@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateInsightCaches } from "@/lib/cache/revalidate";
 import { connectDB } from "@/lib/db/mongoose";
 import { Partner } from "@/models/Partner";
 import { Student } from "@/models/Student";
@@ -10,6 +11,7 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import { partnerSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
+import { encryptSensitiveField, maskBankAccount } from "@/lib/utils/pii";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
@@ -72,7 +74,18 @@ export async function getPartnerById(id: string) {
   requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
   await connectDB();
-  return Partner.findById(id).lean();
+  const partner = await Partner.findById(id).lean();
+  if (!partner) return null;
+
+  return {
+    ...partner,
+    bankDetails: partner.bankDetails
+      ? {
+          ...partner.bankDetails,
+          accountNumber: maskBankAccount(partner.bankDetails.accountNumber),
+        }
+      : partner.bankDetails,
+  };
   }, null);
 }
 
@@ -122,7 +135,9 @@ export async function createPartnerAction(
     commissionPercent: data.commissionPercent ?? 0,
     bankDetails: {
       accountName: data.accountName,
-      accountNumber: data.accountNumber,
+      accountNumber: data.accountNumber
+        ? encryptSensitiveField(data.accountNumber)
+        : undefined,
       ifsc: data.ifsc,
       bankName: data.bankName,
     },
@@ -143,6 +158,7 @@ export async function createPartnerAction(
   });
 
   revalidatePath("/dashboard/partners");
+  revalidateInsightCaches();
   return { success: true, data: { id: partner._id.toString() } };
   });
 }
@@ -163,6 +179,8 @@ export async function updatePartnerAction(
 
   await connectDB();
   const data = parsed.data;
+  const existing = await Partner.findById(id);
+  if (!existing) return { success: false, error: "Partner not found" };
 
   const partner = await Partner.findByIdAndUpdate(
     id,
@@ -176,7 +194,9 @@ export async function updatePartnerAction(
       commissionPercent: data.commissionPercent ?? 0,
       bankDetails: {
         accountName: data.accountName,
-        accountNumber: data.accountNumber,
+        accountNumber:
+          encryptSensitiveField(data.accountNumber, existing.bankDetails?.accountNumber) ??
+          existing.bankDetails?.accountNumber,
         ifsc: data.ifsc,
         bankName: data.bankName,
       },
@@ -200,6 +220,7 @@ export async function updatePartnerAction(
   });
 
   revalidatePath("/dashboard/partners");
+  revalidateInsightCaches();
   revalidatePath(`/dashboard/partners/${id}`);
   return { success: true };
   });
@@ -224,6 +245,7 @@ export async function deletePartnerAction(id: string): Promise<ActionResult> {
   });
 
   revalidatePath("/dashboard/partners");
+  revalidateInsightCaches();
   return { success: true };
   });
 }

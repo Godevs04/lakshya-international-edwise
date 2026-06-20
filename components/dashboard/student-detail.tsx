@@ -13,10 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatCurrency, formatDate, getInitials } from "@/lib/utils/format";
 import { addStudentNoteAction } from "@/lib/actions/student.actions";
+import { DocumentUpload } from "@/components/forms/document-upload";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Pencil } from "lucide-react";
 
 interface StudentDetailProps {
+  canWrite?: boolean;
   student: {
     _id: string;
     studentId: string;
@@ -31,6 +33,8 @@ interface StudentDetailProps {
     status: string;
     remarks?: string;
     address?: { line?: string; city?: string; state?: string; pincode?: string };
+    aadhaar?: string;
+    pan?: string;
     education?: { college?: string; course?: string; year?: string };
     loan?: {
       requested?: number;
@@ -49,7 +53,7 @@ interface StudentDetailProps {
   };
 }
 
-export function StudentDetailView({ student }: StudentDetailProps) {
+export function StudentDetailView({ student, canWrite = false }: StudentDetailProps) {
   const router = useRouter();
   const [noteLoading, setNoteLoading] = useState(false);
 
@@ -83,14 +87,18 @@ export function StudentDetailView({ student }: StudentDetailProps) {
               <div className="mt-2"><StatusBadge status={student.status as StudentStatus} /></div>
             </div>
           </div>
-          <Link href={`/dashboard/students/${student._id}/edit`}>
-            <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
-          </Link>
+          {canWrite && (
+            <Link href={`/dashboard/students/${student._id}/edit`}>
+              <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
+            </Link>
+          )}
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm">{student.phone ?? "—"}</p></div>
           <div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm">{student.email ?? "—"}</p></div>
           <div><p className="text-xs text-muted-foreground">Created</p><p className="text-sm">{formatDate(student.createdAt)}</p></div>
+          <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
+          <div><p className="text-xs text-muted-foreground">PAN</p><p className="text-sm font-mono">{student.pan ?? "—"}</p></div>
         </div>
       </GlassCard>
 
@@ -117,7 +125,8 @@ export function StudentDetailView({ student }: StudentDetailProps) {
         </TabsContent>
 
         <TabsContent value="documents" className="mt-4">
-          <GlassCard className="p-5">
+          <GlassCard className="p-5 space-y-4">
+            {canWrite && <DocumentUpload studentId={student._id} />}
             {(student.documents ?? []).length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {student.documents!.map((doc) => (
@@ -149,13 +158,15 @@ export function StudentDetailView({ student }: StudentDetailProps) {
         </TabsContent>
 
         <TabsContent value="notes" className="mt-4 space-y-4">
-          <GlassCard className="p-5">
-            <form onSubmit={handleAddNote} className="flex gap-2">
-              <Input name="content" placeholder="Add a note..." required className="flex-1" />
-              <Input name="dueDate" type="date" className="w-40" />
-              <Button type="submit" disabled={noteLoading}>Add</Button>
-            </form>
-          </GlassCard>
+          {canWrite && (
+            <GlassCard className="p-5">
+              <form onSubmit={handleAddNote} className="flex gap-2">
+                <Input name="content" placeholder="Add a note..." required className="flex-1" />
+                <Input name="dueDate" type="date" className="w-40" />
+                <Button type="submit" disabled={noteLoading}>Add</Button>
+              </form>
+            </GlassCard>
+          )}
           <GlassCard className="p-5">
             {(student.notes ?? []).length > 0 ? (
               <div className="space-y-3">

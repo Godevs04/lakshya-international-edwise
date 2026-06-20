@@ -2,6 +2,8 @@ import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PartnersTable } from "@/components/tables/partners-table";
 import { getPartners } from "@/lib/actions/partner.actions";
+import { requireModuleEnabled } from "@/lib/auth/module-guard";
+import { getPartnerPageAccess } from "@/lib/auth/page-access";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -10,7 +12,10 @@ export default async function PartnersPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
+  await requireModuleEnabled("partners");
+
   const params = await searchParams;
+  const access = await getPartnerPageAccess();
   const result = await getPartners({ page: parseInt(params.page ?? "1", 10) });
 
   return (
@@ -20,12 +25,14 @@ export default async function PartnersPage({
         description="Manage partner companies and commissions"
         badge="Network"
         action={
-          <Link href="/dashboard/partners/new">
-            <Button><Plus className="mr-1.5 h-4 w-4" /> Add Partner</Button>
-          </Link>
+          access.canWrite ? (
+            <Link href="/dashboard/partners/new">
+              <Button><Plus className="mr-1.5 h-4 w-4" /> Add Partner</Button>
+            </Link>
+          ) : undefined
         }
       />
-      <PartnersTable {...result} />
+      <PartnersTable {...result} {...access} />
     </div>
   );
 }

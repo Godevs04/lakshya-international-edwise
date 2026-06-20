@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { getMongoUri } from "@/lib/config/env";
+import { isNextBuildPhase } from "@/lib/config/build-phase";
 import { initServerLogging } from "@/lib/init-server-logging";
 import { logger } from "@/lib/logger";
 
@@ -24,6 +25,10 @@ if (!global.mongooseCache) {
 export async function connectDB(): Promise<typeof mongoose> {
   initServerLogging();
 
+  if (isNextBuildPhase()) {
+    throw new Error("Database connections are disabled during Next.js build");
+  }
+
   const uri = getMongoUri();
   if (!uri) {
     throw new Error("MONGODB_URI is not configured");
@@ -36,6 +41,7 @@ export async function connectDB(): Promise<typeof mongoose> {
   if (!cached.promise) {
     cached.promise = mongoose.connect(uri, {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
     });
   }
 

@@ -12,7 +12,7 @@ export async function globalSearch(query: string, limit = 10): Promise<SearchRes
   const trimmed = query.trim();
   const regex = toSafeRegExp(trimmed);
 
-  const [students, partners, matchingStudents] = await Promise.all([
+  const [students, partners] = await Promise.all([
     Student.find({
       $or: [
         { firstName: regex },
@@ -24,7 +24,7 @@ export async function globalSearch(query: string, limit = 10): Promise<SearchRes
       ],
     })
       .limit(limit)
-      .select("studentId firstName lastName phone email status")
+      .select("_id studentId firstName lastName phone email status")
       .lean(),
     Partner.find({
       $or: [
@@ -38,19 +38,9 @@ export async function globalSearch(query: string, limit = 10): Promise<SearchRes
       .limit(limit)
       .select("companyName owner phone email status")
       .lean(),
-    Student.find({
-      $or: [
-        { firstName: regex },
-        { lastName: regex },
-        { studentId: regex },
-      ],
-    })
-      .limit(limit)
-      .select("_id")
-      .lean(),
   ]);
 
-  const studentIds = matchingStudents.map((s) => s._id);
+  const studentIds = students.map((s) => s._id);
   const applications =
     studentIds.length > 0
       ? await Application.find({ studentId: { $in: studentIds } })

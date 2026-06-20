@@ -8,43 +8,107 @@ import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
-import { runLoggedMutation, runLoggedQuery } from "@/lib/action-utils";
-import type { ActionResult, ApplicationListItem } from "@/types";
+import { revalidateInsightCaches } from "@/lib/cache/revalidate";
+import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
+import { toSafeRegExp } from "@/lib/utils/sanitize";
+import type { ActionResult, ApplicationListItem, PaginatedResult } from "@/types";
 import type { ApplicationStatus } from "@/lib/constants/statuses";
 
-export async function getApplications(): Promise<ApplicationListItem[]> {
-  return runLoggedQuery("getApplications", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.APPLICATIONS_READ);
+const PIPELINE_LIMIT = 300;
 
-    await connectDB();
-    const apps = await Application.find()
-      .populate("studentId", "firstName lastName studentId")
-      .populate("partnerId", "companyName")
-      .sort({ createdAt: -1 })
-      .lean();
+function mapApplication(a: {
+  _id: { toString(): string };
+  studentId: unknown;
+  partnerId?: unknown;
+  loanAmount?: number;
+  status: string;
+  priority?: string;
+  dueDate?: Date;
+  createdAt: Date;
+}): ApplicationListItem {
+  const student = a.studentId as {
+    firstName: string;
+    lastName: string;
+    studentId: string;
+  } | null;
+  const partner = a.partnerId as { companyName?: string } | null;
 
-    return apps.map((a) => {
-      const student = a.studentId as unknown as {
-        _id: string;
-        firstName: string;
-        lastName: string;
-        studentId: string;
-      } | null;
-      const partner = a.partnerId as unknown as { companyName?: string } | null;
+  return {
+    _id: a._id.toString(),
+    studentId: student?.studentId ?? "",
+    studentName: student ? `${student.firstName} ${student.lastName}` : "Unknown",
+    partnerName: partner?.companyName,
+    loanAmount: a.loanAmount ?? 0,
+    status: a.status as ApplicationStatus,
+    priority: a.priority,
+    dueDate: a.dueDate,
+    createdAt: a.createdAt,
+  };
+}
+
+export async function getApplications(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  pipeline?: boolean;
+} = {}): Promise<PaginatedResult<ApplicationListItem>> {
+  return runLoggedQuery(
+    "getApplications",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.APPLICATIONS_READ);
+
+      await connectDB();
+
+      const pipeline = params.pipeline === true;
+      const page = params.page ?? 1;
+      const pageSize = pipeline ? PIPELINE_LIMIT : (params.pageSize ?? 20);
+      const skip = (page - 1) * pageSize;
+      const filter: Record<string, unknown> = {};
+
+      if (params.status) {
+        filter.status = params.status;
+      }
+
+      if (params.search) {
+        const regex = toSafeRegExp(params.search);
+        const matchingStudents = await Student.find({
+          $or: [
+            { firstName: regex },
+            { lastName: regex },
+            { studentId: regex },
+            { phone: regex },
+          ],
+        })
+          .select("_id")
+          .limit(100)
+          .lean();
+
+        filter.studentId = { $in: matchingStudents.map((s) => s._id) };
+      }
+
+      const [data, total] = await Promise.all([
+        Application.find(filter)
+          .populate("studentId", "firstName lastName studentId")
+          .populate("partnerId", "companyName")
+          .sort({ updatedAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Application.countDocuments(filter),
+      ]);
+
       return {
-        _id: a._id.toString(),
-        studentId: student?.studentId ?? "",
-        studentName: student ? `${student.firstName} ${student.lastName}` : "Unknown",
-        partnerName: partner?.companyName,
-        loanAmount: a.loanAmount,
-        status: a.status as ApplicationStatus,
-        priority: a.priority,
-        dueDate: a.dueDate,
-        createdAt: a.createdAt,
+        data: data.map(mapApplication),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
       };
-    });
-  }, []);
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 20)
+  );
 }
 
 export async function updateApplicationStatusAction(
@@ -86,6 +150,7 @@ export async function updateApplicationStatusAction(
       userName: user?.name,
     });
 
+    revalidateInsightCaches();
     revalidatePath("/dashboard/applications");
     revalidatePath("/dashboard/overview");
     return { success: true };

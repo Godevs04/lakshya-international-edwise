@@ -9,8 +9,11 @@ import {
 } from "@/components/charts/dashboard-charts";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getAnalyticsDashboardAction } from "@/lib/actions/analytics.actions";
+import { requireModuleEnabled } from "@/lib/auth/module-guard";
 
 export default async function AnalyticsPage() {
+  await requireModuleEnabled("analytics");
+
   const { funnel, trends, revenue, demographics, heatmap, partners, loanDist } =
     await getAnalyticsDashboardAction();
 

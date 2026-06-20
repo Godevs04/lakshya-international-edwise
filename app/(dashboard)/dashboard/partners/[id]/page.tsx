@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table";
 import { DemographicsPieChart } from "@/components/charts/dashboard-charts";
 import { getPartnerById, getPartnerStudents, getPartnerAnalytics } from "@/lib/actions/partner.actions";
+import { requireModuleEnabled } from "@/lib/auth/module-guard";
+import { getPartnerPageAccess } from "@/lib/auth/page-access";
 import { formatCurrency } from "@/lib/utils/format";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import { Pencil } from "lucide-react";
@@ -23,7 +25,10 @@ export default async function PartnerDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireModuleEnabled("partners");
+
   const { id } = await params;
+  const access = await getPartnerPageAccess();
   const [partner, students, analytics] = await Promise.all([
     getPartnerById(id),
     getPartnerStudents(id),
@@ -37,9 +42,11 @@ export default async function PartnerDetailPage({
         title={partner.companyName}
         description={`Owner: ${partner.owner ?? "N/A"}`}
         action={
-          <Link href={`/dashboard/partners/${id}/edit`}>
-            <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
-          </Link>
+          access.canWrite ? (
+            <Link href={`/dashboard/partners/${id}/edit`}>
+              <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
+            </Link>
+          ) : undefined
         }
       />
 
@@ -60,6 +67,13 @@ export default async function PartnerDetailPage({
           <p><span className="text-muted-foreground">Email:</span> {partner.email ?? "—"}</p>
           <p><span className="text-muted-foreground">GST:</span> {partner.gst ?? "—"}</p>
           <p><span className="text-muted-foreground">Address:</span> {partner.address ?? "—"}</p>
+          {partner.bankDetails?.accountNumber && (
+            <>
+              <p><span className="text-muted-foreground">Bank:</span> {partner.bankDetails.bankName ?? "—"}</p>
+              <p><span className="text-muted-foreground">Account:</span> {partner.bankDetails.accountNumber}</p>
+              <p><span className="text-muted-foreground">IFSC:</span> {partner.bankDetails.ifsc ?? "—"}</p>
+            </>
+          )}
         </div>
       </GlassCard>
 

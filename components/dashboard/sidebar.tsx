@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Sparkles,
   Menu,
+  Shield,
 } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,17 +33,22 @@ import { getInitials } from "@/lib/utils/format";
 import type { AppModules } from "@/types";
 
 const navItems = [
-  { href: "/dashboard/overview", label: "Overview", icon: LayoutDashboard, module: null },
-  { href: "/dashboard/students", label: "Students", icon: Users, module: "students" as keyof AppModules },
-  { href: "/dashboard/partners", label: "Partners", icon: Handshake, module: "partners" as keyof AppModules },
-  { href: "/dashboard/applications", label: "Applications", icon: FileText, module: "applications" as keyof AppModules },
-  { href: "/dashboard/reports", label: "Reports", icon: BarChart3, module: "reports" as keyof AppModules },
-  { href: "/dashboard/analytics", label: "Analytics", icon: LineChart, module: "analytics" as keyof AppModules },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings, module: null },
+  { href: "/dashboard/overview", label: "Overview", icon: LayoutDashboard, module: null, permission: null },
+  { href: "/dashboard/students", label: "Students", icon: Users, module: "students" as keyof AppModules, permission: null },
+  { href: "/dashboard/partners", label: "Partners", icon: Handshake, module: "partners" as keyof AppModules, permission: null },
+  { href: "/dashboard/applications", label: "Applications", icon: FileText, module: "applications" as keyof AppModules, permission: null },
+  { href: "/dashboard/reports", label: "Reports", icon: BarChart3, module: "reports" as keyof AppModules, permission: null },
+  { href: "/dashboard/analytics", label: "Analytics", icon: LineChart, module: "analytics" as keyof AppModules, permission: null },
+  { href: "/dashboard/audit", label: "Audit Log", icon: Shield, module: null, permission: "audit:read" },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, module: null, permission: null },
 ];
 
-function useFilteredNav(modules?: AppModules) {
+function useFilteredNav(modules?: AppModules, permissions?: string[]) {
   return navItems.filter((item) => {
+    if (item.permission) {
+      const perms = permissions ?? [];
+      if (!perms.includes("*") && !perms.includes(item.permission)) return false;
+    }
     if (!item.module) return true;
     return modules?.[item.module] !== false;
   });
@@ -58,7 +64,7 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const filteredNav = useFilteredNav(modules);
+  const filteredNav = useFilteredNav(modules, session?.user?.permissions);
 
   return (
     <motion.aside
@@ -228,7 +234,8 @@ export function MobileTopBar({
   modules?: AppModules;
 }) {
   const pathname = usePathname();
-  const filteredNav = useFilteredNav(modules);
+  const { data: session } = useSession();
+  const filteredNav = useFilteredNav(modules, session?.user?.permissions);
 
   return (
     <div className="flex items-center justify-between gap-3 lg:hidden">
@@ -284,7 +291,8 @@ export function MobileTopBar({
 
 export function MobileNav({ modules }: { modules?: AppModules }) {
   const pathname = usePathname();
-  const filteredNav = useFilteredNav(modules);
+  const { data: session } = useSession();
+  const filteredNav = useFilteredNav(modules, session?.user?.permissions);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#6D5EF7]/10 glass-sidebar pb-[env(safe-area-inset-bottom)] lg:hidden">

@@ -1,11 +1,21 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
 import { getDefaultSettings } from "@/lib/config/app-defaults";
+import { isNextBuildPhase } from "@/lib/config/build-phase";
 import { logger } from "@/lib/logger";
 import type { AppSettings } from "@/types";
 
 export async function getAppConfig(): Promise<AppSettings> {
   const envDefaults = getDefaultSettings();
+
+  if (isNextBuildPhase()) {
+    return {
+      company: envDefaults.company,
+      theme: envDefaults.theme,
+      modules: envDefaults.modules,
+      sessionExpiryHours: envDefaults.sessionExpiryHours,
+    };
+  }
 
   try {
     await connectDB();

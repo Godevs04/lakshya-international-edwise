@@ -1,8 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StudentForm } from "@/components/forms/student-form";
-import { getStudentById } from "@/lib/actions/student.actions";
+import { getStudentForEdit } from "@/lib/actions/student.actions";
 import { getPartnersList } from "@/lib/actions/partner.actions";
+import { requireModuleEnabled } from "@/lib/auth/module-guard";
+import { getStudentPageAccess } from "@/lib/auth/page-access";
 import { format } from "date-fns";
 
 export default async function EditStudentPage({
@@ -10,9 +12,15 @@ export default async function EditStudentPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireModuleEnabled("students");
+  const access = await getStudentPageAccess();
+  if (!access.canWrite) {
+    redirect("/dashboard/students");
+  }
+
   const { id } = await params;
   const [student, partners] = await Promise.all([
-    getStudentById(id),
+    getStudentForEdit(id),
     getPartnersList(),
   ]);
   if (!student) notFound();
@@ -37,6 +45,8 @@ export default async function EditStudentPage({
           city: student.address?.city,
           state: student.address?.state,
           pincode: student.address?.pincode,
+          aadhaar: student.aadhaar,
+          pan: student.pan,
           college: student.education?.college,
           course: student.education?.course,
           year: student.education?.year,
@@ -46,7 +56,14 @@ export default async function EditStudentPage({
           interest: student.loan?.interest,
           bankName: student.loan?.bankName,
           applicationNumber: student.loan?.applicationNumber,
-          partnerId: student.partnerId?.toString(),
+          partnerId:
+            student.partnerId && typeof student.partnerId === "object"
+              ? "_id" in student.partnerId
+                ? String(student.partnerId._id)
+                : String(student.partnerId)
+              : student.partnerId
+                ? String(student.partnerId)
+                : undefined,
           status: student.status,
           remarks: student.remarks,
         }}

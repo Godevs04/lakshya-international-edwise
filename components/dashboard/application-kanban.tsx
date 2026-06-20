@@ -22,6 +22,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/cards/glass-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -35,35 +36,13 @@ import {
 import { APPLICATION_STATUSES } from "@/lib/constants/statuses";
 import { updateApplicationStatusAction } from "@/lib/actions/application.actions";
 import { formatCurrency } from "@/lib/utils/format";
-import type { ApplicationListItem } from "@/types";
+import type { ApplicationListItem, PaginatedResult } from "@/types";
 import type { ApplicationStatus } from "@/lib/constants/statuses";
 
-function KanbanColumn({ status, apps }: { status: ApplicationStatus; apps: ApplicationListItem[] }) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
-
-  return (
-    <div className="min-w-[240px] flex-shrink-0 sm:min-w-[280px]">
-      <div className="mb-3 flex items-center gap-2">
-        <StatusBadge status={status} />
-        <span className="text-xs text-muted-foreground">({apps.length})</span>
-      </div>
-      <SortableContext items={apps.map((a) => a._id)} strategy={verticalListSortingStrategy}>
-        <div
-          ref={setNodeRef}
-          className={`min-h-[200px] rounded-2xl border border-[#6D5EF7]/10 p-2 transition-all ${isOver ? "bg-[#6D5EF7]/10 ring-2 ring-[#6D5EF7]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
-        >
-          {apps.map((app) => (
-            <KanbanCard key={app._id} app={app} />
-          ))}
-        </div>
-      </SortableContext>
-    </div>
-  );
-}
-
-function KanbanCard({ app }: { app: ApplicationListItem }) {
+function KanbanCard({ app, canWrite }: { app: ApplicationListItem; canWrite: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: app._id,
+    disabled: !canWrite,
   });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -72,8 +51,15 @@ function KanbanCard({ app }: { app: ApplicationListItem }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <GlassCard hover className="mb-2 cursor-grab p-4 active:cursor-grabbing">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...(canWrite ? { ...attributes, ...listeners } : {})}
+    >
+      <GlassCard
+        hover={canWrite}
+        className={`mb-2 p-4 ${canWrite ? "cursor-grab active:cursor-grabbing" : "cursor-default"}`}
+      >
         <p className="text-sm font-semibold">{app.studentName}</p>
         <p className="text-xs text-muted-foreground">{app.studentId}</p>
         <p className="mt-2 text-base font-bold text-[#6D5EF7]">{formatCurrency(app.loanAmount)}</p>
@@ -85,24 +71,41 @@ function KanbanCard({ app }: { app: ApplicationListItem }) {
 
 interface ApplicationKanbanProps {
   applications: ApplicationListItem[];
+  tableResult?: PaginatedResult<ApplicationListItem>;
+  view?: "kanban" | "table";
+  canWrite?: boolean;
 }
 
-export function ApplicationKanban({ applications: initialApps }: ApplicationKanbanProps) {
+export function ApplicationKanban({
+  applications: initialApps,
+  tableResult,
+  view: initialView = "kanban",
+  canWrite = false,
+}: ApplicationKanbanProps) {
   const router = useRouter();
   const [apps, setApps] = useState(initialApps);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [view, setView] = useState<"kanban" | "table">("kanban");
+  const view = initialView;
+  const tableApps = tableResult?.data ?? apps;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
+  function handleViewChange(nextView: string) {
+    const params = new URLSearchParams();
+    params.set("view", nextView);
+    router.push(`/dashboard/applications?${params.toString()}`);
+  }
+
   function handleDragStart(event: DragStartEvent) {
+    if (!canWrite) return;
     setActiveId(event.active.id as string);
   }
 
   async function handleDragEnd(event: DragEndEvent) {
+    if (!canWrite) return;
     setActiveId(null);
     const { active, over } = event;
     if (!over) return;
@@ -129,12 +132,14 @@ export function ApplicationKanban({ applications: initialApps }: ApplicationKanb
   }
 
   const activeApp = activeId ? apps.find((a) => a._id === activeId) : null;
-
   const columns = APPLICATION_STATUSES.filter((s) => s !== "closed");
 
   return (
     <div className="space-y-4">
-      <Tabs value={view} onValueChange={(v) => setView(v as "kanban" | "table")}>
+      {!canWrite && view === "kanban" && (
+        <p className="text-sm text-muted-foreground">View-only mode — drag & drop requires edit permission.</p>
+      )}
+      <Tabs value={view} onValueChange={handleViewChange}>
         <TabsList>
           <TabsTrigger value="kanban">Kanban</TabsTrigger>
           <TabsTrigger value="table">Table</TabsTrigger>
@@ -149,11 +154,24 @@ export function ApplicationKanban({ applications: initialApps }: ApplicationKanb
           >
             <div className="flex gap-4 overflow-x-auto pb-4">
               {columns.map((status) => (
-                <KanbanColumn
-                  key={status}
-                  status={status}
-                  apps={apps.filter((a) => a.status === status)}
-                />
+                <div key={status} className="min-w-[240px] flex-shrink-0 sm:min-w-[280px]">
+                  <div className="mb-3 flex items-center gap-2">
+                    <StatusBadge status={status} />
+                    <span className="text-xs text-muted-foreground">
+                      ({apps.filter((a) => a.status === status).length})
+                    </span>
+                  </div>
+                  <SortableContext
+                    items={apps.filter((a) => a.status === status).map((a) => a._id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <KanbanColumnInner
+                      status={status}
+                      apps={apps.filter((a) => a.status === status)}
+                      canWrite={canWrite}
+                    />
+                  </SortableContext>
+                </div>
               ))}
             </div>
             <DragOverlay>
@@ -179,7 +197,7 @@ export function ApplicationKanban({ applications: initialApps }: ApplicationKanb
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {apps.map((app) => (
+                {tableApps.length ? tableApps.map((app) => (
                   <TableRow key={app._id}>
                     <TableCell>
                       <div>
@@ -192,12 +210,67 @@ export function ApplicationKanban({ applications: initialApps }: ApplicationKanb
                     <TableCell><StatusBadge status={app.status} /></TableCell>
                     <TableCell className="capitalize">{app.priority ?? "medium"}</TableCell>
                   </TableRow>
-                ))}
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                      No applications found.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </GlassCard>
+          {tableResult && tableResult.totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+              <span>{tableResult.total} total applications</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={tableResult.page <= 1}
+                  onClick={() => router.push(`/dashboard/applications?view=table&page=${tableResult.page - 1}`)}
+                >
+                  Previous
+                </Button>
+                <span className="flex items-center px-2">
+                  Page {tableResult.page} of {tableResult.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={tableResult.page >= tableResult.totalPages}
+                  onClick={() => router.push(`/dashboard/applications?view=table&page=${tableResult.page + 1}`)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function KanbanColumnInner({
+  status,
+  apps,
+  canWrite,
+}: {
+  status: ApplicationStatus;
+  apps: ApplicationListItem[];
+  canWrite: boolean;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-[200px] rounded-2xl border border-[#6D5EF7]/10 p-2 transition-all ${isOver ? "bg-[#6D5EF7]/10 ring-2 ring-[#6D5EF7]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
+    >
+      {apps.map((app) => (
+        <KanbanCard key={app._id} app={app} canWrite={canWrite} />
+      ))}
     </div>
   );
 }

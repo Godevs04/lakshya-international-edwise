@@ -6,6 +6,8 @@ import { Sidebar, MobileNav, MobileTopBar } from "@/components/dashboard/sidebar
 import { Topbar } from "@/components/dashboard/topbar";
 import { PremiumBackground } from "@/components/layout/premium-background";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {

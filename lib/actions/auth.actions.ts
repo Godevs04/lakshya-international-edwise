@@ -17,6 +17,7 @@ import type { ActionResult } from "@/types";
 import { runLoggedMutation } from "@/lib/action-utils";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/utils/token-hash";
+import { isPublicRegistrationAllowed } from "@/lib/config/env";
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
 
@@ -40,6 +41,10 @@ export async function registerAction(
   formData: FormData
 ): Promise<ActionResult> {
   return runLoggedMutation("registerAction", async () => {
+  if (!isPublicRegistrationAllowed()) {
+    return { success: false, error: "Public registration is disabled. Contact your administrator." };
+  }
+
   const ip = await getClientIp();
   const rateLimit = await checkRateLimit("register", ip);
   if (!rateLimit.allowed) {

@@ -138,6 +138,18 @@ export async function updateSettingsAction(
       },
       { upsert: true }
     );
+  } else if (section === "security") {
+    const parsed = settingsSchema.safeParse({
+      sessionExpiryHours: raw.sessionExpiryHours,
+    });
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+    await Settings.findOneAndUpdate(
+      {},
+      { $set: { sessionExpiryHours: parsed.data.sessionExpiryHours ?? defaults.sessionExpiryHours } },
+      { upsert: true }
+    );
   } else {
     return { success: false, error: "Invalid settings section" };
   }

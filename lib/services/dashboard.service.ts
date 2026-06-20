@@ -4,7 +4,9 @@ import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
 import { PENDING_STATUSES } from "@/lib/constants/statuses";
 import type { DashboardMetrics, ChartDataPoint } from "@/types";
-import { startOfDay, subMonths, format } from "date-fns";
+import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
+import { formatMetricTrend } from "@/lib/utils/metrics-trend";
+import { startOfDay, subMonths, format, startOfMonth, endOfMonth, subDays } from "date-fns";
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   await connectDB();
@@ -62,6 +64,96 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     rejected,
     totalLoanAmount: loanAgg[0]?.total ?? 0,
     todaysCollection: todayCollection[0]?.total ?? 0,
+  };
+}
+
+export interface DashboardMetricTrends {
+  totalStudents: MetricTrendInfo;
+  newStudentsToday: MetricTrendInfo;
+  totalPartners: MetricTrendInfo;
+  pendingApplications: MetricTrendInfo;
+  sanctioned: MetricTrendInfo;
+  disbursed: MetricTrendInfo;
+  rejected: MetricTrendInfo;
+  totalLoanAmount: MetricTrendInfo;
+  todaysCollection: MetricTrendInfo;
+}
+
+export async function getDashboardMetricTrends(): Promise<DashboardMetricTrends> {
+  await connectDB();
+
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const yesterdayStart = startOfDay(subDays(now, 1));
+  const monthStart = startOfMonth(now);
+  const lastMonthStart = startOfMonth(subMonths(now, 1));
+  const lastMonthEnd = endOfMonth(subMonths(now, 1));
+
+  const [
+    studentsThisMonth,
+    studentsLastMonth,
+    studentsToday,
+    studentsYesterday,
+    partnersThisMonth,
+    partnersLastMonth,
+    pendingNow,
+    pendingLastMonth,
+    sanctionedThisMonth,
+    sanctionedLastMonth,
+    disbursedThisMonth,
+    disbursedLastMonth,
+    rejectedThisMonth,
+    rejectedLastMonth,
+    loanThisMonth,
+    loanLastMonth,
+    collectionToday,
+    collectionYesterday,
+  ] = await Promise.all([
+    Student.countDocuments({ createdAt: { $gte: monthStart } }),
+    Student.countDocuments({ createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
+    Student.countDocuments({ createdAt: { $gte: todayStart } }),
+    Student.countDocuments({ createdAt: { $gte: yesterdayStart, $lt: todayStart } }),
+    Partner.countDocuments({ createdAt: { $gte: monthStart } }),
+    Partner.countDocuments({ createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
+    Application.countDocuments({ status: { $in: PENDING_STATUSES } }),
+    Application.countDocuments({
+      status: { $in: PENDING_STATUSES },
+      updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
+    }),
+    Student.countDocuments({ status: "sanctioned", updatedAt: { $gte: monthStart } }),
+    Student.countDocuments({ status: "sanctioned", updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
+    Student.countDocuments({ status: "disbursed", updatedAt: { $gte: monthStart } }),
+    Student.countDocuments({ status: "disbursed", updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
+    Student.countDocuments({ status: "rejected", updatedAt: { $gte: monthStart } }),
+    Student.countDocuments({ status: "rejected", updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
+    Student.aggregate([
+      { $match: { updatedAt: { $gte: monthStart } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.sanctioned", 0] } } } },
+    ]),
+    Student.aggregate([
+      { $match: { updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.sanctioned", 0] } } } },
+    ]),
+    Student.aggregate([
+      { $match: { status: "disbursed", updatedAt: { $gte: todayStart } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.disbursed", 0] } } } },
+    ]),
+    Student.aggregate([
+      { $match: { status: "disbursed", updatedAt: { $gte: yesterdayStart, $lt: todayStart } } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.disbursed", 0] } } } },
+    ]),
+  ]);
+
+  return {
+    totalStudents: formatMetricTrend(studentsThisMonth, studentsLastMonth),
+    newStudentsToday: formatMetricTrend(studentsToday, studentsYesterday),
+    totalPartners: formatMetricTrend(partnersThisMonth, partnersLastMonth),
+    pendingApplications: formatMetricTrend(pendingNow, pendingLastMonth),
+    sanctioned: formatMetricTrend(sanctionedThisMonth, sanctionedLastMonth),
+    disbursed: formatMetricTrend(disbursedThisMonth, disbursedLastMonth),
+    rejected: formatMetricTrend(rejectedThisMonth, rejectedLastMonth),
+    totalLoanAmount: formatMetricTrend(loanThisMonth[0]?.total ?? 0, loanLastMonth[0]?.total ?? 0),
+    todaysCollection: formatMetricTrend(collectionToday[0]?.total ?? 0, collectionYesterday[0]?.total ?? 0),
   };
 }
 

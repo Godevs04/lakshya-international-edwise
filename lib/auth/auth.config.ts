@@ -1,5 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import { getAuthSecret } from "@/lib/config/env";
+import { isPublicRegistrationAllowed } from "@/lib/config/env";
+import { getSessionMaxAgeSeconds } from "@/lib/auth/session-expiry";
 import type { UserRole } from "@/types";
 
 declare module "next-auth" {
@@ -18,6 +20,7 @@ declare module "next-auth" {
     role: UserRole;
     permissions: string[];
     avatar?: string;
+    rememberMe?: boolean;
   }
 }
 
@@ -49,6 +52,9 @@ export const authConfig = {
         token.role = user.role;
         token.permissions = user.permissions;
         token.avatar = user.avatar;
+        token.rememberMe = user.rememberMe ?? false;
+        const maxAge = await getSessionMaxAgeSeconds(!!token.rememberMe);
+        token.exp = Math.floor(Date.now() / 1000) + maxAge;
       }
       return token;
     },
@@ -71,6 +77,10 @@ export const authConfig = {
         pathname.startsWith("/verify-email") ||
         pathname.startsWith("/verify-otp") ||
         pathname.startsWith("/pending-approval");
+
+      if (pathname.startsWith("/register") && !isPublicRegistrationAllowed()) {
+        return Response.redirect(new URL("/login", request.nextUrl));
+      }
 
       if (isAuthPage) {
         if (session) {

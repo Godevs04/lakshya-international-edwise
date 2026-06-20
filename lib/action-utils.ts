@@ -1,8 +1,18 @@
 import { logger } from "@/lib/logger";
+import { isNextBuildPhase } from "@/lib/config/build-phase";
 import type { ActionResult, PaginatedResult } from "@/types";
 
 export function isAuthError(error: unknown): boolean {
   return error instanceof Error && error.message.startsWith("Unauthorized");
+}
+
+function isExpectedBuildError(error: unknown): boolean {
+  if (!isNextBuildPhase()) return false;
+  if (!(error instanceof Error)) return false;
+  return (
+    error.message.includes("Dynamic server usage") ||
+    error.message.includes("Database connections are disabled during Next.js build")
+  );
 }
 
 export function emptyPaginated<T>(page = 1, pageSize = 10): PaginatedResult<T> {
@@ -43,7 +53,9 @@ export async function runLoggedQuery<T>(
     if (isAuthError(error)) {
       throw error;
     }
-    logActionError(action, error);
+    if (!isExpectedBuildError(error)) {
+      logActionError(action, error);
+    }
     return fallback;
   }
 }

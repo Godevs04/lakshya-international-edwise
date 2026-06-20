@@ -18,11 +18,28 @@ import {
 import Link from "next/link";
 import { Handshake } from "lucide-react";
 import type { StudentStatus } from "@/lib/constants/statuses";
+import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
+
+function withTrend(
+  title: string,
+  value: string | number,
+  icon: MetricIconName,
+  trendInfo: MetricTrendInfo
+) {
+  return {
+    title,
+    value,
+    icon,
+    trend: trendInfo.trend,
+    trendUp: trendInfo.trendUp,
+  };
+}
 
 export default async function OverviewPage() {
   const session = await auth();
   const {
     metrics,
+    trends,
     loanStatus,
     monthlyStudents,
     loanAmount,
@@ -33,16 +50,16 @@ export default async function OverviewPage() {
     followups,
   } = await getOverviewDashboardAction();
 
-  const metricCards: Array<{ title: string; value: string | number; icon: MetricIconName; trend?: string; trendUp?: boolean }> = [
-    { title: "Total Students", value: metrics.totalStudents, icon: "users", trend: "↑ 24%", trendUp: true },
-    { title: "New Students Today", value: metrics.newStudentsToday, icon: "user-plus", trend: "↑ 12%", trendUp: true },
-    { title: "Partners", value: metrics.totalPartners, icon: "handshake", trend: "↑ 8%", trendUp: true },
-    { title: "Pending Applications", value: metrics.pendingApplications, icon: "clock", trend: "↓ 5%", trendUp: false },
-    { title: "Sanctioned", value: metrics.sanctioned, icon: "check-circle", trend: "↑ 18%", trendUp: true },
-    { title: "Disbursed", value: metrics.disbursed, icon: "banknote", trend: "↑ 32%", trendUp: true },
-    { title: "Rejected", value: metrics.rejected, icon: "x-circle", trend: "↓ 3%", trendUp: false },
-    { title: "Loan Amount", value: formatCurrency(metrics.totalLoanAmount), icon: "indian-rupee", trend: "↑ 41%", trendUp: true },
-    { title: "Today's Collection", value: formatCurrency(metrics.todaysCollection), icon: "wallet", trend: "↑ 15%", trendUp: true },
+  const metricCards = [
+    withTrend("Total Students", metrics.totalStudents, "users", trends.totalStudents),
+    withTrend("New Students Today", metrics.newStudentsToday, "user-plus", trends.newStudentsToday),
+    withTrend("Partners", metrics.totalPartners, "handshake", trends.totalPartners),
+    withTrend("Pending Applications", metrics.pendingApplications, "clock", trends.pendingApplications),
+    withTrend("Sanctioned", metrics.sanctioned, "check-circle", trends.sanctioned),
+    withTrend("Disbursed", metrics.disbursed, "banknote", trends.disbursed),
+    withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected),
+    withTrend("Loan Amount", formatCurrency(metrics.totalLoanAmount), "indian-rupee", trends.totalLoanAmount),
+    withTrend("Today's Collection", formatCurrency(metrics.todaysCollection), "wallet", trends.todaysCollection),
   ];
 
   return (

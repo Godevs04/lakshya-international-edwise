@@ -330,11 +330,11 @@ if (!config.modules.students) redirect("/dashboard");
 
 ### Phase 3 — Performance & UX (1 week)
 
-1. Paginate applications; optimize global search
-2. Cache dashboard/analytics aggregations
-3. Remove fake overview trends; compute real deltas or hide
-4. Permission-aware UI buttons
-5. Server-side module route guards
+1. Paginate applications; optimize global search — **done**
+2. Cache dashboard/analytics aggregations — **done**
+3. Remove fake overview trends; compute real deltas or hide — **done**
+4. Permission-aware UI buttons — **done**
+5. Server-side module route guards — **done**
 
 ### Phase 4 — Polish (ongoing)
 
@@ -385,7 +385,7 @@ Client (RSC + Client Components)
 
 - [x] Add `requirePermission` to `getStudents`, `getPartners`, `getApplications`, `globalSearchAction`
 - [x] Block `super_admin` in `createUserAction`
-- [ ] Remove hardcoded `↑ 24%` trends from overview
+- [x] Remove hardcoded `↑ 24%` trends from overview
 - [x] Fix `.gitignore` for `.env.example`
 - [x] Add `GET /api/health` with DB ping
 - [x] Escape regex in `search.service.ts`

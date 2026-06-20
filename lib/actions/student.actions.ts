@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateInsightCaches } from "@/lib/cache/revalidate";
 import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
@@ -11,11 +12,12 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import { studentSchema, noteSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
-import { encrypt } from "@/lib/utils/encryption";
+import { encryptSensitiveField, maskAadhaar, maskPan } from "@/lib/utils/pii";
 import { generateStudentId } from "@/lib/utils/format";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Types } from "mongoose";
+import { validateCloudinaryDocument } from "@/lib/services/upload.service";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 
 export async function getStudents(params: {
@@ -94,7 +96,31 @@ export async function getStudentById(id: string) {
   requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
   await connectDB();
-  return Student.findById(id).populate("partnerId").lean();
+  const student = await Student.findById(id).populate("partnerId").lean();
+  if (!student) return null;
+
+  return {
+    ...student,
+    aadhaar: maskAadhaar(student.aadhaar),
+    pan: maskPan(student.pan),
+  };
+  }, null);
+}
+
+export async function getStudentForEdit(id: string) {
+  return runLoggedQuery("getStudentForEdit", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+  await connectDB();
+  const student = await Student.findById(id).lean();
+  if (!student) return null;
+
+  return {
+    ...student,
+    aadhaar: maskAadhaar(student.aadhaar),
+    pan: maskPan(student.pan),
+  };
   }, null);
 }
 
@@ -131,8 +157,8 @@ export async function createStudentAction(
       state: data.state,
       pincode: data.pincode,
     },
-    aadhaar: data.aadhaar ? encrypt(data.aadhaar) : undefined,
-    pan: data.pan ? encrypt(data.pan) : undefined,
+    aadhaar: data.aadhaar ? encryptSensitiveField(data.aadhaar) : undefined,
+    pan: data.pan ? encryptSensitiveField(data.pan) : undefined,
     education: {
       college: data.college,
       course: data.course,
@@ -179,6 +205,7 @@ export async function createStudentAction(
 
   revalidatePath("/dashboard/students");
   revalidatePath("/dashboard/overview");
+  revalidateInsightCaches();
   return { success: true, data: { id: student._id.toString() } };
   });
 }
@@ -217,8 +244,8 @@ export async function updateStudentAction(
     state: data.state,
     pincode: data.pincode,
   };
-  if (data.aadhaar) existing.aadhaar = encrypt(data.aadhaar);
-  if (data.pan) existing.pan = encrypt(data.pan);
+  existing.aadhaar = encryptSensitiveField(data.aadhaar, existing.aadhaar) ?? existing.aadhaar;
+  existing.pan = encryptSensitiveField(data.pan, existing.pan) ?? existing.pan;
   existing.education = { college: data.college, course: data.course, year: data.year };
   existing.loan = {
     requested: data.loanRequested ?? 0,
@@ -363,6 +390,11 @@ export async function addStudentDocumentAction(
   return runLoggedMutation("addStudentDocumentAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+  const validation = validateCloudinaryDocument(doc.url, doc.publicId, "students");
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
+  }
 
   await connectDB();
   await Student.findByIdAndUpdate(studentId, {

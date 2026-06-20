@@ -38,5 +38,6 @@ export async function authorizeCredentials(credentials: Record<string, unknown>)
     role,
     permissions: getPermissionsForRole(role),
     avatar: user.avatar,
+    rememberMe: credentials.rememberMe === "true",
   };
 }

@@ -44,6 +44,9 @@ interface StudentsTableProps {
   page: number;
   pageSize: number;
   totalPages: number;
+  canWrite?: boolean;
+  canDelete?: boolean;
+  canExport?: boolean;
 }
 
 export function StudentsTable({
@@ -51,6 +54,9 @@ export function StudentsTable({
   total,
   page,
   totalPages,
+  canWrite = false,
+  canDelete = false,
+  canExport = false,
 }: StudentsTableProps) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -62,18 +68,22 @@ export function StudentsTable({
     {
       id: "select",
       header: ({ table }) => (
-        <input
-          type="checkbox"
-          checked={table.getIsAllPageRowsSelected()}
-          onChange={table.getToggleAllPageRowsSelectedHandler()}
-        />
+        canDelete ? (
+          <input
+            type="checkbox"
+            checked={table.getIsAllPageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+          />
+        ) : null
       ),
       cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={row.getIsSelected()}
-          onChange={row.getToggleSelectedHandler()}
-        />
+        canDelete ? (
+          <input
+            type="checkbox"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+          />
+        ) : null
       ),
     },
     {
@@ -191,17 +201,21 @@ export function StudentsTable({
           <Button variant="outline" onClick={applyFilters}>Filter</Button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {selected.length > 0 && (
+          {canDelete && selected.length > 0 && (
             <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
               <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={handleExportCSV}>
-            <Download className="mr-1 h-4 w-4" /> Export
-          </Button>
-          <Link href="/dashboard/students/new">
-            <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Student</Button>
-          </Link>
+          {canExport && (
+            <Button variant="outline" size="sm" onClick={handleExportCSV}>
+              <Download className="mr-1 h-4 w-4" /> Export
+            </Button>
+          )}
+          {canWrite && (
+            <Link href="/dashboard/students/new">
+              <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Student</Button>
+            </Link>
+          )}
         </div>
       </div>
       </GlassCard>

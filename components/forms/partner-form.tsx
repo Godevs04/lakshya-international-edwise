@@ -111,7 +111,8 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           </div>
           <div className="space-y-2">
             <Label htmlFor="accountNumber">Account Number</Label>
-            <Input id="accountNumber" name="accountNumber" defaultValue={initialData?.accountNumber as string} />
+            <Input id="accountNumber" name="accountNumber" defaultValue={initialData?.accountNumber as string} placeholder="Leave blank to keep current" />
+            <p className="text-xs text-muted-foreground">Stored encrypted. Masked value shown when editing.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="ifsc">IFSC</Label>

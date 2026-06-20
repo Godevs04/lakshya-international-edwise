@@ -23,18 +23,27 @@ interface PartnersTableProps {
   total: number;
   page: number;
   totalPages: number;
+  canWrite?: boolean;
 }
 
-export function PartnersTable({ data, total, page, totalPages }: PartnersTableProps) {
+export function PartnersTable({
+  data,
+  total,
+  page,
+  totalPages,
+  canWrite = false,
+}: PartnersTableProps) {
   const router = useRouter();
 
   return (
     <div className="space-y-4">
-      <GlassCard className="flex justify-end p-4">
-        <Link href="/dashboard/partners/new">
-          <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Partner</Button>
-        </Link>
-      </GlassCard>
+      {canWrite && (
+        <GlassCard className="flex justify-end p-4">
+          <Link href="/dashboard/partners/new">
+            <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Partner</Button>
+          </Link>
+        </GlassCard>
+      )}
       <GlassCard className="overflow-hidden">
         <Table>
           <TableHeader>

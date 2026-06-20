@@ -33,6 +33,17 @@ interface StudentFormProps {
 export function StudentForm({ partners, initialData, studentId, mode }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [gender, setGender] = useState<string | undefined>(
+    (initialData?.gender as string) || undefined
+  );
+  const [partnerId, setPartnerId] = useState<string | undefined>(
+    (initialData?.partnerId as string) || undefined
+  );
+  const [status, setStatus] = useState<string>(
+    (initialData?.status as string) ?? "new"
+  );
+
+  const selectedPartner = partners.find((p) => p._id === partnerId);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -73,14 +84,15 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
           </div>
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <Select name="gender" defaultValue={(initialData?.gender as string) ?? ""}>
-              <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+            <Select value={gender} onValueChange={(v) => setGender(v ?? undefined)}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Select gender" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+            <input type="hidden" name="gender" value={gender ?? ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
@@ -132,11 +144,12 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="aadhaar">Aadhaar</Label>
-            <Input id="aadhaar" name="aadhaar" defaultValue={initialData?.aadhaar as string} />
+            <Input id="aadhaar" name="aadhaar" defaultValue={initialData?.aadhaar as string} placeholder="Leave blank to keep current" />
+            <p className="text-xs text-muted-foreground">Masked values are shown for security. Enter a new number to replace.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="pan">PAN</Label>
-            <Input id="pan" name="pan" defaultValue={initialData?.pan as string} />
+            <Input id="pan" name="pan" defaultValue={initialData?.pan as string} placeholder="Leave blank to keep current" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="college">College</Label>
@@ -182,25 +195,31 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
           </div>
           <div className="space-y-2">
             <Label htmlFor="partnerId">Partner</Label>
-            <Select name="partnerId" defaultValue={(initialData?.partnerId as string) ?? ""}>
-              <SelectTrigger><SelectValue placeholder="Select partner" /></SelectTrigger>
+            <Select value={partnerId} onValueChange={(v) => setPartnerId(v ?? undefined)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select partner">
+                  {selectedPartner?.companyName}
+                </SelectValue>
+              </SelectTrigger>
               <SelectContent>
                 {partners.map((p) => (
                   <SelectItem key={p._id} value={p._id}>{p.companyName}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <input type="hidden" name="partnerId" value={partnerId ?? ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select name="status" defaultValue={(initialData?.status as string) ?? "new"}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select value={status} onValueChange={(v) => setStatus(v ?? "new")}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {STUDENT_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <input type="hidden" name="status" value={status} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="remarks">Remarks</Label>

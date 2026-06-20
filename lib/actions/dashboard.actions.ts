@@ -1,10 +1,12 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requireAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import {
   getDashboardMetrics,
+  getDashboardMetricTrends,
   getLoanStatusChart,
   getMonthlyStudentsChart,
   getLoanAmountChart,
@@ -14,6 +16,7 @@ import {
   getUpcomingFollowups,
 } from "@/lib/services/dashboard.service";
 import { getRecentActivities } from "@/lib/services/activity.service";
+import { CACHE_TAGS } from "@/lib/cache/revalidate";
 import { runLogged } from "@/lib/action-utils";
 
 const OVERVIEW_PERMISSIONS = [
@@ -24,6 +27,62 @@ const OVERVIEW_PERMISSIONS = [
   PERMISSIONS.REPORTS_READ,
 ];
 
+const CACHE_SECONDS = 60;
+
+const cachedDashboardMetrics = unstable_cache(getDashboardMetrics, ["dashboard-metrics"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
+
+const cachedDashboardTrends = unstable_cache(getDashboardMetricTrends, ["dashboard-trends"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
+
+const cachedLoanStatusChart = unstable_cache(getLoanStatusChart, ["dashboard-loan-status"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
+
+const cachedMonthlyStudentsChart = unstable_cache(getMonthlyStudentsChart, ["dashboard-monthly-students"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
+
+const cachedLoanAmountChart = unstable_cache(getLoanAmountChart, ["dashboard-loan-amount"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
+
+const cachedTopPartnersChart = unstable_cache(getTopPartnersChart, ["dashboard-top-partners"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
+
+const cachedRecentActivities = unstable_cache(
+  () => getRecentActivities(8),
+  ["dashboard-recent-activities"],
+  { revalidate: CACHE_SECONDS, tags: [CACHE_TAGS.dashboard] }
+);
+
+const cachedLatestStudents = unstable_cache(
+  () => getLatestStudents(5),
+  ["dashboard-latest-students"],
+  { revalidate: CACHE_SECONDS, tags: [CACHE_TAGS.dashboard] }
+);
+
+const cachedLatestPartners = unstable_cache(
+  () => getLatestPartners(5),
+  ["dashboard-latest-partners"],
+  { revalidate: CACHE_SECONDS, tags: [CACHE_TAGS.dashboard] }
+);
+
+const cachedFollowups = unstable_cache(
+  () => getUpcomingFollowups(5),
+  ["dashboard-followups"],
+  { revalidate: CACHE_SECONDS, tags: [CACHE_TAGS.dashboard] }
+);
+
 export async function getOverviewDashboardAction() {
   return runLogged("getOverviewDashboardAction", async () => {
     const user = await getSessionUser();
@@ -31,6 +90,7 @@ export async function getOverviewDashboardAction() {
 
     const [
       metrics,
+      trends,
       loanStatus,
       monthlyStudents,
       loanAmount,
@@ -40,19 +100,21 @@ export async function getOverviewDashboardAction() {
       latestPartners,
       followups,
     ] = await Promise.all([
-      getDashboardMetrics(),
-      getLoanStatusChart(),
-      getMonthlyStudentsChart(),
-      getLoanAmountChart(),
-      getTopPartnersChart(),
-      getRecentActivities(8),
-      getLatestStudents(5),
-      getLatestPartners(5),
-      getUpcomingFollowups(5),
+      cachedDashboardMetrics(),
+      cachedDashboardTrends(),
+      cachedLoanStatusChart(),
+      cachedMonthlyStudentsChart(),
+      cachedLoanAmountChart(),
+      cachedTopPartnersChart(),
+      cachedRecentActivities(),
+      cachedLatestStudents(),
+      cachedLatestPartners(),
+      cachedFollowups(),
     ]);
 
     return {
       metrics,
+      trends,
       loanStatus,
       monthlyStudents,
       loanAmount,

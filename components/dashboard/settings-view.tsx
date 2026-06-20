@@ -118,6 +118,7 @@ export function SettingsView({
         <TabsTrigger value="company">Company</TabsTrigger>
         <TabsTrigger value="theme">Theme</TabsTrigger>
         <TabsTrigger value="modules">Modules</TabsTrigger>
+        {canWriteSettings && <TabsTrigger value="security">Security</TabsTrigger>}
         {canManageUsers && <TabsTrigger value="users">Users</TabsTrigger>}
         </TabsList>
       </div>
@@ -220,6 +221,34 @@ export function SettingsView({
           </form>
         </GlassCard>
       </TabsContent>
+
+      {canWriteSettings && (
+      <TabsContent value="security" className="mt-4">
+        <GlassCard className="p-6">
+          <form onSubmit={handleSettingsSubmit} className="space-y-4">
+            <input type="hidden" name="settingsSection" value="security" />
+            <div className="space-y-2 max-w-sm">
+              <Label htmlFor="sessionExpiryHours">Session expiry (hours)</Label>
+              <Input
+                id="sessionExpiryHours"
+                name="sessionExpiryHours"
+                type="number"
+                min={1}
+                max={720}
+                defaultValue={settings.sessionExpiryHours}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Default session length for sign-in. &quot;Remember me&quot; extends this by 7× on the next login.
+              </p>
+            </div>
+            <Button type="submit" disabled={loading}>
+              Save Security Settings
+            </Button>
+          </form>
+        </GlassCard>
+      </TabsContent>
+      )}
 
       {canManageUsers && (
       <TabsContent value="users" className="mt-4 space-y-6">
