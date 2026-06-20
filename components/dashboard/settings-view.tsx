@@ -27,11 +27,10 @@ import {
 import {
   updateSettingsAction,
   createUserAction,
-  updateUserRoleAction,
   deleteUserAction,
 } from "@/lib/actions/settings.actions";
 import { ROLE_LABELS } from "@/lib/constants/permissions";
-import type { AppSettings, UserRole } from "@/types";
+import type { AppModules, AppSettings, UserRole } from "@/types";
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -44,19 +43,19 @@ interface SettingsViewProps {
   }>;
 }
 
+const MODULE_KEYS = ["students", "partners", "applications", "reports", "analytics"] as const;
+
 export function SettingsView({ settings, users }: SettingsViewProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [themeMode, setThemeMode] = useState(settings.theme.mode);
+  const [modules, setModules] = useState<AppModules>(settings.modules);
+  const [createUserRole, setCreateUserRole] = useState<UserRole>("staff");
 
   async function handleSettingsSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    formData.set("modulesStudents", formData.get("modulesStudents") ? "true" : "false");
-    formData.set("modulesPartners", formData.get("modulesPartners") ? "true" : "false");
-    formData.set("modulesApplications", formData.get("modulesApplications") ? "true" : "false");
-    formData.set("modulesReports", formData.get("modulesReports") ? "true" : "false");
-    formData.set("modulesAnalytics", formData.get("modulesAnalytics") ? "true" : "false");
     const result = await updateSettingsAction(formData);
     if (result.success) {
       toast.success("Settings saved");
@@ -70,10 +69,12 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
   async function handleCreateUser(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    formData.set("role", createUserRole);
     const result = await createUserAction(formData);
     if (result.success) {
       toast.success("User created");
       (e.target as HTMLFormElement).reset();
+      setCreateUserRole("staff");
       router.refresh();
     } else {
       toast.error(result.error);
@@ -92,11 +93,7 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
       <TabsContent value="company" className="mt-4">
         <GlassCard className="p-6">
           <form onSubmit={handleSettingsSubmit} className="space-y-4">
-            <input type="hidden" name="themePrimary" value={settings.theme.primary} />
-            <input type="hidden" name="themeAccent" value={settings.theme.accent} />
-            <input type="hidden" name="themeRadius" value={settings.theme.radius} />
-            <input type="hidden" name="themeMode" value={settings.theme.mode} />
-            <input type="hidden" name="sessionExpiryHours" value={settings.sessionExpiryHours} />
+            <input type="hidden" name="settingsSection" value="company" />
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="companyName">Company Name</Label>
@@ -127,12 +124,8 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
       <TabsContent value="theme" className="mt-4">
         <GlassCard className="p-6">
           <form onSubmit={handleSettingsSubmit} className="space-y-4">
-            <input type="hidden" name="companyName" value={settings.company.name} />
-            <input type="hidden" name="companyEmail" value={settings.company.email ?? ""} />
-            <input type="hidden" name="companyPhone" value={settings.company.phone ?? ""} />
-            <input type="hidden" name="companyAddress" value={settings.company.address ?? ""} />
-            <input type="hidden" name="companyLogo" value={settings.company.logo ?? ""} />
-            <input type="hidden" name="sessionExpiryHours" value={settings.sessionExpiryHours} />
+            <input type="hidden" name="settingsSection" value="theme" />
+            <input type="hidden" name="themeMode" value={themeMode} />
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="themePrimary">Primary Color</Label>
@@ -148,8 +141,10 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="themeMode">Theme Mode</Label>
-                <Select name="themeMode" defaultValue={settings.theme.mode}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select value={themeMode} onValueChange={(value) => setThemeMode(value as AppSettings["theme"]["mode"])}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -166,22 +161,23 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
       <TabsContent value="modules" className="mt-4">
         <GlassCard className="p-6">
           <form onSubmit={handleSettingsSubmit} className="space-y-4">
-            <input type="hidden" name="companyName" value={settings.company.name} />
-            <input type="hidden" name="themePrimary" value={settings.theme.primary} />
-            <input type="hidden" name="themeAccent" value={settings.theme.accent} />
-            <input type="hidden" name="themeRadius" value={settings.theme.radius} />
-            <input type="hidden" name="themeMode" value={settings.theme.mode} />
-            <input type="hidden" name="sessionExpiryHours" value={settings.sessionExpiryHours} />
-            {(["students", "partners", "applications", "reports", "analytics"] as const).map((mod) => (
-              <div key={mod} className="flex items-center justify-between">
-                <Label htmlFor={`modules${mod.charAt(0).toUpperCase() + mod.slice(1)}`} className="capitalize">{mod}</Label>
-                <Switch
-                  id={`modules${mod.charAt(0).toUpperCase() + mod.slice(1)}`}
-                  name={`modules${mod.charAt(0).toUpperCase() + mod.slice(1)}`}
-                  defaultChecked={settings.modules[mod]}
-                />
-              </div>
-            ))}
+            <input type="hidden" name="settingsSection" value="modules" />
+            {MODULE_KEYS.map((mod) => {
+              const inputName = `modules${mod.charAt(0).toUpperCase()}${mod.slice(1)}`;
+              return (
+                <div key={mod} className="flex items-center justify-between">
+                  <Label htmlFor={inputName} className="capitalize">{mod}</Label>
+                  <Switch
+                    id={inputName}
+                    checked={modules[mod]}
+                    onCheckedChange={(checked) =>
+                      setModules((prev) => ({ ...prev, [mod]: checked }))
+                    }
+                  />
+                  <input type="hidden" name={inputName} value={modules[mod] ? "true" : "false"} />
+                </div>
+              );
+            })}
             <Button type="submit" disabled={loading}>Save Modules</Button>
           </form>
         </GlassCard>
@@ -194,8 +190,10 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
             <Input name="name" placeholder="Full Name" required />
             <Input name="email" type="email" placeholder="Email" required />
             <Input name="password" type="password" placeholder="Password" required />
-            <Select name="role" defaultValue="staff">
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select value={createUserRole} onValueChange={(value) => setCreateUserRole(value as UserRole)}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {(Object.keys(ROLE_LABELS) as UserRole[]).map((role) => (
                   <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>

@@ -16,17 +16,36 @@ import type { UserRole } from "@/types";
 
 export async function getSettings(): Promise<AppSettings> {
   await connectDB();
+  const defaults = getDefaultSettings();
   let settings = await Settings.findOne().lean();
   if (!settings) {
-    const created = await Settings.create(getDefaultSettings());
+    const created = await Settings.create(defaults);
     settings = created.toObject();
   }
+
+  const modules = settings.modules ?? defaults.modules;
+  const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
+
   return {
-    company: settings.company,
-    theme: settings.theme,
-    modules: settings.modules,
-    sessionExpiryHours: settings.sessionExpiryHours,
+    company: {
+      ...defaults.company,
+      ...settings.company,
+      name: settings.company?.name?.trim() || defaults.company.name,
+    },
+    theme: {
+      ...defaults.theme,
+      ...settings.theme,
+      primary: settings.theme?.primary?.trim() || defaults.theme.primary,
+      accent: settings.theme?.accent?.trim() || defaults.theme.accent,
+      radius: settings.theme?.radius?.trim() || defaults.theme.radius,
+    },
+    modules: allModulesDisabled ? defaults.modules : modules,
+    sessionExpiryHours: settings.sessionExpiryHours ?? defaults.sessionExpiryHours,
   };
+}
+
+function parseModuleFlag(value: FormDataEntryValue | null): boolean {
+  return value === "true" || value === "on";
 }
 
 export async function updateSettingsAction(
@@ -35,50 +54,86 @@ export async function updateSettingsAction(
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.SETTINGS_WRITE);
 
+  const section = (formData.get("settingsSection") as string) || "company";
   const raw = Object.fromEntries(formData.entries());
-  const parsed = settingsSchema.safeParse({
-    ...raw,
-    modulesStudents: raw.modulesStudents === "true",
-    modulesPartners: raw.modulesPartners === "true",
-    modulesApplications: raw.modulesApplications === "true",
-    modulesReports: raw.modulesReports === "true",
-    modulesAnalytics: raw.modulesAnalytics === "true",
-  });
-
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
 
   await connectDB();
-  const data = parsed.data;
+  const defaults = getDefaultSettings();
+  const existingDoc = await Settings.findOne().lean();
+  const existing = existingDoc ?? defaults;
 
-  await Settings.findOneAndUpdate(
-    {},
-    {
-      company: {
-        name: data.companyName,
-        email: data.companyEmail,
-        phone: data.companyPhone,
-        address: data.companyAddress,
-        logo: data.companyLogo,
+  if (section === "company") {
+    const parsed = settingsSchema.safeParse({
+      companyName: raw.companyName,
+      companyEmail: raw.companyEmail,
+      companyPhone: raw.companyPhone,
+      companyAddress: raw.companyAddress,
+      companyLogo: raw.companyLogo,
+    });
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+    const data = parsed.data;
+    await Settings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          company: {
+            name: data.companyName,
+            email: data.companyEmail ?? "",
+            phone: data.companyPhone ?? "",
+            address: data.companyAddress ?? "",
+            logo: data.companyLogo ?? "",
+          },
+        },
       },
-      theme: {
-        primary: data.themePrimary,
-        accent: data.themeAccent,
-        radius: data.themeRadius,
-        mode: data.themeMode,
+      { upsert: true }
+    );
+  } else if (section === "theme") {
+    const parsed = settingsSchema.safeParse({
+      themePrimary: raw.themePrimary,
+      themeAccent: raw.themeAccent,
+      themeRadius: raw.themeRadius,
+      themeMode: raw.themeMode,
+    });
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+    const data = parsed.data;
+    await Settings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          theme: {
+            primary: data.themePrimary?.trim() || existing.theme?.primary || defaults.theme.primary,
+            accent: data.themeAccent?.trim() || existing.theme?.accent || defaults.theme.accent,
+            radius: data.themeRadius?.trim() || existing.theme?.radius || defaults.theme.radius,
+            fontFamily: existing.theme?.fontFamily || defaults.theme.fontFamily,
+            mode: data.themeMode ?? existing.theme?.mode ?? defaults.theme.mode,
+          },
+        },
       },
-      modules: {
-        students: data.modulesStudents ?? true,
-        partners: data.modulesPartners ?? true,
-        applications: data.modulesApplications ?? true,
-        reports: data.modulesReports ?? true,
-        analytics: data.modulesAnalytics ?? true,
+      { upsert: true }
+    );
+  } else if (section === "modules") {
+    await Settings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          modules: {
+            students: parseModuleFlag(formData.get("modulesStudents")),
+            partners: parseModuleFlag(formData.get("modulesPartners")),
+            applications: parseModuleFlag(formData.get("modulesApplications")),
+            reports: parseModuleFlag(formData.get("modulesReports")),
+            analytics: parseModuleFlag(formData.get("modulesAnalytics")),
+          },
+        },
       },
-      sessionExpiryHours: data.sessionExpiryHours,
-    },
-    { upsert: true }
-  );
+      { upsert: true }
+    );
+  } else {
+    return { success: false, error: "Invalid settings section" };
+  }
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");

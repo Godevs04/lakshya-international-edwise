@@ -13,11 +13,24 @@ export async function getAppConfig(): Promise<AppSettings> {
       const created = await Settings.create(envDefaults);
       settings = created.toObject();
     }
+    const modules = settings.modules ?? envDefaults.modules;
+    const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
+
     return {
-      company: settings.company,
-      theme: settings.theme,
-      modules: settings.modules,
-      sessionExpiryHours: settings.sessionExpiryHours,
+      company: {
+        ...envDefaults.company,
+        ...settings.company,
+        name: settings.company?.name?.trim() || envDefaults.company.name,
+      },
+      theme: {
+        ...envDefaults.theme,
+        ...settings.theme,
+        primary: settings.theme?.primary?.trim() || envDefaults.theme.primary,
+        accent: settings.theme?.accent?.trim() || envDefaults.theme.accent,
+        radius: settings.theme?.radius?.trim() || envDefaults.theme.radius,
+      },
+      modules: allModulesDisabled ? envDefaults.modules : modules,
+      sessionExpiryHours: settings.sessionExpiryHours ?? envDefaults.sessionExpiryHours,
     };
   } catch {
     return {

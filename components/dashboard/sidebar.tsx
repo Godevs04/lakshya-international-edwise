@@ -40,8 +40,8 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const filteredNav = navItems.filter((item) => {
-    if (!item.module || !modules) return true;
-    return modules[item.module];
+    if (!item.module) return true;
+    return modules?.[item.module] !== false;
   });
 
   return (
