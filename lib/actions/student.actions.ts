@@ -10,7 +10,7 @@ import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import { studentSchema, noteSchema } from "@/lib/validations/schemas";
-import { sanitizeText } from "@/lib/utils/sanitize";
+import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encrypt } from "@/lib/utils/encryption";
 import { generateStudentId } from "@/lib/utils/format";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
@@ -30,6 +30,9 @@ export async function getStudents(params: {
   bank?: string;
 }): Promise<PaginatedResult<StudentListItem>> {
   return runLoggedQuery("getStudents", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.STUDENTS_READ);
+
   await connectDB();
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 10;
@@ -38,7 +41,7 @@ export async function getStudents(params: {
   const filter: Record<string, unknown> = {};
 
   if (params.search) {
-    const regex = new RegExp(params.search, "i");
+    const regex = toSafeRegExp(params.search);
     filter.$or = [
       { firstName: regex },
       { lastName: regex },
@@ -50,9 +53,9 @@ export async function getStudents(params: {
   if (params.status) filter.status = params.status;
   if (params.partnerId) filter.partnerId = params.partnerId;
   if (params.state) filter["address.state"] = params.state;
-  if (params.college) filter["education.college"] = new RegExp(params.college, "i");
-  if (params.course) filter["education.course"] = new RegExp(params.course, "i");
-  if (params.bank) filter["loan.bankName"] = new RegExp(params.bank, "i");
+  if (params.college) filter["education.college"] = toSafeRegExp(params.college);
+  if (params.course) filter["education.course"] = toSafeRegExp(params.course);
+  if (params.bank) filter["loan.bankName"] = toSafeRegExp(params.bank);
 
   const [data, total] = await Promise.all([
     Student.find(filter)
@@ -87,6 +90,9 @@ export async function getStudents(params: {
 
 export async function getStudentById(id: string) {
   return runLoggedQuery("getStudentById", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.STUDENTS_READ);
+
   await connectDB();
   return Student.findById(id).populate("partnerId").lean();
   }, null);

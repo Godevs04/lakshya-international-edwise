@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
+import { toSafeRegExp } from "@/lib/utils/sanitize";
 import type { SearchResult } from "@/types";
 
 export async function globalSearch(query: string, limit = 10): Promise<SearchResult[]> {
@@ -9,9 +10,9 @@ export async function globalSearch(query: string, limit = 10): Promise<SearchRes
 
   await connectDB();
   const trimmed = query.trim();
-  const regex = new RegExp(trimmed, "i");
+  const regex = toSafeRegExp(trimmed);
 
-  const [students, partners, applications] = await Promise.all([
+  const [students, partners, matchingStudents] = await Promise.all([
     Student.find({
       $or: [
         { firstName: regex },
@@ -37,11 +38,26 @@ export async function globalSearch(query: string, limit = 10): Promise<SearchRes
       .limit(limit)
       .select("companyName owner phone email status")
       .lean(),
-    Application.find()
-      .populate("studentId", "firstName lastName studentId")
+    Student.find({
+      $or: [
+        { firstName: regex },
+        { lastName: regex },
+        { studentId: regex },
+      ],
+    })
       .limit(limit)
+      .select("_id")
       .lean(),
   ]);
+
+  const studentIds = matchingStudents.map((s) => s._id);
+  const applications =
+    studentIds.length > 0
+      ? await Application.find({ studentId: { $in: studentIds } })
+          .populate("studentId", "firstName lastName studentId")
+          .limit(limit)
+          .lean()
+      : [];
 
   const results: SearchResult[] = [];
 
@@ -72,15 +88,15 @@ export async function globalSearch(query: string, limit = 10): Promise<SearchRes
       lastName: string;
       studentId: string;
     } | null;
-    if (student && regex.test(`${student.firstName} ${student.lastName} ${student.studentId}`)) {
-      results.push({
-        type: "application",
-        id: a._id.toString(),
-        title: `${student.firstName} ${student.lastName}`,
-        subtitle: `Application - ${a.status}`,
-        href: `/dashboard/applications`,
-      });
-    }
+    if (!student) continue;
+
+    results.push({
+      type: "application",
+      id: a._id.toString(),
+      title: `${student.firstName} ${student.lastName}`,
+      subtitle: `Application - ${a.status}`,
+      href: `/dashboard/applications`,
+    });
   }
 
   return results.slice(0, limit);

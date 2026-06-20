@@ -1,3 +1,11 @@
+export function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function toSafeRegExp(input: string, flags = "i"): RegExp {
+  return new RegExp(escapeRegExp(input.trim()), flags);
+}
+
 export function sanitizeText(input: string): string {
   return input
     .replace(/<[^>]*>/g, "")

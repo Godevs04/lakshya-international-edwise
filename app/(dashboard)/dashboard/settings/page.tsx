@@ -30,6 +30,7 @@ export default async function SettingsPage() {
         settings={settings}
         canManageUsers={canManageUsers}
         canWriteSettings={canWriteSettings}
+        currentUserRole={user?.role}
         users={users.map((u) => ({
           _id: u._id.toString(),
           name: u.name,

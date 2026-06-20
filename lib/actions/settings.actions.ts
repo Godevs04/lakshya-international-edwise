@@ -242,6 +242,14 @@ export async function createUserAction(formData: FormData): Promise<ActionResult
     return { success: false, error: "All fields are required" };
   }
 
+  if (role === "super_admin") {
+    return { success: false, error: "Cannot assign super admin role" };
+  }
+
+  if (role === "admin" && user?.role !== "super_admin") {
+    return { success: false, error: "Only super admin can create admin users" };
+  }
+
   await connectDB();
   const existing = await User.findOne({ email: email.toLowerCase() });
   if (existing) return { success: false, error: "Email already exists" };
@@ -269,6 +277,14 @@ export async function updateUserRoleAction(
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.USERS_WRITE);
 
+  if (role === "super_admin") {
+    return { success: false, error: "Cannot assign super admin role" };
+  }
+
+  if (role === "admin" && user?.role !== "super_admin") {
+    return { success: false, error: "Only super admin can assign admin role" };
+  }
+
   await connectDB();
   await User.findByIdAndUpdate(userId, { role });
   revalidatePath("/dashboard/settings");
@@ -294,6 +310,9 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
 
 export async function getRoles() {
   return runLoggedQuery("getRoles", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_READ);
+
   await connectDB();
   return Role.find().lean();
   }, []);

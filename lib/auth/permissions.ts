@@ -47,6 +47,15 @@ export function canAccessRoute(
   return true;
 }
 
+export function requireAnyPermission(
+  user: SessionUser | null | undefined,
+  permissions: string[]
+): void {
+  if (!hasAnyPermission(user, permissions)) {
+    throw new Error("Unauthorized: insufficient permissions");
+  }
+}
+
 export function requirePermission(
   user: SessionUser | null | undefined,
   permission: string

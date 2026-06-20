@@ -1,16 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import { getGreeting, formatCurrency } from "@/lib/utils/format";
-import {
-  getDashboardMetrics,
-  getLoanStatusChart,
-  getMonthlyStudentsChart,
-  getLoanAmountChart,
-  getTopPartnersChart,
-  getLatestStudents,
-  getLatestPartners,
-  getUpcomingFollowups,
-} from "@/lib/services/dashboard.service";
-import { getRecentActivities } from "@/lib/services/activity.service";
+import { getOverviewDashboardAction } from "@/lib/actions/dashboard.actions";
 import { MetricCardsGrid, type MetricIconName } from "@/components/cards/metric-card";
 import { GlassCard } from "@/components/cards/glass-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -31,7 +21,7 @@ import type { StudentStatus } from "@/lib/constants/statuses";
 
 export default async function OverviewPage() {
   const session = await auth();
-  const [
+  const {
     metrics,
     loanStatus,
     monthlyStudents,
@@ -41,17 +31,7 @@ export default async function OverviewPage() {
     latestStudents,
     latestPartners,
     followups,
-  ] = await Promise.all([
-    getDashboardMetrics(),
-    getLoanStatusChart(),
-    getMonthlyStudentsChart(),
-    getLoanAmountChart(),
-    getTopPartnersChart(),
-    getRecentActivities(8),
-    getLatestStudents(5),
-    getLatestPartners(5),
-    getUpcomingFollowups(5),
-  ]);
+  } = await getOverviewDashboardAction();
 
   const metricCards: Array<{ title: string; value: string | number; icon: MetricIconName; trend?: string; trendUp?: boolean }> = [
     { title: "Total Students", value: metrics.totalStudents, icon: "users", trend: "↑ 24%", trendUp: true },

@@ -15,8 +15,14 @@ import {
 } from "@/lib/validations/schemas";
 import type { ActionResult } from "@/types";
 import { runLoggedMutation } from "@/lib/action-utils";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { hashToken } from "@/lib/utils/token-hash";
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
+
+function rateLimitMessage(retryAfterSeconds: number): string {
+  return `Too many attempts. Please try again in ${retryAfterSeconds} seconds.`;
+}
 
 function generateOtp(): string {
   return crypto.randomInt(100000, 999999).toString();
@@ -34,6 +40,12 @@ export async function registerAction(
   formData: FormData
 ): Promise<ActionResult> {
   return runLoggedMutation("registerAction", async () => {
+  const ip = await getClientIp();
+  const rateLimit = await checkRateLimit("register", ip);
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+  }
+
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -87,6 +99,11 @@ export async function verifyOtpAction(
     return { success: false, error: "Please enter a valid 6-digit code" };
   }
 
+  const rateLimit = await checkRateLimit("otp-verify", email.toLowerCase());
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+  }
+
   await connectDB();
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
@@ -122,6 +139,11 @@ export async function resendOtpAction(email: string): Promise<ActionResult> {
     return { success: false, error: "Email is required" };
   }
 
+  const rateLimit = await checkRateLimit("otp-resend", email.toLowerCase());
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+  }
+
   await connectDB();
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
@@ -149,6 +171,12 @@ export async function validateLoginAction(
   password: string
 ): Promise<ActionResult> {
   return runLoggedMutation("validateLoginAction", async () => {
+  const ip = await getClientIp();
+  const rateLimit = await checkRateLimit("login", `${ip}:${email.toLowerCase()}`);
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+  }
+
   await connectDB();
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
@@ -200,6 +228,11 @@ export async function forgotPasswordAction(
     return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
   }
 
+  const rateLimit = await checkRateLimit("forgot-password", parsed.data.email.toLowerCase());
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+  }
+
   await connectDB();
   const user = await User.findOne({ email: parsed.data.email.toLowerCase(), status: "active" });
   if (!user) {
@@ -207,7 +240,7 @@ export async function forgotPasswordAction(
   }
 
   const resetToken = crypto.randomBytes(32).toString("hex");
-  user.resetToken = resetToken;
+  user.resetToken = hashToken(resetToken);
   user.resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
   await user.save();
 
@@ -232,9 +265,15 @@ export async function resetPasswordAction(
     return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
   }
 
+  const ip = await getClientIp();
+  const rateLimit = await checkRateLimit("login", `reset:${ip}`);
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+  }
+
   await connectDB();
   const user = await User.findOne({
-    resetToken: parsed.data.token,
+    resetToken: hashToken(parsed.data.token),
     resetTokenExpiry: { $gt: new Date() },
   });
 

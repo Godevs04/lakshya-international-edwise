@@ -14,6 +14,9 @@ import type { ApplicationStatus } from "@/lib/constants/statuses";
 
 export async function getApplications(): Promise<ApplicationListItem[]> {
   return runLoggedQuery("getApplications", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.APPLICATIONS_READ);
+
     await connectDB();
     const apps = await Application.find()
       .populate("studentId", "firstName lastName studentId")

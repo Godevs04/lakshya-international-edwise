@@ -48,6 +48,7 @@ interface SettingsViewProps {
   }>;
   canManageUsers?: boolean;
   canWriteSettings?: boolean;
+  currentUserRole?: UserRole;
   pendingUsers?: Array<{
     _id: string;
     name: string;
@@ -58,11 +59,20 @@ interface SettingsViewProps {
 
 const MODULE_KEYS = ["students", "partners", "applications", "reports", "analytics"] as const;
 
+function getCreatableRoles(currentUserRole?: UserRole): UserRole[] {
+  return (Object.keys(ROLE_LABELS) as UserRole[]).filter((role) => {
+    if (role === "super_admin") return false;
+    if (role === "admin") return currentUserRole === "super_admin";
+    return true;
+  });
+}
+
 export function SettingsView({
   settings,
   users,
   canManageUsers = false,
   canWriteSettings = true,
+  currentUserRole,
   pendingUsers = [],
 }: SettingsViewProps) {
   const router = useRouter();
@@ -302,7 +312,7 @@ export function SettingsView({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(ROLE_LABELS) as UserRole[]).map((role) => (
+                {getCreatableRoles(currentUserRole).map((role) => (
                   <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
                 ))}
               </SelectContent>

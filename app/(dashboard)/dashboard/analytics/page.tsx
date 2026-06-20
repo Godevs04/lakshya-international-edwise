@@ -8,27 +8,11 @@ import {
   TopPartnersBarChart,
 } from "@/components/charts/dashboard-charts";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  getConversionFunnel,
-  getTrendData,
-  getMonthlyRevenue,
-  getStudentDemographics,
-  getHeatMapData,
-  getPartnerPerformance,
-  getLoanDistribution,
-} from "@/lib/services/analytics.service";
+import { getAnalyticsDashboardAction } from "@/lib/actions/analytics.actions";
 
 export default async function AnalyticsPage() {
-  const [funnel, trends, revenue, demographics, heatmap, partners, loanDist] =
-    await Promise.all([
-      getConversionFunnel(),
-      getTrendData(),
-      getMonthlyRevenue(),
-      getStudentDemographics(),
-      getHeatMapData(),
-      getPartnerPerformance(),
-      getLoanDistribution(),
-    ]);
+  const { funnel, trends, revenue, demographics, heatmap, partners, loanDist } =
+    await getAnalyticsDashboardAction();
 
   const partnerChart = partners.map((p) => ({
     name: p.companyName,

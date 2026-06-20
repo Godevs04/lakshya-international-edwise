@@ -9,7 +9,7 @@ import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import { partnerSchema } from "@/lib/validations/schemas";
-import { sanitizeText } from "@/lib/utils/sanitize";
+import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
@@ -21,6 +21,9 @@ export async function getPartners(params: {
   status?: string;
 }): Promise<PaginatedResult<PartnerListItem>> {
   return runLoggedQuery("getPartners", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
   await connectDB();
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 10;
@@ -28,7 +31,7 @@ export async function getPartners(params: {
 
   const filter: Record<string, unknown> = {};
   if (params.search) {
-    const regex = new RegExp(params.search, "i");
+    const regex = toSafeRegExp(params.search);
     filter.$or = [
       { companyName: regex },
       { owner: regex },
@@ -65,6 +68,9 @@ export async function getPartners(params: {
 
 export async function getPartnerById(id: string) {
   return runLoggedQuery("getPartnerById", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
   await connectDB();
   return Partner.findById(id).lean();
   }, null);
@@ -72,6 +78,9 @@ export async function getPartnerById(id: string) {
 
 export async function getPartnerStudents(partnerId: string) {
   return runLoggedQuery("getPartnerStudents", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
   await connectDB();
   return Student.find({ partnerId }).sort({ createdAt: -1 }).limit(20).lean();
   }, []);
@@ -79,6 +88,9 @@ export async function getPartnerStudents(partnerId: string) {
 
 export async function getPartnersList() {
   return runLoggedQuery("getPartnersList", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
   await connectDB();
   return Partner.find({ status: "active" }).select("companyName").sort({ companyName: 1 }).lean();
   }, []);
@@ -218,6 +230,9 @@ export async function deletePartnerAction(id: string): Promise<ActionResult> {
 
 export async function getPartnerAnalytics(partnerId: string) {
   return runLoggedQuery("getPartnerAnalytics", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
   await connectDB();
   const partner = await Partner.findById(partnerId).lean();
   if (!partner) return null;

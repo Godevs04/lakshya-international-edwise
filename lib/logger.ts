@@ -1,5 +1,15 @@
 type LogLevel = "debug" | "info" | "warn" | "error";
 
+async function reportError(message: string, meta?: unknown): Promise<void> {
+  if (process.env.NODE_ENV !== "production" && !process.env.SENTRY_DSN) {
+    return;
+  }
+
+  const { captureException } = await import("@/lib/error-tracking");
+  const error = meta instanceof Error ? meta : new Error(message);
+  await captureException(error, meta instanceof Error ? { message } : { message, meta });
+}
+
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
@@ -57,6 +67,7 @@ function write(level: LogLevel, message: string, meta?: unknown): void {
       break;
     case "error":
       console.error(output);
+      void reportError(message, meta);
       break;
   }
 }
