@@ -25,7 +25,7 @@ export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative overflow-hidden rounded-[28px] hero-banner p-8 text-white shadow-2xl shadow-[#6D5EF7]/25"
+      className="relative overflow-hidden rounded-[20px] p-5 hero-banner text-white shadow-2xl shadow-[#6D5EF7]/25 sm:rounded-[28px] sm:p-8"
     >
       {/* Animated orbs inside hero */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -56,7 +56,7 @@ export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl"
+              className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl"
             >
               {greeting}, {firstName} 👋
             </motion.h1>
@@ -75,7 +75,7 @@ export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 flex flex-wrap gap-3"
+          className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3"
         >
           {quickActions.map((action, i) => (
             <Link key={action.href} href={action.href}>
@@ -85,7 +85,7 @@ export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.05 }}
-                className="flex items-center gap-2.5 rounded-full bg-white/15 px-4 py-2.5 text-sm font-medium backdrop-blur-sm transition-all hover:bg-white/25"
+                className="flex w-full items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-xs font-medium backdrop-blur-sm transition-all hover:bg-white/25 sm:w-auto sm:gap-2.5 sm:px-4 sm:py-2.5 sm:text-sm"
               >
                 <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${action.gradient}`}>
                   <action.icon className="h-3.5 w-3.5 text-white" />

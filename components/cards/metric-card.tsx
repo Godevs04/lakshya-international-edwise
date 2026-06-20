@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -35,28 +34,20 @@ export const METRIC_ICONS = {
 export type MetricIconName = keyof typeof METRIC_ICONS;
 
 function AnimatedNumber({ value }: { value: string | number }) {
-  const [display, setDisplay] = useState<string | number>(value);
-
-  useEffect(() => {
-    if (typeof value !== "number") {
-      setDisplay(value);
-      return;
-    }
-    const duration = 900;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const p = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setDisplay(Math.round(value * eased));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [value]);
-
   const formatted =
-    typeof display === "number" ? display.toLocaleString("en-IN") : display;
+    typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
 
-  return <span className="text-3xl font-bold tracking-tight">{formatted}</span>;
+  return (
+    <motion.span
+      key={formatted}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="text-2xl font-bold tracking-tight sm:text-3xl"
+    >
+      {formatted}
+    </motion.span>
+  );
 }
 
 function Sparkline({ seed, color }: { seed: number; color: string }) {
@@ -161,7 +152,7 @@ interface MetricCardsGridProps {
 
 export function MetricCardsGrid({ cards }: MetricCardsGridProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card, i) => (
         <MetricCard key={card.title} {...card} index={i} />
       ))}

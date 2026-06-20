@@ -21,7 +21,7 @@ export default function AuthLayout({
 async function AuthLayoutInner({ children }: { children: React.ReactNode }) {
   const config = await getAppConfig();
   return (
-    <div className="relative z-10 w-full max-w-md">
+    <div className="relative z-10 w-full max-w-md px-4 sm:max-w-lg sm:px-0">
       <div className="mb-8 text-center">
         {config.company.logo ? (
           // eslint-disable-next-line @next/next/no-img-element

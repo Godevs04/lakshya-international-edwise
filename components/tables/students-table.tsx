@@ -50,7 +50,6 @@ export function StudentsTable({
   data,
   total,
   page,
-  pageSize,
   totalPages,
 }: StudentsTableProps) {
   const router = useRouter();
@@ -110,6 +109,7 @@ export function StudentsTable({
     },
   ];
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table returns unstable function refs by design
   const table = useReactTable({
     data,
     columns,
@@ -175,7 +175,7 @@ export function StudentsTable({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-            className="max-w-xs"
+            className="w-full min-w-0 sm:max-w-xs"
           />
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "")}>
             <SelectTrigger className="w-[160px] rounded-xl border-[#6D5EF7]/15 bg-white/60 backdrop-blur-xl">
@@ -241,9 +241,9 @@ export function StudentsTable({
         </Table>
       </GlassCard>
 
-      <div className="flex items-center justify-between rounded-2xl bg-white/50 px-4 py-3 text-sm text-muted-foreground backdrop-blur-xl dark:bg-white/5">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white/50 px-3 py-3 text-sm text-muted-foreground backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/5">
         <span>{total} total students</span>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
           <Button
             variant="outline"
             size="sm"

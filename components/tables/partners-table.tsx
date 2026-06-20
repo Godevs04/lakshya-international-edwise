@@ -71,9 +71,9 @@ export function PartnersTable({ data, total, page, totalPages }: PartnersTablePr
           </TableBody>
         </Table>
       </GlassCard>
-      <div className="flex items-center justify-between rounded-2xl bg-white/50 px-4 py-3 text-sm text-muted-foreground backdrop-blur-xl dark:bg-white/5">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white/50 px-3 py-3 text-sm text-muted-foreground backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/5">
         <span>{total} total partners</span>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => router.push(`/dashboard/partners?page=${page - 1}`)}>Previous</Button>
           <span className="flex items-center px-2">Page {page} of {totalPages || 1}</span>
           <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => router.push(`/dashboard/partners?page=${page + 1}`)}>Next</Button>

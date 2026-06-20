@@ -38,25 +38,27 @@ export function Topbar({ unreadCount = 0 }: TopbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-3 px-1 lg:px-0">
-        {/* Premium Search */}
+      <header className="sticky top-0 z-40 flex min-h-14 flex-wrap items-center gap-2 sm:gap-3 lg:min-h-16">
         <motion.button
           type="button"
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setSearchOpen(true)}
-          className="search-glow group relative flex h-11 flex-1 max-w-md items-center gap-3 rounded-full border border-[#6D5EF7]/15 bg-white/60 px-5 backdrop-blur-xl transition-all dark:bg-white/5"
+          className="search-glow group relative flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full border border-[#6D5EF7]/15 bg-white/60 px-3 backdrop-blur-xl transition-all sm:h-11 sm:gap-3 sm:px-5 lg:max-w-md dark:bg-white/5"
         >
-          <Search className="h-4 w-4 text-[#6D5EF7]/60 transition-colors group-hover:text-[#6D5EF7]" />
-          <span className="text-sm text-muted-foreground">Search students, partners...</span>
-          <kbd className="pointer-events-none ml-auto hidden h-6 select-none items-center gap-0.5 rounded-full border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 px-2 font-mono text-[10px] font-medium text-[#6D5EF7] sm:flex">
+          <Search className="h-4 w-4 shrink-0 text-[#6D5EF7]/60 transition-colors group-hover:text-[#6D5EF7]" />
+          <span className="min-w-0 truncate text-sm text-muted-foreground">
+            <span className="hidden sm:inline">Search students, partners...</span>
+            <span className="sm:hidden">Search...</span>
+          </span>
+          <kbd className="pointer-events-none ml-auto hidden h-6 shrink-0 select-none items-center gap-0.5 rounded-full border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 px-2 font-mono text-[10px] font-medium text-[#6D5EF7] md:flex">
             <span>⌘</span>K
           </kbd>
         </motion.button>
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
           <DropdownMenu>
-            <DropdownMenuTrigger className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 dark:bg-white/5">
+            <DropdownMenuTrigger className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:h-10 sm:w-10 dark:bg-white/5">
               <Bell className="h-4 w-4 text-muted-foreground" />
               {unreadCount > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#EF4444] to-[#EC4899] text-[10px] font-bold text-white">
@@ -64,7 +66,7 @@ export function Topbar({ unreadCount = 0 }: TopbarProps) {
                 </span>
               )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 rounded-2xl border-[#6D5EF7]/10 bg-white/95 backdrop-blur-xl">
+            <DropdownMenuContent align="end" className="w-[min(calc(100vw-2rem),20rem)] rounded-2xl border-[#6D5EF7]/10 bg-white/95 backdrop-blur-xl">
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="font-semibold">Notifications</DropdownMenuLabel>
                 <DropdownMenuItem disabled className="text-muted-foreground">
@@ -75,7 +77,7 @@ export function Topbar({ unreadCount = 0 }: TopbarProps) {
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 dark:bg-white/5">
+            <DropdownMenuTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:h-10 sm:w-10 dark:bg-white/5">
               <Sun className="h-4 w-4 rotate-0 scale-100 text-muted-foreground transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 text-muted-foreground transition-all dark:rotate-0 dark:scale-100" />
             </DropdownMenuTrigger>
@@ -93,8 +95,8 @@ export function Topbar({ unreadCount = 0 }: TopbarProps) {
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="hidden sm:inline-flex">
-              <Avatar className="h-10 w-10 ring-2 ring-[#6D5EF7]/20 transition-all hover:ring-[#6D5EF7]/40">
+            <DropdownMenuTrigger className="inline-flex">
+              <Avatar className="h-9 w-9 ring-2 ring-[#6D5EF7]/20 transition-all hover:ring-[#6D5EF7]/40 sm:h-10 sm:w-10">
                 <AvatarImage src={session?.user?.avatar} />
                 <AvatarFallback className="bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xs text-white">
                   {getInitials(session?.user?.name ?? "U")}

@@ -83,12 +83,14 @@ export function SettingsView({ settings, users }: SettingsViewProps) {
 
   return (
     <Tabs defaultValue="company">
-      <TabsList>
+      <div className="scrollbar-hide -mx-1 overflow-x-auto px-1 pb-1">
+        <TabsList className="min-w-max">
         <TabsTrigger value="company">Company</TabsTrigger>
         <TabsTrigger value="theme">Theme</TabsTrigger>
         <TabsTrigger value="modules">Modules</TabsTrigger>
         <TabsTrigger value="users">Users</TabsTrigger>
-      </TabsList>
+        </TabsList>
+      </div>
 
       <TabsContent value="company" className="mt-4">
         <GlassCard className="p-6">

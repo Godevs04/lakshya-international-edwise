@@ -17,7 +17,7 @@ export function PageHeader({ title, description, action, badge }: PageHeaderProp
       transition={{ duration: 0.4 }}
       className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
     >
-      <div>
+      <div className="min-w-0">
         {badge && (
           <span className="mb-2 inline-flex items-center rounded-full bg-[#6D5EF7]/10 px-3 py-1 text-xs font-semibold text-[#6D5EF7]">
             {badge}
@@ -33,7 +33,7 @@ export function PageHeader({ title, description, action, badge }: PageHeaderProp
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex shrink-0 items-center gap-2"
+          className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto"
         >
           {action}
         </motion.div>

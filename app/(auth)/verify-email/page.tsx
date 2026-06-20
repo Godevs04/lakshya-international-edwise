@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
 import { verifyEmailAction } from "@/lib/actions/auth.actions";

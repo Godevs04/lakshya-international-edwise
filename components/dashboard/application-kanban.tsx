@@ -24,7 +24,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GlassCard } from "@/components/cards/glass-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -43,7 +42,7 @@ function KanbanColumn({ status, apps }: { status: ApplicationStatus; apps: Appli
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <div className="min-w-[280px] flex-shrink-0">
+    <div className="min-w-[240px] flex-shrink-0 sm:min-w-[280px]">
       <div className="mb-3 flex items-center gap-2">
         <StatusBadge status={status} />
         <span className="text-xs text-muted-foreground">({apps.length})</span>
