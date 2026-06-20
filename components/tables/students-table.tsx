@@ -12,6 +12,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
+import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -166,8 +167,9 @@ export function StudentsTable({
 
   return (
     <div className="space-y-4">
+      <GlassCard className="p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 gap-2">
+        <div className="flex flex-1 flex-wrap gap-2">
           <Input
             placeholder="Search students..."
             value={search}
@@ -176,10 +178,10 @@ export function StudentsTable({
             className="max-w-xs"
           />
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "")}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] rounded-xl border-[#6D5EF7]/15 bg-white/60 backdrop-blur-xl">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-2xl">
               <SelectItem value="">All Status</SelectItem>
               {STUDENT_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
@@ -188,7 +190,7 @@ export function StudentsTable({
           </Select>
           <Button variant="outline" onClick={applyFilters}>Filter</Button>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {selected.length > 0 && (
             <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
               <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
@@ -202,8 +204,9 @@ export function StudentsTable({
           </Link>
         </div>
       </div>
+      </GlassCard>
 
-      <div className="rounded-xl border">
+      <GlassCard className="overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
@@ -236,9 +239,9 @@ export function StudentsTable({
             )}
           </TableBody>
         </Table>
-      </div>
+      </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <div className="flex items-center justify-between rounded-2xl bg-white/50 px-4 py-3 text-sm text-muted-foreground backdrop-blur-xl dark:bg-white/5">
         <span>{total} total students</span>
         <div className="flex gap-2">
           <Button

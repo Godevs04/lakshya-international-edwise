@@ -37,7 +37,7 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Analytics" description="Business intelligence and performance metrics" />
+      <PageHeader title="Analytics" description="Business intelligence and performance metrics" badge="Insights" />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {funnel.some((f) => f.value > 0) ? (

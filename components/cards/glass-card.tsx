@@ -7,26 +7,35 @@ interface GlassCardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
-  gradient?: boolean;
+  glow?: boolean;
+  padding?: boolean;
 }
 
 export function GlassCard({
   children,
   className,
   hover = false,
-  gradient = false,
+  glow = false,
+  padding = false,
 }: GlassCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={hover ? { y: -2, transition: { duration: 0.2 } } : undefined}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={
+        hover
+          ? {
+              y: -4,
+              transition: { duration: 0.2 },
+            }
+          : undefined
+      }
       className={cn(
-        "relative rounded-xl border bg-card/80 backdrop-blur-sm shadow-sm",
-        gradient &&
-          "before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-br before:from-primary/20 before:via-transparent before:to-accent/20 before:-z-10",
-        hover && "transition-shadow hover:shadow-md",
+        "glass-card relative overflow-hidden rounded-[20px]",
+        hover && "cursor-pointer transition-shadow hover:shadow-xl hover:shadow-[#6D5EF7]/10",
+        glow && "ring-1 ring-[#6D5EF7]/20",
+        padding && "p-6",
         className
       )}
     >

@@ -41,11 +41,11 @@ export default function LoginPage() {
   }
 
   return (
-    <GlassCard className="p-8">
+    <GlassCard className="p-8 shadow-2xl shadow-[#6D5EF7]/10">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Enter your credentials to access the dashboard
+        <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Sign in to your enterprise dashboard
         </p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">

@@ -10,9 +10,10 @@ interface StatusBadgeProps {
   status: StudentStatus | PartnerStatus | string;
   type?: "student" | "partner";
   className?: string;
+  size?: "sm" | "md";
 }
 
-export function StatusBadge({ status, type = "student", className }: StatusBadgeProps) {
+export function StatusBadge({ status, type = "student", className, size = "sm" }: StatusBadgeProps) {
   const config =
     type === "partner"
       ? PARTNER_STATUS_CONFIG[status as PartnerStatus]
@@ -22,11 +23,13 @@ export function StatusBadge({ status, type = "student", className }: StatusBadge
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
-          "bg-muted text-muted-foreground",
+          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold capitalize shadow-sm",
+          "bg-muted/80 text-muted-foreground border-border/50",
+          size === "md" && "px-3.5 py-1.5 text-sm",
           className
         )}
       >
+        <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
         {status.replace(/_/g, " ")}
       </span>
     );
@@ -35,12 +38,13 @@ export function StatusBadge({ status, type = "student", className }: StatusBadge
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm",
         config.color,
+        size === "md" && "px-3.5 py-1.5 text-sm",
         className
       )}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full", config.dotColor)} />
+      <span className={cn("h-1.5 w-1.5 rounded-full shadow-sm", config.dotColor)} />
       {config.label}
     </span>
   );

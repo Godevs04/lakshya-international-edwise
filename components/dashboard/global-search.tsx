@@ -74,7 +74,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog open={open} onOpenChange={onOpenChange} shouldFilter={false}>
       <CommandInput
         placeholder="Search students, partners, applications..."
         value={query}
@@ -93,8 +93,11 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   key={item.id}
                   value={item.title}
                   onSelect={() => handleSelect(item.href)}
+                  className="rounded-xl"
                 >
-                  <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6]">
+                    <Icon className="h-3.5 w-3.5 text-white" />
+                  </div>
                   <div className="flex flex-col">
                     <span>{item.title}</span>
                     <span className="text-xs text-muted-foreground">{item.subtitle}</span>

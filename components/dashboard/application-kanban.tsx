@@ -51,7 +51,7 @@ function KanbanColumn({ status, apps }: { status: ApplicationStatus; apps: Appli
       <SortableContext items={apps.map((a) => a._id)} strategy={verticalListSortingStrategy}>
         <div
           ref={setNodeRef}
-          className={`min-h-[200px] rounded-xl p-2 transition-colors ${isOver ? "bg-primary/10" : "bg-muted/30"}`}
+          className={`min-h-[200px] rounded-2xl border border-[#6D5EF7]/10 p-2 transition-all ${isOver ? "bg-[#6D5EF7]/10 ring-2 ring-[#6D5EF7]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
         >
           {apps.map((app) => (
             <KanbanCard key={app._id} app={app} />
@@ -74,11 +74,11 @@ function KanbanCard({ app }: { app: ApplicationListItem }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <GlassCard className="mb-2 cursor-grab p-3 active:cursor-grabbing">
-        <p className="text-sm font-medium">{app.studentName}</p>
+      <GlassCard hover className="mb-2 cursor-grab p-4 active:cursor-grabbing">
+        <p className="text-sm font-semibold">{app.studentName}</p>
         <p className="text-xs text-muted-foreground">{app.studentId}</p>
-        <p className="mt-1 text-sm font-semibold">{formatCurrency(app.loanAmount)}</p>
-        {app.partnerName && <p className="text-xs text-muted-foreground">{app.partnerName}</p>}
+        <p className="mt-2 text-base font-bold text-[#6D5EF7]">{formatCurrency(app.loanAmount)}</p>
+        {app.partnerName && <p className="mt-1 text-xs text-muted-foreground">{app.partnerName}</p>}
       </GlassCard>
     </div>
   );
@@ -168,7 +168,7 @@ export function ApplicationKanban({ applications: initialApps }: ApplicationKanb
         </TabsContent>
 
         <TabsContent value="table" className="mt-4">
-          <div className="rounded-xl border">
+          <GlassCard className="overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -196,7 +196,7 @@ export function ApplicationKanban({ applications: initialApps }: ApplicationKanb
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </GlassCard>
         </TabsContent>
       </Tabs>
     </div>

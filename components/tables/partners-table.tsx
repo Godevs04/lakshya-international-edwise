@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -13,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { GlassCard } from "@/components/cards/glass-card";
 import { formatCurrency } from "@/lib/utils/format";
 import type { PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
@@ -30,12 +30,12 @@ export function PartnersTable({ data, total, page, totalPages }: PartnersTablePr
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <GlassCard className="flex justify-end p-4">
         <Link href="/dashboard/partners/new">
           <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Partner</Button>
         </Link>
-      </div>
-      <div className="rounded-xl border">
+      </GlassCard>
+      <GlassCard className="overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -52,7 +52,7 @@ export function PartnersTable({ data, total, page, totalPages }: PartnersTablePr
             {data.length ? data.map((p) => (
               <TableRow key={p._id}>
                 <TableCell>
-                  <Link href={`/dashboard/partners/${p._id}`} className="font-medium text-primary hover:underline">
+                  <Link href={`/dashboard/partners/${p._id}`} className="font-semibold text-[#6D5EF7] hover:underline">
                     {p.companyName}
                   </Link>
                 </TableCell>
@@ -70,8 +70,8 @@ export function PartnersTable({ data, total, page, totalPages }: PartnersTablePr
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      </GlassCard>
+      <div className="flex items-center justify-between rounded-2xl bg-white/50 px-4 py-3 text-sm text-muted-foreground backdrop-blur-xl dark:bg-white/5">
         <span>{total} total partners</span>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => router.push(`/dashboard/partners?page=${page - 1}`)}>Previous</Button>

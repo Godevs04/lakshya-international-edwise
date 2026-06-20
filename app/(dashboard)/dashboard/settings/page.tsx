@@ -8,7 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Configure your CRM application" />
+      <PageHeader title="Settings" description="Configure your CRM application" badge="Admin" />
       <SettingsView
         settings={settings}
         users={users.map((u) => ({

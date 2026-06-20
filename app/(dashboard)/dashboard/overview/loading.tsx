@@ -3,18 +3,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function OverviewLoading() {
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Skeleton className="h-48 rounded-[28px] bg-[#6D5EF7]/10" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 9 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+          <Skeleton key={i} className="h-44 rounded-[20px] bg-[#6D5EF7]/8" />
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-80 rounded-xl" />
+          <Skeleton key={i} className="h-80 rounded-[20px] bg-[#6D5EF7]/8" />
         ))}
       </div>
     </div>

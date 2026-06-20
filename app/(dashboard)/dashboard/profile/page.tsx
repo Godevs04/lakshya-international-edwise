@@ -36,19 +36,21 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Profile" description="Manage your account settings" />
-      <GlassCard className="p-6">
-        <div className="mb-6 flex items-center gap-4">
-          <Avatar className="h-16 w-16">
+      <PageHeader title="Profile" description="Manage your account settings" badge="Account" />
+      <GlassCard className="p-8">
+        <div className="mb-8 flex items-center gap-5">
+          <Avatar className="h-20 w-20 ring-4 ring-[#6D5EF7]/20">
             <AvatarImage src={session?.user?.avatar} />
-            <AvatarFallback>{getInitials(session?.user?.name ?? "U")}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xl font-bold text-white">
+              {getInitials(session?.user?.name ?? "U")}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="text-lg font-semibold">{session?.user?.name}</h2>
+            <h2 className="text-xl font-bold">{session?.user?.name}</h2>
             <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
-            <p className="text-xs text-muted-foreground">
+            <span className="mt-1 inline-flex rounded-full bg-[#6D5EF7]/10 px-3 py-0.5 text-xs font-semibold text-[#6D5EF7]">
               {ROLE_LABELS[(session?.user?.role ?? "staff") as UserRole]}
-            </p>
+            </span>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">

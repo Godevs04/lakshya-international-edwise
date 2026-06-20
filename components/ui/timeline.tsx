@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/utils/format";
+import { Activity, FileText, UserPlus, CheckCircle, Clock } from "lucide-react";
 
 interface TimelineItem {
   id: string;
@@ -7,6 +8,7 @@ interface TimelineItem {
   description?: string;
   timestamp: Date | string;
   icon?: React.ReactNode;
+  color?: string;
 }
 
 interface TimelineProps {
@@ -14,32 +16,50 @@ interface TimelineProps {
   className?: string;
 }
 
+const DOT_COLORS = [
+  "from-[#6D5EF7] to-[#8B5CF6]",
+  "from-[#3B82F6] to-[#06B6D4]",
+  "from-[#22C55E] to-[#10B981]",
+  "from-[#F59E0B] to-[#EF4444]",
+  "from-[#EC4899] to-[#8B5CF6]",
+];
+
+const DEFAULT_ICONS = [Activity, UserPlus, FileText, CheckCircle, Clock];
+
 export function Timeline({ items, className }: TimelineProps) {
-  if (items.length === 0) {
-    return null;
-  }
+  if (items.length === 0) return null;
 
   return (
     <div className={cn("space-y-0", className)}>
-      {items.map((item, index) => (
-        <div key={item.id} className="relative flex gap-4 pb-6 last:pb-0">
-          {index < items.length - 1 && (
-            <div className="absolute left-[15px] top-8 h-[calc(100%-16px)] w-px bg-border" />
-          )}
-          <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-background">
-            {item.icon ?? <div className="h-2 w-2 rounded-full bg-primary" />}
-          </div>
-          <div className="min-w-0 flex-1 pt-0.5">
-            <p className="text-sm font-medium">{item.title}</p>
-            {item.description && (
-              <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
+      {items.map((item, index) => {
+        const gradient = item.color ?? DOT_COLORS[index % DOT_COLORS.length];
+        const DefaultIcon = DEFAULT_ICONS[index % DEFAULT_ICONS.length];
+
+        return (
+          <div key={item.id} className="relative flex gap-4 pb-6 last:pb-0">
+            {index < items.length - 1 && (
+              <div className="absolute left-[19px] top-10 h-[calc(100%-20px)] w-px bg-gradient-to-b from-[#6D5EF7]/30 to-transparent" />
             )}
-            <p className="mt-1 text-xs text-muted-foreground">
-              {formatDateTime(item.timestamp)}
-            </p>
+            <div
+              className={cn(
+                "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-md",
+                gradient
+              )}
+            >
+              {item.icon ?? <DefaultIcon className="h-4 w-4 text-white" />}
+            </div>
+            <div className="min-w-0 flex-1 rounded-2xl bg-[#6D5EF7]/4 p-3 transition-colors hover:bg-[#6D5EF7]/8">
+              <p className="text-sm font-semibold text-foreground">{item.title}</p>
+              {item.description && (
+                <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
+              )}
+              <p className="mt-1.5 text-[11px] font-medium text-[#6D5EF7]/70">
+                {formatDateTime(item.timestamp)}
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
