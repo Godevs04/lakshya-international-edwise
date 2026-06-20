@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { getMongoUri } from "@/lib/config/env";
+import { initServerLogging } from "@/lib/init-server-logging";
+import { logger } from "@/lib/logger";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -20,6 +22,8 @@ if (!global.mongooseCache) {
 }
 
 export async function connectDB(): Promise<typeof mongoose> {
+  initServerLogging();
+
   const uri = getMongoUri();
   if (!uri) {
     throw new Error("MONGODB_URI is not configured");
@@ -35,6 +39,12 @@ export async function connectDB(): Promise<typeof mongoose> {
     });
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  } catch (error) {
+    cached.promise = null;
+    logger.error("MongoDB connection failed", error);
+    throw error;
+  }
 }

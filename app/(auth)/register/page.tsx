@@ -18,10 +18,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
     const result = await registerAction(formData);
     if (result.success) {
-      toast.success("Registration successful! Check your email to verify.");
-      router.push("/login");
+      toast.success("Check your email for a 6-digit verification code");
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
     } else {
       toast.error(result.error ?? "Registration failed");
     }
@@ -31,8 +32,10 @@ export default function RegisterPage() {
   return (
     <GlassCard className="p-8 shadow-2xl shadow-[#6D5EF7]/10">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Create account</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Register for a new account</p>
+        <h2 className="text-2xl font-bold tracking-tight">Request access</h2>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Register to join the approval queue. An admin will onboard you after verification.
+        </p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

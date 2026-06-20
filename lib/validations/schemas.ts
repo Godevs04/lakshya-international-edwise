@@ -29,6 +29,11 @@ export const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+export const verifyOtpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+});
+
 export const studentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),

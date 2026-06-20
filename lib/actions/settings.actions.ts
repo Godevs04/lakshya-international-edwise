@@ -13,8 +13,13 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 import { settingsSchema, profileSchema } from "@/lib/validations/schemas";
 import type { ActionResult, AppSettings } from "@/types";
 import type { UserRole } from "@/types";
+import { runLoggedMutation, runLoggedQuery } from "@/lib/action-utils";
 
 export async function getSettings(): Promise<AppSettings> {
+  return runLoggedQuery("getSettings", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.SETTINGS_READ);
+
   await connectDB();
   const defaults = getDefaultSettings();
   let settings = await Settings.findOne().lean();
@@ -42,6 +47,7 @@ export async function getSettings(): Promise<AppSettings> {
     modules: allModulesDisabled ? defaults.modules : modules,
     sessionExpiryHours: settings.sessionExpiryHours ?? defaults.sessionExpiryHours,
   };
+  }, getDefaultSettings());
 }
 
 function parseModuleFlag(value: FormDataEntryValue | null): boolean {
@@ -51,6 +57,7 @@ function parseModuleFlag(value: FormDataEntryValue | null): boolean {
 export async function updateSettingsAction(
   formData: FormData
 ): Promise<ActionResult> {
+  return runLoggedMutation("updateSettingsAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.SETTINGS_WRITE);
 
@@ -138,17 +145,91 @@ export async function updateSettingsAction(
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");
   return { success: true };
+  });
 }
 
 export async function getUsers() {
+  return runLoggedQuery("getUsers", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.USERS_READ);
 
   await connectDB();
-  return User.find().select("-passwordHash -resetToken -verifyToken").sort({ createdAt: -1 }).lean();
+  return User.find().select("-passwordHash -resetToken -verifyToken -emailOtpHash").sort({ createdAt: -1 }).lean();
+  }, []);
+}
+
+export async function getPendingUsers() {
+  return runLoggedQuery("getPendingUsers", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_READ);
+
+  await connectDB();
+  return User.find({ status: "pending", isVerified: true })
+    .select("-passwordHash -resetToken -verifyToken -emailOtpHash")
+    .sort({ createdAt: 1 })
+    .lean();
+  }, []);
+}
+
+export async function approveUserAction(
+  userId: string,
+  role: UserRole
+): Promise<ActionResult> {
+  return runLoggedMutation("approveUserAction", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_WRITE);
+
+  if (role === "super_admin") {
+    return { success: false, error: "Cannot assign super admin role via approval" };
+  }
+
+  await connectDB();
+  const pendingUser = await User.findById(userId);
+  if (!pendingUser) {
+    return { success: false, error: "User not found" };
+  }
+  if (pendingUser.status !== "pending" || !pendingUser.isVerified) {
+    return { success: false, error: "User is not eligible for approval" };
+  }
+
+  pendingUser.status = "active";
+  pendingUser.role = role;
+  await pendingUser.save();
+
+  const { sendApprovalEmail } = await import("@/lib/services/email.service");
+  const { ROLE_LABELS } = await import("@/lib/constants/permissions");
+  await sendApprovalEmail(pendingUser.email, pendingUser.name, ROLE_LABELS[role]);
+
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+  });
+}
+
+export async function rejectUserAction(userId: string): Promise<ActionResult> {
+  return runLoggedMutation("rejectUserAction", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_WRITE);
+
+  if (user?.id === userId) {
+    return { success: false, error: "Cannot reject your own account" };
+  }
+
+  await connectDB();
+  const pendingUser = await User.findById(userId);
+  if (!pendingUser) {
+    return { success: false, error: "User not found" };
+  }
+
+  pendingUser.status = "inactive";
+  await pendingUser.save();
+
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+  });
 }
 
 export async function createUserAction(formData: FormData): Promise<ActionResult> {
+  return runLoggedMutation("createUserAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.USERS_WRITE);
 
@@ -177,12 +258,14 @@ export async function createUserAction(formData: FormData): Promise<ActionResult
 
   revalidatePath("/dashboard/settings");
   return { success: true };
+  });
 }
 
 export async function updateUserRoleAction(
   userId: string,
   role: UserRole
 ): Promise<ActionResult> {
+  return runLoggedMutation("updateUserRoleAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.USERS_WRITE);
 
@@ -190,9 +273,11 @@ export async function updateUserRoleAction(
   await User.findByIdAndUpdate(userId, { role });
   revalidatePath("/dashboard/settings");
   return { success: true };
+  });
 }
 
 export async function deleteUserAction(userId: string): Promise<ActionResult> {
+  return runLoggedMutation("deleteUserAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.USERS_DELETE);
 
@@ -204,14 +289,18 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
   await User.findByIdAndDelete(userId);
   revalidatePath("/dashboard/settings");
   return { success: true };
+  });
 }
 
 export async function getRoles() {
+  return runLoggedQuery("getRoles", async () => {
   await connectDB();
   return Role.find().lean();
+  }, []);
 }
 
 export async function updateProfileAction(formData: FormData): Promise<ActionResult> {
+  return runLoggedMutation("updateProfileAction", async () => {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return { success: false, error: "Not authenticated" };
 
@@ -249,11 +338,14 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
   await user.save();
   revalidatePath("/dashboard/profile");
   return { success: true };
+  });
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
+  return runLoggedQuery("getUnreadNotificationCount", async () => {
   const user = await getSessionUser();
   if (!user) return 0;
   const { getUnreadCount } = await import("@/lib/services/notification.service");
   return getUnreadCount(user.id);
+  }, 0);
 }

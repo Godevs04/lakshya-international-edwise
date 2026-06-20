@@ -74,7 +74,11 @@ export default async function StudentDetailPage({
                 email: partner.email,
               }
             : null,
-          metadata: student.metadata,
+          metadata: student.metadata
+            ? {
+                createdByName: student.metadata.createdByName,
+              }
+            : undefined,
           createdAt: student.createdAt,
         }}
       />

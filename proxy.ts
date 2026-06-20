@@ -13,5 +13,7 @@ export const config = {
     "/forgot-password",
     "/reset-password",
     "/verify-email",
+    "/verify-otp",
+    "/pending-approval",
   ],
 };

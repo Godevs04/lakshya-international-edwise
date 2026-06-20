@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import { getCloudinaryCloudName } from "@/lib/config/env";
+import { logger } from "@/lib/logger";
 
 function trim(value: string | undefined): string | undefined {
   return value?.trim();
@@ -24,26 +25,37 @@ export async function uploadToCloudinary(
 ): Promise<UploadResult> {
   const cloudName = getCloudinaryCloudName();
   if (!cloudName) {
+    logger.error("Cloudinary upload failed: not configured in .env.local");
     throw new Error("Cloudinary is not configured in .env.local");
   }
 
-  const result = await cloudinary.uploader.upload(file, {
-    folder: `nandhini-crm/${folder}`,
-    resource_type: resourceType,
-  });
+  try {
+    const result = await cloudinary.uploader.upload(file, {
+      folder: `nandhini-crm/${folder}`,
+      resource_type: resourceType,
+    });
 
-  return {
-    url: result.secure_url,
-    publicId: result.public_id,
-    mimeType: result.format
-      ? `${resourceType === "image" ? "image" : "application"}/${result.format}`
-      : "application/octet-stream",
-  };
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      mimeType: result.format
+        ? `${resourceType === "image" ? "image" : "application"}/${result.format}`
+        : "application/octet-stream",
+    };
+  } catch (error) {
+    logger.error("Cloudinary upload failed", error);
+    throw error;
+  }
 }
 
 export async function deleteFromCloudinary(publicId: string): Promise<void> {
   if (!getCloudinaryCloudName()) return;
-  await cloudinary.uploader.destroy(publicId);
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    logger.error("Cloudinary delete failed", error);
+    throw error;
+  }
 }
 
 export function getCloudinaryUploadUrl(): string {

@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
 import { getDefaultSettings } from "@/lib/config/app-defaults";
+import { logger } from "@/lib/logger";
 import type { AppSettings } from "@/types";
 
 export async function getAppConfig(): Promise<AppSettings> {
@@ -32,7 +33,8 @@ export async function getAppConfig(): Promise<AppSettings> {
       modules: allModulesDisabled ? envDefaults.modules : modules,
       sessionExpiryHours: settings.sessionExpiryHours ?? envDefaults.sessionExpiryHours,
     };
-  } catch {
+  } catch (error) {
+    logger.error("Failed to load app config from database", error);
     return {
       company: envDefaults.company,
       theme: envDefaults.theme,

@@ -12,6 +12,7 @@ import { partnerSchema } from "@/lib/validations/schemas";
 import { sanitizeText } from "@/lib/utils/sanitize";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
+import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 
 export async function getPartners(params: {
   page?: number;
@@ -19,6 +20,7 @@ export async function getPartners(params: {
   search?: string;
   status?: string;
 }): Promise<PaginatedResult<PartnerListItem>> {
+  return runLoggedQuery("getPartners", async () => {
   await connectDB();
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 10;
@@ -58,26 +60,34 @@ export async function getPartners(params: {
     pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
+  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
 }
 
 export async function getPartnerById(id: string) {
+  return runLoggedQuery("getPartnerById", async () => {
   await connectDB();
   return Partner.findById(id).lean();
+  }, null);
 }
 
 export async function getPartnerStudents(partnerId: string) {
+  return runLoggedQuery("getPartnerStudents", async () => {
   await connectDB();
   return Student.find({ partnerId }).sort({ createdAt: -1 }).limit(20).lean();
+  }, []);
 }
 
 export async function getPartnersList() {
+  return runLoggedQuery("getPartnersList", async () => {
   await connectDB();
   return Partner.find({ status: "active" }).select("companyName").sort({ companyName: 1 }).lean();
+  }, []);
 }
 
 export async function createPartnerAction(
   formData: FormData
 ): Promise<ActionResult<{ id: string }>> {
+  return runLoggedMutation("createPartnerAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
@@ -122,12 +132,14 @@ export async function createPartnerAction(
 
   revalidatePath("/dashboard/partners");
   return { success: true, data: { id: partner._id.toString() } };
+  });
 }
 
 export async function updatePartnerAction(
   id: string,
   formData: FormData
 ): Promise<ActionResult> {
+  return runLoggedMutation("updatePartnerAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
@@ -178,9 +190,11 @@ export async function updatePartnerAction(
   revalidatePath("/dashboard/partners");
   revalidatePath(`/dashboard/partners/${id}`);
   return { success: true };
+  });
 }
 
 export async function deletePartnerAction(id: string): Promise<ActionResult> {
+  return runLoggedMutation("deletePartnerAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.PARTNERS_DELETE);
 
@@ -199,9 +213,11 @@ export async function deletePartnerAction(id: string): Promise<ActionResult> {
 
   revalidatePath("/dashboard/partners");
   return { success: true };
+  });
 }
 
 export async function getPartnerAnalytics(partnerId: string) {
+  return runLoggedQuery("getPartnerAnalytics", async () => {
   await connectDB();
   const partner = await Partner.findById(partnerId).lean();
   if (!partner) return null;
@@ -223,4 +239,5 @@ export async function getPartnerAnalytics(partnerId: string) {
     statusCounts,
     disbursed,
   };
+  }, null);
 }

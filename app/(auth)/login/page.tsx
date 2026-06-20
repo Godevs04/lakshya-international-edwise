@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GlassCard } from "@/components/cards/glass-card";
+import { validateLoginAction } from "@/lib/actions/auth.actions";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,11 +20,29 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
+      const validation = await validateLoginAction(email, password);
+      if (!validation.success) {
+        if (validation.code === "UNVERIFIED") {
+          toast.error(validation.error);
+          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        if (validation.code === "PENDING") {
+          toast.info(validation.error);
+          router.push("/pending-approval");
+          return;
+        }
+        toast.error(validation.error ?? "Invalid email or password");
+        return;
+      }
+
       const result = await signIn("credentials", {
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
+        email,
+        password,
         rememberMe: formData.get("rememberMe") ? "true" : "false",
         redirect: false,
       });
@@ -75,7 +94,7 @@ export default function LoginPage() {
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Link href="/register" className="text-primary hover:underline">
-          Register
+          Request access
         </Link>
       </p>
     </GlassCard>

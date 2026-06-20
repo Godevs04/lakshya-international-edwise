@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import "./load-env";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
@@ -13,7 +14,7 @@ async function seed() {
   try {
     getMongoUri();
   } catch {
-    console.error("MONGODB_URI is required in .env.local");
+    logger.error("MONGODB_URI is required in .env.local");
     process.exit(1);
   }
 
@@ -21,12 +22,12 @@ async function seed() {
   const adminPassword = process.env.SEED_ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
-    console.error("SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD are required in .env.local");
+    logger.error("SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD are required in .env.local");
     process.exit(1);
   }
 
   await connectDB();
-  console.log("Connected to MongoDB");
+  logger.info("Connected to MongoDB");
 
   for (const roleName of Object.keys(ROLE_PERMISSIONS) as UserRole[]) {
     await Role.findOneAndUpdate(
@@ -38,13 +39,13 @@ async function seed() {
       },
       { upsert: true, returnDocument: "after" }
     );
-    console.log(`Role seeded: ${roleName}`);
+    logger.info(`Role seeded: ${roleName}`);
   }
 
   const settingsCount = await Settings.countDocuments();
   if (settingsCount === 0) {
     await Settings.create(getDefaultSettings());
-    console.log("Default settings created from .env.local");
+    logger.info("Default settings created from .env.local");
   }
 
   const existingAdmin = await User.findOne({ email: adminEmail.toLowerCase() });
@@ -58,16 +59,16 @@ async function seed() {
       isVerified: true,
       status: "active",
     });
-    console.log(`Super Admin created: ${adminEmail}`);
+    logger.info(`Super Admin created: ${adminEmail}`);
   } else {
-    console.log("Super Admin already exists");
+    logger.info("Super Admin already exists");
   }
 
-  console.log("Seed completed successfully");
+  logger.info("Seed completed successfully");
   process.exit(0);
 }
 
 seed().catch((err) => {
-  console.error("Seed failed:", err);
+  logger.error("Seed failed", err);
   process.exit(1);
 });

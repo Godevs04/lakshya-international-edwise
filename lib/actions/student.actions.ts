@@ -16,6 +16,7 @@ import { generateStudentId } from "@/lib/utils/format";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Types } from "mongoose";
+import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 
 export async function getStudents(params: {
   page?: number;
@@ -28,6 +29,7 @@ export async function getStudents(params: {
   course?: string;
   bank?: string;
 }): Promise<PaginatedResult<StudentListItem>> {
+  return runLoggedQuery("getStudents", async () => {
   await connectDB();
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 10;
@@ -80,16 +82,20 @@ export async function getStudents(params: {
     pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
+  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
 }
 
 export async function getStudentById(id: string) {
+  return runLoggedQuery("getStudentById", async () => {
   await connectDB();
   return Student.findById(id).populate("partnerId").lean();
+  }, null);
 }
 
 export async function createStudentAction(
   formData: FormData
 ): Promise<ActionResult<{ id: string }>> {
+  return runLoggedMutation("createStudentAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
@@ -168,12 +174,14 @@ export async function createStudentAction(
   revalidatePath("/dashboard/students");
   revalidatePath("/dashboard/overview");
   return { success: true, data: { id: student._id.toString() } };
+  });
 }
 
 export async function updateStudentAction(
   id: string,
   formData: FormData
 ): Promise<ActionResult> {
+  return runLoggedMutation("updateStudentAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
@@ -247,9 +255,11 @@ export async function updateStudentAction(
   revalidatePath("/dashboard/students");
   revalidatePath(`/dashboard/students/${id}`);
   return { success: true };
+  });
 }
 
 export async function deleteStudentAction(id: string): Promise<ActionResult> {
+  return runLoggedMutation("deleteStudentAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
 
@@ -270,6 +280,7 @@ export async function deleteStudentAction(id: string): Promise<ActionResult> {
 
   revalidatePath("/dashboard/students");
   return { success: true };
+  });
 }
 
 export async function bulkUpdateStudentsAction(
@@ -277,6 +288,7 @@ export async function bulkUpdateStudentsAction(
   action: "delete" | "assign_partner" | "change_status",
   value?: string
 ): Promise<ActionResult> {
+  return runLoggedMutation("bulkUpdateStudentsAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
@@ -301,12 +313,14 @@ export async function bulkUpdateStudentsAction(
 
   revalidatePath("/dashboard/students");
   return { success: true };
+  });
 }
 
 export async function addStudentNoteAction(
   studentId: string,
   formData: FormData
 ): Promise<ActionResult> {
+  return runLoggedMutation("addStudentNoteAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
@@ -333,12 +347,14 @@ export async function addStudentNoteAction(
 
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };
+  });
 }
 
 export async function addStudentDocumentAction(
   studentId: string,
   doc: { name: string; url: string; publicId: string; mimeType: string }
 ): Promise<ActionResult> {
+  return runLoggedMutation("addStudentDocumentAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
@@ -355,4 +371,5 @@ export async function addStudentDocumentAction(
 
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };
+  });
 }

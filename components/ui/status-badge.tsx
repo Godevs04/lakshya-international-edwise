@@ -2,22 +2,26 @@ import { cn } from "@/lib/utils";
 import {
   STUDENT_STATUS_CONFIG,
   PARTNER_STATUS_CONFIG,
+  USER_STATUS_CONFIG,
   type StudentStatus,
   type PartnerStatus,
+  type UserStatus,
 } from "@/lib/constants/statuses";
 
 interface StatusBadgeProps {
-  status: StudentStatus | PartnerStatus | string;
-  type?: "student" | "partner";
+  status: StudentStatus | PartnerStatus | UserStatus | string;
+  type?: "student" | "partner" | "user";
   className?: string;
   size?: "sm" | "md";
 }
 
 export function StatusBadge({ status, type = "student", className, size = "sm" }: StatusBadgeProps) {
   const config =
-    type === "partner"
-      ? PARTNER_STATUS_CONFIG[status as PartnerStatus]
-      : STUDENT_STATUS_CONFIG[status as StudentStatus];
+    type === "user"
+      ? USER_STATUS_CONFIG[status as UserStatus]
+      : type === "partner"
+        ? PARTNER_STATUS_CONFIG[status as PartnerStatus]
+        : STUDENT_STATUS_CONFIG[status as StudentStatus];
 
   if (!config) {
     return (

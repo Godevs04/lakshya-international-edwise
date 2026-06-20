@@ -31,7 +31,7 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
-export const USER_STATUSES = ["active", "inactive", "suspended"] as const;
+export const USER_STATUSES = ["pending", "active", "inactive", "suspended"] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
 
 export interface StatusConfig {
@@ -90,6 +90,29 @@ export const STUDENT_STATUS_CONFIG: Record<StudentStatus, StatusConfig> = {
     label: "Closed",
     color: "bg-slate-400/12 text-slate-500 border-slate-400/25 dark:text-slate-400",
     dotColor: "bg-slate-400",
+  },
+};
+
+export const USER_STATUS_CONFIG: Record<UserStatus, StatusConfig> = {
+  pending: {
+    label: "Pending Approval",
+    color: "bg-[#F59E0B]/12 text-[#F59E0B] border-[#F59E0B]/25",
+    dotColor: "bg-[#F59E0B]",
+  },
+  active: {
+    label: "Active",
+    color: "bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/25",
+    dotColor: "bg-[#22C55E]",
+  },
+  inactive: {
+    label: "Inactive",
+    color: "bg-slate-400/12 text-slate-500 border-slate-400/25 dark:text-slate-400",
+    dotColor: "bg-slate-400",
+  },
+  suspended: {
+    label: "Suspended",
+    color: "bg-[#EF4444]/12 text-[#EF4444] border-[#EF4444]/25",
+    dotColor: "bg-[#EF4444]",
   },
 };
 
