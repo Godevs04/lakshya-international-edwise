@@ -1,0 +1,204 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
+import { connectDB } from "@/lib/db/mongoose";
+import { Settings } from "@/models/Settings";
+import { getDefaultSettings } from "@/lib/config/app-defaults";
+import { User } from "@/models/User";
+import { Role } from "@/models/Role";
+import { getSessionUser } from "@/lib/auth/auth";
+import { requirePermission } from "@/lib/auth/permissions";
+import { PERMISSIONS } from "@/lib/constants/permissions";
+import { settingsSchema, profileSchema } from "@/lib/validations/schemas";
+import type { ActionResult, AppSettings } from "@/types";
+import type { UserRole } from "@/types";
+
+export async function getSettings(): Promise<AppSettings> {
+  await connectDB();
+  let settings = await Settings.findOne().lean();
+  if (!settings) {
+    const created = await Settings.create(getDefaultSettings());
+    settings = created.toObject();
+  }
+  return {
+    company: settings.company,
+    theme: settings.theme,
+    modules: settings.modules,
+    sessionExpiryHours: settings.sessionExpiryHours,
+  };
+}
+
+export async function updateSettingsAction(
+  formData: FormData
+): Promise<ActionResult> {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.SETTINGS_WRITE);
+
+  const raw = Object.fromEntries(formData.entries());
+  const parsed = settingsSchema.safeParse({
+    ...raw,
+    modulesStudents: raw.modulesStudents === "true",
+    modulesPartners: raw.modulesPartners === "true",
+    modulesApplications: raw.modulesApplications === "true",
+    modulesReports: raw.modulesReports === "true",
+    modulesAnalytics: raw.modulesAnalytics === "true",
+  });
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+  }
+
+  await connectDB();
+  const data = parsed.data;
+
+  await Settings.findOneAndUpdate(
+    {},
+    {
+      company: {
+        name: data.companyName,
+        email: data.companyEmail,
+        phone: data.companyPhone,
+        address: data.companyAddress,
+        logo: data.companyLogo,
+      },
+      theme: {
+        primary: data.themePrimary,
+        accent: data.themeAccent,
+        radius: data.themeRadius,
+        mode: data.themeMode,
+      },
+      modules: {
+        students: data.modulesStudents ?? true,
+        partners: data.modulesPartners ?? true,
+        applications: data.modulesApplications ?? true,
+        reports: data.modulesReports ?? true,
+        analytics: data.modulesAnalytics ?? true,
+      },
+      sessionExpiryHours: data.sessionExpiryHours,
+    },
+    { upsert: true }
+  );
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function getUsers() {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_READ);
+
+  await connectDB();
+  return User.find().select("-passwordHash -resetToken -verifyToken").sort({ createdAt: -1 }).lean();
+}
+
+export async function createUserAction(formData: FormData): Promise<ActionResult> {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_WRITE);
+
+  const email = formData.get("email") as string;
+  const name = formData.get("name") as string;
+  const password = formData.get("password") as string;
+  const role = formData.get("role") as UserRole;
+
+  if (!email || !name || !password) {
+    return { success: false, error: "All fields are required" };
+  }
+
+  await connectDB();
+  const existing = await User.findOne({ email: email.toLowerCase() });
+  if (existing) return { success: false, error: "Email already exists" };
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  await User.create({
+    email: email.toLowerCase(),
+    name,
+    passwordHash,
+    role: role ?? "staff",
+    isVerified: true,
+    status: "active",
+  });
+
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
+export async function updateUserRoleAction(
+  userId: string,
+  role: UserRole
+): Promise<ActionResult> {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_WRITE);
+
+  await connectDB();
+  await User.findByIdAndUpdate(userId, { role });
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
+export async function deleteUserAction(userId: string): Promise<ActionResult> {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.USERS_DELETE);
+
+  if (user?.id === userId) {
+    return { success: false, error: "Cannot delete your own account" };
+  }
+
+  await connectDB();
+  await User.findByIdAndDelete(userId);
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
+export async function getRoles() {
+  await connectDB();
+  return Role.find().lean();
+}
+
+export async function updateProfileAction(formData: FormData): Promise<ActionResult> {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) return { success: false, error: "Not authenticated" };
+
+  const parsed = profileSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+  }
+
+  await connectDB();
+  const user = await User.findById(sessionUser.id);
+  if (!user) return { success: false, error: "User not found" };
+
+  user.name = parsed.data.name;
+  user.email = parsed.data.email.toLowerCase();
+
+  if (parsed.data.newPassword) {
+    if (!parsed.data.currentPassword) {
+      return { success: false, error: "Current password is required" };
+    }
+    const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
+    if (!valid) return { success: false, error: "Current password is incorrect" };
+    if (parsed.data.newPassword !== parsed.data.confirmPassword) {
+      return { success: false, error: "Passwords don't match" };
+    }
+    user.passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
+  }
+
+  await user.save();
+  revalidatePath("/dashboard/profile");
+  return { success: true };
+}
+
+export async function getUnreadNotificationCount(): Promise<number> {
+  const user = await getSessionUser();
+  if (!user) return 0;
+  const { getUnreadCount } = await import("@/lib/services/notification.service");
+  return getUnreadCount(user.id);
+}

@@ -1,0 +1,84 @@
+import type { UserRole } from "@/types";
+
+export const PERMISSIONS = {
+  STUDENTS_READ: "students:read",
+  STUDENTS_WRITE: "students:write",
+  STUDENTS_DELETE: "students:delete",
+  STUDENTS_EXPORT: "students:export",
+  PARTNERS_READ: "partners:read",
+  PARTNERS_WRITE: "partners:write",
+  PARTNERS_DELETE: "partners:delete",
+  APPLICATIONS_READ: "applications:read",
+  APPLICATIONS_WRITE: "applications:write",
+  REPORTS_READ: "reports:read",
+  REPORTS_EXPORT: "reports:export",
+  ANALYTICS_READ: "analytics:read",
+  SETTINGS_READ: "settings:read",
+  SETTINGS_WRITE: "settings:write",
+  USERS_READ: "users:read",
+  USERS_WRITE: "users:write",
+  USERS_DELETE: "users:delete",
+  ROLES_MANAGE: "roles:manage",
+  AUDIT_READ: "audit:read",
+} as const;
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+export const ROLE_PERMISSIONS: Record<UserRole, Permission[] | ["*"]> = {
+  super_admin: ["*"],
+  admin: [
+    PERMISSIONS.STUDENTS_READ,
+    PERMISSIONS.STUDENTS_WRITE,
+    PERMISSIONS.STUDENTS_DELETE,
+    PERMISSIONS.STUDENTS_EXPORT,
+    PERMISSIONS.PARTNERS_READ,
+    PERMISSIONS.PARTNERS_WRITE,
+    PERMISSIONS.PARTNERS_DELETE,
+    PERMISSIONS.APPLICATIONS_READ,
+    PERMISSIONS.APPLICATIONS_WRITE,
+    PERMISSIONS.REPORTS_READ,
+    PERMISSIONS.REPORTS_EXPORT,
+    PERMISSIONS.ANALYTICS_READ,
+    PERMISSIONS.SETTINGS_READ,
+    PERMISSIONS.SETTINGS_WRITE,
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.USERS_WRITE,
+    PERMISSIONS.AUDIT_READ,
+  ],
+  manager: [
+    PERMISSIONS.STUDENTS_READ,
+    PERMISSIONS.STUDENTS_WRITE,
+    PERMISSIONS.STUDENTS_EXPORT,
+    PERMISSIONS.PARTNERS_READ,
+    PERMISSIONS.PARTNERS_WRITE,
+    PERMISSIONS.APPLICATIONS_READ,
+    PERMISSIONS.APPLICATIONS_WRITE,
+    PERMISSIONS.REPORTS_READ,
+    PERMISSIONS.REPORTS_EXPORT,
+    PERMISSIONS.ANALYTICS_READ,
+    PERMISSIONS.SETTINGS_READ,
+  ],
+  staff: [
+    PERMISSIONS.STUDENTS_READ,
+    PERMISSIONS.STUDENTS_WRITE,
+    PERMISSIONS.PARTNERS_READ,
+    PERMISSIONS.APPLICATIONS_READ,
+    PERMISSIONS.APPLICATIONS_WRITE,
+    PERMISSIONS.REPORTS_READ,
+  ],
+  viewer: [
+    PERMISSIONS.STUDENTS_READ,
+    PERMISSIONS.PARTNERS_READ,
+    PERMISSIONS.APPLICATIONS_READ,
+    PERMISSIONS.REPORTS_READ,
+    PERMISSIONS.ANALYTICS_READ,
+  ],
+};
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  super_admin: "Super Admin",
+  admin: "Admin",
+  manager: "Manager",
+  staff: "Staff",
+  viewer: "Viewer",
+};

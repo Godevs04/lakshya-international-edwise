@@ -1,0 +1,220 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { GlassCard } from "@/components/cards/glass-card";
+import { STUDENT_STATUSES } from "@/lib/constants/statuses";
+import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
+
+interface PartnerOption {
+  _id: string;
+  companyName: string;
+}
+
+interface StudentFormProps {
+  partners: PartnerOption[];
+  initialData?: Record<string, string | number | undefined>;
+  studentId?: string;
+  mode: "create" | "edit";
+}
+
+export function StudentForm({ partners, initialData, studentId, mode }: StudentFormProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+
+    const result =
+      mode === "create"
+        ? await createStudentAction(formData)
+        : await updateStudentAction(studentId!, formData);
+
+    if (result.success) {
+      toast.success(mode === "create" ? "Student created" : "Student updated");
+      router.push(
+        mode === "create"
+          ? `/dashboard/students/${result.data?.id}`
+          : `/dashboard/students/${studentId}`
+      );
+      router.refresh();
+    } else {
+      toast.error(result.error ?? "Something went wrong");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <GlassCard className="p-6">
+        <h3 className="mb-4 text-sm font-semibold">Personal Information</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">First Name *</Label>
+            <Input id="firstName" name="firstName" defaultValue={initialData?.firstName as string} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name *</Label>
+            <Input id="lastName" name="lastName" defaultValue={initialData?.lastName as string} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="gender">Gender</Label>
+            <Select name="gender" defaultValue={(initialData?.gender as string) ?? ""}>
+              <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Input id="dob" name="dob" type="date" defaultValue={initialData?.dob as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input id="phone" name="phone" defaultValue={initialData?.phone as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <Input id="whatsapp" name="whatsapp" defaultValue={initialData?.whatsapp as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" type="email" defaultValue={initialData?.email as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="photo">Photo URL</Label>
+            <Input id="photo" name="photo" defaultValue={initialData?.photo as string} />
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h3 className="mb-4 text-sm font-semibold">Address</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="addressLine">Address</Label>
+            <Input id="addressLine" name="addressLine" defaultValue={initialData?.addressLine as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="city">City</Label>
+            <Input id="city" name="city" defaultValue={initialData?.city as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="state">State</Label>
+            <Input id="state" name="state" defaultValue={initialData?.state as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pincode">Pincode</Label>
+            <Input id="pincode" name="pincode" defaultValue={initialData?.pincode as string} />
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h3 className="mb-4 text-sm font-semibold">Documents & Education</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="aadhaar">Aadhaar</Label>
+            <Input id="aadhaar" name="aadhaar" defaultValue={initialData?.aadhaar as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pan">PAN</Label>
+            <Input id="pan" name="pan" defaultValue={initialData?.pan as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="college">College</Label>
+            <Input id="college" name="college" defaultValue={initialData?.college as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="course">Course</Label>
+            <Input id="course" name="course" defaultValue={initialData?.course as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="year">Year</Label>
+            <Input id="year" name="year" defaultValue={initialData?.year as string} />
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h3 className="mb-4 text-sm font-semibold">Loan Details</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="loanRequested">Loan Amount Requested</Label>
+            <Input id="loanRequested" name="loanRequested" type="number" defaultValue={initialData?.loanRequested as number} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="loanSanctioned">Sanctioned Amount</Label>
+            <Input id="loanSanctioned" name="loanSanctioned" type="number" defaultValue={initialData?.loanSanctioned as number} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="loanDisbursed">Disbursed Amount</Label>
+            <Input id="loanDisbursed" name="loanDisbursed" type="number" defaultValue={initialData?.loanDisbursed as number} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="interest">Interest %</Label>
+            <Input id="interest" name="interest" type="number" defaultValue={initialData?.interest as number} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bankName">Bank Name</Label>
+            <Input id="bankName" name="bankName" defaultValue={initialData?.bankName as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="applicationNumber">Application Number</Label>
+            <Input id="applicationNumber" name="applicationNumber" defaultValue={initialData?.applicationNumber as string} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="partnerId">Partner</Label>
+            <Select name="partnerId" defaultValue={(initialData?.partnerId as string) ?? ""}>
+              <SelectTrigger><SelectValue placeholder="Select partner" /></SelectTrigger>
+              <SelectContent>
+                {partners.map((p) => (
+                  <SelectItem key={p._id} value={p._id}>{p.companyName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select name="status" defaultValue={(initialData?.status as string) ?? "new"}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {STUDENT_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="remarks">Remarks</Label>
+            <Textarea id="remarks" name="remarks" defaultValue={initialData?.remarks as string} />
+          </div>
+        </div>
+      </GlassCard>
+
+      <div className="flex gap-3">
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving..." : mode === "create" ? "Create Student" : "Update Student"}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+      </div>
+    </form>
+  );
+}
