@@ -58,7 +58,7 @@ export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
               transition={{ delay: 0.2 }}
               className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl"
             >
-              {greeting}, {firstName} 👋
+              {greeting}, {firstName}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, x: -20 }}

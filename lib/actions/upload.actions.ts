@@ -2,7 +2,10 @@
 
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
-import { PERMISSIONS } from "@/lib/constants/permissions";
+import {
+  isUploadFolder,
+  UPLOAD_FOLDER_PERMISSIONS,
+} from "@/lib/constants/upload-folders";
 import { getSignedUploadParams, type SignedUploadParams } from "@/lib/services/upload.service";
 import { runLoggedMutation } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
@@ -12,7 +15,12 @@ export async function getUploadSignatureAction(
 ): Promise<ActionResult<SignedUploadParams>> {
   return runLoggedMutation("getUploadSignatureAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    if (!isUploadFolder(folder)) {
+      return { success: false, error: "Invalid upload folder" };
+    }
+
+    requirePermission(user, UPLOAD_FOLDER_PERMISSIONS[folder]);
 
     const params = getSignedUploadParams(folder);
     if (!params) {

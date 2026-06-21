@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,16 +31,16 @@ export function LoginForm({ allowRegistration = true }: LoginFormProps) {
       const validation = await validateLoginAction(email, password);
       if (!validation.success) {
         if (validation.code === "UNVERIFIED") {
-          toast.error(validation.error);
+          notify.error(validation.error ?? "Please verify your email to continue.");
           router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
           return;
         }
         if (validation.code === "PENDING") {
-          toast.info(validation.error);
+          notify.info(validation.error ?? "Your account is pending approval.");
           router.push("/pending-approval");
           return;
         }
-        toast.error(validation.error ?? "Invalid email or password");
+        notify.error(validation.error ?? "Invalid email or password");
         return;
       }
 
@@ -52,9 +52,11 @@ export function LoginForm({ allowRegistration = true }: LoginFormProps) {
       });
 
       if (result?.error) {
-        toast.error("Invalid email or password");
+        notify.error("Invalid email or password");
       } else {
-        toast.success("Welcome back!");
+        notify.success("Welcome back", {
+          description: "Signed in to your workspace.",
+        });
         router.push("/dashboard/overview");
         router.refresh();
       }

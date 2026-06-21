@@ -65,7 +65,7 @@ export default async function OverviewPage() {
   return (
     <div className="space-y-8">
       <DashboardHero
-        greeting={getGreeting(session?.user?.name ?? "User")}
+        greeting={getGreeting()}
         userName={session?.user?.name ?? "User"}
       />
 

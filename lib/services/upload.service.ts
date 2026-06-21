@@ -115,6 +115,21 @@ export async function deleteFromCloudinary(publicId: string): Promise<void> {
   }
 }
 
+export function validateOptionalCloudinaryUrl(
+  url: string | undefined,
+  folder: string
+): { valid: true } | { valid: false; error: string } {
+  const trimmed = url?.trim();
+  if (!trimmed) return { valid: true };
+  if (!isValidCloudinaryUrl(trimmed)) {
+    return { valid: false, error: "Please upload the file using the upload button" };
+  }
+  if (!trimmed.includes(getUploadFolder(folder))) {
+    return { valid: false, error: "Invalid upload path for this field" };
+  }
+  return { valid: true };
+}
+
 export function getCloudinaryUploadUrl(): string {
   return `https://api.cloudinary.com/v1_1/${getCloudinaryCloudName()}/auto/upload`;
 }

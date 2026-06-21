@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GlassCard } from "@/components/cards/glass-card";
+import { FormSection } from "@/components/forms/form-section";
+import { ImageUploadField } from "@/components/forms/image-upload-field";
 import { STUDENT_STATUSES } from "@/lib/constants/statuses";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
 
@@ -33,15 +34,9 @@ interface StudentFormProps {
 export function StudentForm({ partners, initialData, studentId, mode }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [gender, setGender] = useState<string | undefined>(
-    (initialData?.gender as string) || undefined
-  );
-  const [partnerId, setPartnerId] = useState<string | undefined>(
-    (initialData?.partnerId as string) || undefined
-  );
-  const [status, setStatus] = useState<string>(
-    (initialData?.status as string) ?? "new"
-  );
+  const [gender, setGender] = useState((initialData?.gender as string) ?? "");
+  const [partnerId, setPartnerId] = useState((initialData?.partnerId as string) ?? "");
+  const [status, setStatus] = useState((initialData?.status as string) ?? "new");
 
   const selectedPartner = partners.find((p) => p._id === partnerId);
 
@@ -71,28 +66,50 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <GlassCard className="p-6">
-        <h3 className="mb-4 text-sm font-semibold">Personal Information</h3>
+      <FormSection
+        title="Required Fields"
+        description="Fields marked with * must be completed before saving."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name *</Label>
-            <Input id="firstName" name="firstName" defaultValue={initialData?.firstName as string} required />
+            <Input
+              id="firstName"
+              name="firstName"
+              defaultValue={initialData?.firstName as string}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastName">Last Name *</Label>
-            <Input id="lastName" name="lastName" defaultValue={initialData?.lastName as string} required />
+            <Input
+              id="lastName"
+              name="lastName"
+              defaultValue={initialData?.lastName as string}
+              required
+            />
           </div>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="Optional — Personal & Contact"
+        description="Additional profile details. All fields in this section are optional."
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <Select value={gender} onValueChange={(v) => setGender(v ?? undefined)}>
-              <SelectTrigger className="w-full"><SelectValue placeholder="Select gender" /></SelectTrigger>
+            <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <input type="hidden" name="gender" value={gender ?? ""} />
+            <input type="hidden" name="gender" value={gender} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
@@ -110,15 +127,22 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" defaultValue={initialData?.email as string} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="photo">Photo URL</Label>
-            <Input id="photo" name="photo" defaultValue={initialData?.photo as string} />
+          <div className="space-y-2 sm:col-span-2">
+            <ImageUploadField
+              name="photo"
+              label="Photo"
+              folder="students"
+              defaultValue={(initialData?.photo as string) ?? ""}
+              hint="JPEG, PNG, or WebP up to 10 MB."
+            />
           </div>
         </div>
-      </GlassCard>
+      </FormSection>
 
-      <GlassCard className="p-6">
-        <h3 className="mb-4 text-sm font-semibold">Address</h3>
+      <FormSection
+        title="Optional — Address"
+        description="Residential address details."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="addressLine">Address</Label>
@@ -137,19 +161,33 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Input id="pincode" name="pincode" defaultValue={initialData?.pincode as string} />
           </div>
         </div>
-      </GlassCard>
+      </FormSection>
 
-      <GlassCard className="p-6">
-        <h3 className="mb-4 text-sm font-semibold">Documents & Education</h3>
+      <FormSection
+        title="Optional — Documents & Education"
+        description="Identity and academic information."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="aadhaar">Aadhaar</Label>
-            <Input id="aadhaar" name="aadhaar" defaultValue={initialData?.aadhaar as string} placeholder="Leave blank to keep current" />
-            <p className="text-xs text-muted-foreground">Masked values are shown for security. Enter a new number to replace.</p>
+            <Input
+              id="aadhaar"
+              name="aadhaar"
+              defaultValue={initialData?.aadhaar as string}
+              placeholder="Leave blank to keep current"
+            />
+            <p className="text-xs text-muted-foreground">
+              Masked values are shown for security. Enter a new number to replace.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="pan">PAN</Label>
-            <Input id="pan" name="pan" defaultValue={initialData?.pan as string} placeholder="Leave blank to keep current" />
+            <Input
+              id="pan"
+              name="pan"
+              defaultValue={initialData?.pan as string}
+              placeholder="Leave blank to keep current"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="college">College</Label>
@@ -164,26 +202,48 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Input id="year" name="year" defaultValue={initialData?.year as string} />
           </div>
         </div>
-      </GlassCard>
+      </FormSection>
 
-      <GlassCard className="p-6">
-        <h3 className="mb-4 text-sm font-semibold">Loan Details</h3>
+      <FormSection
+        title="Optional — Loan & Application"
+        description="Loan amounts, partner assignment, and application status."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="loanRequested">Loan Amount Requested</Label>
-            <Input id="loanRequested" name="loanRequested" type="number" defaultValue={initialData?.loanRequested as number} />
+            <Input
+              id="loanRequested"
+              name="loanRequested"
+              type="number"
+              defaultValue={initialData?.loanRequested as number}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="loanSanctioned">Sanctioned Amount</Label>
-            <Input id="loanSanctioned" name="loanSanctioned" type="number" defaultValue={initialData?.loanSanctioned as number} />
+            <Input
+              id="loanSanctioned"
+              name="loanSanctioned"
+              type="number"
+              defaultValue={initialData?.loanSanctioned as number}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="loanDisbursed">Disbursed Amount</Label>
-            <Input id="loanDisbursed" name="loanDisbursed" type="number" defaultValue={initialData?.loanDisbursed as number} />
+            <Input
+              id="loanDisbursed"
+              name="loanDisbursed"
+              type="number"
+              defaultValue={initialData?.loanDisbursed as number}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="interest">Interest %</Label>
-            <Input id="interest" name="interest" type="number" defaultValue={initialData?.interest as number} />
+            <Input
+              id="interest"
+              name="interest"
+              type="number"
+              defaultValue={initialData?.interest as number}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="bankName">Bank Name</Label>
@@ -191,11 +251,15 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
           </div>
           <div className="space-y-2">
             <Label htmlFor="applicationNumber">Application Number</Label>
-            <Input id="applicationNumber" name="applicationNumber" defaultValue={initialData?.applicationNumber as string} />
+            <Input
+              id="applicationNumber"
+              name="applicationNumber"
+              defaultValue={initialData?.applicationNumber as string}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="partnerId">Partner</Label>
-            <Select value={partnerId} onValueChange={(v) => setPartnerId(v ?? undefined)}>
+            <Select value={partnerId} onValueChange={(v) => setPartnerId(v ?? "")}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select partner">
                   {selectedPartner?.companyName}
@@ -203,19 +267,25 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
               </SelectTrigger>
               <SelectContent>
                 {partners.map((p) => (
-                  <SelectItem key={p._id} value={p._id}>{p.companyName}</SelectItem>
+                  <SelectItem key={p._id} value={p._id}>
+                    {p.companyName}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <input type="hidden" name="partnerId" value={partnerId ?? ""} />
+            <input type="hidden" name="partnerId" value={partnerId} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v ?? "new")}>
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {STUDENT_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s.replace(/_/g, " ")}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -226,13 +296,15 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Textarea id="remarks" name="remarks" defaultValue={initialData?.remarks as string} />
           </div>
         </div>
-      </GlassCard>
+      </FormSection>
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : mode === "create" ? "Create Student" : "Update Student"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          Cancel
+        </Button>
       </div>
     </form>
   );

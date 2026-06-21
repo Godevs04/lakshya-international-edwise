@@ -16,11 +16,11 @@ export function formatDateTime(date: Date | string): string {
   return format(new Date(date), "dd MMM yyyy, hh:mm a");
 }
 
-export function getGreeting(name: string): string {
+export function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return `Good Morning, ${name}`;
-  if (hour < 17) return `Good Afternoon, ${name}`;
-  return `Good Evening, ${name}`;
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
 }
 
 export type DateRangePreset = "daily" | "weekly" | "monthly" | "yearly";

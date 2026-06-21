@@ -14,6 +14,7 @@ import { settingsSchema, profileSchema } from "@/lib/validations/schemas";
 import type { ActionResult, AppSettings } from "@/types";
 import type { UserRole } from "@/types";
 import { runLoggedMutation, runLoggedQuery } from "@/lib/action-utils";
+import { validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
 
 export async function getSettings(): Promise<AppSettings> {
   return runLoggedQuery("getSettings", async () => {
@@ -81,6 +82,12 @@ export async function updateSettingsAction(
       return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
     }
     const data = parsed.data;
+
+    const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "settings");
+    if (!logoCheck.valid) {
+      return { success: false, error: logoCheck.error };
+    }
+
     await Settings.findOneAndUpdate(
       {},
       {

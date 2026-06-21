@@ -12,6 +12,7 @@ import { logActivity } from "@/lib/services/activity.service";
 import { partnerSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encryptSensitiveField, maskBankAccount } from "@/lib/utils/pii";
+import { validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
@@ -125,6 +126,11 @@ export async function createPartnerAction(
   await connectDB();
   const data = parsed.data;
 
+  const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "partners");
+  if (!logoCheck.valid) {
+    return { success: false, error: logoCheck.error };
+  }
+
   const partner = await Partner.create({
     companyName: sanitizeText(data.companyName),
     owner: data.owner ? sanitizeText(data.owner) : undefined,
@@ -181,6 +187,11 @@ export async function updatePartnerAction(
   const data = parsed.data;
   const existing = await Partner.findById(id);
   if (!existing) return { success: false, error: "Partner not found" };
+
+  const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "partners");
+  if (!logoCheck.valid) {
+    return { success: false, error: logoCheck.error };
+  }
 
   const partner = await Partner.findByIdAndUpdate(
     id,

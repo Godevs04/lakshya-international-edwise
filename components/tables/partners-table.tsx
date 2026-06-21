@@ -16,14 +16,12 @@ import { GlassCard } from "@/components/cards/glass-card";
 import { formatCurrency } from "@/lib/utils/format";
 import type { PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
-import { Plus } from "lucide-react";
 
 interface PartnersTableProps {
   data: PartnerListItem[];
   total: number;
   page: number;
   totalPages: number;
-  canWrite?: boolean;
 }
 
 export function PartnersTable({
@@ -31,19 +29,11 @@ export function PartnersTable({
   total,
   page,
   totalPages,
-  canWrite = false,
 }: PartnersTableProps) {
   const router = useRouter();
 
   return (
     <div className="space-y-4">
-      {canWrite && (
-        <GlassCard className="flex justify-end p-4">
-          <Link href="/dashboard/partners/new">
-            <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Partner</Button>
-          </Link>
-        </GlassCard>
-      )}
       <GlassCard className="overflow-hidden">
         <Table>
           <TableHeader>

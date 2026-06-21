@@ -36,7 +36,7 @@ import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { bulkUpdateStudentsAction } from "@/lib/actions/student.actions";
 import type { StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
-import { Plus, Trash2, Download } from "lucide-react";
+import { Trash2, Download } from "lucide-react";
 
 interface StudentsTableProps {
   data: StudentListItem[];
@@ -44,7 +44,6 @@ interface StudentsTableProps {
   page: number;
   pageSize: number;
   totalPages: number;
-  canWrite?: boolean;
   canDelete?: boolean;
   canExport?: boolean;
 }
@@ -54,7 +53,6 @@ export function StudentsTable({
   total,
   page,
   totalPages,
-  canWrite = false,
   canDelete = false,
   canExport = false,
 }: StudentsTableProps) {
@@ -210,11 +208,6 @@ export function StudentsTable({
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
               <Download className="mr-1 h-4 w-4" /> Export
             </Button>
-          )}
-          {canWrite && (
-            <Link href="/dashboard/students/new">
-              <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Student</Button>
-            </Link>
           )}
         </div>
       </div>

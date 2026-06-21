@@ -1,6 +1,19 @@
 import nodemailer from "nodemailer";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
 import { logger } from "@/lib/logger";
+import {
+  getEmailBranding,
+  renderEmailLayout,
+  renderGreeting,
+  renderMutedNote,
+  renderOtpBlock,
+  renderFeatureList,
+  renderInfoBox,
+  renderLinkFallback,
+  emailButton,
+  escapeHtml,
+  BRAND,
+} from "@/lib/services/email-templates";
 
 interface SendEmailParams {
   to: string;
@@ -63,19 +76,26 @@ export async function sendPasswordResetEmail(
   name: string,
   resetUrl: string
 ): Promise<boolean> {
-  const company = getDefaultCompanySettings().name;
+  const company = await getEmailBranding();
+  const bodyHtml = `
+    ${renderGreeting(name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      We received a request to reset the password associated with your ${escapeHtml(company.name)} CRM account. To proceed, please use the button below.
+    </p>
+    ${emailButton(resetUrl, "Reset Password")}
+    ${renderLinkFallback(resetUrl)}
+    ${renderMutedNote("This link is valid for <strong>1 hour</strong>. If you did not initiate this request, please disregard this email. No changes will be made to your account.")}`;
+
   return sendEmail({
     to: email,
-    subject: `Reset Your Password — ${company}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Password Reset Request</h2>
-        <p>Hi ${name},</p>
-        <p>Click the link below to reset your password. This link expires in 1 hour.</p>
-        <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #6366f1; color: white; text-decoration: none; border-radius: 8px;">Reset Password</a>
-        <p>If you didn't request this, please ignore this email.</p>
-      </div>
-    `,
+    subject: `Password Reset Request — ${company.name}`,
+    html: renderEmailLayout({
+      company,
+      preheader: "Action required: reset your CRM password",
+      title: "Password Reset Request",
+      subtitle: "Secure access to your enterprise dashboard",
+      bodyHtml,
+    }),
   });
 }
 
@@ -84,18 +104,31 @@ export async function sendVerificationEmail(
   name: string,
   verifyUrl: string
 ): Promise<boolean> {
-  const company = getDefaultCompanySettings().name;
+  const company = await getEmailBranding();
+  const bodyHtml = `
+    ${renderGreeting(name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      Thank you for registering with ${escapeHtml(company.name)}. To complete your account setup, please verify your email address.
+    </p>
+    ${emailButton(verifyUrl, "Verify Email Address")}
+    ${renderLinkFallback(verifyUrl)}
+    ${renderFeatureList([
+      "Confirm your registered email address",
+      "Proceed to secure onboarding",
+      "Access your assigned CRM workspace upon approval",
+    ])}
+    ${renderMutedNote("If you did not register for an account, no further action is required.")}`;
+
   return sendEmail({
     to: email,
-    subject: `Verify Your Email — ${company}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Email Verification</h2>
-        <p>Hi ${name},</p>
-        <p>Please verify your email address by clicking the link below.</p>
-        <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background: #6366f1; color: white; text-decoration: none; border-radius: 8px;">Verify Email</a>
-      </div>
-    `,
+    subject: `Email Verification — ${company.name}`,
+    html: renderEmailLayout({
+      company,
+      preheader: "Please verify your email address",
+      title: "Email Verification",
+      subtitle: "Complete your account registration",
+      bodyHtml,
+    }),
   });
 }
 
@@ -104,22 +137,30 @@ export async function sendOtpEmail(
   name: string,
   otp: string
 ): Promise<boolean> {
-  const company = getDefaultCompanySettings().name;
+  const company = await getEmailBranding();
+  const bodyHtml = `
+    ${renderGreeting(name)}
+    <p style="margin: 0 0 8px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      Thank you for your interest in joining ${escapeHtml(company.name)}. Please enter the verification code below to confirm your email address.
+    </p>
+    ${renderOtpBlock(otp)}
+    ${renderFeatureList([
+      "Code valid for 10 minutes only",
+      "Your request will enter the admin approval queue after verification",
+      "A confirmation email will be sent once your access is approved",
+    ])}
+    ${renderMutedNote(`For your security, never share this code with anyone. ${escapeHtml(company.name)} will never request your OTP via phone or unsolicited email.`)}`;
+
   return sendEmail({
     to: email,
-    subject: `Your verification code — ${company}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-        <h2 style="color: #6D5EF7;">Verify your email</h2>
-        <p>Hi ${name},</p>
-        <p>Use the one-time code below to verify your email address. This code expires in <strong>10 minutes</strong>.</p>
-        <div style="margin: 32px 0; text-align: center;">
-          <span style="display: inline-block; letter-spacing: 8px; font-size: 32px; font-weight: bold; color: #6D5EF7; background: #f4f3ff; padding: 16px 32px; border-radius: 12px;">${otp}</span>
-        </div>
-        <p style="color: #64748b; font-size: 14px;">After verification, your account will be placed in the approval queue. An administrator will review and onboard you to the CRM.</p>
-        <p style="color: #64748b; font-size: 14px;">If you did not request this, please ignore this email.</p>
-      </div>
-    `,
+    subject: `Verification Code — ${company.name}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `Your verification code: ${otp}`,
+      title: "Email Verification",
+      subtitle: "One-time verification code",
+      bodyHtml,
+    }),
   });
 }
 
@@ -128,19 +169,32 @@ export async function sendApprovalEmail(
   name: string,
   roleLabel: string
 ): Promise<boolean> {
-  const company = getDefaultCompanySettings().name;
+  const company = await getEmailBranding();
   const loginUrl = `${process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:4000"}/login`;
+  const bodyHtml = `
+    ${renderGreeting(name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      We are pleased to inform you that your access request has been approved. Your account has been assigned the role of <strong>${escapeHtml(roleLabel)}</strong> on the ${escapeHtml(company.name)} CRM platform.
+    </p>
+    ${renderInfoBox("Your account is now active. You may sign in using your registered credentials.")}
+    ${emailButton(loginUrl, "Sign In to CRM")}
+    ${renderLinkFallback(loginUrl)}
+    ${renderFeatureList([
+      "Manage students, partners, and loan applications",
+      "Access reports and analytics dashboards",
+      "Collaborate with your consultancy team",
+    ])}
+    ${renderMutedNote("For assistance, please contact your system administrator or write to our support team.")}`;
+
   return sendEmail({
     to: email,
-    subject: `You're approved — ${company}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-        <h2 style="color: #22C55E;">Welcome aboard!</h2>
-        <p>Hi ${name},</p>
-        <p>Great news — your account has been approved as <strong>${roleLabel}</strong>.</p>
-        <p>You can now sign in and access the ${company} CRM dashboard.</p>
-        <a href="${loginUrl}" style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: #6D5EF7; color: white; text-decoration: none; border-radius: 8px;">Sign in to CRM</a>
-      </div>
-    `,
+    subject: `Account Approved — ${company.name}`,
+    html: renderEmailLayout({
+      company,
+      preheader: "Your CRM access has been approved",
+      title: "Account Approved",
+      subtitle: "Welcome to the team",
+      bodyHtml,
+    }),
   });
 }

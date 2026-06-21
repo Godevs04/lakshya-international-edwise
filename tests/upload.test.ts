@@ -3,6 +3,7 @@ import {
   isValidCloudinaryPublicId,
   isValidCloudinaryUrl,
   validateCloudinaryDocument,
+  validateOptionalCloudinaryUrl,
   getUploadFolder,
 } from "@/lib/services/upload.service";
 
@@ -36,5 +37,17 @@ describe("upload.service validation", () => {
       "students"
     );
     expect(result.valid).toBe(true);
+  });
+
+  it("validates optional cloudinary url", () => {
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "demo";
+    expect(
+      validateOptionalCloudinaryUrl(
+        "https://res.cloudinary.com/demo/image/upload/v1/nandhini-crm/students/photo.jpg",
+        "students"
+      ).valid
+    ).toBe(true);
+    expect(validateOptionalCloudinaryUrl("", "students").valid).toBe(true);
+    expect(validateOptionalCloudinaryUrl("https://evil.com/x.jpg", "students").valid).toBe(false);
   });
 });

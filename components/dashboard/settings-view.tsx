@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { GlassCard } from "@/components/cards/glass-card";
+import { FormSection } from "@/components/forms/form-section";
+import { ImageUploadField } from "@/components/forms/image-upload-field";
 import {
   Select,
   SelectContent,
@@ -124,36 +126,78 @@ export function SettingsView({
       </div>
 
       <TabsContent value="company" className="mt-4">
-        <GlassCard className="p-6">
-          <form onSubmit={handleSettingsSubmit} className="space-y-4">
+        <FormSection
+          title="Company Settings"
+          description="Required company identity and optional branding details."
+        >
+          <form onSubmit={handleSettingsSubmit} className="space-y-6">
             <input type="hidden" name="settingsSection" value="company" />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name</Label>
-                <Input id="companyName" name="companyName" defaultValue={settings.company.name} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyEmail">Email</Label>
-                <Input id="companyEmail" name="companyEmail" type="email" defaultValue={settings.company.email} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyPhone">Phone</Label>
-                <Input id="companyPhone" name="companyPhone" defaultValue={settings.company.phone} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyLogo">Logo URL</Label>
-                <Input id="companyLogo" name="companyLogo" defaultValue={settings.company.logo} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="companyAddress">Address</Label>
-                <Input id="companyAddress" name="companyAddress" defaultValue={settings.company.address} />
+
+            <div>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Required
+              </h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Input
+                    id="companyName"
+                    name="companyName"
+                    defaultValue={settings.company.name}
+                    required
+                  />
+                </div>
               </div>
             </div>
+
+            <div>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Optional
+              </h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="companyEmail">Email</Label>
+                  <Input
+                    id="companyEmail"
+                    name="companyEmail"
+                    type="email"
+                    defaultValue={settings.company.email}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyPhone">Phone</Label>
+                  <Input
+                    id="companyPhone"
+                    name="companyPhone"
+                    defaultValue={settings.company.phone}
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="companyAddress">Address</Label>
+                  <Input
+                    id="companyAddress"
+                    name="companyAddress"
+                    defaultValue={settings.company.address}
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <ImageUploadField
+                    name="companyLogo"
+                    label="Company Logo"
+                    folder="settings"
+                    defaultValue={settings.company.logo ?? ""}
+                    disabled={!canWriteSettings}
+                    hint="JPEG, PNG, or WebP up to 10 MB."
+                  />
+                </div>
+              </div>
+            </div>
+
             <Button type="submit" disabled={loading || !canWriteSettings}>
               {canWriteSettings ? "Save Company Settings" : "View only"}
             </Button>
           </form>
-        </GlassCard>
+        </FormSection>
       </TabsContent>
 
       <TabsContent value="theme" className="mt-4">

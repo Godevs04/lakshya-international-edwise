@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GlassCard } from "@/components/cards/glass-card";
+import { FormSection } from "@/components/forms/form-section";
+import { ImageUploadField } from "@/components/forms/image-upload-field";
 import { PARTNER_STATUSES } from "@/lib/constants/statuses";
 import { createPartnerAction, updatePartnerAction } from "@/lib/actions/partner.actions";
 
@@ -27,6 +28,7 @@ interface PartnerFormProps {
 export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState((initialData?.status as string) ?? "active");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -53,13 +55,28 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <GlassCard className="p-6">
-        <h3 className="mb-4 text-sm font-semibold">Company Information</h3>
+      <FormSection
+        title="Required Fields"
+        description="Fields marked with * must be completed before saving."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="companyName">Company Name *</Label>
-            <Input id="companyName" name="companyName" defaultValue={initialData?.companyName as string} required />
+            <Input
+              id="companyName"
+              name="companyName"
+              defaultValue={initialData?.companyName as string}
+              required
+            />
           </div>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="Optional — Company Details"
+        description="Contact information, branding, and status."
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="owner">Owner</Label>
             <Input id="owner" name="owner" defaultValue={initialData?.owner as string} />
@@ -72,38 +89,55 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" defaultValue={initialData?.email as string} />
           </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="address">Address</Label>
-            <Textarea id="address" name="address" defaultValue={initialData?.address as string} />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="gst">GST</Label>
             <Input id="gst" name="gst" defaultValue={initialData?.gst as string} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="commissionPercent">Commission %</Label>
-            <Input id="commissionPercent" name="commissionPercent" type="number" defaultValue={initialData?.commissionPercent as number} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="companyLogo">Company Logo URL</Label>
-            <Input id="companyLogo" name="companyLogo" defaultValue={initialData?.companyLogo as string} />
+            <Input
+              id="commissionPercent"
+              name="commissionPercent"
+              type="number"
+              defaultValue={initialData?.commissionPercent as number}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select name="status" defaultValue={(initialData?.status as string) ?? "active"}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select value={status} onValueChange={(v) => setStatus(v ?? "active")}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {PARTNER_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <input type="hidden" name="status" value={status} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="address">Address</Label>
+            <Textarea id="address" name="address" defaultValue={initialData?.address as string} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <ImageUploadField
+              name="companyLogo"
+              label="Company Logo"
+              folder="partners"
+              defaultValue={(initialData?.companyLogo as string) ?? ""}
+              hint="JPEG, PNG, or WebP up to 10 MB."
+            />
           </div>
         </div>
-      </GlassCard>
+      </FormSection>
 
-      <GlassCard className="p-6">
-        <h3 className="mb-4 text-sm font-semibold">Bank Details</h3>
+      <FormSection
+        title="Optional — Bank Details"
+        description="Banking information for commission payouts."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="accountName">Account Name</Label>
@@ -111,8 +145,15 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           </div>
           <div className="space-y-2">
             <Label htmlFor="accountNumber">Account Number</Label>
-            <Input id="accountNumber" name="accountNumber" defaultValue={initialData?.accountNumber as string} placeholder="Leave blank to keep current" />
-            <p className="text-xs text-muted-foreground">Stored encrypted. Masked value shown when editing.</p>
+            <Input
+              id="accountNumber"
+              name="accountNumber"
+              defaultValue={initialData?.accountNumber as string}
+              placeholder="Leave blank to keep current"
+            />
+            <p className="text-xs text-muted-foreground">
+              Stored encrypted. Masked value shown when editing.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="ifsc">IFSC</Label>
@@ -123,13 +164,15 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
             <Input id="bankName" name="bankName" defaultValue={initialData?.bankName as string} />
           </div>
         </div>
-      </GlassCard>
+      </FormSection>
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : mode === "create" ? "Create Partner" : "Update Partner"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          Cancel
+        </Button>
       </div>
     </form>
   );

@@ -17,7 +17,7 @@ import { generateStudentId } from "@/lib/utils/format";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Types } from "mongoose";
-import { validateCloudinaryDocument } from "@/lib/services/upload.service";
+import { validateCloudinaryDocument, validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 
 export async function getStudents(params: {
@@ -139,6 +139,12 @@ export async function createStudentAction(
 
   await connectDB();
   const data = parsed.data;
+
+  const photoCheck = validateOptionalCloudinaryUrl(data.photo, "students");
+  if (!photoCheck.valid) {
+    return { success: false, error: photoCheck.error };
+  }
+
   const studentId = generateStudentId();
 
   const student = await Student.create({
@@ -229,6 +235,11 @@ export async function updateStudentAction(
   const existing = await Student.findById(id);
   if (!existing) return { success: false, error: "Student not found" };
 
+  const photoCheck = validateOptionalCloudinaryUrl(data.photo, "students");
+  if (!photoCheck.valid) {
+    return { success: false, error: photoCheck.error };
+  }
+
   const oldStatus = existing.status;
   existing.firstName = sanitizeText(data.firstName);
   existing.lastName = sanitizeText(data.lastName);
@@ -238,6 +249,7 @@ export async function updateStudentAction(
   existing.whatsapp = data.whatsapp;
   existing.email = data.email;
   if (data.photo) existing.photo = data.photo;
+  else if (raw.photo === "") existing.photo = undefined;
   existing.address = {
     line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
     city: data.city,
