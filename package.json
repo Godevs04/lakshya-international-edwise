@@ -9,7 +9,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "tsx scripts/seed.ts"
+    "test:e2e": "playwright install chromium && playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "test:e2e:ui": "playwright install chromium && playwright test --ui",
+    "seed": "tsx scripts/seed.ts",
+    "backup:mongodb": "bash scripts/backup-mongodb.sh"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -52,6 +56,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",

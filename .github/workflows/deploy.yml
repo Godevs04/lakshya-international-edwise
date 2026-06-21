@@ -1,0 +1,199 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Deployment platform
+        required: true
+        default: docker
+        type: choice
+        options:
+          - docker
+          - fly
+          - vps
+          - vercel
+          - skip
+      environment:
+        description: Deployment environment
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    uses: ./.github/workflows/ci.yml
+
+  resolve-platform:
+    needs: quality
+    runs-on: ubuntu-latest
+    outputs:
+      platform: ${{ steps.pick.outputs.platform }}
+      build_image: ${{ steps.pick.outputs.build_image }}
+    steps:
+      - name: Resolve deploy platform
+        id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PLATFORM="${{ inputs.platform }}"
+          else
+            PLATFORM="${{ vars.DEPLOY_PLATFORM }}"
+            if [ -z "$PLATFORM" ]; then
+              PLATFORM="docker"
+            fi
+          fi
+          echo "platform=$PLATFORM" >> "$GITHUB_OUTPUT"
+          if [ "$PLATFORM" = "docker" ] || [ "$PLATFORM" = "vps" ]; then
+            echo "build_image=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_image=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-image:
+    name: Build Docker image
+    needs: resolve-platform
+    if: needs.resolve-platform.outputs.build_image == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  publish-docker:
+    name: Docker → GHCR
+    needs: [resolve-platform, build-image]
+    if: needs.resolve-platform.outputs.platform == 'docker'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Published ghcr.io/${{ github.repository }}:latest"
+          echo "Run on any server: docker pull ghcr.io/${{ github.repository }}:latest"
+
+  deploy-vps:
+    name: Deploy → VPS (SSH)
+    needs: [resolve-platform, build-image]
+    if: needs.resolve-platform.outputs.platform == 'vps'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'production' }}
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}:latest
+          GHCR_USER: ${{ github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          DEPLOY_PATH: ${{ secrets.SSH_DEPLOY_PATH }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          envs: IMAGE,GHCR_USER,GHCR_TOKEN,DEPLOY_PATH
+          script: |
+            set -euo pipefail
+            cd "${DEPLOY_PATH:-/opt/nandhini-consultancy}"
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            export IMAGE
+            docker compose -f docker-compose.prod.yml pull app || docker pull "$IMAGE"
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+
+  deploy-fly:
+    name: Deploy → Fly.io
+    needs: resolve-platform
+    if: needs.resolve-platform.outputs.platform == 'fly'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-vercel:
+    name: Deploy → Vercel
+    needs: resolve-platform
+    if: needs.resolve-platform.outputs.platform == 'vercel'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pull Vercel environment
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build for Vercel
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  skip-deploy:
+    name: Skip deploy
+    needs: resolve-platform
+    if: needs.resolve-platform.outputs.platform == 'skip'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploy skipped."

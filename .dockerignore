@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.github
+.env
+.env.*
+!.env.example
+coverage
+*.md
+scripts/Notes
+Banners
+.vercel
+npm-debug.log*
+.DS_Store

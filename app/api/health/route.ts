@@ -2,17 +2,10 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db/mongoose";
 import { getProductionEnvStatus } from "@/lib/config/validate-env";
+import { isSmtpConfigured } from "@/lib/config/smtp-config";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
-
-function isSmtpConfigured(): boolean {
-  return Boolean(
-    process.env.SMTP_HOST?.trim() &&
-      process.env.SMTP_USER?.trim() &&
-      process.env.SMTP_PASS?.trim()
-  );
-}
 
 export async function GET() {
   const timestamp = new Date().toISOString();

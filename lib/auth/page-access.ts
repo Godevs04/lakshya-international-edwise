@@ -1,12 +1,19 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { canAccessRoute, hasPermission } from "@/lib/auth/permissions";
+import { canAccessRoute, hasPermission, hasAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import type { Permission } from "@/lib/constants/permissions";
 
 export async function requirePagePermission(permission: Permission): Promise<void> {
   const session = await auth();
   if (!hasPermission(session?.user, permission)) {
+    redirect("/dashboard/overview");
+  }
+}
+
+export async function requireAnyPagePermission(permissions: Permission[]): Promise<void> {
+  const session = await auth();
+  if (!hasAnyPermission(session?.user, permissions)) {
     redirect("/dashboard/overview");
   }
 }

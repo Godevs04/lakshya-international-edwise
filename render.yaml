@@ -1,0 +1,50 @@
+# Render Blueprint — connect repo at https://dashboard.render.com/blueprints
+# Set secrets in the Render dashboard (MONGODB_URI, AUTH_SECRET, etc.)
+
+services:
+  - type: web
+    name: nandhini-consultancy
+    runtime: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: HOSTNAME
+        value: 0.0.0.0
+      - key: MONGODB_URI
+        sync: false
+      - key: AUTH_SECRET
+        sync: false
+      - key: AUTH_URL
+        sync: false
+      - key: APP_ENCRYPTION_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: ALLOW_PUBLIC_REGISTRATION
+        value: "false"

@@ -6,6 +6,7 @@ import { hasPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { runLoggedQuery } from "@/lib/action-utils";
 import type { SearchResult } from "@/types";
+import { enforceUserRateLimit } from "@/lib/rate-limit";
 
 export async function globalSearchAction(query: string): Promise<SearchResult[]> {
   return runLoggedQuery("globalSearchAction", async () => {
@@ -13,6 +14,8 @@ export async function globalSearchAction(query: string): Promise<SearchResult[]>
     if (!user) {
       throw new Error("Unauthorized: insufficient permissions");
     }
+
+    await enforceUserRateLimit("search", user.id);
 
     return globalSearch(query, {
       students: hasPermission(user, PERMISSIONS.STUDENTS_READ),

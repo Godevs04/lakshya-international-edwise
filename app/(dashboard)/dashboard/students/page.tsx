@@ -38,7 +38,7 @@ export default async function StudentsPage({
           ) : undefined
         }
       />
-      <StudentsTable {...result} {...access} />
+      <StudentsTable {...result} {...access} canWrite={access.canWrite} />
     </div>
   );
 }

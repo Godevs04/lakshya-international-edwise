@@ -198,3 +198,45 @@ export async function sendApprovalEmail(
     }),
   });
 }
+
+export async function sendFollowUpReminderEmail(params: {
+  email: string;
+  name: string;
+  studentName: string;
+  studentCode: string;
+  note: string;
+  dueDate: Date;
+  studentUrl: string;
+}): Promise<boolean> {
+  const company = await getEmailBranding();
+  const dueLabel = params.dueDate.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  const bodyHtml = `
+    ${renderGreeting(params.name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      You have a student follow-up scheduled for <strong>${escapeHtml(dueLabel)}</strong>.
+    </p>
+    ${renderInfoBox(
+      `<strong>${escapeHtml(params.studentName)}</strong> (${escapeHtml(params.studentCode)})<br/>${escapeHtml(params.note)}`
+    )}
+    ${emailButton(params.studentUrl, "View Student")}
+    ${renderLinkFallback(params.studentUrl)}
+    ${renderMutedNote("This reminder was sent automatically by your CRM follow-up scheduler.")}`;
+
+  return sendEmail({
+    to: params.email,
+    subject: `Follow-up Reminder — ${params.studentName}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `Follow-up due for ${params.studentName}`,
+      title: "Follow-up Reminder",
+      subtitle: params.studentCode,
+      bodyHtml,
+    }),
+  });
+}

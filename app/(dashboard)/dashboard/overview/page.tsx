@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth/auth";
 import { getGreeting, formatCurrency } from "@/lib/utils/format";
 import { getOverviewDashboardAction } from "@/lib/actions/dashboard.actions";
+import { requireAnyPagePermission } from "@/lib/auth/page-access";
+import { PERMISSIONS } from "@/lib/constants/permissions";
 import { MetricCardsGrid, type MetricIconName } from "@/components/cards/metric-card";
 import { GlassCard } from "@/components/cards/glass-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -36,6 +38,14 @@ function withTrend(
 }
 
 export default async function OverviewPage() {
+  await requireAnyPagePermission([
+    PERMISSIONS.STUDENTS_READ,
+    PERMISSIONS.PARTNERS_READ,
+    PERMISSIONS.APPLICATIONS_READ,
+    PERMISSIONS.ANALYTICS_READ,
+    PERMISSIONS.REPORTS_READ,
+  ]);
+
   const session = await auth();
   const {
     metrics,

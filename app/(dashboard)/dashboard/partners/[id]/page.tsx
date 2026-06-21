@@ -15,7 +15,8 @@ import {
 import { DemographicsPieChart } from "@/components/charts/dashboard-charts";
 import { getPartnerById, getPartnerStudents, getPartnerAnalytics } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
-import { getPartnerPageAccess } from "@/lib/auth/page-access";
+import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
+import { PERMISSIONS } from "@/lib/constants/permissions";
 import { formatCurrency } from "@/lib/utils/format";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import { Pencil } from "lucide-react";
@@ -26,6 +27,7 @@ export default async function PartnerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   await requireModuleEnabled("partners");
+  await requirePagePermission(PERMISSIONS.PARTNERS_READ);
 
   const { id } = await params;
   const access = await getPartnerPageAccess();

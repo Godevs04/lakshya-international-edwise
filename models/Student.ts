@@ -30,6 +30,7 @@ const NoteSchema = new Schema(
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     createdByName: { type: String },
     dueDate: { type: Date },
+    reminderSentAt: { type: Date },
     createdAt: { type: Date, default: Date.now },
   },
   { _id: true }
@@ -92,6 +93,7 @@ export interface IStudent extends Document {
     createdBy?: Types.ObjectId;
     createdByName?: string;
     dueDate?: Date;
+    reminderSentAt?: Date;
     createdAt?: Date;
   }>;
   metadata: {

@@ -3,7 +3,8 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StudentDetailView } from "@/components/dashboard/student-detail";
 import { getStudentById } from "@/lib/actions/student.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
-import { getStudentPageAccess } from "@/lib/auth/page-access";
+import { getStudentPageAccess, requirePagePermission } from "@/lib/auth/page-access";
+import { PERMISSIONS } from "@/lib/constants/permissions";
 
 export default async function StudentDetailPage({
   params,
@@ -11,6 +12,7 @@ export default async function StudentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   await requireModuleEnabled("students");
+  await requirePagePermission(PERMISSIONS.STUDENTS_READ);
 
   const { id } = await params;
   const access = await getStudentPageAccess();

@@ -9,6 +9,7 @@ import {
 import { getSignedUploadParams, type SignedUploadParams } from "@/lib/services/upload.service";
 import { runLoggedMutation } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";
+import { enforceUserRateLimit } from "@/lib/rate-limit";
 
 export async function getUploadSignatureAction(
   folder: string
@@ -21,6 +22,11 @@ export async function getUploadSignatureAction(
     }
 
     requirePermission(user, UPLOAD_FOLDER_PERMISSIONS[folder]);
+    if (!user) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    await enforceUserRateLimit("upload", user.id);
 
     const params = getSignedUploadParams(folder);
     if (!params) {

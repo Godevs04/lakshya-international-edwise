@@ -1,0 +1,2 @@
+firstName,lastName,phone,whatsapp,email,gender,dob,addressLine,city,state,pincode,aadhaar,pan,college,course,year,loanRequested,loanSanctioned,loanDisbursed,interest,bankName,applicationNumber,partnerCompanyName,status,remarks
+Ravi,Kumar,9876543210,,ravi@example.com,male,2000-01-15,12 MG Road,Chennai,Tamil Nadu,600001,,,Anna University,B.Tech,3,500000,0,0,8.5,SBI,,Partner Co Ltd,new,Imported via bulk upload

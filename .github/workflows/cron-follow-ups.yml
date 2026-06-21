@@ -1,0 +1,22 @@
+name: Follow-up Reminders
+
+on:
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger follow-up reminder job
+        if: ${{ vars.ENABLE_FOLLOW_UP_CRON == 'true' }}
+        run: |
+          curl --fail --silent --show-error \
+            -X POST "${{ vars.PRODUCTION_URL }}/api/cron/follow-up-reminders" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+
+      - name: Skip (cron not enabled)
+        if: ${{ vars.ENABLE_FOLLOW_UP_CRON != 'true' }}
+        run: |
+          echo "Set ENABLE_FOLLOW_UP_CRON=true, PRODUCTION_URL var, and CRON_SECRET to run daily follow-up reminders."

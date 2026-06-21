@@ -66,6 +66,9 @@ const limiterConfigs: Record<RateLimitAction, LimiterConfig> = {
   "otp-verify": { points: 5, duration: 600, blockDuration: 600 },
   "otp-resend": { points: 3, duration: 600, blockDuration: 600 },
   "forgot-password": { points: 3, duration: 3600, blockDuration: 3600 },
+  search: { points: 60, duration: 900, blockDuration: 120 },
+  upload: { points: 40, duration: 900, blockDuration: 120 },
+  import: { points: 5, duration: 3600, blockDuration: 3600 },
 };
 
 const memoryLimiters: Partial<Record<RateLimitAction, RateLimiterMemory>> = {};
@@ -76,7 +79,10 @@ export type RateLimitAction =
   | "register"
   | "otp-verify"
   | "otp-resend"
-  | "forgot-password";
+  | "forgot-password"
+  | "search"
+  | "upload"
+  | "import";
 
 async function getLimiter(action: RateLimitAction): Promise<RateLimiterAbstract> {
   const client = await getRedisClient();
@@ -119,5 +125,17 @@ export async function checkRateLimit(
         ? Math.ceil(Number(error.msBeforeNext) / 1000)
         : 60;
     return { allowed: false, retryAfterSeconds };
+  }
+}
+
+export async function enforceUserRateLimit(
+  action: Extract<RateLimitAction, "search" | "upload" | "import">,
+  userId: string
+): Promise<void> {
+  const result = await checkRateLimit(action, userId);
+  if (!result.allowed) {
+    throw new Error(
+      `Too many requests. Please try again in ${result.retryAfterSeconds} seconds.`
+    );
   }
 }

@@ -336,7 +336,22 @@ export async function updateUserRoleAction(
   }
 
   await connectDB();
+  const targetUser = await User.findById(userId);
+  if (!targetUser) {
+    return { success: false, error: "User not found" };
+  }
+
   await User.findByIdAndUpdate(userId, { role });
+
+  const { ROLE_LABELS } = await import("@/lib/constants/permissions");
+  await createNotification({
+    userId: targetUser._id,
+    type: "system",
+    title: "Role updated",
+    body: `Your role was changed to ${ROLE_LABELS[role]}. Sign in again for permissions to take full effect.`,
+    link: "/dashboard/profile",
+  });
+
   await logSettingsActivity(
     user!,
     "user.role_update",

@@ -37,6 +37,7 @@ import { bulkUpdateStudentsAction } from "@/lib/actions/student.actions";
 import type { StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Trash2, Download } from "lucide-react";
+import { StudentImportDialog } from "@/components/dashboard/student-import-dialog";
 
 interface StudentsTableProps {
   data: StudentListItem[];
@@ -46,6 +47,7 @@ interface StudentsTableProps {
   totalPages: number;
   canDelete?: boolean;
   canExport?: boolean;
+  canWrite?: boolean;
 }
 
 export function StudentsTable({
@@ -55,6 +57,7 @@ export function StudentsTable({
   totalPages,
   canDelete = false,
   canExport = false,
+  canWrite = false,
 }: StudentsTableProps) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -204,6 +207,7 @@ export function StudentsTable({
               <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
             </Button>
           )}
+          {canWrite && <StudentImportDialog canWrite={canWrite} />}
           {canExport && (
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
               <Download className="mr-1 h-4 w-4" /> Export
