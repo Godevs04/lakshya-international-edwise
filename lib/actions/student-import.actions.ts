@@ -6,7 +6,8 @@ import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { runLoggedMutation } from "@/lib/action-utils";
 import { revalidateInsightCaches } from "@/lib/cache/revalidate";
-import { buildImportTemplateCsv, parseImportFile } from "@/lib/utils/student-import-parse";
+import { buildImportTemplateXlsx } from "@/lib/utils/student-import-template";
+import { parseImportFile } from "@/lib/utils/student-import-parse";
 import { importStudentsFromRows } from "@/lib/services/student-import.service";
 import type { ActionResult } from "@/types";
 import type { ImportStudentsResult } from "@/lib/services/student-import.service";
@@ -18,7 +19,7 @@ const MAX_IMPORT_ROWS = 500;
 export async function getStudentImportTemplateAction(): Promise<string> {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
-  return buildImportTemplateCsv();
+  return buildImportTemplateXlsx().toString("base64");
 }
 
 export async function importStudentsAction(

@@ -5,8 +5,7 @@ import { getSessionUser } from "@/lib/auth/auth";
 import { requireAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import {
-  getDashboardMetrics,
-  getDashboardMetricTrends,
+  getDashboardCoreStats,
   getLoanStatusChart,
   getMonthlyStudentsChart,
   getLoanAmountChart,
@@ -29,12 +28,7 @@ const OVERVIEW_PERMISSIONS = [
 
 const CACHE_SECONDS = 60;
 
-const cachedDashboardMetrics = unstable_cache(getDashboardMetrics, ["dashboard-metrics"], {
-  revalidate: CACHE_SECONDS,
-  tags: [CACHE_TAGS.dashboard],
-});
-
-const cachedDashboardTrends = unstable_cache(getDashboardMetricTrends, ["dashboard-trends"], {
+const cachedDashboardCoreStats = unstable_cache(getDashboardCoreStats, ["dashboard-core-stats"], {
   revalidate: CACHE_SECONDS,
   tags: [CACHE_TAGS.dashboard],
 });
@@ -89,8 +83,7 @@ export async function getOverviewDashboardAction() {
     requireAnyPermission(user, OVERVIEW_PERMISSIONS);
 
     const [
-      metrics,
-      trends,
+      { metrics, trends },
       loanStatus,
       monthlyStudents,
       loanAmount,
@@ -100,8 +93,7 @@ export async function getOverviewDashboardAction() {
       latestPartners,
       followups,
     ] = await Promise.all([
-      cachedDashboardMetrics(),
-      cachedDashboardTrends(),
+      cachedDashboardCoreStats(),
       cachedLoanStatusChart(),
       cachedMonthlyStudentsChart(),
       cachedLoanAmountChart(),
