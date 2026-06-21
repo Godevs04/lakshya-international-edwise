@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { UserPlus, Handshake, FileText, BarChart3 } from "lucide-react";
-import { formatDate } from "@/lib/utils/format";
-
 interface DashboardHeroProps {
   greeting: string;
   userName: string;
+  displayDate: string;
 }
 
 const quickActions = [
@@ -17,7 +16,7 @@ const quickActions = [
   { href: "/dashboard/reports", label: "Generate Report", icon: BarChart3, gradient: "from-[#F59E0B] to-[#EF4444]" },
 ];
 
-export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
+export function DashboardHero({ greeting, userName, displayDate }: DashboardHeroProps) {
   const firstName = userName.split(" ")[0] ?? userName;
 
   return (
@@ -50,7 +49,7 @@ export function DashboardHero({ greeting, userName }: DashboardHeroProps) {
               transition={{ delay: 0.1 }}
               className="text-sm font-medium text-white/80"
             >
-              {formatDate(new Date())}
+              {displayDate}
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
