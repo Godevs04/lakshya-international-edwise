@@ -1,0 +1,117 @@
+name: Version Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: Semantic version bump
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      trigger_deploy:
+        description: Run deploy pipeline after tagging
+        required: true
+        default: false
+        type: boolean
+      deploy_platform:
+        description: Deploy platform (only when trigger_deploy is true)
+        required: true
+        default: docker
+        type: choice
+        options:
+          - docker
+          - fly
+          - vps
+          - vercel
+          - skip
+
+env:
+  RELEASE_PROPERTIES_FILE: .github/workflows/release/release.properties
+
+concurrency:
+  group: version-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Pre-release checks
+    uses: ./.github/workflows/ci.yml
+
+  tag-release:
+    name: Bump version & tag
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+      last: ${{ steps.bump.outputs.last }}
+      bump: ${{ steps.bump.outputs.bump }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump release version
+        id: bump
+        run: |
+          chmod +x scripts/release-version.sh
+          scripts/release-version.sh bump "${{ inputs.version_bump }}"
+
+      - name: Commit release metadata
+        run: |
+          PROPS="${RELEASE_PROPERTIES_FILE}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$PROPS" package.json
+          git commit -m "chore(release): ${{ steps.bump.outputs.tag }}"
+
+          RELEASE_SHA="$(git rev-parse HEAD)"
+          awk -v sha="$RELEASE_SHA" '
+            /^release\.ref=/ { print "release.ref=" sha; next }
+            { print }
+          ' "$PROPS" > "${PROPS}.tmp" && mv "${PROPS}.tmp" "$PROPS"
+          git add "$PROPS"
+          git commit --amend --no-edit
+
+          git tag "${{ steps.bump.outputs.tag }}"
+          git push origin "HEAD:${{ github.ref_name }}"
+          git push origin "${{ steps.bump.outputs.tag }}"
+
+      - name: Release summary
+        run: |
+          PROPS="${RELEASE_PROPERTIES_FILE}"
+          echo "## Release ${{ steps.bump.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Prefix | $(grep '^version.prefix=' "$PROPS" | cut -d= -f2-) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Last version | ${{ steps.bump.outputs.last }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| New version | ${{ steps.bump.outputs.version }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Bump type | ${{ steps.bump.outputs.bump }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Git tag | ${{ steps.bump.outputs.tag }} |" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Trigger deploy pipeline
+    needs: tag-release
+    if: ${{ inputs.trigger_deploy }}
+    uses: ./.github/workflows/deploy.yml
+    with:
+      platform: ${{ inputs.deploy_platform }}
+      environment: production
+      release_tag: ${{ needs.tag-release.outputs.tag }}
+      release_version: ${{ needs.tag-release.outputs.version }}
+    secrets: inherit

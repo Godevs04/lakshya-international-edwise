@@ -84,12 +84,12 @@ The app ships with **Docker** and supports multiple hosting platforms (not only 
 | Platform | How to deploy |
 |----------|----------------|
 | **Docker / VPS** | `docker compose up -d` or `bash scripts/docker-run.sh` |
-| **GitHub Container Registry** | Push to `main` with `DEPLOY_PLATFORM=docker` (default) |
-| **Fly.io** | `fly launch` then set `DEPLOY_PLATFORM=fly` + `FLY_API_TOKEN` secret |
+| **GitHub Container Registry** | **Actions → Release Pipeline → Run workflow** → platform `docker` |
+| **Fly.io** | `fly launch`, then run Release Pipeline with platform `fly` + `FLY_API_TOKEN` secret |
 | **Render** | Connect repo and use `render.yaml` blueprint |
 | **Railway** | Connect repo — uses `Dockerfile` automatically |
-| **VPS (SSH)** | Set `DEPLOY_PLATFORM=vps` + SSH/GHCR secrets (see below) |
-| **Vercel** | Set `DEPLOY_PLATFORM=vercel` + Vercel secrets |
+| **VPS (SSH)** | Run Release Pipeline with platform `vps` + SSH/GHCR secrets (see below) |
+| **Vercel** | Run Release Pipeline with platform `vercel` + Vercel secrets |
 
 ### Docker (local or any server)
 
@@ -101,11 +101,40 @@ docker compose up -d --build
 bash scripts/docker-run.sh
 ```
 
-### GitHub Actions deploy
+### GitHub Actions
 
-Repository variable `DEPLOY_PLATFORM`: `docker` | `fly` | `vps` | `vercel` | `skip`
+Two separate manual workflows:
 
-Manual deploy: **Actions → Deploy → Run workflow** and pick a platform.
+#### 1. Version Release (tag & bump)
+
+**Actions → Version Release → Run workflow**
+
+1. Choose bump: `patch` | `minor` | `major`
+2. Optionally enable **Trigger deploy pipeline** to chain into deploy
+3. Updates `.github/workflows/release/release.properties`, `package.json`, and creates git tag (e.g. `v0.1.1`)
+
+`.github/workflows/release/release.properties` fields:
+
+| Key | Description |
+|-----|-------------|
+| `version.prefix` | Tag prefix (default `v`) — edit manually |
+| `version.last` | Previous version |
+| `version.current` | Current released version |
+| `version.new` | Latest bumped version |
+| `version.bump` | Last bump type (`patch`, `minor`, `major`) |
+| `release.tag` | Full git tag (e.g. `v0.1.1`) |
+| `release.date` | UTC date of last release |
+| `release.ref` | Commit SHA of the release commit |
+
+#### 2. Release Pipeline (deploy)
+
+**Actions → Release Pipeline → Run workflow**
+
+1. Choose platform: `docker` | `fly` | `vps` | `vercel` | `skip`
+2. Choose environment: `production` or `staging`
+3. Reads version/tag from `.github/workflows/release/release.properties` for Docker image tags
+
+Run **Version Release** first when shipping a new version, then **Release Pipeline** to deploy (or chain them in one run).
 
 **VPS secrets:** `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `GHCR_READ_TOKEN`, optional `SSH_DEPLOY_PATH`
 

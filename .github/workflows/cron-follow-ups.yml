@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  reminders:
+  send-reminders:
+    name: Daily follow-up alerts
     runs-on: ubuntu-latest
     steps:
       - name: Trigger follow-up reminder job
