@@ -42,10 +42,23 @@ async function seed() {
     logger.info(`Role seeded: ${roleName}`);
   }
 
+  const defaults = getDefaultSettings();
   const settingsCount = await Settings.countDocuments();
   if (settingsCount === 0) {
-    await Settings.create(getDefaultSettings());
+    await Settings.create(defaults);
     logger.info("Default settings created from .env.local");
+  } else {
+    await Settings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          company: defaults.company,
+          smtpConfigured: defaults.smtpConfigured,
+        },
+      },
+      { sort: { createdAt: 1 } }
+    );
+    logger.info(`Company branding synced: ${defaults.company.name}`);
   }
 
   const existingAdmin = await User.findOne({ email: adminEmail.toLowerCase() });

@@ -276,6 +276,11 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
               id="interest"
               name="interest"
               type="number"
+              min={0}
+              max={100}
+              step="0.01"
+              inputMode="decimal"
+              placeholder="e.g. 7.8"
               defaultValue={initialData?.interest as number}
             />
           </div>

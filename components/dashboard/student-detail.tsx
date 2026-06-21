@@ -150,7 +150,7 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
               <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.requested ?? 0)}</p></div>
               <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.sanctioned ?? 0)}</p></div>
               <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.disbursed ?? 0)}</p></div>
-              <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest ?? 0}%</p></div>
+              <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest != null ? `${student.loan.interest}%` : "—"}</p></div>
               <div><p className="text-xs text-muted-foreground">Bank</p><p className="text-sm">{student.loan?.bankName ?? "—"}</p></div>
               <div><p className="text-xs text-muted-foreground">Application #</p><p className="text-sm">{student.loan?.applicationNumber ?? "—"}</p></div>
             </div>

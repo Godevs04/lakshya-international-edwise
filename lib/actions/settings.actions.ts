@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
-import { getDefaultSettings } from "@/lib/config/app-defaults";
+import { getDefaultSettings, resolveCompanySettings } from "@/lib/config/app-defaults";
 import { User } from "@/models/User";
 import { Role } from "@/models/Role";
 import { getSessionUser } from "@/lib/auth/auth";
@@ -53,11 +53,7 @@ export async function getSettings(): Promise<AppSettings> {
   const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
 
   return {
-    company: {
-      ...defaults.company,
-      ...settings.company,
-      name: settings.company?.name?.trim() || defaults.company.name,
-    },
+    company: resolveCompanySettings(settings.company),
     theme: {
       ...defaults.theme,
       ...settings.theme,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { registerSchema, verifyOtpSchema } from "@/lib/validations/schemas";
+import { registerSchema, studentSchema, verifyOtpSchema } from "@/lib/validations/schemas";
 
 describe("schemas", () => {
   it("validates register payload", () => {
@@ -25,5 +25,17 @@ describe("schemas", () => {
   it("validates otp format", () => {
     expect(verifyOtpSchema.safeParse({ email: "a@b.com", otp: "123456" }).success).toBe(true);
     expect(verifyOtpSchema.safeParse({ email: "a@b.com", otp: "12345" }).success).toBe(false);
+  });
+
+  it("accepts decimal interest on student payload", () => {
+    const result = studentSchema.safeParse({
+      firstName: "Test",
+      lastName: "Student",
+      interest: "7.8",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.interest).toBe(7.8);
+    }
   });
 });

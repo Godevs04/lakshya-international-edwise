@@ -97,7 +97,7 @@ export function getCloudinaryCloudName(): string {
 export function isPublicRegistrationAllowed(): boolean {
   const val = trimEnv(process.env.ALLOW_PUBLIC_REGISTRATION);
   if (val === undefined || val === "") {
-    return process.env.NODE_ENV !== "production";
+    return false;
   }
   return val === "true" || val === "1";
 }

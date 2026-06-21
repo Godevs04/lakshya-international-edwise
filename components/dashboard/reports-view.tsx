@@ -48,14 +48,14 @@ function downloadBase64(base64: string, filename: string, mime: string) {
 export function ReportsView() {
   const [preset, setPreset] = useState<DateRangePreset>("monthly");
   const [reportType, setReportType] = useState<ReportType>("student");
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<Record<string, string | number>[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function loadReport(p: DateRangePreset, type: ReportType) {
     setLoading(true);
     try {
       const result = await getReportAction(p, type);
-      setData(result as Record<string, unknown>[]);
+      setData(result);
     } catch {
       notify.error("Failed to load report");
     }
@@ -100,10 +100,7 @@ export function ReportsView() {
     window.print();
   }
 
-  const columns =
-    data.length > 0
-      ? Object.keys(data[0] ?? {}).filter((k) => k !== "__v" && k !== "_id")
-      : [];
+  const columns = data.length > 0 ? Object.keys(data[0] ?? {}) : [];
 
   return (
     <div className="space-y-6">
@@ -164,9 +161,7 @@ export function ReportsView() {
               <TableHeader>
                 <TableRow>
                   {columns.map((col) => (
-                    <TableHead key={col} className="capitalize">
-                      {col.replace(/([A-Z])/g, " $1")}
-                    </TableHead>
+                    <TableHead key={col}>{col}</TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -174,11 +169,7 @@ export function ReportsView() {
                 {data.map((row, i) => (
                   <TableRow key={i}>
                     {columns.map((col) => (
-                      <TableCell key={col}>
-                        {typeof row[col] === "object"
-                          ? JSON.stringify(row[col])
-                          : String(row[col] ?? "—")}
-                      </TableCell>
+                      <TableCell key={col}>{String(row[col] ?? "—")}</TableCell>
                     ))}
                   </TableRow>
                 ))}

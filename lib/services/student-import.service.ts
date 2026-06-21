@@ -11,7 +11,7 @@ import {
   normalizePincode,
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField } from "@/lib/utils/pii";
-import { generateStudentId } from "@/lib/utils/format";
+import { allocateStudentId } from "@/lib/services/student-id.service";
 import { mapRowToStudentInput } from "@/lib/utils/student-import-parse";
 import { logActivity } from "@/lib/services/activity.service";
 import { Types } from "mongoose";
@@ -91,7 +91,7 @@ export async function importStudentsFromRows(
     }
 
     const data = parsed.data;
-    const studentId = generateStudentId();
+    const studentId = await allocateStudentId();
 
     try {
       const student = await Student.create({

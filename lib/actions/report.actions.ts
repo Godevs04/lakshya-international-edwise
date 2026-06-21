@@ -2,7 +2,6 @@
 
 import { getReportData, exportToCSV, type ReportType } from "@/lib/services/report.service";
 import type { DateRangePreset } from "@/lib/utils/format";
-import { serializeRowsForClient } from "@/lib/utils/serialize";
 import { exportToExcel, exportToPdf } from "@/lib/utils/report-export";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
@@ -12,11 +11,10 @@ import { runLogged } from "@/lib/action-utils";
 async function getAuthorizedReportData(
   preset: DateRangePreset,
   reportType: ReportType
-): Promise<Record<string, unknown>[]> {
+): Promise<Record<string, string | number>[]> {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.REPORTS_READ);
-  const data = await getReportData(preset, reportType);
-  return serializeRowsForClient(data) as Record<string, unknown>[];
+  return getReportData(preset, reportType);
 }
 
 export async function getReportAction(

@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
-import { getDefaultSettings } from "@/lib/config/app-defaults";
+import { getDefaultSettings, resolveCompanySettings } from "@/lib/config/app-defaults";
 import { isNextBuildPhase } from "@/lib/config/build-phase";
 import { logger } from "@/lib/logger";
 import type { AppSettings } from "@/types";
@@ -28,11 +28,7 @@ export async function getAppConfig(): Promise<AppSettings> {
     const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
 
     return {
-      company: {
-        ...envDefaults.company,
-        ...settings.company,
-        name: settings.company?.name?.trim() || envDefaults.company.name,
-      },
+      company: resolveCompanySettings(settings.company),
       theme: {
         ...envDefaults.theme,
         ...settings.theme,

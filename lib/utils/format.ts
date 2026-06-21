@@ -39,12 +39,6 @@ export function getDateRange(preset: DateRangePreset): { start: Date; end: Date 
   }
 }
 
-export function generateStudentId(): string {
-  const date = format(new Date(), "yyyyMMdd");
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `STU-${date}-${random}`;
-}
-
 export function getInitials(name: string): string {
   return name
     .split(" ")

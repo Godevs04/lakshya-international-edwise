@@ -20,6 +20,20 @@ export function getDefaultCompanySettings(): CompanySettings {
   };
 }
 
+/** Env vars override stored DB values so rebranding via .env.local takes effect immediately. */
+export function resolveCompanySettings(stored?: Partial<CompanySettings>): CompanySettings {
+  const defaults = getDefaultCompanySettings();
+  const merged = { ...defaults, ...stored };
+
+  return {
+    name: process.env.APP_COMPANY_NAME?.trim() || merged.name?.trim() || defaults.name,
+    logo: process.env.APP_COMPANY_LOGO?.trim() || merged.logo?.trim() || defaults.logo,
+    email: process.env.APP_COMPANY_EMAIL?.trim() || merged.email?.trim() || defaults.email,
+    phone: process.env.APP_COMPANY_PHONE?.trim() || merged.phone?.trim() || defaults.phone,
+    address: process.env.APP_COMPANY_ADDRESS?.trim() || merged.address?.trim() || defaults.address,
+  };
+}
+
 export function getDefaultThemeSettings(): AppTheme {
   return {
     primary: process.env.APP_THEME_PRIMARY ?? "oklch(0.488 0.243 264.376)",

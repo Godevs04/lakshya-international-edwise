@@ -20,7 +20,7 @@ import {
   normalizePincode,
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField, maskAadhaar, maskPan, safeDecrypt } from "@/lib/utils/pii";
-import { generateStudentId } from "@/lib/utils/format";
+import { allocateStudentId } from "@/lib/services/student-id.service";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Types } from "mongoose";
@@ -152,7 +152,7 @@ export async function createStudentAction(
     return { success: false, error: photoCheck.error };
   }
 
-  const studentId = generateStudentId();
+  const studentId = await allocateStudentId();
 
   const student = await Student.create({
     studentId,

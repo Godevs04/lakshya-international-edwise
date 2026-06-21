@@ -1,22 +1,15 @@
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
 
-function flattenRow(row: Record<string, unknown>): Record<string, string> {
+function flattenRow(row: Record<string, string | number>): Record<string, string> {
   const flat: Record<string, string> = {};
   for (const [key, value] of Object.entries(row)) {
-    if (key === "__v" || key === "_id") continue;
-    if (value === null || value === undefined) {
-      flat[key] = "";
-    } else if (typeof value === "object") {
-      flat[key] = JSON.stringify(value);
-    } else {
-      flat[key] = String(value);
-    }
+    flat[key] = value === null || value === undefined ? "" : String(value);
   }
   return flat;
 }
 
-export function exportToExcel(data: Record<string, unknown>[]): Buffer {
+export function exportToExcel(data: Record<string, string | number>[]): Buffer {
   const rows = data.map(flattenRow);
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
@@ -25,7 +18,7 @@ export function exportToExcel(data: Record<string, unknown>[]): Buffer {
 }
 
 export function exportToPdf(
-  data: Record<string, unknown>[],
+  data: Record<string, string | number>[],
   title: string
 ): Uint8Array {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });

@@ -16,7 +16,7 @@ interface LoginFormProps {
   allowRegistration?: boolean;
 }
 
-export function LoginForm({ allowRegistration = true }: LoginFormProps) {
+export function LoginForm({ allowRegistration = false }: LoginFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 

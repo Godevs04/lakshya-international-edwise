@@ -27,6 +27,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils/format";
 import { GlobalSearch } from "@/components/dashboard/global-search";
+import { useSearchShortcutLabel } from "@/hooks/use-search-shortcut";
 import {
   markAllNotificationsReadAction,
   markNotificationReadAction,
@@ -46,6 +47,7 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const searchShortcutLabel = useSearchShortcutLabel();
 
   function handleNotificationClick(notification: ClientNotification) {
     startTransition(async () => {
@@ -72,6 +74,7 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setSearchOpen(true)}
+          aria-label={`Search students, partners, and applications (${searchShortcutLabel})`}
           className="search-glow group relative flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full border border-[#6D5EF7]/15 bg-white/60 px-3 backdrop-blur-xl transition-all sm:h-11 sm:gap-3 sm:px-5 lg:max-w-md dark:bg-white/5"
         >
           <Search className="h-4 w-4 shrink-0 text-[#6D5EF7]/60 transition-colors group-hover:text-[#6D5EF7]" />
@@ -79,8 +82,8 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
             <span className="hidden sm:inline">Search students, partners...</span>
             <span className="sm:hidden">Search...</span>
           </span>
-          <kbd className="pointer-events-none ml-auto hidden h-6 shrink-0 select-none items-center gap-0.5 rounded-full border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 px-2 font-mono text-[10px] font-medium text-[#6D5EF7] md:flex">
-            <span>⌘</span>K
+          <kbd className="pointer-events-none ml-auto hidden h-6 shrink-0 select-none items-center rounded-full border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 px-2 font-mono text-[10px] font-medium text-[#6D5EF7] sm:flex">
+            {searchShortcutLabel}
           </kbd>
         </motion.button>
 

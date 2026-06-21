@@ -13,6 +13,7 @@
     "test:e2e:install": "playwright install chromium",
     "test:e2e:ui": "playwright install chromium && playwright test --ui",
     "seed": "tsx scripts/seed.ts",
+    "sync:branding": "tsx scripts/seed.ts",
     "backup:mongodb": "bash scripts/backup-mongodb.sh"
   },
   "dependencies": {

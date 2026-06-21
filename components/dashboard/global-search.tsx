@@ -11,6 +11,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { globalSearchAction } from "@/lib/actions/search.actions";
+import { useSearchShortcutToggle } from "@/hooks/use-search-shortcut";
 import type { SearchResult } from "@/types";
 import { Users, Handshake, FileText } from "lucide-react";
 
@@ -50,16 +51,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     return () => clearTimeout(timer);
   }, [query, search]);
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        onOpenChange(!open);
-      }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, [open, onOpenChange]);
+  useSearchShortcutToggle(open, onOpenChange);
 
   const handleSelect = (href: string) => {
     onOpenChange(false);
