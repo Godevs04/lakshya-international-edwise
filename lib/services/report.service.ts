@@ -3,7 +3,7 @@ import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import type { DateRangePreset } from "@/lib/utils/format";
 import { getDateRange } from "@/lib/utils/format";
-import { formatReportRows } from "@/lib/utils/report-format";
+import { formatReportRows, type ReportSourceRow } from "@/lib/utils/report-format";
 
 export type ReportType = "partner" | "student" | "loan";
 
@@ -38,10 +38,10 @@ export async function getReportData(
     case "student":
       return formatReportRows(
         reportType,
-        await Student.find(dateFilter)
+        (await Student.find(dateFilter)
           .populate("partnerId", "companyName")
           .sort({ createdAt: -1 })
-          .lean()
+          .lean()) as unknown as ReportSourceRow[]
       );
 
     case "loan":

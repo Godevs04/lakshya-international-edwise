@@ -1,7 +1,9 @@
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { maskAadhaar, maskPan } from "@/lib/utils/pii";
 
-type LooseRecord = Record<string, unknown>;
+export type ReportSourceRow = Record<string, unknown>;
+
+type LooseRecord = ReportSourceRow;
 
 function partnerName(partnerId: unknown): string {
   if (!partnerId || typeof partnerId !== "object") return "";

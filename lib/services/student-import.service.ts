@@ -12,7 +12,7 @@ import {
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField } from "@/lib/utils/pii";
 import { allocateStudentId } from "@/lib/services/student-id.service";
-import { mapRowToStudentInput } from "@/lib/utils/student-import-parse";
+import { mapRowToStudentInput, parseImportDate } from "@/lib/utils/student-import-parse";
 import { logActivity } from "@/lib/services/activity.service";
 import { Types } from "mongoose";
 
@@ -30,6 +30,33 @@ export interface ImportStudentsResult {
 interface ImportContext {
   userId?: string;
   userName?: string;
+}
+
+function formatImportSaveError(error: unknown): string {
+  if (error && typeof error === "object" && "errors" in error) {
+    const validationError = error as {
+      errors?: Record<string, { message?: string }>;
+    };
+    const firstIssue = Object.values(validationError.errors ?? {})[0];
+    if (firstIssue?.message?.includes("Cast to date failed")) {
+      return "Invalid date of birth — use YYYY-MM-DD format";
+    }
+    if (firstIssue?.message) return firstIssue.message;
+  }
+
+  if (error instanceof Error) {
+    if (error.message.includes("Cast to date failed")) {
+      return "Invalid date of birth — use YYYY-MM-DD format";
+    }
+    if (error.message) return error.message;
+  }
+
+  return "Failed to save student record";
+}
+
+function toObjectId(value?: string): Types.ObjectId | undefined {
+  if (!value || !Types.ObjectId.isValid(value)) return undefined;
+  return new Types.ObjectId(value);
 }
 
 async function resolvePartnerId(companyName?: string): Promise<string | undefined> {
@@ -99,7 +126,7 @@ export async function importStudentsFromRows(
         firstName: sanitizeText(data.firstName),
         lastName: sanitizeText(data.lastName),
         gender: data.gender,
-        dob: data.dob ? new Date(data.dob) : undefined,
+        dob: parseImportDate(data.dob),
         phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
         whatsapp: data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined,
         email: data.email,
@@ -138,7 +165,7 @@ export async function importStudentsFromRows(
           },
         ],
         metadata: {
-          createdBy: context.userId ? new Types.ObjectId(context.userId) : undefined,
+          createdBy: toObjectId(context.userId),
           createdByName: context.userName,
         },
       });
@@ -150,7 +177,7 @@ export async function importStudentsFromRows(
         status: data.status ?? "new",
         pipelineStage: data.status ?? "new",
         metadata: {
-          createdBy: context.userId ? new Types.ObjectId(context.userId) : undefined,
+          createdBy: toObjectId(context.userId),
           createdByName: context.userName,
         },
       });
@@ -162,9 +189,9 @@ export async function importStudentsFromRows(
       }
 
       result.imported++;
-    } catch {
+    } catch (error) {
       result.failed++;
-      result.errors.push({ row: rowNumber, message: "Failed to save student record" });
+      result.errors.push({ row: rowNumber, message: formatImportSaveError(error) });
     }
   }
 

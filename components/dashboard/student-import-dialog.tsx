@@ -17,28 +17,54 @@ import {
   getStudentImportTemplateAction,
   importStudentsAction,
 } from "@/lib/actions/student-import.actions";
-import { Upload, Download, FileSpreadsheet } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Upload, Download, FileSpreadsheet, CheckCircle2, X } from "lucide-react";
 
 interface StudentImportDialogProps {
   canWrite?: boolean;
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function StudentImportDialog({ canWrite = false }: StudentImportDialogProps) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pending, startTransition] = useTransition();
 
   if (!canWrite) return null;
 
+  function resetFileSelection() {
+    setSelectedFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) resetFileSelection();
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setSelectedFile(file);
+  }
+
   async function handleDownloadTemplate() {
     try {
-      const csv = await getStudentImportTemplateAction();
-      const blob = new Blob([csv], { type: "text/csv" });
+      const base64 = await getStudentImportTemplateAction();
+      const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+      const blob = new Blob([bytes], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = "student-import-template.csv";
+      anchor.download = "student-import-template.xlsx";
       anchor.click();
       URL.revokeObjectURL(url);
       notify.success("Template downloaded");
@@ -48,14 +74,13 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
   }
 
   function handleImport() {
-    const file = fileRef.current?.files?.[0];
-    if (!file) {
+    if (!selectedFile) {
       notify.error("Select a CSV or Excel file first");
       return;
     }
 
     const formData = new FormData();
-    formData.set("file", file);
+    formData.set("file", selectedFile);
 
     startTransition(async () => {
       const result = await importStudentsAction(formData);
@@ -65,7 +90,7 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
           description: failed > 0 ? `${failed} row(s) failed validation` : undefined,
         });
         setOpen(false);
-        if (fileRef.current) fileRef.current.value = "";
+        resetFileSelection();
         router.refresh();
       } else {
         notify.error(result.error ?? "Import failed", {
@@ -79,7 +104,7 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button variant="outline" size="sm" type="button">
@@ -91,7 +116,7 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
         <DialogHeader>
           <DialogTitle>Bulk import students</DialogTitle>
           <DialogDescription>
-            Upload a CSV or Excel file (max 500 rows). Download the template for the correct column format.
+            Upload a CSV or Excel file (max 500 rows). Download the Excel template with sample records and field guide.
           </DialogDescription>
         </DialogHeader>
 
@@ -101,24 +126,58 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
             Download template
           </Button>
 
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-[#6D5EF7]/25 bg-[#6D5EF7]/5 p-6 transition-colors hover:bg-[#6D5EF7]/10">
-            <FileSpreadsheet className="h-8 w-8 text-[#6D5EF7]" />
-            <span className="text-sm font-medium">Choose CSV or Excel file</span>
-            <span className="text-xs text-muted-foreground">.csv, .xlsx, .xls — up to 5 MB</span>
+          <label
+            className={cn(
+              "relative flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed p-6 transition-colors",
+              selectedFile
+                ? "border-[#22C55E]/40 bg-[#22C55E]/5 hover:bg-[#22C55E]/10"
+                : "border-[#6D5EF7]/25 bg-[#6D5EF7]/5 hover:bg-[#6D5EF7]/10"
+            )}
+          >
+            {selectedFile ? (
+              <>
+                <CheckCircle2 className="h-8 w-8 text-[#22C55E]" />
+                <span className="max-w-full truncate px-2 text-sm font-semibold text-foreground">
+                  {selectedFile.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {formatFileSize(selectedFile.size)} · Ready to import
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    resetFileSelection();
+                  }}
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Remove file
+                </button>
+              </>
+            ) : (
+              <>
+                <FileSpreadsheet className="h-8 w-8 text-[#6D5EF7]" />
+                <span className="text-sm font-medium">Choose CSV or Excel file</span>
+                <span className="text-xs text-muted-foreground">.csv, .xlsx, .xls — up to 5 MB</span>
+              </>
+            )}
             <input
               ref={fileRef}
               type="file"
               accept=".csv,.xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               className="sr-only"
+              onChange={handleFileChange}
             />
           </label>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={pending}>
             Cancel
           </Button>
-          <Button onClick={handleImport} disabled={pending}>
+          <Button onClick={handleImport} disabled={pending || !selectedFile}>
             {pending ? "Importing..." : "Import students"}
           </Button>
         </DialogFooter>

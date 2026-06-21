@@ -1,6 +1,8 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { Activity } from "@/models/Activity";
 import { AuditLog } from "@/models/AuditLog";
+import { getClientIp } from "@/lib/rate-limit";
+import { headers } from "next/headers";
 import type { Types } from "mongoose";
 
 interface LogActivityParams {
@@ -19,6 +21,19 @@ interface LogActivityParams {
 export async function logActivity(params: LogActivityParams): Promise<void> {
   await connectDB();
 
+  let ip = params.ip;
+  let userAgent = params.userAgent;
+
+  if (!ip || !userAgent) {
+    try {
+      const headerList = await headers();
+      ip = ip ?? (await getClientIp());
+      userAgent = userAgent ?? headerList.get("user-agent") ?? undefined;
+    } catch {
+      // Request headers unavailable outside server actions / route handlers.
+    }
+  }
+
   await Activity.create({
     action: params.action,
     description: params.description,
@@ -33,11 +48,13 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
     userId: params.userId,
     userName: params.userName,
     action: params.action,
+    description: params.description,
     resourceType: params.resourceType,
     resourceId: params.resourceId,
     diff: params.diff,
-    ip: params.ip,
-    userAgent: params.userAgent,
+    metadata: params.metadata,
+    ip,
+    userAgent,
   });
 }
 

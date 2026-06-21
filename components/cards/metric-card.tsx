@@ -50,26 +50,40 @@ function AnimatedNumber({ value }: { value: string | number }) {
   );
 }
 
-function Sparkline({ seed, color }: { seed: number; color: string }) {
-  const points = Array.from({ length: 12 }, (_, i) => {
-    const v = 20 + Math.sin(i * 0.8 + seed) * 10 + (seed % 5) * 2 + i * 1.5;
-    return Math.max(5, Math.min(35, v));
+function sparklinePoints(seed: number): number[] {
+  return Array.from({ length: 12 }, (_, i) => {
+    const hash = ((seed * 2654435761) ^ (i * 2246822519)) >>> 0;
+    return 8 + (hash % 28);
   });
+}
+
+function buildSparklinePaths(seed: number): { area: string; line: string } {
+  const points = sparklinePoints(seed);
   const max = Math.max(...points);
-  const path = points
-    .map((p, i) => `${i === 0 ? "M" : "L"}${(i / (points.length - 1)) * 100},${40 - (p / max) * 35}`)
+  const line = points
+    .map((p, i) => {
+      const x = +((i / (points.length - 1)) * 100).toFixed(2);
+      const y = +(40 - (p / max) * 35).toFixed(2);
+      return `${i === 0 ? "M" : "L"}${x},${y}`;
+    })
     .join(" ");
 
+  return { area: `${line} L100,40 L0,40 Z`, line };
+}
+
+function Sparkline({ seed, color }: { seed: number; color: string }) {
+  const { area, line } = buildSparklinePaths(seed);
+
   return (
-    <svg viewBox="0 0 100 40" className="h-10 w-full" preserveAspectRatio="none">
+    <svg viewBox="0 0 100 40" className="h-10 w-full" preserveAspectRatio="none" aria-hidden>
       <defs>
         <linearGradient id={`spark-${seed}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.3" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={`${path} L100,40 L0,40 Z`} fill={`url(#spark-${seed})`} />
-      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <path d={area} fill={`url(#spark-${seed})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
