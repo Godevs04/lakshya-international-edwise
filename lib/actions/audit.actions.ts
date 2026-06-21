@@ -114,7 +114,7 @@ function mapAuditLog(log: {
 }
 
 export async function getAuditLogStats(): Promise<AuditLogStats> {
-  return runLoggedQuery(
+  return runLoggedQuery<AuditLogStats>(
     "getAuditLogStats",
     async () => {
       const user = await getSessionUser();

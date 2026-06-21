@@ -2,38 +2,10 @@ import * as XLSX from "xlsx";
 import type { StudentInput } from "@/lib/validations/schemas";
 import {
   buildImportTemplateLabelAliases,
-  STUDENT_IMPORT_COLUMNS,
+  STUDENT_IMPORT_COLUMN_KEYS,
 } from "@/lib/utils/student-import-template";
 
-export const IMPORT_TEMPLATE_HEADERS = STUDENT_IMPORT_COLUMNS.map(
-  (column) => column.key
-) as readonly [
-  "firstName",
-  "lastName",
-  "phone",
-  "whatsapp",
-  "email",
-  "gender",
-  "dob",
-  "addressLine",
-  "city",
-  "state",
-  "pincode",
-  "aadhaar",
-  "pan",
-  "college",
-  "course",
-  "year",
-  "loanRequested",
-  "loanSanctioned",
-  "loanDisbursed",
-  "interest",
-  "bankName",
-  "applicationNumber",
-  "partnerCompanyName",
-  "status",
-  "remarks",
-];
+export const IMPORT_TEMPLATE_HEADERS = STUDENT_IMPORT_COLUMN_KEYS;
 
 const HEADER_ALIASES: Record<string, string> = {
   firstname: "firstName",

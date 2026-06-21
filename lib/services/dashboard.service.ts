@@ -8,63 +8,403 @@ import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 import { formatMetricTrend } from "@/lib/utils/metrics-trend";
 import { startOfDay, subMonths, format, startOfMonth, endOfMonth, subDays } from "date-fns";
 
-export async function getDashboardMetrics(): Promise<DashboardMetrics> {
-  await connectDB();
-  const todayStart = startOfDay(new Date());
+interface DashboardDateBounds {
+  now: Date;
+  todayStart: Date;
+  yesterdayStart: Date;
+  monthStart: Date;
+  lastMonthStart: Date;
+  lastMonthEnd: Date;
+}
 
-  const [
-    totalStudents,
-    newStudentsToday,
-    totalPartners,
-    pendingApplications,
-    sanctioned,
-    disbursed,
-    rejected,
-    loanAgg,
-    todayCollection,
-  ] = await Promise.all([
-    Student.countDocuments(),
-    Student.countDocuments({ createdAt: { $gte: todayStart } }),
-    Partner.countDocuments({ status: "active" }),
-    Application.countDocuments({ status: { $in: PENDING_STATUSES } }),
-    Student.countDocuments({ status: "sanctioned" }),
-    Student.countDocuments({ status: "disbursed" }),
-    Student.countDocuments({ status: "rejected" }),
-    Student.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: { $ifNull: ["$loan.sanctioned", 0] } },
+function getDashboardDateBounds(now = new Date()): DashboardDateBounds {
+  return {
+    now,
+    todayStart: startOfDay(now),
+    yesterdayStart: startOfDay(subDays(now, 1)),
+    monthStart: startOfMonth(now),
+    lastMonthStart: startOfMonth(subMonths(now, 1)),
+    lastMonthEnd: endOfMonth(subMonths(now, 1)),
+  };
+}
+
+interface StudentDashboardAggregateRow {
+  totalStudents: number;
+  newStudentsToday: number;
+  sanctioned: number;
+  disbursed: number;
+  rejected: number;
+  totalLoanAmount: number;
+  todaysCollection: number;
+  studentsThisMonth: number;
+  studentsLastMonth: number;
+  studentsToday: number;
+  studentsYesterday: number;
+  sanctionedThisMonth: number;
+  sanctionedLastMonth: number;
+  disbursedThisMonth: number;
+  disbursedLastMonth: number;
+  rejectedThisMonth: number;
+  rejectedLastMonth: number;
+  loanThisMonth: number;
+  loanLastMonth: number;
+  collectionToday: number;
+  collectionYesterday: number;
+}
+
+interface PartnerDashboardAggregateRow {
+  totalPartners: number;
+  partnersThisMonth: number;
+  partnersLastMonth: number;
+}
+
+interface ApplicationDashboardAggregateRow {
+  pendingApplications: number;
+  pendingLastMonth: number;
+}
+
+function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
+  const {
+    todayStart,
+    yesterdayStart,
+    monthStart,
+    lastMonthStart,
+    lastMonthEnd,
+  } = bounds;
+
+  return [
+    {
+      $group: {
+        _id: null,
+        totalStudents: { $sum: 1 },
+        newStudentsToday: {
+          $sum: { $cond: [{ $gte: ["$createdAt", todayStart] }, 1, 0] },
+        },
+        sanctioned: {
+          $sum: { $cond: [{ $eq: ["$status", "sanctioned"] }, 1, 0] },
+        },
+        disbursed: {
+          $sum: { $cond: [{ $eq: ["$status", "disbursed"] }, 1, 0] },
+        },
+        rejected: {
+          $sum: { $cond: [{ $eq: ["$status", "rejected"] }, 1, 0] },
+        },
+        totalLoanAmount: { $sum: { $ifNull: ["$loan.sanctioned", 0] } },
+        todaysCollection: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "disbursed"] },
+                  { $gte: ["$updatedAt", todayStart] },
+                ],
+              },
+              { $ifNull: ["$loan.disbursed", 0] },
+              0,
+            ],
+          },
+        },
+        studentsThisMonth: {
+          $sum: { $cond: [{ $gte: ["$createdAt", monthStart] }, 1, 0] },
+        },
+        studentsLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $gte: ["$createdAt", lastMonthStart] },
+                  { $lte: ["$createdAt", lastMonthEnd] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        studentsToday: {
+          $sum: { $cond: [{ $gte: ["$createdAt", todayStart] }, 1, 0] },
+        },
+        studentsYesterday: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $gte: ["$createdAt", yesterdayStart] },
+                  { $lt: ["$createdAt", todayStart] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        sanctionedThisMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "sanctioned"] },
+                  { $gte: ["$updatedAt", monthStart] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        sanctionedLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "sanctioned"] },
+                  { $gte: ["$updatedAt", lastMonthStart] },
+                  { $lte: ["$updatedAt", lastMonthEnd] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        disbursedThisMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "disbursed"] },
+                  { $gte: ["$updatedAt", monthStart] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        disbursedLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "disbursed"] },
+                  { $gte: ["$updatedAt", lastMonthStart] },
+                  { $lte: ["$updatedAt", lastMonthEnd] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        rejectedThisMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "rejected"] },
+                  { $gte: ["$updatedAt", monthStart] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        rejectedLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "rejected"] },
+                  { $gte: ["$updatedAt", lastMonthStart] },
+                  { $lte: ["$updatedAt", lastMonthEnd] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        loanThisMonth: {
+          $sum: {
+            $cond: [
+              { $gte: ["$updatedAt", monthStart] },
+              { $ifNull: ["$loan.sanctioned", 0] },
+              0,
+            ],
+          },
+        },
+        loanLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $gte: ["$updatedAt", lastMonthStart] },
+                  { $lte: ["$updatedAt", lastMonthEnd] },
+                ],
+              },
+              { $ifNull: ["$loan.sanctioned", 0] },
+              0,
+            ],
+          },
+        },
+        collectionToday: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "disbursed"] },
+                  { $gte: ["$updatedAt", todayStart] },
+                ],
+              },
+              { $ifNull: ["$loan.disbursed", 0] },
+              0,
+            ],
+          },
+        },
+        collectionYesterday: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "disbursed"] },
+                  { $gte: ["$updatedAt", yesterdayStart] },
+                  { $lt: ["$updatedAt", todayStart] },
+                ],
+              },
+              { $ifNull: ["$loan.disbursed", 0] },
+              0,
+            ],
+          },
         },
       },
-    ]),
-    Student.aggregate([
-      {
-        $match: {
-          status: "disbursed",
-          updatedAt: { $gte: todayStart },
+    },
+  ];
+}
+
+function buildPartnerDashboardPipeline(bounds: DashboardDateBounds) {
+  const { monthStart, lastMonthStart, lastMonthEnd } = bounds;
+
+  return [
+    {
+      $group: {
+        _id: null,
+        totalPartners: {
+          $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
+        },
+        partnersThisMonth: {
+          $sum: { $cond: [{ $gte: ["$createdAt", monthStart] }, 1, 0] },
+        },
+        partnersLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $gte: ["$createdAt", lastMonthStart] },
+                  { $lte: ["$createdAt", lastMonthEnd] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
         },
       },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: { $ifNull: ["$loan.disbursed", 0] } },
+    },
+  ];
+}
+
+function buildApplicationDashboardPipeline(bounds: DashboardDateBounds) {
+  const { lastMonthStart, lastMonthEnd } = bounds;
+  const pendingStatuses = [...PENDING_STATUSES];
+
+  return [
+    {
+      $group: {
+        _id: null,
+        pendingApplications: {
+          $sum: { $cond: [{ $in: ["$status", pendingStatuses] }, 1, 0] },
+        },
+        pendingLastMonth: {
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $in: ["$status", pendingStatuses] },
+                  { $gte: ["$updatedAt", lastMonthStart] },
+                  { $lte: ["$updatedAt", lastMonthEnd] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
         },
       },
-    ]),
+    },
+  ];
+}
+
+function mapDashboardCoreStats(
+  studentRow: StudentDashboardAggregateRow | undefined,
+  partnerRow: PartnerDashboardAggregateRow | undefined,
+  applicationRow: ApplicationDashboardAggregateRow | undefined
+): { metrics: DashboardMetrics; trends: DashboardMetricTrends } {
+  const students = studentRow ?? ({} as StudentDashboardAggregateRow);
+  const partners = partnerRow ?? ({} as PartnerDashboardAggregateRow);
+  const applications = applicationRow ?? ({} as ApplicationDashboardAggregateRow);
+
+  const metrics: DashboardMetrics = {
+    totalStudents: students.totalStudents ?? 0,
+    newStudentsToday: students.newStudentsToday ?? 0,
+    totalPartners: partners.totalPartners ?? 0,
+    pendingApplications: applications.pendingApplications ?? 0,
+    sanctioned: students.sanctioned ?? 0,
+    disbursed: students.disbursed ?? 0,
+    rejected: students.rejected ?? 0,
+    totalLoanAmount: students.totalLoanAmount ?? 0,
+    todaysCollection: students.todaysCollection ?? 0,
+  };
+
+  const trends: DashboardMetricTrends = {
+    totalStudents: formatMetricTrend(students.studentsThisMonth ?? 0, students.studentsLastMonth ?? 0),
+    newStudentsToday: formatMetricTrend(students.studentsToday ?? 0, students.studentsYesterday ?? 0),
+    totalPartners: formatMetricTrend(partners.partnersThisMonth ?? 0, partners.partnersLastMonth ?? 0),
+    pendingApplications: formatMetricTrend(
+      applications.pendingApplications ?? 0,
+      applications.pendingLastMonth ?? 0
+    ),
+    sanctioned: formatMetricTrend(students.sanctionedThisMonth ?? 0, students.sanctionedLastMonth ?? 0),
+    disbursed: formatMetricTrend(students.disbursedThisMonth ?? 0, students.disbursedLastMonth ?? 0),
+    rejected: formatMetricTrend(students.rejectedThisMonth ?? 0, students.rejectedLastMonth ?? 0),
+    totalLoanAmount: formatMetricTrend(students.loanThisMonth ?? 0, students.loanLastMonth ?? 0),
+    todaysCollection: formatMetricTrend(students.collectionToday ?? 0, students.collectionYesterday ?? 0),
+  };
+
+  return { metrics, trends };
+}
+
+export interface DashboardCoreStats {
+  metrics: DashboardMetrics;
+  trends: DashboardMetricTrends;
+}
+
+export async function getDashboardCoreStats(): Promise<DashboardCoreStats> {
+  await connectDB();
+  const bounds = getDashboardDateBounds();
+
+  const [studentRows, partnerRows, applicationRows] = await Promise.all([
+    Student.aggregate<StudentDashboardAggregateRow>(buildStudentDashboardPipeline(bounds)),
+    Partner.aggregate<PartnerDashboardAggregateRow>(buildPartnerDashboardPipeline(bounds)),
+    Application.aggregate<ApplicationDashboardAggregateRow>(buildApplicationDashboardPipeline(bounds)),
   ]);
 
-  return {
-    totalStudents,
-    newStudentsToday,
-    totalPartners,
-    pendingApplications,
-    sanctioned,
-    disbursed,
-    rejected,
-    totalLoanAmount: loanAgg[0]?.total ?? 0,
-    todaysCollection: todayCollection[0]?.total ?? 0,
-  };
+  return mapDashboardCoreStats(studentRows[0], partnerRows[0], applicationRows[0]);
+}
+
+export async function getDashboardMetrics(): Promise<DashboardMetrics> {
+  const { metrics } = await getDashboardCoreStats();
+  return metrics;
 }
 
 export interface DashboardMetricTrends {
@@ -80,81 +420,8 @@ export interface DashboardMetricTrends {
 }
 
 export async function getDashboardMetricTrends(): Promise<DashboardMetricTrends> {
-  await connectDB();
-
-  const now = new Date();
-  const todayStart = startOfDay(now);
-  const yesterdayStart = startOfDay(subDays(now, 1));
-  const monthStart = startOfMonth(now);
-  const lastMonthStart = startOfMonth(subMonths(now, 1));
-  const lastMonthEnd = endOfMonth(subMonths(now, 1));
-
-  const [
-    studentsThisMonth,
-    studentsLastMonth,
-    studentsToday,
-    studentsYesterday,
-    partnersThisMonth,
-    partnersLastMonth,
-    pendingNow,
-    pendingLastMonth,
-    sanctionedThisMonth,
-    sanctionedLastMonth,
-    disbursedThisMonth,
-    disbursedLastMonth,
-    rejectedThisMonth,
-    rejectedLastMonth,
-    loanThisMonth,
-    loanLastMonth,
-    collectionToday,
-    collectionYesterday,
-  ] = await Promise.all([
-    Student.countDocuments({ createdAt: { $gte: monthStart } }),
-    Student.countDocuments({ createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
-    Student.countDocuments({ createdAt: { $gte: todayStart } }),
-    Student.countDocuments({ createdAt: { $gte: yesterdayStart, $lt: todayStart } }),
-    Partner.countDocuments({ createdAt: { $gte: monthStart } }),
-    Partner.countDocuments({ createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
-    Application.countDocuments({ status: { $in: PENDING_STATUSES } }),
-    Application.countDocuments({
-      status: { $in: PENDING_STATUSES },
-      updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
-    }),
-    Student.countDocuments({ status: "sanctioned", updatedAt: { $gte: monthStart } }),
-    Student.countDocuments({ status: "sanctioned", updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
-    Student.countDocuments({ status: "disbursed", updatedAt: { $gte: monthStart } }),
-    Student.countDocuments({ status: "disbursed", updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
-    Student.countDocuments({ status: "rejected", updatedAt: { $gte: monthStart } }),
-    Student.countDocuments({ status: "rejected", updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
-    Student.aggregate([
-      { $match: { updatedAt: { $gte: monthStart } } },
-      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.sanctioned", 0] } } } },
-    ]),
-    Student.aggregate([
-      { $match: { updatedAt: { $gte: lastMonthStart, $lte: lastMonthEnd } } },
-      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.sanctioned", 0] } } } },
-    ]),
-    Student.aggregate([
-      { $match: { status: "disbursed", updatedAt: { $gte: todayStart } } },
-      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.disbursed", 0] } } } },
-    ]),
-    Student.aggregate([
-      { $match: { status: "disbursed", updatedAt: { $gte: yesterdayStart, $lt: todayStart } } },
-      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.disbursed", 0] } } } },
-    ]),
-  ]);
-
-  return {
-    totalStudents: formatMetricTrend(studentsThisMonth, studentsLastMonth),
-    newStudentsToday: formatMetricTrend(studentsToday, studentsYesterday),
-    totalPartners: formatMetricTrend(partnersThisMonth, partnersLastMonth),
-    pendingApplications: formatMetricTrend(pendingNow, pendingLastMonth),
-    sanctioned: formatMetricTrend(sanctionedThisMonth, sanctionedLastMonth),
-    disbursed: formatMetricTrend(disbursedThisMonth, disbursedLastMonth),
-    rejected: formatMetricTrend(rejectedThisMonth, rejectedLastMonth),
-    totalLoanAmount: formatMetricTrend(loanThisMonth[0]?.total ?? 0, loanLastMonth[0]?.total ?? 0),
-    todaysCollection: formatMetricTrend(collectionToday[0]?.total ?? 0, collectionYesterday[0]?.total ?? 0),
-  };
+  const { trends } = await getDashboardCoreStats();
+  return trends;
 }
 
 export async function getLoanStatusChart(): Promise<ChartDataPoint[]> {
