@@ -3,7 +3,7 @@
 
 services:
   - type: web
-    name: nandhini-consultancy
+    name: lakshya-international-edwise
     runtime: docker
     plan: starter
     region: singapore

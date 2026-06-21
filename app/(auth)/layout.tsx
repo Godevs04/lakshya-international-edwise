@@ -36,7 +36,7 @@ async function AuthLayoutInner({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <h1 className="text-2xl font-bold tracking-tight">{config.company.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Premium Education Consultancy CRM</p>
+        <p className="mt-1 text-sm text-muted-foreground">Premium International Education Consultancy CRM</p>
       </div>
       {children}
     </div>

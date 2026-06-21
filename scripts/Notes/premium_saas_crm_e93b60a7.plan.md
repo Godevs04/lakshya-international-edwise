@@ -41,7 +41,7 @@ todos:
 isProject: false
 ---
 
-# Nandhini Consultancy — Premium SaaS CRM (Full Build)
+# Lakshya International Edwise — Premium SaaS CRM (Full Build)
 
 ## Current state
 
@@ -274,7 +274,7 @@ Helper: `hasPermission(session, 'students:write')` used in Server Actions and UI
 
 - Default roles + permissions
 - Super Admin user (from env `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`)
-- Default settings (Nandhini Consultancy branding)
+- Default settings (Lakshya International Edwise branding)
 
 ---
 

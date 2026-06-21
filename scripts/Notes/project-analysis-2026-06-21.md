@@ -1,4 +1,4 @@
-# Nandhini Consultancy CRM — Full Project Analysis
+# Lakshya International Edwise CRM — Full Project Analysis
 
 **Analysis date:** June 21, 2026  
 **Last updated:** June 21, 2026 (all actionable phases complete)  

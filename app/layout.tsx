@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: config.company.name,
       template: `%s | ${config.company.name}`,
     },
-    description: `${config.company.name} - Premium Education Consultancy CRM`,
+    description: `${config.company.name} - Premium International Education Consultancy CRM`,
     applicationName: config.company.name,
     appleWebApp: {
       capable: true,

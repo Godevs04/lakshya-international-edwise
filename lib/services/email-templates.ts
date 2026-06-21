@@ -88,7 +88,7 @@ function emailHeader(company: CompanySettings): string {
             <td style="width: 56px; vertical-align: middle; padding-right: 16px;">${logoBlock}</td>
             <td style="vertical-align: middle;">
               <p style="margin: 0; font-family: ${FONT}; font-size: 20px; font-weight: 600; color: ${BRAND.navy}; letter-spacing: -0.01em; line-height: 1.3;">${name}</p>
-              <p style="margin: 4px 0 0; font-family: ${FONT}; font-size: 11px; font-weight: 500; color: ${BRAND.muted}; text-transform: uppercase; letter-spacing: 0.14em;">Education &amp; Career Consultancy</p>
+              <p style="margin: 4px 0 0; font-family: ${FONT}; font-size: 11px; font-weight: 500; color: ${BRAND.muted}; text-transform: uppercase; letter-spacing: 0.14em;">International Education &amp; Career Consultancy</p>
             </td>
           </tr>
         </table>

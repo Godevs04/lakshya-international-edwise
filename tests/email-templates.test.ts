@@ -16,7 +16,7 @@ describe("email-templates", () => {
   it("renders branded layout with company name", () => {
     const html = renderEmailLayout({
       company: {
-        name: "Nandhini Consultancy",
+        name: "Lakshya International Edwise",
         logo: "",
         email: "hello@example.com",
         phone: "",
@@ -25,7 +25,7 @@ describe("email-templates", () => {
       title: "Test Email",
       bodyHtml: "<p>Hello</p>",
     });
-    expect(html).toContain("Nandhini Consultancy");
+    expect(html).toContain("Lakshya International Edwise");
     expect(html).toContain("Test Email");
     expect(html).toContain("<!DOCTYPE html>");
   });

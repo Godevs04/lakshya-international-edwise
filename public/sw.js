@@ -1,4 +1,4 @@
-const CACHE_NAME = "nandhini-crm-v1";
+const CACHE_NAME = "lakshya-international-edwise-v1";
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {

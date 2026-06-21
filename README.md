@@ -1,4 +1,4 @@
-# Nandhini Consultancy CRM
+# Lakshya International Edwise CRM
 
 Production-grade, white-label-ready education/loan consultancy CRM built with Next.js, MongoDB, and Auth.js.
 
@@ -84,12 +84,12 @@ The app ships with **Docker** and supports multiple hosting platforms (not only 
 | Platform | How to deploy |
 |----------|----------------|
 | **Docker / VPS** | `docker compose up -d` or `bash scripts/docker-run.sh` |
-| **GitHub Container Registry** | **Actions → Release Pipeline → Run workflow** → platform `docker` |
-| **Fly.io** | `fly launch`, then run Release Pipeline with platform `fly` + `FLY_API_TOKEN` secret |
+| **GitHub Container Registry** | **Actions → Deploy Application → Run workflow** → platform `docker` |
+| **Fly.io** | `fly launch`, then run Deploy Application with platform `fly` + `FLY_API_TOKEN` secret |
 | **Render** | Connect repo and use `render.yaml` blueprint |
 | **Railway** | Connect repo — uses `Dockerfile` automatically |
-| **VPS (SSH)** | Run Release Pipeline with platform `vps` + SSH/GHCR secrets (see below) |
-| **Vercel** | Run Release Pipeline with platform `vercel` + Vercel secrets |
+| **VPS (SSH)** | Run Deploy Application with platform `vps` + SSH/GHCR secrets (see below) |
+| **Vercel** | Run Deploy Application with platform `vercel` + Vercel secrets |
 
 ### Docker (local or any server)
 
@@ -105,9 +105,9 @@ bash scripts/docker-run.sh
 
 Two separate manual workflows:
 
-#### 1. Version Release (tag & bump)
+#### 1. Bump Version & Tag
 
-**Actions → Version Release → Run workflow**
+**Actions → Bump Version & Tag → Run workflow**
 
 1. Choose bump: `patch` | `minor` | `major`
 2. Optionally enable **Trigger deploy pipeline** to chain into deploy
@@ -126,15 +126,15 @@ Two separate manual workflows:
 | `release.date` | UTC date of last release |
 | `release.ref` | Commit SHA of the release commit |
 
-#### 2. Release Pipeline (deploy)
+#### 2. Deploy Application
 
-**Actions → Release Pipeline → Run workflow**
+**Actions → Deploy Application → Run workflow**
 
 1. Choose platform: `docker` | `fly` | `vps` | `vercel` | `skip`
 2. Choose environment: `production` or `staging`
 3. Reads version/tag from `.github/workflows/release/release.properties` for Docker image tags
 
-Run **Version Release** first when shipping a new version, then **Release Pipeline** to deploy (or chain them in one run).
+Run **Bump Version & Tag** first when shipping a new version, then **Deploy Application** to deploy (or chain them in one run).
 
 **VPS secrets:** `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `GHCR_READ_TOKEN`, optional `SSH_DEPLOY_PATH`
 

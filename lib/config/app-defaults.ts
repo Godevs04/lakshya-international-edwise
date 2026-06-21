@@ -12,7 +12,7 @@ function parseSmtpFrom(from: string | undefined): { name?: string; email?: strin
 export function getDefaultCompanySettings(): CompanySettings {
   const fromSmtp = parseSmtpFrom(process.env.SMTP_FROM);
   return {
-    name: process.env.APP_COMPANY_NAME ?? fromSmtp.name ?? "Consultancy CRM",
+    name: process.env.APP_COMPANY_NAME ?? fromSmtp.name ?? "Lakshya International Edwise",
     logo: process.env.APP_COMPANY_LOGO ?? "",
     email: process.env.APP_COMPANY_EMAIL ?? fromSmtp.email ?? process.env.SMTP_USER ?? "",
     phone: process.env.APP_COMPANY_PHONE ?? "",

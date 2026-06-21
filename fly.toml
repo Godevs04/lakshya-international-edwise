@@ -1,7 +1,7 @@
 # Fly.io — deploy with: fly launch && fly secrets import < .env.local && fly deploy
 # Docs: https://fly.io/docs/languages-and-frameworks/nextjs/
 
-app = "nandhini-consultancy"
+app = "lakshya-international-edwise"
 primary_region = "bom"
 
 [build]

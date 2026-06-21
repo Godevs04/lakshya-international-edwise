@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 OUTPUT_DIR="${1:-$ROOT_DIR/backups}"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP_PATH="${OUTPUT_DIR}/nandhini-crm-${TIMESTAMP}"
+BACKUP_PATH="${OUTPUT_DIR}/lakshya-international-edwise-${TIMESTAMP}"
 
 read_env_value() {
   local key="$1"

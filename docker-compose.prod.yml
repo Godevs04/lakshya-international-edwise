@@ -5,7 +5,7 @@
 
 services:
   app:
-    image: ${IMAGE:-ghcr.io/owner/nandhini-consultancy:latest}
+    image: ${IMAGE:-ghcr.io/owner/lakshya-international-edwise:latest}
     restart: unless-stopped
     ports:
       - "${PORT:-4000}:4000"

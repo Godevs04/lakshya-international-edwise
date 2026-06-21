@@ -2,7 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { getCloudinaryCloudName } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
 
-export const UPLOAD_FOLDER_PREFIX = "nandhini-crm";
+export const UPLOAD_FOLDER_PREFIX = "lakshya-international-edwise";
 
 function trim(value: string | undefined): string | undefined {
   return value?.trim();

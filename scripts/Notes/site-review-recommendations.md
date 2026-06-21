@@ -1,4 +1,4 @@
-# Nandhini Consultancy CRM — Site Review & Recommendations
+# Lakshya International Edwise CRM — Site Review & Recommendations
 
 **Review date:** June 21, 2026  
 **Stack:** Next.js 16 (App Router) · Auth.js v5 · MongoDB/Mongoose · Tailwind v4 · shadcn/ui  

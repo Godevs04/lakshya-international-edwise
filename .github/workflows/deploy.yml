@@ -1,4 +1,4 @@
-name: Release Pipeline
+name: Deploy Application
 
 on:
   workflow_dispatch:
@@ -38,7 +38,6 @@ on:
         required: false
         type: string
         default: ""
-    secrets: inherit
 
 env:
   RELEASE_PROPERTIES_FILE: .github/workflows/release/release.properties
@@ -200,7 +199,7 @@ jobs:
           envs: IMAGE,GHCR_USER,GHCR_TOKEN,DEPLOY_PATH
           script: |
             set -euo pipefail
-            cd "${DEPLOY_PATH:-/opt/nandhini-consultancy}"
+            cd "${DEPLOY_PATH:-/opt/lakshya-international-edwise}"
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             export IMAGE
             docker compose -f docker-compose.prod.yml pull app || docker pull "$IMAGE"

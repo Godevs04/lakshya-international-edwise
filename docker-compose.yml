@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: nandhini-consultancy:latest
+    image: lakshya-international-edwise:latest
     restart: unless-stopped
     ports:
       - "${PORT:-4000}:4000"

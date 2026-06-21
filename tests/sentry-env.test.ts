@@ -29,7 +29,7 @@ describe("sentry-env", () => {
   it("detects build plugin configuration", () => {
     process.env.SENTRY_AUTH_TOKEN = "token";
     process.env.SENTRY_ORG = "godevs";
-    process.env.SENTRY_PROJECT = "nandhini-crm";
+    process.env.SENTRY_PROJECT = "lakshya-international-edwise";
     expect(isSentryBuildConfigured()).toBe(true);
   });
 

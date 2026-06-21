@@ -15,11 +15,11 @@ describe("upload.service validation", () => {
   });
 
   it("builds upload folder path", () => {
-    expect(getUploadFolder("students")).toBe("nandhini-crm/students");
+    expect(getUploadFolder("students")).toBe("lakshya-international-edwise/students");
   });
 
   it("validates public id prefix", () => {
-    expect(isValidCloudinaryPublicId("nandhini-crm/students/doc1", "students")).toBe(true);
+    expect(isValidCloudinaryPublicId("lakshya-international-edwise/students/doc1", "students")).toBe(true);
     expect(isValidCloudinaryPublicId("other-folder/doc1", "students")).toBe(false);
   });
 
@@ -32,8 +32,8 @@ describe("upload.service validation", () => {
   it("validates full document", () => {
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "demo";
     const result = validateCloudinaryDocument(
-      "https://res.cloudinary.com/demo/raw/upload/v1/nandhini-crm/students/a.pdf",
-      "nandhini-crm/students/a",
+      "https://res.cloudinary.com/demo/raw/upload/v1/lakshya-international-edwise/students/a.pdf",
+      "lakshya-international-edwise/students/a",
       "students"
     );
     expect(result.valid).toBe(true);
@@ -43,7 +43,7 @@ describe("upload.service validation", () => {
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "demo";
     expect(
       validateOptionalCloudinaryUrl(
-        "https://res.cloudinary.com/demo/image/upload/v1/nandhini-crm/students/photo.jpg",
+        "https://res.cloudinary.com/demo/image/upload/v1/lakshya-international-edwise/students/photo.jpg",
         "students"
       ).valid
     ).toBe(true);
