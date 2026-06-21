@@ -15,6 +15,26 @@ import type { ActionResult, AppSettings } from "@/types";
 import type { UserRole } from "@/types";
 import { runLoggedMutation, runLoggedQuery } from "@/lib/action-utils";
 import { validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
+import { logActivity } from "@/lib/services/activity.service";
+import { createNotification } from "@/lib/services/notification.service";
+
+async function logSettingsActivity(
+  user: { id: string; name: string },
+  action: string,
+  description: string,
+  resourceId?: string,
+  diff?: Record<string, unknown>
+): Promise<void> {
+  await logActivity({
+    action,
+    description,
+    resourceType: "settings",
+    resourceId,
+    userId: user.id,
+    userName: user.name,
+    diff,
+  });
+}
 
 export async function getSettings(): Promise<AppSettings> {
   return runLoggedQuery("getSettings", async () => {
@@ -135,6 +155,7 @@ export async function updateSettingsAction(
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");
+  await logSettingsActivity(user!, "settings.update", `Updated ${section} settings`, section);
   return { success: true };
   });
 }
@@ -191,6 +212,22 @@ export async function approveUserAction(
   const { ROLE_LABELS } = await import("@/lib/constants/permissions");
   await sendApprovalEmail(pendingUser.email, pendingUser.name, ROLE_LABELS[role]);
 
+  await createNotification({
+    userId: pendingUser._id,
+    type: "success",
+    title: "Account approved",
+    body: `Your account has been approved with the ${ROLE_LABELS[role]} role.`,
+    link: "/login",
+  });
+
+  await logSettingsActivity(
+    user!,
+    "user.approve",
+    `Approved user ${pendingUser.email} as ${role}`,
+    pendingUser._id.toString(),
+    { role }
+  );
+
   revalidatePath("/dashboard/settings");
   return { success: true };
   });
@@ -213,6 +250,20 @@ export async function rejectUserAction(userId: string): Promise<ActionResult> {
 
   pendingUser.status = "inactive";
   await pendingUser.save();
+
+  await createNotification({
+    userId: pendingUser._id,
+    type: "warning",
+    title: "Registration declined",
+    body: "Your registration request was not approved. Contact your administrator for details.",
+  });
+
+  await logSettingsActivity(
+    user!,
+    "user.reject",
+    `Rejected user ${pendingUser.email}`,
+    pendingUser._id.toString()
+  );
 
   revalidatePath("/dashboard/settings");
   return { success: true };
@@ -255,6 +306,14 @@ export async function createUserAction(formData: FormData): Promise<ActionResult
     status: "active",
   });
 
+  await logSettingsActivity(
+    user!,
+    "user.create",
+    `Created user ${email.toLowerCase()} with role ${role ?? "staff"}`,
+    email.toLowerCase(),
+    { role: role ?? "staff" }
+  );
+
   revalidatePath("/dashboard/settings");
   return { success: true };
   });
@@ -278,6 +337,13 @@ export async function updateUserRoleAction(
 
   await connectDB();
   await User.findByIdAndUpdate(userId, { role });
+  await logSettingsActivity(
+    user!,
+    "user.role_update",
+    `Updated role for user ${userId} to ${role}`,
+    userId,
+    { role }
+  );
   revalidatePath("/dashboard/settings");
   return { success: true };
   });
@@ -293,7 +359,14 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
   }
 
   await connectDB();
+  const target = await User.findById(userId).select("email").lean();
   await User.findByIdAndDelete(userId);
+  await logSettingsActivity(
+    user!,
+    "user.delete",
+    `Deleted user ${target?.email ?? userId}`,
+    userId
+  );
   revalidatePath("/dashboard/settings");
   return { success: true };
   });

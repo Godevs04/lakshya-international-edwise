@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Bell,
@@ -12,6 +13,7 @@ import {
   LogOut,
   User,
   Search,
+  CheckCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,16 +27,42 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils/format";
 import { GlobalSearch } from "@/components/dashboard/global-search";
-import { useState } from "react";
+import {
+  markAllNotificationsReadAction,
+  markNotificationReadAction,
+  type ClientNotification,
+} from "@/lib/actions/notification.actions";
+import { useState, useTransition } from "react";
+import { formatDistanceToNow } from "date-fns";
 
 interface TopbarProps {
   unreadCount?: number;
+  notifications?: ClientNotification[];
 }
 
-export function Topbar({ unreadCount = 0 }: TopbarProps) {
+export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
   const { data: session } = useSession();
   const { setTheme } = useTheme();
+  const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  function handleNotificationClick(notification: ClientNotification) {
+    startTransition(async () => {
+      if (!notification.read) {
+        await markNotificationReadAction(notification.id);
+      }
+      if (notification.link) {
+        router.push(notification.link);
+      }
+    });
+  }
+
+  function handleMarkAllRead() {
+    startTransition(async () => {
+      await markAllNotificationsReadAction();
+    });
+  }
 
   return (
     <>
@@ -68,10 +96,49 @@ export function Topbar({ unreadCount = 0 }: TopbarProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[min(calc(100vw-2rem),20rem)] rounded-2xl border-[#6D5EF7]/10 bg-white/95 backdrop-blur-xl">
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="font-semibold">Notifications</DropdownMenuLabel>
-                <DropdownMenuItem disabled className="text-muted-foreground">
-                  No new notifications
-                </DropdownMenuItem>
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <DropdownMenuLabel className="p-0 font-semibold">
+                    Notifications
+                  </DropdownMenuLabel>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleMarkAllRead}
+                      disabled={pending}
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      <CheckCheck className="h-3 w-3" />
+                      Mark all read
+                    </button>
+                  )}
+                </div>
+                {notifications.length === 0 ? (
+                  <DropdownMenuItem disabled className="text-muted-foreground">
+                    No new notifications
+                  </DropdownMenuItem>
+                ) : (
+                  notifications.map((notification) => (
+                    <DropdownMenuItem
+                      key={notification.id}
+                      className="cursor-pointer flex-col items-start gap-0.5 py-2"
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      <span
+                        className={`text-sm font-medium ${notification.read ? "text-muted-foreground" : "text-foreground"}`}
+                      >
+                        {notification.title}
+                      </span>
+                      <span className="line-clamp-2 text-xs text-muted-foreground">
+                        {notification.body}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/80">
+                        {formatDistanceToNow(new Date(notification.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </DropdownMenuItem>
+                  ))
+                )}
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>

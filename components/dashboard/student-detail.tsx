@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GlassCard } from "@/components/cards/glass-card";
@@ -63,11 +63,11 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
     const formData = new FormData(e.currentTarget);
     const result = await addStudentNoteAction(student._id, formData);
     if (result.success) {
-      toast.success("Note added");
+      notify.success("Note added");
       (e.target as HTMLFormElement).reset();
       router.refresh();
     } else {
-      toast.error(result.error);
+      notify.error(result.error ?? "Failed to add note");
     }
     setNoteLoading(false);
   }

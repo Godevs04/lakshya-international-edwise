@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { uploadFileToCloudinary } from "@/lib/utils/cloudinary-client";
 import { addStudentDocumentAction } from "@/lib/actions/student.actions";
@@ -25,7 +25,7 @@ export function DocumentUpload({ studentId }: DocumentUploadProps) {
     try {
       const uploadResult = await uploadFileToCloudinary(file, "students");
       if (!uploadResult.success) {
-        toast.error(uploadResult.error);
+        notify.error(uploadResult.error);
         return;
       }
 
@@ -37,10 +37,10 @@ export function DocumentUpload({ studentId }: DocumentUploadProps) {
       });
 
       if (docResult.success) {
-        toast.success("Document uploaded");
+        notify.success("Document uploaded");
         router.refresh();
       } else {
-        toast.error(docResult.error ?? "Could not save document");
+        notify.error(docResult.error ?? "Could not save document");
       }
     } finally {
       setUploading(false);

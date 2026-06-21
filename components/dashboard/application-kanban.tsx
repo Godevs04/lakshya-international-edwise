@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import {
   DndContext,
   DragOverlay,
@@ -123,10 +123,10 @@ export function ApplicationKanban({
 
     const result = await updateApplicationStatusAction(appId, newStatus);
     if (result.success) {
-      toast.success("Status updated");
+      notify.success("Status updated");
       router.refresh();
     } else {
-      toast.error(result.error);
+      notify.error(result.error ?? "Failed to update status");
       setApps(initialApps);
     }
   }

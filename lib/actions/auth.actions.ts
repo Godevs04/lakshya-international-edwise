@@ -91,6 +91,14 @@ export async function registerAction(
     };
   }
 
+  const { notifyAdmins } = await import("@/lib/services/notification.service");
+  await notifyAdmins({
+    title: "New registration pending",
+    body: `${parsed.data.name} (${email}) registered and awaits approval.`,
+    link: "/dashboard/settings",
+    type: "info",
+  });
+
   return { success: true, data: undefined, code: "OTP_SENT" };
   });
 }
@@ -299,7 +307,7 @@ export async function verifyEmailAction(token: string): Promise<ActionResult> {
   return runLoggedMutation("verifyEmailAction", async () => {
   await connectDB();
   const user = await User.findOne({
-    verifyToken: token,
+    verifyToken: hashToken(token),
     verifyTokenExpiry: { $gt: new Date() },
   });
 

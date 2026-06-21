@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,10 +23,10 @@ function ResetPasswordForm() {
     formData.set("token", token);
     const result = await resetPasswordAction(formData);
     if (result.success) {
-      toast.success("Password reset successfully!");
+      notify.success("Password reset successfully!");
       router.push("/login");
     } else {
-      toast.error(result.error ?? "Failed to reset password");
+      notify.error(result.error ?? "Failed to reset password");
     }
     setLoading(false);
   }

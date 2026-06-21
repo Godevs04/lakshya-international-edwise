@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { uploadFileToCloudinary } from "@/lib/utils/cloudinary-client";
@@ -45,11 +45,11 @@ export function ImageUploadField({
     try {
       const result = await uploadFileToCloudinary(file, folder);
       if (!result.success) {
-        toast.error(result.error);
+        notify.error(result.error ?? "Upload failed");
         return;
       }
       setValue(result.data.url);
-      toast.success(variant === "image" ? "Image uploaded" : "File uploaded");
+      notify.success(variant === "image" ? "Image uploaded" : "File uploaded");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

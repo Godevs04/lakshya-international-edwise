@@ -14,19 +14,10 @@ export async function globalSearchAction(query: string): Promise<SearchResult[]>
       throw new Error("Unauthorized: insufficient permissions");
     }
 
-    const results = await globalSearch(query);
-
-    return results.filter((result) => {
-      if (result.type === "student") {
-        return hasPermission(user, PERMISSIONS.STUDENTS_READ);
-      }
-      if (result.type === "partner") {
-        return hasPermission(user, PERMISSIONS.PARTNERS_READ);
-      }
-      if (result.type === "application") {
-        return hasPermission(user, PERMISSIONS.APPLICATIONS_READ);
-      }
-      return false;
+    return globalSearch(query, {
+      students: hasPermission(user, PERMISSIONS.STUDENTS_READ),
+      partners: hasPermission(user, PERMISSIONS.PARTNERS_READ),
+      applications: hasPermission(user, PERMISSIONS.APPLICATIONS_READ),
     });
   }, []);
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,9 +20,9 @@ export default function ForgotPasswordPage() {
     const result = await forgotPasswordAction(formData);
     if (result.success) {
       setSent(true);
-      toast.success("If the email exists, a reset link has been sent.");
+      notify.success("If the email exists, a reset link has been sent.");
     } else {
-      toast.error(result.error ?? "Failed to send reset email");
+      notify.error(result.error ?? "Failed to send reset email");
     }
     setLoading(false);
   }

@@ -5,44 +5,62 @@ import { Application } from "@/models/Application";
 import { toSafeRegExp } from "@/lib/utils/sanitize";
 import type { SearchResult } from "@/types";
 
-export async function globalSearch(query: string, limit = 10): Promise<SearchResult[]> {
+export interface SearchScope {
+  students: boolean;
+  partners: boolean;
+  applications: boolean;
+}
+
+export async function globalSearch(
+  query: string,
+  scope: SearchScope,
+  limit = 10
+): Promise<SearchResult[]> {
   if (!query || query.trim().length < 2) return [];
+
+  const canSearchAnything =
+    scope.students || scope.partners || scope.applications;
+  if (!canSearchAnything) return [];
 
   await connectDB();
   const trimmed = query.trim();
   const regex = toSafeRegExp(trimmed);
 
   const [students, partners] = await Promise.all([
-    Student.find({
-      $or: [
-        { firstName: regex },
-        { lastName: regex },
-        { phone: regex },
-        { email: regex },
-        { studentId: regex },
-        { "loan.applicationNumber": regex },
-      ],
-    })
-      .limit(limit)
-      .select("_id studentId firstName lastName phone email status")
-      .lean(),
-    Partner.find({
-      $or: [
-        { companyName: regex },
-        { owner: regex },
-        { phone: regex },
-        { email: regex },
-        { gst: regex },
-      ],
-    })
-      .limit(limit)
-      .select("companyName owner phone email status")
-      .lean(),
+    scope.students
+      ? Student.find({
+          $or: [
+            { firstName: regex },
+            { lastName: regex },
+            { phone: regex },
+            { email: regex },
+            { studentId: regex },
+            { "loan.applicationNumber": regex },
+          ],
+        })
+          .limit(limit)
+          .select("_id studentId firstName lastName phone email status")
+          .lean()
+      : Promise.resolve([]),
+    scope.partners
+      ? Partner.find({
+          $or: [
+            { companyName: regex },
+            { owner: regex },
+            { phone: regex },
+            { email: regex },
+            { gst: regex },
+          ],
+        })
+          .limit(limit)
+          .select("companyName owner phone email status")
+          .lean()
+      : Promise.resolve([]),
   ]);
 
   const studentIds = students.map((s) => s._id);
   const applications =
-    studentIds.length > 0
+    scope.applications && studentIds.length > 0
       ? await Application.find({ studentId: { $in: studentIds } })
           .populate("studentId", "firstName lastName studentId")
           .limit(limit)

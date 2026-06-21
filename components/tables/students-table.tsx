@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import {
   useReactTable,
   getCoreRowModel,
@@ -138,11 +138,11 @@ export function StudentsTable({
     if (!selected.length) return;
     const result = await bulkUpdateStudentsAction(selected, "delete");
     if (result.success) {
-      toast.success("Students deleted");
+      notify.success("Students deleted");
       setSelected([]);
       router.refresh();
     } else {
-      toast.error(result.error);
+      notify.error(result.error ?? "Delete failed");
     }
   }
 

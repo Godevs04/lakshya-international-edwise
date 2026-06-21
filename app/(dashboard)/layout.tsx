@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { getAppConfig } from "@/lib/config/app-config";
 import { getUnreadNotificationCount } from "@/lib/actions/settings.actions";
+import { getNotificationsAction } from "@/lib/actions/notification.actions";
 import { Sidebar, MobileNav, MobileTopBar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { PremiumBackground } from "@/components/layout/premium-background";
@@ -18,9 +19,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const [config, unreadCount] = await Promise.all([
+  const [config, unreadCount, notifications] = await Promise.all([
     getAppConfig(),
     getUnreadNotificationCount(),
+    getNotificationsAction(),
   ]);
 
   return (
@@ -38,7 +40,7 @@ export default async function DashboardLayout({
             logo={config.company.logo}
             modules={config.modules}
           />
-          <Topbar unreadCount={unreadCount} />
+          <Topbar unreadCount={unreadCount} notifications={notifications} />
         </div>
         <main className="min-w-0 flex-1 overflow-x-hidden px-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-2 sm:px-4 lg:px-8 lg:pb-8 lg:pt-4">
           {children}

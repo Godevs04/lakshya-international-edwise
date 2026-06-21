@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,10 +21,10 @@ export function RegisterForm() {
     const email = formData.get("email") as string;
     const result = await registerAction(formData);
     if (result.success) {
-      toast.success("Check your email for a 6-digit verification code");
+      notify.success("Check your email for a 6-digit verification code");
       router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
     } else {
-      toast.error(result.error ?? "Registration failed");
+      notify.error(result.error ?? "Registration failed");
     }
     setLoading(false);
   }

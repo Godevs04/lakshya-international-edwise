@@ -38,3 +38,31 @@ export async function markAllAsRead(userId: string) {
   await connectDB();
   return Notification.updateMany({ userId, read: false }, { read: true });
 }
+
+export async function notifyAdmins(params: {
+  title: string;
+  body: string;
+  link?: string;
+  type?: "info" | "success" | "warning" | "reminder" | "system";
+}) {
+  await connectDB();
+  const { User } = await import("@/models/User");
+  const admins = await User.find({
+    role: { $in: ["super_admin", "admin"] },
+    status: "active",
+  })
+    .select("_id")
+    .lean();
+
+  await Promise.all(
+    admins.map((admin) =>
+      createNotification({
+        userId: admin._id,
+        type: params.type ?? "system",
+        title: params.title,
+        body: params.body,
+        link: params.link,
+      })
+    )
+  );
+}

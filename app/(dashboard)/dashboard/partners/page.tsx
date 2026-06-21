@@ -3,7 +3,8 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { PartnersTable } from "@/components/tables/partners-table";
 import { getPartners } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
-import { getPartnerPageAccess } from "@/lib/auth/page-access";
+import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
+import { PERMISSIONS } from "@/lib/constants/permissions";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -13,6 +14,7 @@ export default async function PartnersPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   await requireModuleEnabled("partners");
+  await requirePagePermission(PERMISSIONS.PARTNERS_READ);
 
   const params = await searchParams;
   const access = await getPartnerPageAccess();

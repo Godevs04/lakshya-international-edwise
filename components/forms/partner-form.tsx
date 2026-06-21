@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +42,7 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
         : await updatePartnerAction(partnerId!, formData);
 
     if (result.success) {
-      toast.success(mode === "create" ? "Partner created" : "Partner updated");
+      notify.success(mode === "create" ? "Partner created" : "Partner updated");
       router.push(
         mode === "create"
           ? `/dashboard/partners/${result.data?.id}`
@@ -50,7 +50,7 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
       );
       router.refresh();
     } else {
-      toast.error(result.error ?? "Something went wrong");
+      notify.error(result.error ?? "Something went wrong");
     }
     setLoading(false);
   }

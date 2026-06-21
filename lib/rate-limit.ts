@@ -1,13 +1,75 @@
-import { RateLimiterMemory } from "rate-limiter-flexible";
+import { RateLimiterMemory, RateLimiterRedis } from "rate-limiter-flexible";
+import type { RateLimiterAbstract } from "rate-limiter-flexible";
 import { headers } from "next/headers";
+import { logger } from "@/lib/logger";
 
 const limiterOptions = { duration: 900, blockDuration: 900 };
 
-const loginLimiter = new RateLimiterMemory({ points: 5, ...limiterOptions });
-const registerLimiter = new RateLimiterMemory({ points: 3, duration: 3600, blockDuration: 3600 });
-const otpVerifyLimiter = new RateLimiterMemory({ points: 5, duration: 600, blockDuration: 600 });
-const otpResendLimiter = new RateLimiterMemory({ points: 3, duration: 600, blockDuration: 600 });
-const forgotPasswordLimiter = new RateLimiterMemory({ points: 3, duration: 3600, blockDuration: 3600 });
+type LimiterConfig = { points: number; duration?: number; blockDuration?: number };
+
+function createMemoryLimiter(config: LimiterConfig): RateLimiterMemory {
+  return new RateLimiterMemory({
+    points: config.points,
+    duration: config.duration ?? limiterOptions.duration,
+    blockDuration: config.blockDuration ?? limiterOptions.blockDuration,
+  });
+}
+
+let redisClient: import("ioredis").default | null = null;
+let redisInitAttempted = false;
+
+async function getRedisClient(): Promise<import("ioredis").default | null> {
+  const redisUrl = process.env.REDIS_URL?.trim();
+  if (!redisUrl) return null;
+
+  if (redisClient) return redisClient;
+  if (redisInitAttempted) return null;
+
+  redisInitAttempted = true;
+  try {
+    const Redis = (await import("ioredis")).default;
+    redisClient = new Redis(redisUrl, {
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      lazyConnect: true,
+    });
+    await redisClient.connect();
+    logger.info("Rate limiting using Redis", { url: redisUrl.replace(/:[^:@]+@/, ":***@") });
+    return redisClient;
+  } catch (error) {
+    logger.warn("Redis unavailable for rate limiting; falling back to memory", error);
+    redisClient = null;
+    return null;
+  }
+}
+
+async function createLimiter(
+  keyPrefix: string,
+  config: LimiterConfig
+): Promise<RateLimiterAbstract> {
+  const client = await getRedisClient();
+  if (client) {
+    return new RateLimiterRedis({
+      storeClient: client,
+      keyPrefix: `rl:${keyPrefix}`,
+      points: config.points,
+      duration: config.duration ?? limiterOptions.duration,
+      blockDuration: config.blockDuration ?? limiterOptions.blockDuration,
+    });
+  }
+  return createMemoryLimiter(config);
+}
+
+const limiterConfigs: Record<RateLimitAction, LimiterConfig> = {
+  login: { points: 5, ...limiterOptions },
+  register: { points: 3, duration: 3600, blockDuration: 3600 },
+  "otp-verify": { points: 5, duration: 600, blockDuration: 600 },
+  "otp-resend": { points: 3, duration: 600, blockDuration: 600 },
+  "forgot-password": { points: 3, duration: 3600, blockDuration: 3600 },
+};
+
+const memoryLimiters: Partial<Record<RateLimitAction, RateLimiterMemory>> = {};
+const redisLimiters = new Map<RateLimitAction, RateLimiterAbstract>();
 
 export type RateLimitAction =
   | "login"
@@ -16,13 +78,21 @@ export type RateLimitAction =
   | "otp-resend"
   | "forgot-password";
 
-const limiters: Record<RateLimitAction, RateLimiterMemory> = {
-  login: loginLimiter,
-  register: registerLimiter,
-  "otp-verify": otpVerifyLimiter,
-  "otp-resend": otpResendLimiter,
-  "forgot-password": forgotPasswordLimiter,
-};
+async function getLimiter(action: RateLimitAction): Promise<RateLimiterAbstract> {
+  const client = await getRedisClient();
+  if (client) {
+    const existing = redisLimiters.get(action);
+    if (existing) return existing;
+    const limiter = await createLimiter(action, limiterConfigs[action]);
+    redisLimiters.set(action, limiter);
+    return limiter;
+  }
+
+  if (!memoryLimiters[action]) {
+    memoryLimiters[action] = createMemoryLimiter(limiterConfigs[action]);
+  }
+  return memoryLimiters[action]!;
+}
 
 export async function getClientIp(): Promise<string> {
   const headerList = await headers();
@@ -37,7 +107,7 @@ export async function checkRateLimit(
   action: RateLimitAction,
   key: string
 ): Promise<{ allowed: true } | { allowed: false; retryAfterSeconds: number }> {
-  const limiter = limiters[action];
+  const limiter = await getLimiter(action);
   const rateKey = `${action}:${key}`;
 
   try {

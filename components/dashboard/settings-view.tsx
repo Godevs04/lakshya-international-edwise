@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,10 +89,10 @@ export function SettingsView({
     const formData = new FormData(e.currentTarget);
     const result = await updateSettingsAction(formData);
     if (result.success) {
-      toast.success("Settings saved");
+      notify.success("Settings saved");
       router.refresh();
     } else {
-      toast.error(result.error ?? "Something went wrong");
+      notify.error(result.error ?? "Something went wrong");
     }
     setLoading(false);
   }
@@ -103,12 +103,12 @@ export function SettingsView({
     formData.set("role", createUserRole);
     const result = await createUserAction(formData);
     if (result.success) {
-      toast.success("User created");
+      notify.success("User created");
       (e.target as HTMLFormElement).reset();
       setCreateUserRole("staff");
       router.refresh();
     } else {
-      toast.error(result.error ?? "Something went wrong");
+      notify.error(result.error ?? "Something went wrong");
     }
   }
 
@@ -305,9 +305,9 @@ export function SettingsView({
                         onClick={async () => {
                           const result = await approveUserAction(u._id, role);
                           if (result.success) {
-                            toast.success(`${u.name} approved as ${ROLE_LABELS[role]}`);
+                            notify.success(`${u.name} approved as ${ROLE_LABELS[role]}`);
                             router.refresh();
-                          } else toast.error(result.error ?? "Something went wrong");
+                          } else notify.error(result.error ?? "Something went wrong");
                         }}
                       >
                         <UserCheck className="mr-1 h-4 w-4" /> Approve
@@ -318,9 +318,9 @@ export function SettingsView({
                         onClick={async () => {
                           const result = await rejectUserAction(u._id);
                           if (result.success) {
-                            toast.success("User rejected");
+                            notify.success("User rejected");
                             router.refresh();
-                          } else toast.error(result.error ?? "Something went wrong");
+                          } else notify.error(result.error ?? "Something went wrong");
                         }}
                       >
                         <UserX className="mr-1 h-4 w-4" /> Reject
@@ -379,8 +379,8 @@ export function SettingsView({
                       size="sm"
                       onClick={async () => {
                         const result = await deleteUserAction(u._id);
-                        if (result.success) { toast.success("User deleted"); router.refresh(); }
-                        else toast.error(result.error ?? "Something went wrong");
+                        if (result.success) { notify.success("User deleted"); router.refresh(); }
+                        else notify.error(result.error ?? "Something went wrong");
                       }}
                     >
                       Delete

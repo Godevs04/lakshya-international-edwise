@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
@@ -26,10 +26,10 @@ export default function ProfilePage() {
     const formData = new FormData(e.currentTarget);
     const result = await updateProfileAction(formData);
     if (result.success) {
-      toast.success("Profile updated");
+      notify.success("Profile updated");
       router.refresh();
     } else {
-      toast.error(result.error);
+      notify.error(result.error ?? "Something went wrong");
     }
     setLoading(false);
   }

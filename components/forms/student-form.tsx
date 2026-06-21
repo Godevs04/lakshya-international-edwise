@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,7 +55,7 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
         : await updateStudentAction(studentId!, formData);
 
     if (result.success) {
-      toast.success(mode === "create" ? "Student created" : "Student updated");
+      notify.success(mode === "create" ? "Student created" : "Student updated");
       router.push(
         mode === "create"
           ? `/dashboard/students/${result.data?.id}`
@@ -63,7 +63,7 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
       );
       router.refresh();
     } else {
-      toast.error(result.error ?? "Something went wrong");
+      notify.error(result.error ?? "Something went wrong");
     }
     setLoading(false);
   }

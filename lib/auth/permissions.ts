@@ -25,6 +25,16 @@ export function hasAnyPermission(
   return permissions.some((p) => hasPermission(user, p));
 }
 
+const ROUTE_PERMISSIONS: { prefix: string; permission: string }[] = [
+  { prefix: "/dashboard/students", permission: "students:read" },
+  { prefix: "/dashboard/partners", permission: "partners:read" },
+  { prefix: "/dashboard/applications", permission: "applications:read" },
+  { prefix: "/dashboard/reports", permission: "reports:read" },
+  { prefix: "/dashboard/analytics", permission: "analytics:read" },
+  { prefix: "/dashboard/settings", permission: "settings:read" },
+  { prefix: "/dashboard/audit", permission: "audit:read" },
+];
+
 export function canAccessRoute(
   user: SessionUser | null | undefined,
   route: string
@@ -32,13 +42,7 @@ export function canAccessRoute(
   if (!user) return false;
   if (user.role === "super_admin") return true;
 
-  const routePermissions: Record<string, string> = {
-    "/dashboard/settings": "settings:read",
-    "/dashboard/reports": "reports:read",
-    "/dashboard/analytics": "analytics:read",
-  };
-
-  for (const [prefix, permission] of Object.entries(routePermissions)) {
+  for (const { prefix, permission } of ROUTE_PERMISSIONS) {
     if (route.startsWith(prefix)) {
       return hasPermission(user, permission);
     }

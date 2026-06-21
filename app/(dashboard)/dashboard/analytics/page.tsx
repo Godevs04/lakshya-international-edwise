@@ -10,9 +10,12 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { getAnalyticsDashboardAction } from "@/lib/actions/analytics.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
+import { requirePagePermission } from "@/lib/auth/page-access";
+import { PERMISSIONS } from "@/lib/constants/permissions";
 
 export default async function AnalyticsPage() {
   await requireModuleEnabled("analytics");
+  await requirePagePermission(PERMISSIONS.ANALYTICS_READ);
 
   const { funnel, trends, revenue, demographics, heatmap, partners, loanDist } =
     await getAnalyticsDashboardAction();

@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,10 +27,10 @@ function VerifyOtpForm() {
 
     const result = await verifyOtpAction(email, otp);
     if (result.success) {
-      toast.success("Email verified successfully!");
+      notify.success("Email verified successfully!");
       router.push("/pending-approval");
     } else {
-      toast.error(result.error);
+      notify.error(result.error ?? "Verification failed");
     }
     setLoading(false);
   }
@@ -39,15 +39,15 @@ function VerifyOtpForm() {
     const emailInput = document.getElementById("email") as HTMLInputElement | null;
     const email = emailInput?.value;
     if (!email) {
-      toast.error("Enter your email first");
+      notify.error("Enter your email first");
       return;
     }
     setResending(true);
     const result = await resendOtpAction(email);
     if (result.success) {
-      toast.success("A new OTP has been sent to your email");
+      notify.success("A new OTP has been sent to your email");
     } else {
-      toast.error(result.error);
+      notify.error(result.error ?? "Could not resend OTP");
     }
     setResending(false);
   }

@@ -2,7 +2,8 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ApplicationKanban } from "@/components/dashboard/application-kanban";
 import { getApplications } from "@/lib/actions/application.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
-import { getApplicationPageAccess } from "@/lib/auth/page-access";
+import { getApplicationPageAccess, requirePagePermission } from "@/lib/auth/page-access";
+import { PERMISSIONS } from "@/lib/constants/permissions";
 
 export default async function ApplicationsPage({
   searchParams,
@@ -10,6 +11,7 @@ export default async function ApplicationsPage({
   searchParams: Promise<{ page?: string; view?: string; search?: string }>;
 }) {
   await requireModuleEnabled("applications");
+  await requirePagePermission(PERMISSIONS.APPLICATIONS_READ);
 
   const params = await searchParams;
   const view = params.view === "table" ? "table" : "kanban";
