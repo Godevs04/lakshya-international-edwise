@@ -67,8 +67,6 @@ export async function updateSettingsAction(
 
   await connectDB();
   const defaults = getDefaultSettings();
-  const existingDoc = await Settings.findOne().lean();
-  const existing = existingDoc ?? defaults;
 
   if (section === "company") {
     const parsed = settingsSchema.safeParse({
@@ -98,32 +96,6 @@ export async function updateSettingsAction(
             phone: data.companyPhone ?? "",
             address: data.companyAddress ?? "",
             logo: data.companyLogo ?? "",
-          },
-        },
-      },
-      { upsert: true }
-    );
-  } else if (section === "theme") {
-    const parsed = settingsSchema.safeParse({
-      themePrimary: raw.themePrimary,
-      themeAccent: raw.themeAccent,
-      themeRadius: raw.themeRadius,
-      themeMode: raw.themeMode,
-    });
-    if (!parsed.success) {
-      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-    }
-    const data = parsed.data;
-    await Settings.findOneAndUpdate(
-      {},
-      {
-        $set: {
-          theme: {
-            primary: data.themePrimary?.trim() || existing.theme?.primary || defaults.theme.primary,
-            accent: data.themeAccent?.trim() || existing.theme?.accent || defaults.theme.accent,
-            radius: data.themeRadius?.trim() || existing.theme?.radius || defaults.theme.radius,
-            fontFamily: existing.theme?.fontFamily || defaults.theme.fontFamily,
-            mode: data.themeMode ?? existing.theme?.mode ?? defaults.theme.mode,
           },
         },
       },

@@ -12,7 +12,14 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import { studentSchema, noteSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
-import { encryptSensitiveField, maskAadhaar, maskPan } from "@/lib/utils/pii";
+import {
+  formatAadhaarForEdit,
+  normalizeAadhaar,
+  normalizeIndianPhone,
+  normalizePan,
+  normalizePincode,
+} from "@/lib/validations/indian-fields";
+import { encryptSensitiveField, maskAadhaar, maskPan, safeDecrypt } from "@/lib/utils/pii";
 import { generateStudentId } from "@/lib/utils/format";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
@@ -118,8 +125,8 @@ export async function getStudentForEdit(id: string) {
 
   return {
     ...student,
-    aadhaar: maskAadhaar(student.aadhaar),
-    pan: maskPan(student.pan),
+    aadhaar: formatAadhaarForEdit(safeDecrypt(student.aadhaar)),
+    pan: normalizePan(safeDecrypt(student.pan)),
   };
   }, null);
 }
@@ -153,18 +160,20 @@ export async function createStudentAction(
     lastName: sanitizeText(data.lastName),
     gender: data.gender,
     dob: data.dob ? new Date(data.dob) : undefined,
-    phone: data.phone,
-    whatsapp: data.whatsapp,
+    phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
+    whatsapp: data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined,
     email: data.email,
     photo: data.photo,
     address: {
       line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
       city: data.city,
       state: data.state,
-      pincode: data.pincode,
+      pincode: data.pincode?.trim() ? normalizePincode(data.pincode) : undefined,
     },
-    aadhaar: data.aadhaar ? encryptSensitiveField(data.aadhaar) : undefined,
-    pan: data.pan ? encryptSensitiveField(data.pan) : undefined,
+    aadhaar: data.aadhaar?.trim()
+      ? encryptSensitiveField(normalizeAadhaar(data.aadhaar))
+      : undefined,
+    pan: data.pan?.trim() ? encryptSensitiveField(normalizePan(data.pan)) : undefined,
     education: {
       college: data.college,
       course: data.course,
@@ -245,8 +254,8 @@ export async function updateStudentAction(
   existing.lastName = sanitizeText(data.lastName);
   existing.gender = data.gender;
   existing.dob = data.dob ? new Date(data.dob) : existing.dob;
-  existing.phone = data.phone;
-  existing.whatsapp = data.whatsapp;
+  existing.phone = data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined;
+  existing.whatsapp = data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined;
   existing.email = data.email;
   if (data.photo) existing.photo = data.photo;
   else if (raw.photo === "") existing.photo = undefined;
@@ -254,10 +263,18 @@ export async function updateStudentAction(
     line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
     city: data.city,
     state: data.state,
-    pincode: data.pincode,
+    pincode: data.pincode?.trim() ? normalizePincode(data.pincode) : undefined,
   };
-  existing.aadhaar = encryptSensitiveField(data.aadhaar, existing.aadhaar) ?? existing.aadhaar;
-  existing.pan = encryptSensitiveField(data.pan, existing.pan) ?? existing.pan;
+  if (data.aadhaar?.trim()) {
+    existing.aadhaar = encryptSensitiveField(normalizeAadhaar(data.aadhaar));
+  } else if (raw.aadhaar === "") {
+    existing.aadhaar = undefined;
+  }
+  if (data.pan?.trim()) {
+    existing.pan = encryptSensitiveField(normalizePan(data.pan));
+  } else if (raw.pan === "") {
+    existing.pan = undefined;
+  }
   existing.education = { college: data.college, course: data.course, year: data.year };
   existing.loan = {
     requested: data.loanRequested ?? 0,

@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PartnerForm } from "@/components/forms/partner-form";
-import { getPartnerById } from "@/lib/actions/partner.actions";
+import { getPartnerForEdit } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess } from "@/lib/auth/page-access";
 
@@ -17,7 +17,7 @@ export default async function EditPartnerPage({
   }
 
   const { id } = await params;
-  const partner = await getPartnerById(id);
+  const partner = await getPartnerForEdit(id);
   if (!partner) notFound();
 
   return (

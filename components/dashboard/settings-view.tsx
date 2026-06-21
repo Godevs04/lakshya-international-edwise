@@ -79,7 +79,6 @@ export function SettingsView({
 }: SettingsViewProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [themeMode, setThemeMode] = useState(settings.theme.mode);
   const [modules, setModules] = useState<AppModules>(settings.modules);
   const [createUserRole, setCreateUserRole] = useState<UserRole>("staff");
   const [approvalRoles, setApprovalRoles] = useState<Record<string, UserRole>>({});
@@ -93,7 +92,7 @@ export function SettingsView({
       toast.success("Settings saved");
       router.refresh();
     } else {
-      toast.error(result.error);
+      toast.error(result.error ?? "Something went wrong");
     }
     setLoading(false);
   }
@@ -109,7 +108,7 @@ export function SettingsView({
       setCreateUserRole("staff");
       router.refresh();
     } else {
-      toast.error(result.error);
+      toast.error(result.error ?? "Something went wrong");
     }
   }
 
@@ -118,7 +117,6 @@ export function SettingsView({
       <div className="scrollbar-hide -mx-1 overflow-x-auto px-1 pb-1">
         <TabsList className="min-w-max">
         <TabsTrigger value="company">Company</TabsTrigger>
-        <TabsTrigger value="theme">Theme</TabsTrigger>
         <TabsTrigger value="modules">Modules</TabsTrigger>
         {canWriteSettings && <TabsTrigger value="security">Security</TabsTrigger>}
         {canManageUsers && <TabsTrigger value="users">Users</TabsTrigger>}
@@ -198,45 +196,6 @@ export function SettingsView({
             </Button>
           </form>
         </FormSection>
-      </TabsContent>
-
-      <TabsContent value="theme" className="mt-4">
-        <GlassCard className="p-6">
-          <form onSubmit={handleSettingsSubmit} className="space-y-4">
-            <input type="hidden" name="settingsSection" value="theme" />
-            <input type="hidden" name="themeMode" value={themeMode} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="themePrimary">Primary Color</Label>
-                <Input id="themePrimary" name="themePrimary" defaultValue={settings.theme.primary} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="themeAccent">Accent Color</Label>
-                <Input id="themeAccent" name="themeAccent" defaultValue={settings.theme.accent} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="themeRadius">Border Radius</Label>
-                <Input id="themeRadius" name="themeRadius" defaultValue={settings.theme.radius} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="themeMode">Theme Mode</Label>
-                <Select value={themeMode} onValueChange={(value) => setThemeMode(value as AppSettings["theme"]["mode"])}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button type="submit" disabled={loading || !canWriteSettings}>
-              {canWriteSettings ? "Save Theme" : "View only"}
-            </Button>
-          </form>
-        </GlassCard>
       </TabsContent>
 
       <TabsContent value="modules" className="mt-4">
@@ -348,7 +307,7 @@ export function SettingsView({
                           if (result.success) {
                             toast.success(`${u.name} approved as ${ROLE_LABELS[role]}`);
                             router.refresh();
-                          } else toast.error(result.error);
+                          } else toast.error(result.error ?? "Something went wrong");
                         }}
                       >
                         <UserCheck className="mr-1 h-4 w-4" /> Approve
@@ -361,7 +320,7 @@ export function SettingsView({
                           if (result.success) {
                             toast.success("User rejected");
                             router.refresh();
-                          } else toast.error(result.error);
+                          } else toast.error(result.error ?? "Something went wrong");
                         }}
                       >
                         <UserX className="mr-1 h-4 w-4" /> Reject
@@ -421,7 +380,7 @@ export function SettingsView({
                       onClick={async () => {
                         const result = await deleteUserAction(u._id);
                         if (result.success) { toast.success("User deleted"); router.refresh(); }
-                        else toast.error(result.error);
+                        else toast.error(result.error ?? "Something went wrong");
                       }}
                     >
                       Delete

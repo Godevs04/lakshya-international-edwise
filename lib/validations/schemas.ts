@@ -1,4 +1,67 @@
 import { z } from "zod";
+import {
+  isBlank,
+  isValidAadhaar,
+  isValidIfsc,
+  isValidIndianPhone,
+  isValidPan,
+  isValidPincode,
+} from "@/lib/validations/indian-fields";
+
+function refineIndianFields(
+  data: {
+    phone?: string;
+    whatsapp?: string;
+    pincode?: string;
+    aadhaar?: string;
+    pan?: string;
+    ifsc?: string;
+  },
+  ctx: z.RefinementCtx
+) {
+  if (!isBlank(data.phone) && !isValidIndianPhone(data.phone!)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Phone must be a valid 10-digit Indian mobile number",
+      path: ["phone"],
+    });
+  }
+  if (!isBlank(data.whatsapp) && !isValidIndianPhone(data.whatsapp!)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "WhatsApp must be a valid 10-digit Indian mobile number",
+      path: ["whatsapp"],
+    });
+  }
+  if (!isBlank(data.pincode) && !isValidPincode(data.pincode!)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Pincode must be exactly 6 digits",
+      path: ["pincode"],
+    });
+  }
+  if (!isBlank(data.aadhaar) && !isValidAadhaar(data.aadhaar!)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Aadhaar must be exactly 12 digits (numbers only)",
+      path: ["aadhaar"],
+    });
+  }
+  if (!isBlank(data.pan) && !isValidPan(data.pan!)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "PAN must be 10 characters: 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F)",
+      path: ["pan"],
+    });
+  }
+  if (!isBlank(data.ifsc) && !isValidIfsc(data.ifsc!)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "IFSC must be 11 characters (e.g. SBIN0001234)",
+      path: ["ifsc"],
+    });
+  }
+}
 
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -64,6 +127,8 @@ export const studentSchema = z.object({
   ]).optional(),
   remarks: z.string().optional(),
   photo: z.string().optional(),
+}).superRefine((data, ctx) => {
+  refineIndianFields(data, ctx);
 });
 
 export const partnerSchema = z.object({
@@ -82,6 +147,8 @@ export const partnerSchema = z.object({
   photo: z.string().optional(),
   companyLogo: z.string().optional(),
   agreementUrl: z.string().optional(),
+}).superRefine((data, ctx) => {
+  refineIndianFields(data, ctx);
 });
 
 export const noteSchema = z.object({
@@ -95,10 +162,6 @@ export const settingsSchema = z.object({
   companyPhone: z.string().optional(),
   companyAddress: z.string().optional(),
   companyLogo: z.string().optional(),
-  themePrimary: z.string().optional(),
-  themeAccent: z.string().optional(),
-  themeRadius: z.string().optional(),
-  themeMode: z.enum(["light", "dark", "system"]).optional(),
   modulesStudents: z.boolean().optional(),
   modulesPartners: z.boolean().optional(),
   modulesApplications: z.boolean().optional(),

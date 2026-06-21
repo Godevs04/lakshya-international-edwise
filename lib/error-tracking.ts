@@ -1,4 +1,8 @@
 import { logger } from "@/lib/logger";
+import {
+  getSentryDsn,
+  getSentryTracesSampleRate,
+} from "@/lib/config/sentry-env";
 
 let initialized = false;
 
@@ -9,7 +13,7 @@ export async function initErrorTracking(): Promise<void> {
 
   initialized = true;
 
-  const dsn = process.env.SENTRY_DSN?.trim();
+  const dsn = getSentryDsn();
   if (!dsn) {
     return;
   }
@@ -19,7 +23,7 @@ export async function initErrorTracking(): Promise<void> {
     Sentry.init({
       dsn,
       environment: process.env.NODE_ENV ?? "development",
-      tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 0,
+      tracesSampleRate: getSentryTracesSampleRate(),
     });
     logger.info("Sentry error tracking initialized");
   } catch (error) {
@@ -31,7 +35,7 @@ export async function captureException(
   error: unknown,
   context?: Record<string, unknown>
 ): Promise<void> {
-  const dsn = process.env.SENTRY_DSN?.trim();
+  const dsn = getSentryDsn();
   if (!dsn || typeof window !== "undefined") {
     return;
   }

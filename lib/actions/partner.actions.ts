@@ -11,8 +11,12 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import { partnerSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
-import { encryptSensitiveField, maskBankAccount } from "@/lib/utils/pii";
+import { encryptSensitiveField, maskBankAccount, safeDecrypt } from "@/lib/utils/pii";
 import { validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
+import {
+  normalizeIfsc,
+  normalizeIndianPhone,
+} from "@/lib/validations/indian-fields";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
@@ -90,6 +94,30 @@ export async function getPartnerById(id: string) {
   }, null);
 }
 
+export async function getPartnerForEdit(id: string) {
+  return runLoggedQuery("getPartnerForEdit", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+  await connectDB();
+  const partner = await Partner.findById(id).lean();
+  if (!partner) return null;
+
+  return {
+    ...partner,
+    bankDetails: partner.bankDetails
+      ? {
+          ...partner.bankDetails,
+          accountNumber: safeDecrypt(partner.bankDetails.accountNumber) || undefined,
+          ifsc: partner.bankDetails.ifsc
+            ? normalizeIfsc(partner.bankDetails.ifsc)
+            : undefined,
+        }
+      : partner.bankDetails,
+  };
+  }, null);
+}
+
 export async function getPartnerStudents(partnerId: string) {
   return runLoggedQuery("getPartnerStudents", async () => {
   const user = await getSessionUser();
@@ -134,17 +162,17 @@ export async function createPartnerAction(
   const partner = await Partner.create({
     companyName: sanitizeText(data.companyName),
     owner: data.owner ? sanitizeText(data.owner) : undefined,
-    phone: data.phone,
+    phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
     email: data.email,
     address: data.address ? sanitizeText(data.address) : undefined,
-    gst: data.gst,
+    gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
     commissionPercent: data.commissionPercent ?? 0,
     bankDetails: {
       accountName: data.accountName,
-      accountNumber: data.accountNumber
-        ? encryptSensitiveField(data.accountNumber)
+      accountNumber: data.accountNumber?.trim()
+        ? encryptSensitiveField(data.accountNumber.trim())
         : undefined,
-      ifsc: data.ifsc,
+      ifsc: data.ifsc?.trim() ? normalizeIfsc(data.ifsc) : undefined,
       bankName: data.bankName,
     },
     status: data.status ?? "active",
@@ -198,17 +226,20 @@ export async function updatePartnerAction(
     {
       companyName: sanitizeText(data.companyName),
       owner: data.owner ? sanitizeText(data.owner) : undefined,
-      phone: data.phone,
+      phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
       email: data.email,
       address: data.address ? sanitizeText(data.address) : undefined,
-      gst: data.gst,
+      gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
       commissionPercent: data.commissionPercent ?? 0,
       bankDetails: {
         accountName: data.accountName,
-        accountNumber:
-          encryptSensitiveField(data.accountNumber, existing.bankDetails?.accountNumber) ??
-          existing.bankDetails?.accountNumber,
-        ifsc: data.ifsc,
+        accountNumber: data.accountNumber?.trim()
+          ? encryptSensitiveField(data.accountNumber.trim())
+          : raw.accountNumber === ""
+            ? undefined
+            : encryptSensitiveField(data.accountNumber, existing.bankDetails?.accountNumber) ??
+              existing.bankDetails?.accountNumber,
+        ifsc: data.ifsc?.trim() ? normalizeIfsc(data.ifsc) : undefined,
         bankName: data.bankName,
       },
       status: data.status,

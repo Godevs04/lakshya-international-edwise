@@ -1,4 +1,10 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+import {
+  getSentryOrg,
+  getSentryProject,
+  isSentryBuildConfigured,
+} from "@/lib/config/sentry-env";
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -19,6 +25,8 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://res.cloudinary.com",
       "font-src 'self' data:",
       "connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io",
+      "worker-src 'self'",
+      "manifest-src 'self'",
       "frame-ancestors 'self'",
     ].join("; "),
   },
@@ -40,4 +48,24 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const sentryOrg = getSentryOrg();
+const sentryProject = getSentryProject();
+
+const config = isSentryBuildConfigured()
+  ? withSentryConfig(nextConfig, {
+      org: sentryOrg!,
+      project: sentryProject!,
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      tunnelRoute: "/monitoring",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      webpack: {
+        automaticVercelMonitors: true,
+        treeshake: {
+          removeDebugLogging: true,
+        },
+      },
+    })
+  : nextConfig;
+
+export default config;

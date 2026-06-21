@@ -31,6 +31,10 @@ interface StudentFormProps {
   mode: "create" | "edit";
 }
 
+const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optional.";
+const AADHAAR_HINT = "Exactly 12 digits, numbers only.";
+const PAN_HINT = "Format: ABCDE1234F (5 letters, 4 digits, 1 letter).";
+
 export function StudentForm({ partners, initialData, studentId, mode }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -117,11 +121,29 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" defaultValue={initialData?.phone as string} />
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={13}
+              placeholder="9363047040"
+              defaultValue={initialData?.phone as string}
+            />
+            <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="whatsapp">WhatsApp</Label>
-            <Input id="whatsapp" name="whatsapp" defaultValue={initialData?.whatsapp as string} />
+            <Input
+              id="whatsapp"
+              name="whatsapp"
+              type="tel"
+              inputMode="numeric"
+              maxLength={13}
+              placeholder="9363047040"
+              defaultValue={initialData?.whatsapp as string}
+            />
+            <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -158,7 +180,15 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
           </div>
           <div className="space-y-2">
             <Label htmlFor="pincode">Pincode</Label>
-            <Input id="pincode" name="pincode" defaultValue={initialData?.pincode as string} />
+            <Input
+              id="pincode"
+              name="pincode"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="600001"
+              defaultValue={initialData?.pincode as string}
+            />
+            <p className="text-xs text-muted-foreground">6-digit Indian postal code.</p>
           </div>
         </div>
       </FormSection>
@@ -173,21 +203,25 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Input
               id="aadhaar"
               name="aadhaar"
+              inputMode="numeric"
+              maxLength={14}
+              placeholder="1234 5678 9012"
               defaultValue={initialData?.aadhaar as string}
-              placeholder="Leave blank to keep current"
+              className="font-mono"
             />
-            <p className="text-xs text-muted-foreground">
-              Masked values are shown for security. Enter a new number to replace.
-            </p>
+            <p className="text-xs text-muted-foreground">{AADHAAR_HINT}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="pan">PAN</Label>
             <Input
               id="pan"
               name="pan"
+              maxLength={10}
+              placeholder="ABCDE1234F"
               defaultValue={initialData?.pan as string}
-              placeholder="Leave blank to keep current"
+              className="font-mono uppercase"
             />
+            <p className="text-xs text-muted-foreground">{PAN_HINT}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="college">College</Label>

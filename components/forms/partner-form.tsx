@@ -25,6 +25,8 @@ interface PartnerFormProps {
   mode: "create" | "edit";
 }
 
+const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optional.";
+
 export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -83,7 +85,16 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" defaultValue={initialData?.phone as string} />
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={13}
+              placeholder="9363047040"
+              defaultValue={initialData?.phone as string}
+            />
+            <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -148,16 +159,25 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
             <Input
               id="accountNumber"
               name="accountNumber"
+              inputMode="numeric"
               defaultValue={initialData?.accountNumber as string}
-              placeholder="Leave blank to keep current"
+              placeholder="Enter full account number"
             />
             <p className="text-xs text-muted-foreground">
-              Stored encrypted. Masked value shown when editing.
+              Stored encrypted. Full number shown when editing.
             </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="ifsc">IFSC</Label>
-            <Input id="ifsc" name="ifsc" defaultValue={initialData?.ifsc as string} />
+            <Input
+              id="ifsc"
+              name="ifsc"
+              maxLength={11}
+              placeholder="SBIN0001234"
+              defaultValue={initialData?.ifsc as string}
+              className="font-mono uppercase"
+            />
+            <p className="text-xs text-muted-foreground">11 characters (e.g. SBIN0001234).</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="bankName">Bank Name</Label>

@@ -30,8 +30,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
         unstyled: true,
         classNames: {
           toast: cn(
-            "cn-toast group/toast relative flex w-[min(100vw-2rem,300px)] items-start gap-3",
-            "rounded-lg border border-[#E8E4DC] bg-white px-4 pb-3.5 pt-4 pr-9",
+            "cn-toast group/toast relative flex w-[min(100vw-2rem,300px)] items-start gap-3 overflow-hidden",
+            "rounded-lg border border-[#E8E4DC] border-t-0 bg-white px-4 pb-3.5 pt-4 pr-9",
             "shadow-[0_2px_8px_rgba(11,31,58,0.04),0_8px_24px_rgba(11,31,58,0.06)]",
             "dark:border-white/[0.08] dark:bg-[#0f1729]",
             "dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]",
