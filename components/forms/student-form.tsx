@@ -297,6 +297,28 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
               defaultValue={initialData?.applicationNumber as string}
             />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="commissionPercentOverride">Partner Commission Override (%)</Label>
+            <Input
+              id="commissionPercentOverride"
+              name="commissionPercentOverride"
+              type="number"
+              step="0.01"
+              min={0}
+              max={100}
+              inputMode="decimal"
+              placeholder={
+                partnerId
+                  ? `Leave blank to use partner default${selectedPartner ? ` (${selectedPartner.companyName})` : ""}`
+                  : "Optional — set after selecting a partner"
+              }
+              defaultValue={initialData?.commissionPercentOverride as number | undefined}
+              disabled={!partnerId}
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional custom rate for this student. Overrides the partner&apos;s default commission.
+            </p>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="partnerId">Partner</Label>
             <Select value={partnerId} onValueChange={(v) => setPartnerId(v ?? "")}>

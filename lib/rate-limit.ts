@@ -128,6 +128,24 @@ export async function checkRateLimit(
   }
 }
 
+export async function getRateLimitRetryAfter(
+  action: RateLimitAction,
+  key: string
+): Promise<number | null> {
+  const limiter = await getLimiter(action);
+  const rateKey = `${action}:${key}`;
+
+  try {
+    const state = await limiter.get(rateKey);
+    if (!state || state.remainingPoints > 0) {
+      return null;
+    }
+    return Math.ceil(state.msBeforeNext / 1000);
+  } catch {
+    return null;
+  }
+}
+
 export async function enforceUserRateLimit(
   action: Extract<RateLimitAction, "search" | "upload" | "import">,
   userId: string

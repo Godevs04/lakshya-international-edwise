@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GlassCard } from "@/components/cards/glass-card";
-import { validateLoginAction } from "@/lib/actions/auth.actions";
+import { getLoginFailureReasonAction } from "@/lib/actions/auth.actions";
 
 interface LoginFormProps {
   allowRegistration?: boolean;
@@ -28,22 +28,6 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
     const password = formData.get("password") as string;
 
     try {
-      const validation = await validateLoginAction(email, password);
-      if (!validation.success) {
-        if (validation.code === "UNVERIFIED") {
-          notify.error(validation.error ?? "Please verify your email to continue.");
-          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
-          return;
-        }
-        if (validation.code === "PENDING") {
-          notify.info(validation.error ?? "Your account is pending approval.");
-          router.push("/pending-approval");
-          return;
-        }
-        notify.error(validation.error ?? "Invalid email or password");
-        return;
-      }
-
       const result = await signIn("credentials", {
         email,
         password,
@@ -52,14 +36,26 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
       });
 
       if (result?.error) {
-        notify.error("Invalid email or password");
-      } else {
-        notify.success("Welcome back", {
-          description: "Signed in to your workspace.",
-        });
-        router.push("/dashboard/overview");
-        router.refresh();
+        const reason = await getLoginFailureReasonAction(email);
+        if (reason.code === "UNVERIFIED") {
+          notify.error(reason.error ?? "Please verify your email to continue.");
+          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        if (reason.code === "PENDING") {
+          notify.info(reason.error ?? "Your account is pending approval.");
+          router.push("/pending-approval");
+          return;
+        }
+        notify.error(reason.error ?? "Invalid email or password");
+        return;
       }
+
+      notify.success("Welcome back", {
+        description: "Signed in to your workspace.",
+      });
+      router.push("/dashboard/overview");
+      router.refresh();
     } finally {
       setLoading(false);
     }

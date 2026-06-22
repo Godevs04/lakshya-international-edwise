@@ -27,6 +27,7 @@ export async function getReportData(
             studentsCount: 1,
             totalLoanValue: 1,
             commissionPercent: 1,
+            commissionSettled: "$performance.commissionSettled",
             status: 1,
           },
         },
@@ -51,6 +52,7 @@ export async function getReportData(
       const rows = partners.map((partner) => ({
         ...partner,
         commissionEarned: commissionMap.get(String(partner._id)) ?? 0,
+        commissionSettled: Number(partner.commissionSettled ?? 0),
       }));
 
       return formatReportRows(reportType, rows);

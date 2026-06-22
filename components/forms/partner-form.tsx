@@ -110,10 +110,14 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
               id="commissionPercent"
               name="commissionPercent"
               type="number"
+              step="0.01"
+              min={0}
+              max={100}
+              inputMode="decimal"
               defaultValue={initialData?.commissionPercent as number}
             />
             <p className="text-xs text-muted-foreground">
-              Used to calculate payout from disbursed loan amounts.
+              Used to calculate payout from disbursed loan amounts(Payout = disbursed × rate.)
             </p>
           </div>
           <div className="space-y-2">

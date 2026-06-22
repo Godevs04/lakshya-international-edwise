@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
 import { getDefaultSettings, resolveCompanySettings } from "@/lib/config/app-defaults";
+import { APP_CONFIG_CACHE_TAG } from "@/lib/config/app-config";
 import { User } from "@/models/User";
 import { Role } from "@/models/Role";
 import { getSessionUser } from "@/lib/auth/auth";
@@ -151,6 +152,7 @@ export async function updateSettingsAction(
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");
+  updateTag(APP_CONFIG_CACHE_TAG);
   await logSettingsActivity(user!, "settings.update", `Updated ${section} settings`, section);
   return { success: true };
   });

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface GlassCardProps {
@@ -9,6 +8,7 @@ interface GlassCardProps {
   hover?: boolean;
   glow?: boolean;
   padding?: boolean;
+  animate?: boolean;
 }
 
 export function GlassCard({
@@ -17,29 +17,20 @@ export function GlassCard({
   hover = false,
   glow = false,
   padding = false,
+  animate = false,
 }: GlassCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      whileHover={
-        hover
-          ? {
-              y: -4,
-              transition: { duration: 0.2 },
-            }
-          : undefined
-      }
+    <div
       className={cn(
         "glass-card relative overflow-hidden rounded-[20px]",
-        hover && "cursor-pointer transition-shadow hover:shadow-xl hover:shadow-[#6D5EF7]/10",
+        animate && "animate-fade-in-up",
+        hover && "cursor-pointer transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#6D5EF7]/10",
         glow && "ring-1 ring-[#6D5EF7]/20",
         padding && "p-6",
         className
       )}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

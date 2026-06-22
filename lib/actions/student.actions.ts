@@ -189,11 +189,16 @@ export async function createStudentAction(
       requested: data.loanRequested ?? 0,
       sanctioned: data.loanSanctioned ?? 0,
       disbursed: data.loanDisbursed ?? 0,
+      disbursedAt: (data.loanDisbursed ?? 0) > 0 ? new Date() : undefined,
       interest: data.interest ?? 0,
       bankName: data.bankName,
       applicationNumber: data.applicationNumber,
     },
     partnerId: data.partnerId || undefined,
+    commissionPercentOverride:
+      data.commissionPercentOverride === "" || data.commissionPercentOverride == null
+        ? undefined
+        : data.commissionPercentOverride,
     status: data.status ?? "new",
     remarks: data.remarks ? sanitizeText(data.remarks) : undefined,
     timeline: [{ status: data.status ?? "new", createdByName: user?.name, createdAt: new Date() }],
@@ -282,14 +287,28 @@ export async function updateStudentAction(
     existing.pan = undefined;
   }
   existing.education = { college: data.college, course: data.course, year: data.year };
+  const nextDisbursed = data.loanDisbursed ?? 0;
+  const previousDisbursed = existing.loan?.disbursed ?? 0;
   existing.loan = {
     requested: data.loanRequested ?? 0,
     sanctioned: data.loanSanctioned ?? 0,
-    disbursed: data.loanDisbursed ?? 0,
+    disbursed: nextDisbursed,
+    disbursedAt:
+      nextDisbursed > 0
+        ? existing.loan?.disbursedAt ?? new Date()
+        : undefined,
     interest: data.interest ?? 0,
     bankName: data.bankName,
     applicationNumber: data.applicationNumber,
   };
+  if (nextDisbursed > 0 && previousDisbursed === 0 && !existing.loan.disbursedAt) {
+    existing.loan.disbursedAt = new Date();
+  }
+  if (data.commissionPercentOverride === "" || data.commissionPercentOverride == null) {
+    existing.commissionPercentOverride = undefined;
+  } else {
+    existing.commissionPercentOverride = data.commissionPercentOverride;
+  }
   existing.partnerId = data.partnerId ? new Types.ObjectId(data.partnerId) : existing.partnerId;
   if (data.status) existing.status = data.status;
   existing.remarks = data.remarks ? sanitizeText(data.remarks) : existing.remarks;

@@ -6,7 +6,7 @@ import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, IndianRupee } from "lucide-react";
 
 export default async function PartnersPage({
   searchParams,
@@ -27,11 +27,18 @@ export default async function PartnersPage({
         description="Manage partner companies and commissions"
         badge="Network"
         action={
-          access.canWrite ? (
-            <Link href="/dashboard/partners/new">
-              <Button><Plus className="mr-1.5 h-4 w-4" /> Add Partner</Button>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/dashboard/partners/commissions">
+              <Button variant="outline">
+                <IndianRupee className="mr-1.5 h-4 w-4" /> Partner Commissions
+              </Button>
             </Link>
-          ) : undefined
+            {access.canWrite ? (
+              <Link href="/dashboard/partners/new">
+                <Button><Plus className="mr-1.5 h-4 w-4" /> Add Partner</Button>
+              </Link>
+            ) : null}
+          </div>
         }
       />
       <PartnersTable {...result} {...access} />

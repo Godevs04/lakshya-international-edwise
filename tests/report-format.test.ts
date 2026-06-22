@@ -80,7 +80,8 @@ describe("report-format", () => {
 
     expect(partners[0]?.Company).toBe("Godevs");
     expect(partners[0]?.Students).toBe(12);
-    expect(partners[0]?.["Commission Payout"]).toContain("1,00,000");
+    expect(partners[0]?.["Commission Earned"]).toContain("1,00,000");
+    expect(partners[0]?.["Commission %"]).toBe("2%");
 
     const loans = formatLoanReportRows([
       {

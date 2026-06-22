@@ -213,7 +213,7 @@ export function StudentsTable({
             className="w-full min-w-0 sm:max-w-xs"
           />
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "")}>
-            <SelectTrigger className="w-[160px] rounded-xl border-[#6D5EF7]/15 bg-white/60 backdrop-blur-xl">
+            <SelectTrigger className="w-full min-w-0 rounded-xl border-[#6D5EF7]/15 bg-white/60 backdrop-blur-xl sm:w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl">
@@ -241,7 +241,77 @@ export function StudentsTable({
       </div>
       </GlassCard>
 
-      <GlassCard className="overflow-hidden">
+      <div className="space-y-3 md:hidden">
+        {data.length ? (
+          data.map((student) => {
+            const number = getStudentWhatsAppNumber(student.whatsapp, student.phone);
+            const whatsappUrl = number ? buildWhatsAppUrl(number) : null;
+            return (
+              <GlassCard key={student._id} className="p-4">
+                <div
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/dashboard/students/${student._id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/dashboard/students/${student._id}`);
+                    }
+                  }}
+                  className="block cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#6D5EF7]/40"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">
+                        {student.firstName} {student.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{student.studentId}</p>
+                    </div>
+                    <StatusBadge status={student.status as StudentStatus} />
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div>
+                    <p className="font-medium text-foreground">Partner</p>
+                    <p className="truncate">{student.partnerName ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Loan</p>
+                    <p>{formatCurrency(student.loanRequested ?? 0)}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Phone</p>
+                    <div className="flex items-center gap-1.5">
+                      <span>{student.phone ?? "—"}</span>
+                      {whatsappUrl && (
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-600"
+                          aria-label={`WhatsApp ${student.firstName}`}
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Created</p>
+                    <p>{formatDate(student.createdAt)}</p>
+                  </div>
+                </div>
+              </GlassCard>
+            );
+          })
+        ) : (
+          <GlassCard className="p-8 text-center text-muted-foreground">
+            No students found.
+          </GlassCard>
+        )}
+      </div>
+
+      <GlassCard className="hidden overflow-hidden md:block">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (

@@ -1,4 +1,4 @@
-import { formatCurrency, formatDate } from "@/lib/utils/format";
+import { formatCurrency, formatDate, formatPercent } from "@/lib/utils/format";
 import { maskAadhaar, maskPan } from "@/lib/utils/pii";
 
 export type ReportSourceRow = Record<string, unknown>;
@@ -85,8 +85,12 @@ export function formatPartnerReportRows(partners: LooseRecord[]): Record<string,
     Company: String(partner.companyName ?? ""),
     Students: Number(partner.studentsCount ?? 0),
     "Total Loan Value": formatCurrency(Number(partner.totalLoanValue ?? 0)),
-    "Commission %": partner.commissionPercent != null ? String(partner.commissionPercent) : "",
-    "Commission Payout": formatCurrency(Number(partner.commissionEarned ?? 0)),
+    "Commission %": partner.commissionPercent != null ? formatPercent(Number(partner.commissionPercent)) : "",
+    "Commission Earned": formatCurrency(Number(partner.commissionEarned ?? 0)),
+    "Commission Settled": formatCurrency(Number(partner.commissionSettled ?? 0)),
+    "Pending Commission": formatCurrency(
+      Math.max(0, Number(partner.commissionEarned ?? 0) - Number(partner.commissionSettled ?? 0))
+    ),
     Status: String(partner.status ?? ""),
   }));
 }

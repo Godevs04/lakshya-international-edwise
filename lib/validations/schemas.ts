@@ -121,6 +121,12 @@ export const studentSchema = z.object({
   bankName: z.string().optional(),
   applicationNumber: z.string().max(50).optional(),
   partnerId: z.string().optional(),
+  commissionPercentOverride: z.coerce
+    .number()
+    .min(0, "Commission cannot be negative")
+    .max(100, "Commission cannot exceed 100%")
+    .optional()
+    .or(z.literal("")),
   status: z.enum([
     "new", "contacted", "documents_pending", "submitted",
     "under_verification", "approved", "sanctioned", "disbursed", "rejected", "closed",
@@ -138,7 +144,11 @@ export const partnerSchema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
   gst: z.string().optional(),
-  commissionPercent: z.coerce.number().min(0).max(100).optional(),
+  commissionPercent: z.coerce
+    .number()
+    .min(0, "Commission cannot be negative")
+    .max(100, "Commission cannot exceed 100%")
+    .optional(),
   accountName: z.string().optional(),
   accountNumber: z.string().optional(),
   ifsc: z.string().optional(),
@@ -154,6 +164,33 @@ export const partnerSchema = z.object({
 export const noteSchema = z.object({
   content: z.string().min(1, "Note content is required"),
   dueDate: z.string().optional(),
+});
+
+export const commissionSettlementSchema = z.object({
+  amount: z.coerce.number().positive("Settlement amount must be greater than zero"),
+  note: z.string().max(500).optional(),
+});
+
+export const studentCommissionSettlementSchema = z.object({
+  amount: z.coerce.number().positive("Settlement amount must be greater than zero"),
+  note: z.string().max(500).optional(),
+});
+
+export const studentCommissionRateSchema = z.object({
+  commissionPercentOverride: z.coerce
+    .number()
+    .min(0, "Commission cannot be negative")
+    .max(100, "Commission cannot exceed 100%")
+    .optional()
+    .or(z.literal("")),
+});
+
+export const commissionLedgerFilterSchema = z.object({
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "Month must be YYYY-MM")
+    .optional()
+    .or(z.literal("")),
 });
 
 export const settingsSchema = z.object({

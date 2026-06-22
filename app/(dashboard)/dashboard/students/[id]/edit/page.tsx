@@ -64,6 +64,7 @@ export default async function EditStudentPage({
               : student.partnerId
                 ? String(student.partnerId)
                 : undefined,
+          commissionPercentOverride: student.commissionPercentOverride,
           status: student.status,
           remarks: student.remarks,
         }}

@@ -15,7 +15,7 @@ import {
 } from "@/lib/validations/schemas";
 import type { ActionResult } from "@/types";
 import { runLoggedMutation } from "@/lib/action-utils";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIp, getRateLimitRetryAfter } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/utils/token-hash";
 import { isPublicRegistrationAllowed, getAuthUrl } from "@/lib/config/env";
 
@@ -226,6 +226,58 @@ export async function validateLoginAction(
   }
 
   return { success: true };
+  });
+}
+
+export async function getLoginFailureReasonAction(
+  email: string
+): Promise<ActionResult> {
+  return runLoggedMutation("getLoginFailureReasonAction", async () => {
+    const normalizedEmail = email.toLowerCase();
+    const ip = await getClientIp();
+    const retryAfterSeconds = await getRateLimitRetryAfter(
+      "login",
+      `${ip}:${normalizedEmail}`
+    );
+    if (retryAfterSeconds) {
+      return {
+        success: false,
+        error: rateLimitMessage(retryAfterSeconds),
+        code: "RATE_LIMITED",
+      };
+    }
+
+    await connectDB();
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return { success: false, error: "Invalid email or password", code: "INVALID" };
+    }
+
+    if (!user.isVerified) {
+      return {
+        success: false,
+        error: "Please verify your email with the OTP sent to your inbox.",
+        code: "UNVERIFIED",
+      };
+    }
+
+    if (user.status === "pending") {
+      return {
+        success: false,
+        error: "Your account is in the approval queue. An admin will onboard you soon.",
+        code: "PENDING",
+      };
+    }
+
+    if (user.status !== "active") {
+      return {
+        success: false,
+        error: "Your account is not active. Please contact your administrator.",
+        code: "INACTIVE",
+      };
+    }
+
+    return { success: false, error: "Invalid email or password", code: "INVALID" };
   });
 }
 

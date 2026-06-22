@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GlassCard } from "@/components/cards/glass-card";
-import { formatCurrency } from "@/lib/utils/format";
+import { formatCurrency, formatPercent } from "@/lib/utils/format";
 import type { PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 
@@ -59,7 +59,7 @@ export function PartnersTable({
                 <TableCell>{p.phone ?? "—"}</TableCell>
                 <TableCell>{p.studentsCount}</TableCell>
                 <TableCell>{formatCurrency(p.totalLoanValue)}</TableCell>
-                <TableCell>{p.commissionPercent ?? 0}%</TableCell>
+                <TableCell>{formatPercent(p.commissionPercent ?? 0)}</TableCell>
                 <TableCell><StatusBadge status={p.status as PartnerStatus} type="partner" /></TableCell>
               </TableRow>
             )) : (

@@ -42,7 +42,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: company.name,
     short_name: shortName,
     description: `${company.name} — International Education Consultancy CRM`,
-    start_url: "/",
+    start_url: "/dashboard/overview",
     scope: "/",
     display: "standalone",
     orientation: "portrait-primary",
