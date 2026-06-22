@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormSection } from "@/components/forms/form-section";
-import { ImageUploadField } from "@/components/forms/image-upload-field";
+import { LinkUrlField } from "@/components/forms/link-url-field";
 import { PARTNER_STATUSES } from "@/lib/constants/statuses";
 import { createPartnerAction, updatePartnerAction } from "@/lib/actions/partner.actions";
 
@@ -112,6 +112,9 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
               type="number"
               defaultValue={initialData?.commissionPercent as number}
             />
+            <p className="text-xs text-muted-foreground">
+              Used to calculate payout from disbursed loan amounts.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
@@ -134,12 +137,12 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
             <Textarea id="address" name="address" defaultValue={initialData?.address as string} />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <ImageUploadField
+            <LinkUrlField
               name="companyLogo"
-              label="Company Logo"
-              folder="partners"
+              label="Company logo link"
               defaultValue={(initialData?.companyLogo as string) ?? ""}
-              hint="JPEG, PNG, or WebP up to 10 MB."
+              placeholder="https://drive.google.com/file/d/..."
+              hint="Paste a Google Drive or other HTTPS link to the company logo."
             />
           </div>
         </div>

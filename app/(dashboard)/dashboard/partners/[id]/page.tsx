@@ -52,17 +52,19 @@ export default async function PartnerDetailPage({
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Students</p><p className="text-2xl font-semibold">{partner.studentsCount}</p></GlassCard>
-        <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Total Loan Value</p><p className="text-2xl font-semibold">{formatCurrency(partner.totalLoanValue)}</p></GlassCard>
-        <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Sanction Rate</p><p className="text-2xl font-semibold">{analytics?.sanctionRate ?? 0}%</p></GlassCard>
-        <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Commission Earned</p><p className="text-2xl font-semibold">{formatCurrency(analytics?.commissionEarned ?? 0)}</p></GlassCard>
+        <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Commission Rate</p><p className="text-2xl font-semibold">{partner.commissionPercent ?? 0}%</p></GlassCard>
+        <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Total Disbursed</p><p className="text-2xl font-semibold">{formatCurrency(analytics?.disbursementTotal ?? 0)}</p></GlassCard>
+        <GlassCard className="p-4"><p className="text-xs text-muted-foreground">Commission Payout</p><p className="text-2xl font-semibold">{formatCurrency(analytics?.commissionEarned ?? 0)}</p></GlassCard>
       </div>
 
       <GlassCard className="p-5">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <StatusBadge status={partner.status as PartnerStatus} type="partner" />
-          <span className="text-sm text-muted-foreground">Commission: {partner.commissionPercent}%</span>
+          <span className="text-sm text-muted-foreground">
+            Payout = Total Disbursed × Commission % ({formatCurrency(analytics?.disbursementTotal ?? 0)} × {partner.commissionPercent ?? 0}%)
+          </span>
         </div>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 text-sm">
           <p><span className="text-muted-foreground">Phone:</span> {partner.phone ?? "—"}</p>

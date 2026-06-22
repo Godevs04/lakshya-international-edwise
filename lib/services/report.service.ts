@@ -4,6 +4,7 @@ import { Partner } from "@/models/Partner";
 import type { DateRangePreset } from "@/lib/utils/format";
 import { getDateRange } from "@/lib/utils/format";
 import { formatReportRows, type ReportSourceRow } from "@/lib/utils/report-format";
+import { getPartnerCommissionPayouts } from "@/lib/services/partner-commission.service";
 
 export type ReportType = "partner" | "student" | "loan";
 
@@ -16,24 +17,44 @@ export async function getReportData(
   const dateFilter = { createdAt: { $gte: start, $lte: end } };
 
   switch (reportType) {
-    case "partner":
-      return formatReportRows(
-        reportType,
-        await Partner.aggregate([
-          { $match: dateFilter },
-          {
-            $project: {
-              companyName: 1,
-              studentsCount: 1,
-              totalLoanValue: 1,
-              commissionPercent: 1,
-              status: 1,
-              commissionEarned: "$performance.commissionEarned",
-            },
+    case "partner": {
+      const partners = await Partner.aggregate([
+        { $match: dateFilter },
+        {
+          $project: {
+            _id: 1,
+            companyName: 1,
+            studentsCount: 1,
+            totalLoanValue: 1,
+            commissionPercent: 1,
+            status: 1,
           },
-          { $sort: { totalLoanValue: -1 } },
-        ])
-      );
+        },
+        { $sort: { totalLoanValue: -1 } },
+      ]);
+
+      const commissionMap = new Map<string, number>();
+      if (partners.length > 0) {
+        const percentByPartner = new Map(
+          partners.map((partner) => [
+            String(partner._id),
+            Number(partner.commissionPercent ?? 0),
+          ])
+        );
+        const payouts = await getPartnerCommissionPayouts(
+          partners.map((partner) => String(partner._id)),
+          percentByPartner
+        );
+        payouts.forEach((value, key) => commissionMap.set(key, value));
+      }
+
+      const rows = partners.map((partner) => ({
+        ...partner,
+        commissionEarned: commissionMap.get(String(partner._id)) ?? 0,
+      }));
+
+      return formatReportRows(reportType, rows);
+    }
 
     case "student":
       return formatReportRows(

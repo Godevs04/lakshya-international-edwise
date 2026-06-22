@@ -59,7 +59,7 @@ export const STUDENT_IMPORT_COLUMNS: StudentImportColumn[] = [
   { key: "loanDisbursed", label: "Loan Disbursed (INR)", width: 18 },
   { key: "interest", label: "Interest Rate (%)", width: 14 },
   { key: "bankName", label: "Bank Name", width: 16 },
-  { key: "applicationNumber", label: "Application Number", width: 18 },
+  { key: "applicationNumber", label: "Bank LAN", width: 18 },
   { key: "partnerCompanyName", label: "Partner Company", width: 20 },
   { key: "status", label: "Status", width: 18 },
   { key: "remarks", label: "Remarks", width: 30 },
@@ -218,6 +218,7 @@ const GUIDE_LINES = [
   ["• Date of Birth: use YYYY-MM-DD (e.g. 2001-03-12)"],
   ["• Loan amounts: enter numbers only, without commas or currency symbols"],
   ["• Interest Rate: percentage value between 0 and 100 (e.g. 7.8)"],
+  ["• Bank LAN: loan application number from the bank after login (e.g. HDFC-LAN-2026-001234)"],
   ["• Partner Company: must match an existing partner name in the CRM"],
   [
     "• Status: new, contacted, documents_pending, submitted, under_verification, approved, sanctioned, disbursed, rejected, or closed",

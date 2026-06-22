@@ -6,7 +6,7 @@ export interface IAuditLog extends Document {
   action: string;
   description?: string;
   resourceType: string;
-  resourceId?: Types.ObjectId;
+  resourceId?: string;
   diff?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
   ip?: string;
@@ -21,7 +21,7 @@ const AuditLogSchema = new Schema<IAuditLog>(
     action: { type: String, required: true },
     description: { type: String },
     resourceType: { type: String, required: true },
-    resourceId: { type: Schema.Types.ObjectId },
+    resourceId: { type: String },
     diff: { type: Schema.Types.Mixed },
     metadata: { type: Schema.Types.Mixed },
     ip: { type: String },

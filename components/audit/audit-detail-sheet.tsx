@@ -94,7 +94,13 @@ export function AuditDetailSheet({ log, open, onOpenChange }: AuditDetailSheetPr
                   <p className="font-mono text-xs text-muted-foreground break-all">{log.resourceId}</p>
                 )}
                 {resourceHref && (
-                  <Button variant="outline" size="sm" className="mt-2" render={<Link href={resourceHref} />}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    nativeButton={false}
+                    render={<Link href={resourceHref} />}
+                  >
                     <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
                     Open resource
                   </Button>

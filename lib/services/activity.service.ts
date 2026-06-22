@@ -34,11 +34,16 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
     }
   }
 
+  const resourceId =
+    params.resourceId !== undefined && params.resourceId !== null
+      ? String(params.resourceId)
+      : undefined;
+
   await Activity.create({
     action: params.action,
     description: params.description,
     resourceType: params.resourceType,
-    resourceId: params.resourceId,
+    resourceId,
     userId: params.userId,
     userName: params.userName,
     metadata: params.metadata,
@@ -50,7 +55,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
     action: params.action,
     description: params.description,
     resourceType: params.resourceType,
-    resourceId: params.resourceId,
+    resourceId,
     diff: params.diff,
     metadata: params.metadata,
     ip,

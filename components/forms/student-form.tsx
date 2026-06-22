@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormSection } from "@/components/forms/form-section";
-import { ImageUploadField } from "@/components/forms/image-upload-field";
+import { LinkUrlField } from "@/components/forms/link-url-field";
 import { STUDENT_STATUSES } from "@/lib/constants/statuses";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
 
@@ -150,12 +150,12 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Input id="email" name="email" type="email" defaultValue={initialData?.email as string} />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <ImageUploadField
+            <LinkUrlField
               name="photo"
-              label="Photo"
-              folder="students"
+              label="Photo link"
               defaultValue={(initialData?.photo as string) ?? ""}
-              hint="JPEG, PNG, or WebP up to 10 MB."
+              placeholder="https://drive.google.com/file/d/..."
+              hint="Paste a Google Drive or other HTTPS link to the student photo."
             />
           </div>
         </div>
@@ -289,10 +289,11 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
             <Input id="bankName" name="bankName" defaultValue={initialData?.bankName as string} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="applicationNumber">Application Number</Label>
+            <Label htmlFor="applicationNumber">Bank LAN (Loan Application Number)</Label>
             <Input
               id="applicationNumber"
               name="applicationNumber"
+              placeholder="HDFC-LAN-2026-001234"
               defaultValue={initialData?.applicationNumber as string}
             />
           </div>
