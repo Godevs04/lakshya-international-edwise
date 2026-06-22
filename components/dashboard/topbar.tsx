@@ -195,7 +195,10 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={async () => {
+                    await signOut({ redirect: false });
+                    window.location.assign("/login");
+                  }}
                   className="rounded-xl text-[#EF4444]"
                 >
                   <LogOut className="mr-2 h-4 w-4" /> Sign out

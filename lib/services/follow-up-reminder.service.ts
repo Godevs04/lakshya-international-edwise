@@ -1,5 +1,6 @@
 import { endOfDay } from "date-fns";
 import { connectDB } from "@/lib/db/mongoose";
+import { getAuthUrl } from "@/lib/config/env";
 import { Student } from "@/models/Student";
 import { User } from "@/models/User";
 import { sendFollowUpReminderEmail } from "@/lib/services/email.service";
@@ -107,7 +108,7 @@ export async function sendFollowUpReminders(): Promise<FollowUpReminderSummary> 
     skipped: 0,
   };
 
-  const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:4000";
+  const authUrl = getAuthUrl();
 
   for (const followUp of followUps) {
     summary.processed++;
