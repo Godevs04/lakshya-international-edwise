@@ -6,7 +6,7 @@ import { PartnerCommissionSection } from "@/components/dashboard/partner-commiss
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { DemographicsPieChart } from "@/components/charts/dashboard-charts";
-import { getPartnerById, getPartnerAnalytics } from "@/lib/actions/partner.actions";
+import { getPartnerById, getPartnerAnalytics, getPartnerCommissionLedgerAction } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -26,9 +26,10 @@ export default async function PartnerDetailPage({
   const { id } = await params;
   const { tab } = await searchParams;
   const access = await getPartnerPageAccess();
-  const [partner, analytics] = await Promise.all([
+  const [partner, analytics, ledger] = await Promise.all([
     getPartnerById(id),
     getPartnerAnalytics(id),
+    getPartnerCommissionLedgerAction(id),
   ]);
   if (!partner) notFound();
 
@@ -68,7 +69,15 @@ export default async function PartnerDetailPage({
         commissionPending={analytics?.commissionPending ?? 0}
         settlements={analytics?.settlements ?? []}
         studentCommissions={analytics?.studentCommissions ?? []}
-        initialTab={tab === "students" ? "students" : "summary"}
+        ledger={ledger ?? {
+          entries: [],
+          earnedInMonth: 0,
+          settledInMonth: 0,
+          commissionEarnedTotal: analytics?.commissionEarned ?? 0,
+          commissionSettledTotal: analytics?.commissionSettled ?? 0,
+          commissionPendingTotal: analytics?.commissionPending ?? 0,
+        }}
+        initialTab={tab === "students" ? "students" : tab === "ledger" ? "ledger" : "summary"}
       />
 
       <GlassCard className="p-5">

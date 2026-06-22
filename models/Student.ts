@@ -63,11 +63,22 @@ export interface IStudent extends Document {
     requested?: number;
     sanctioned?: number;
     disbursed?: number;
+    disbursedAt?: Date;
     interest?: number;
     bankName?: string;
     applicationNumber?: string;
   };
   partnerId?: Types.ObjectId;
+  commissionPercentOverride?: number;
+  commissionSettled: number;
+  commissionSettlements: Array<{
+    _id?: Types.ObjectId;
+    amount: number;
+    note?: string;
+    settledAt?: Date;
+    settledBy?: Types.ObjectId;
+    settledByName?: string;
+  }>;
   status: StudentStatus;
   remarks?: string;
   documents: Array<{
@@ -134,11 +145,23 @@ const StudentSchema = new Schema<IStudent>(
       requested: { type: Number, default: 0 },
       sanctioned: { type: Number, default: 0 },
       disbursed: { type: Number, default: 0 },
+      disbursedAt: { type: Date },
       interest: { type: Number, default: 0 },
       bankName: { type: String },
       applicationNumber: { type: String },
     },
     partnerId: { type: Schema.Types.ObjectId, ref: "Partner" },
+    commissionPercentOverride: { type: Number, min: 0, max: 100 },
+    commissionSettled: { type: Number, default: 0, min: 0 },
+    commissionSettlements: [
+      {
+        amount: { type: Number, required: true, min: 0 },
+        note: { type: String, trim: true },
+        settledAt: { type: Date, default: Date.now },
+        settledBy: { type: Schema.Types.ObjectId, ref: "User" },
+        settledByName: { type: String, trim: true },
+      },
+    ],
     status: {
       type: String,
       enum: [

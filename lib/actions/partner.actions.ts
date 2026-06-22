@@ -11,11 +11,21 @@ import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
 import {
+  buildCommissionStatementRows,
+  getPartnerCommissionLedger,
   getPartnerCommissionSummary,
   getPartnerStudentCommissions,
   getPartnersCommissionOverview,
 } from "@/lib/services/partner-commission.service";
-import { partnerSchema, commissionSettlementSchema } from "@/lib/validations/schemas";
+import {
+  partnerSchema,
+  commissionSettlementSchema,
+  studentCommissionSettlementSchema,
+  studentCommissionRateSchema,
+  commissionLedgerFilterSchema,
+} from "@/lib/validations/schemas";
+import { exportToCSV } from "@/lib/services/report.service";
+import { exportToPdf } from "@/lib/utils/report-export";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encryptSensitiveField, maskBankAccount, safeDecrypt } from "@/lib/utils/pii";
 import {
@@ -319,11 +329,7 @@ export async function getPartnerAnalytics(partnerId: string) {
   const sanctioned = statusCounts.find((s) => s._id === "sanctioned")?.count ?? 0;
   const disbursed = statusCounts.find((s) => s._id === "disbursed")?.count ?? 0;
 
-  const commission = await getPartnerCommissionSummary(
-    partnerId,
-    partner.commissionPercent ?? 0,
-    partner.performance?.commissionSettled ?? 0
-  );
+  const commission = await getPartnerCommissionSummary(partnerId);
 
   return {
     monthlyLeads: partner.performance.monthlyLeads,
@@ -339,18 +345,16 @@ export async function getPartnerAnalytics(partnerId: string) {
     settlements: (partner.commissionSettlements ?? [])
       .slice()
       .sort((a, b) => new Date(b.settledAt ?? 0).getTime() - new Date(a.settledAt ?? 0).getTime())
-      .slice(0, 10)
+      .slice(0, 20)
       .map((entry) => ({
         amount: entry.amount,
         note: entry.note,
         settledAt: entry.settledAt,
         settledByName: entry.settledByName,
+        studentId: entry.studentId?.toString(),
+        studentName: entry.studentName,
       })),
-    studentCommissions: await getPartnerStudentCommissions(
-      partnerId,
-      partner.commissionPercent ?? 0,
-      partner.performance?.commissionSettled ?? 0
-    ),
+    studentCommissions: await getPartnerStudentCommissions(partnerId),
   };
   }, null);
 }
@@ -380,11 +384,7 @@ export async function recordPartnerCommissionSettlementAction(
     const partner = await Partner.findById(partnerId);
     if (!partner) return { success: false, error: "Partner not found" };
 
-    const summary = await getPartnerCommissionSummary(
-      partnerId,
-      partner.commissionPercent ?? 0,
-      partner.performance?.commissionSettled ?? 0
-    );
+    const summary = await getPartnerCommissionSummary(partnerId);
 
     if (parsed.data.amount > summary.commissionPending) {
       return {
@@ -427,5 +427,221 @@ export async function recordPartnerCommissionSettlementAction(
     revalidatePath("/dashboard/partners");
     revalidateInsightCaches();
     return { success: true };
+  });
+}
+
+export async function getPartnerCommissionLedgerAction(
+  partnerId: string,
+  month?: string
+) {
+  return runLoggedQuery("getPartnerCommissionLedgerAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
+    const parsed = commissionLedgerFilterSchema.safeParse({ month: month ?? "" });
+    if (!parsed.success) {
+      return null;
+    }
+
+    return getPartnerCommissionLedger(partnerId, parsed.data.month || undefined);
+  }, null);
+}
+
+export async function recordStudentCommissionSettlementAction(
+  partnerId: string,
+  studentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("recordStudentCommissionSettlementAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const parsed = studentCommissionSettlementSchema.safeParse(
+      Object.fromEntries(formData.entries())
+    );
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const [partner, student] = await Promise.all([
+      Partner.findById(partnerId),
+      Student.findOne({ _id: studentId, partnerId }),
+    ]);
+
+    if (!partner) return { success: false, error: "Partner not found" };
+    if (!student) return { success: false, error: "Student not found for this partner" };
+
+    const rows = await getPartnerStudentCommissions(partnerId);
+    const row = rows.find((item) => item.studentDbId === studentId);
+    if (!row) return { success: false, error: "Student commission row not found" };
+
+    if (parsed.data.amount > row.commissionPending) {
+      return {
+        success: false,
+        error: `Amount exceeds pending commission (${row.commissionPending.toLocaleString("en-IN")})`,
+      };
+    }
+
+    student.commissionSettled = (student.commissionSettled ?? 0) + parsed.data.amount;
+    student.commissionSettlements ??= [];
+    student.commissionSettlements.push({
+      amount: parsed.data.amount,
+      note: parsed.data.note?.trim() || undefined,
+      settledAt: new Date(),
+      settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+      settledByName: user?.name,
+    });
+    await student.save();
+
+    const updatedRows = await getPartnerStudentCommissions(partnerId);
+    const totalSettled = updatedRows.reduce((sum, item) => sum + item.commissionSettled, 0);
+
+    partner.commissionSettlements ??= [];
+    partner.commissionSettlements.push({
+      amount: parsed.data.amount,
+      note: parsed.data.note?.trim() || `Settlement for ${student.studentId}`,
+      settledAt: new Date(),
+      settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+      settledByName: user?.name,
+      studentId: student._id,
+      studentName: `${student.firstName} ${student.lastName}`.trim(),
+    });
+    partner.performance ??= {
+      monthlyLeads: 0,
+      sanctionRate: 0,
+      disbursementTotal: 0,
+      commissionEarned: 0,
+      commissionSettled: 0,
+    };
+    partner.performance.commissionSettled = totalSettled;
+    await partner.save();
+
+    await logActivity({
+      action: "partner.student_commission_settled",
+      description: `Recorded INR ${parsed.data.amount.toLocaleString("en-IN")} commission settlement for ${student.studentId} (${partner.companyName})`,
+      resourceType: "partner",
+      resourceId: partnerId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    return { success: true };
+  });
+}
+
+export async function updateStudentCommissionRateAction(
+  partnerId: string,
+  studentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("updateStudentCommissionRateAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const parsed = studentCommissionRateSchema.safeParse(
+      Object.fromEntries(formData.entries())
+    );
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const student = await Student.findOne({ _id: studentId, partnerId });
+    if (!student) return { success: false, error: "Student not found for this partner" };
+
+    const rawOverride = formData.get("commissionPercentOverride");
+    if (rawOverride === "" || parsed.data.commissionPercentOverride === "") {
+      student.commissionPercentOverride = undefined;
+    } else if (parsed.data.commissionPercentOverride != null) {
+      student.commissionPercentOverride = parsed.data.commissionPercentOverride;
+    }
+
+    await student.save();
+
+    await logActivity({
+      action: "partner.student_commission_rate_updated",
+      description: `Updated commission rate override for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath(`/dashboard/students/${studentId}`);
+    revalidateInsightCaches();
+    return { success: true };
+  });
+}
+
+export async function exportPartnerCommissionAction(
+  partnerId: string,
+  format: "csv" | "pdf",
+  month?: string
+): Promise<ActionResult<{ filename: string; mimeType: string; data: string }>> {
+  return runLoggedMutation("exportPartnerCommissionAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+
+    await connectDB();
+    const partner = await Partner.findById(partnerId).select("companyName commissionPercent").lean();
+    if (!partner) return { success: false, error: "Partner not found" };
+
+    const parsed = commissionLedgerFilterSchema.safeParse({ month: month ?? "" });
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid month filter" };
+    }
+
+    const monthFilter = parsed.data.month || undefined;
+    const [rows, ledger] = await Promise.all([
+      getPartnerStudentCommissions(partnerId),
+      getPartnerCommissionLedger(partnerId, monthFilter),
+    ]);
+
+    const exportRows = buildCommissionStatementRows(
+      partner.companyName,
+      partner.commissionPercent ?? 0,
+      monthFilter
+        ? rows.filter((row) => {
+            if (!row.disbursedAt) return false;
+            const rowMonth = new Date(row.disbursedAt).toISOString().slice(0, 7);
+            return rowMonth === monthFilter;
+          })
+        : rows,
+      ledger,
+      monthFilter
+    );
+
+    const stamp = monthFilter ?? new Date().toISOString().slice(0, 10);
+    const safeName = partner.companyName.replace(/[^\w\-]+/g, "_");
+
+    if (format === "csv") {
+      return {
+        success: true,
+        data: {
+          filename: `${safeName}-commission-${stamp}.csv`,
+          mimeType: "text/csv",
+          data: Buffer.from(exportToCSV(exportRows)).toString("base64"),
+        },
+      };
+    }
+
+    const pdf = exportToPdf(
+      exportRows,
+      `${partner.companyName} — Commission Statement${monthFilter ? ` (${monthFilter})` : ""}`
+    );
+
+    return {
+      success: true,
+      data: {
+        filename: `${safeName}-commission-${stamp}.pdf`,
+        mimeType: "application/pdf",
+        data: Buffer.from(pdf).toString("base64"),
+      },
+    };
   });
 }

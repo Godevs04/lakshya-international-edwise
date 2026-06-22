@@ -56,6 +56,8 @@ export interface IPartner extends Document {
     settledAt?: Date;
     settledBy?: mongoose.Types.ObjectId;
     settledByName?: string;
+    studentId?: mongoose.Types.ObjectId;
+    studentName?: string;
   }>;
   metadata: {
     createdBy?: mongoose.Types.ObjectId;
@@ -105,6 +107,8 @@ const PartnerSchema = new Schema<IPartner>(
         settledAt: { type: Date, default: Date.now },
         settledBy: { type: Schema.Types.ObjectId, ref: "User" },
         settledByName: { type: String, trim: true },
+        studentId: { type: Schema.Types.ObjectId, ref: "Student" },
+        studentName: { type: String, trim: true },
       },
     ],
     metadata: {

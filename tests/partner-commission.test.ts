@@ -3,6 +3,8 @@ import {
   calculateCommissionPayout,
   calculatePendingCommission,
   allocateSettledToStudents,
+  resolveCommissionPercent,
+  formatCommissionMonth,
 } from "@/lib/services/partner-commission.service";
 
 describe("calculateCommissionPayout", () => {
@@ -21,6 +23,18 @@ describe("calculateCommissionPayout", () => {
 
   it("rounds payout to nearest rupee", () => {
     expect(calculateCommissionPayout(100_001, 3)).toBe(3_000);
+  });
+});
+
+describe("resolveCommissionPercent", () => {
+  it("uses student override when provided", () => {
+    expect(resolveCommissionPercent(2, 1.5)).toBe(1.5);
+    expect(resolveCommissionPercent(2, 0)).toBe(0);
+  });
+
+  it("falls back to partner default when override is missing", () => {
+    expect(resolveCommissionPercent(2.5, null)).toBe(2.5);
+    expect(resolveCommissionPercent(2.5, undefined)).toBe(2.5);
   });
 });
 
@@ -53,5 +67,11 @@ describe("allocateSettledToStudents", () => {
       1_000
     );
     expect(allocation.get("a")).toEqual({ settled: 0, pending: 0 });
+  });
+});
+
+describe("formatCommissionMonth", () => {
+  it("formats dates as YYYY-MM", () => {
+    expect(formatCommissionMonth(new Date("2026-03-15T10:00:00Z"))).toBe("2026-03");
   });
 });
