@@ -7,11 +7,13 @@ import {
   DndContext,
   DragOverlay,
   closestCorners,
+  pointerWithin,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   useDroppable,
+  type CollisionDetection,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -76,6 +78,27 @@ interface ApplicationKanbanProps {
   canWrite?: boolean;
 }
 
+function resolveTargetStatus(
+  overId: string,
+  apps: ApplicationListItem[],
+  columnStatuses: readonly ApplicationStatus[]
+): ApplicationStatus | null {
+  if (columnStatuses.includes(overId as ApplicationStatus)) {
+    return overId as ApplicationStatus;
+  }
+
+  const overApp = apps.find((a) => a._id === overId);
+  return overApp?.status ?? null;
+}
+
+const kanbanCollisionDetection: CollisionDetection = (args) => {
+  const pointerHits = pointerWithin(args);
+  if (pointerHits.length > 0) return pointerHits;
+  return closestCorners(args);
+};
+
+const KANBAN_COLUMNS = APPLICATION_STATUSES.filter((s) => s !== "closed");
+
 export function ApplicationKanban({
   applications: initialApps,
   tableResult,
@@ -111,8 +134,8 @@ export function ApplicationKanban({
     if (!over) return;
 
     const appId = active.id as string;
-    const newStatus = over.id as ApplicationStatus;
-    if (!APPLICATION_STATUSES.includes(newStatus)) return;
+    const newStatus = resolveTargetStatus(over.id as string, apps, KANBAN_COLUMNS);
+    if (!newStatus) return;
 
     const app = apps.find((a) => a._id === appId);
     if (!app || app.status === newStatus) return;
@@ -132,7 +155,6 @@ export function ApplicationKanban({
   }
 
   const activeApp = activeId ? apps.find((a) => a._id === activeId) : null;
-  const columns = APPLICATION_STATUSES.filter((s) => s !== "closed");
 
   return (
     <div className="space-y-4">
@@ -148,12 +170,12 @@ export function ApplicationKanban({
         <TabsContent value="kanban" className="mt-4">
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCorners}
+            collisionDetection={kanbanCollisionDetection}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
             <div className="flex gap-4 overflow-x-auto pb-4">
-              {columns.map((status) => (
+              {KANBAN_COLUMNS.map((status) => (
                 <div key={status} className="min-w-[240px] flex-shrink-0 sm:min-w-[280px]">
                   <div className="mb-3 flex items-center gap-2">
                     <StatusBadge status={status} />
@@ -266,7 +288,7 @@ function KanbanColumnInner({
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[200px] rounded-2xl border border-[#6D5EF7]/10 p-2 transition-all ${isOver ? "bg-[#6D5EF7]/10 ring-2 ring-[#6D5EF7]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
+      className={`min-h-[200px] max-h-[min(70vh,720px)] overflow-y-auto rounded-2xl border border-[#6D5EF7]/10 p-2 transition-all ${isOver ? "bg-[#6D5EF7]/10 ring-2 ring-[#6D5EF7]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
     >
       {apps.map((app) => (
         <KanbanCard key={app._id} app={app} canWrite={canWrite} />
