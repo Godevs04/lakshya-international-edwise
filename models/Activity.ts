@@ -4,7 +4,7 @@ export interface IActivity extends Document {
   action: string;
   description: string;
   resourceType: string;
-  resourceId?: Types.ObjectId;
+  resourceId?: string;
   userId?: Types.ObjectId;
   userName?: string;
   metadata?: Record<string, unknown>;
@@ -16,7 +16,7 @@ const ActivitySchema = new Schema<IActivity>(
     action: { type: String, required: true },
     description: { type: String, required: true },
     resourceType: { type: String, required: true },
-    resourceId: { type: Schema.Types.ObjectId },
+    resourceId: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     userName: { type: String },
     metadata: { type: Schema.Types.Mixed },

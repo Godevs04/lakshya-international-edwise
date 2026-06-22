@@ -36,8 +36,9 @@ import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { bulkUpdateStudentsAction } from "@/lib/actions/student.actions";
 import type { StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
-import { Trash2, Download } from "lucide-react";
+import { Trash2, Download, MessageCircle } from "lucide-react";
 import { StudentImportDialog } from "@/components/dashboard/student-import-dialog";
+import { buildWhatsAppUrl, getStudentWhatsAppNumber } from "@/lib/utils/whatsapp";
 
 interface StudentsTableProps {
   data: StudentListItem[];
@@ -101,7 +102,30 @@ export function StudentsTable({
       header: "Name",
       cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
     },
-    { accessorKey: "phone", header: "Phone" },
+    {
+      accessorKey: "phone",
+      header: "Phone",
+      cell: ({ row }) => {
+        const number = getStudentWhatsAppNumber(row.original.whatsapp, row.original.phone);
+        const whatsappUrl = number ? buildWhatsAppUrl(number) : null;
+        return (
+          <div className="flex items-center gap-2">
+            <span>{row.original.phone ?? "—"}</span>
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-600 hover:text-emerald-700"
+                aria-label={`WhatsApp ${row.original.firstName}`}
+              >
+                <MessageCircle className="h-4 w-4" />
+              </a>
+            )}
+          </div>
+        );
+      },
+    },
     { accessorKey: "partnerName", header: "Partner" },
     {
       accessorKey: "loanRequested",

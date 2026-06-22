@@ -9,10 +9,14 @@ import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
+import { getPartnerCommissionSummary } from "@/lib/services/partner-commission.service";
 import { partnerSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encryptSensitiveField, maskBankAccount, safeDecrypt } from "@/lib/utils/pii";
-import { validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
+import {
+  getOptionalLinkUrlError,
+  normalizeOptionalLinkUrl,
+} from "@/lib/utils/document-url";
 import {
   normalizeIfsc,
   normalizeIndianPhone,
@@ -154,9 +158,9 @@ export async function createPartnerAction(
   await connectDB();
   const data = parsed.data;
 
-  const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "partners");
-  if (!logoCheck.valid) {
-    return { success: false, error: logoCheck.error };
+  const logoError = getOptionalLinkUrlError(data.companyLogo);
+  if (logoError) {
+    return { success: false, error: `Company logo link: ${logoError}` };
   }
 
   const partner = await Partner.create({
@@ -176,9 +180,9 @@ export async function createPartnerAction(
       bankName: data.bankName,
     },
     status: data.status ?? "active",
-    photo: data.photo,
-    companyLogo: data.companyLogo,
-    agreementUrl: data.agreementUrl,
+    photo: normalizeOptionalLinkUrl(data.photo),
+    companyLogo: normalizeOptionalLinkUrl(data.companyLogo),
+    agreementUrl: normalizeOptionalLinkUrl(data.agreementUrl),
     metadata: { createdBy: user?.id, createdByName: user?.name },
   });
 
@@ -216,9 +220,9 @@ export async function updatePartnerAction(
   const existing = await Partner.findById(id);
   if (!existing) return { success: false, error: "Partner not found" };
 
-  const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "partners");
-  if (!logoCheck.valid) {
-    return { success: false, error: logoCheck.error };
+  const logoError = getOptionalLinkUrlError(data.companyLogo);
+  if (logoError) {
+    return { success: false, error: `Company logo link: ${logoError}` };
   }
 
   const partner = await Partner.findByIdAndUpdate(
@@ -243,9 +247,9 @@ export async function updatePartnerAction(
         bankName: data.bankName,
       },
       status: data.status,
-      photo: data.photo,
-      companyLogo: data.companyLogo,
-      agreementUrl: data.agreementUrl,
+      photo: normalizeOptionalLinkUrl(data.photo),
+      companyLogo: normalizeOptionalLinkUrl(data.companyLogo),
+      agreementUrl: normalizeOptionalLinkUrl(data.agreementUrl),
     },
     { new: true }
   );
@@ -310,11 +314,18 @@ export async function getPartnerAnalytics(partnerId: string) {
   const sanctioned = statusCounts.find((s) => s._id === "sanctioned")?.count ?? 0;
   const disbursed = statusCounts.find((s) => s._id === "disbursed")?.count ?? 0;
 
+  const commission = await getPartnerCommissionSummary(
+    partnerId,
+    partner.commissionPercent ?? 0
+  );
+
   return {
     monthlyLeads: partner.performance.monthlyLeads,
     sanctionRate: total > 0 ? Math.round((sanctioned / total) * 100) : 0,
-    disbursementTotal: partner.performance.disbursementTotal,
-    commissionEarned: partner.performance.commissionEarned,
+    disbursementTotal: commission.totalDisbursed,
+    commissionEarned: commission.commissionPayout,
+    commissionPercent: commission.commissionPercent,
+    disbursedStudentCount: commission.disbursedStudentCount,
     statusCounts,
     disbursed,
   };

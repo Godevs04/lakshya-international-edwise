@@ -58,6 +58,7 @@ describe("report-format", () => {
     expect(rows[0]?.Address).toContain("BANGALORE");
     expect(rows[0]?.Partner).toBe("Godevs");
     expect(rows[0]?.["Loan Requested"]).toContain("40,00,000");
+    expect(rows[0]?.["Bank LAN"]).toBe("KJSADNB2938YR8171");
     expect(rows[0]?.Documents).toBe(1);
     expect(rows[0]?.["Last Status"]).toBe("submitted");
     expect(rows[0]?.["Last Update Note"]).toBe("Application filed");
@@ -79,6 +80,7 @@ describe("report-format", () => {
 
     expect(partners[0]?.Company).toBe("Godevs");
     expect(partners[0]?.Students).toBe(12);
+    expect(partners[0]?.["Commission Payout"]).toContain("1,00,000");
 
     const loans = formatLoanReportRows([
       {

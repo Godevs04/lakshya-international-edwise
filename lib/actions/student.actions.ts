@@ -24,7 +24,12 @@ import { allocateStudentId } from "@/lib/services/student-id.service";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Types } from "mongoose";
-import { validateCloudinaryDocument, validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
+import {
+  getDocumentUrlError,
+  getOptionalLinkUrlError,
+  normalizeDocumentUrl,
+  normalizeOptionalLinkUrl,
+} from "@/lib/utils/document-url";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 
 export async function getStudents(params: {
@@ -83,6 +88,7 @@ export async function getStudents(params: {
       firstName: s.firstName,
       lastName: s.lastName,
       phone: s.phone,
+      whatsapp: s.whatsapp,
       email: s.email,
       status: s.status as StudentStatus,
       partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
@@ -147,9 +153,9 @@ export async function createStudentAction(
   await connectDB();
   const data = parsed.data;
 
-  const photoCheck = validateOptionalCloudinaryUrl(data.photo, "students");
-  if (!photoCheck.valid) {
-    return { success: false, error: photoCheck.error };
+  const photoError = getOptionalLinkUrlError(data.photo);
+  if (photoError) {
+    return { success: false, error: `Photo link: ${photoError}` };
   }
 
   const studentId = await allocateStudentId();
@@ -163,7 +169,7 @@ export async function createStudentAction(
     phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
     whatsapp: data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined,
     email: data.email,
-    photo: data.photo,
+    photo: normalizeOptionalLinkUrl(data.photo),
     address: {
       line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
       city: data.city,
@@ -244,9 +250,9 @@ export async function updateStudentAction(
   const existing = await Student.findById(id);
   if (!existing) return { success: false, error: "Student not found" };
 
-  const photoCheck = validateOptionalCloudinaryUrl(data.photo, "students");
-  if (!photoCheck.valid) {
-    return { success: false, error: photoCheck.error };
+  const photoError = getOptionalLinkUrlError(data.photo);
+  if (photoError) {
+    return { success: false, error: `Photo link: ${photoError}` };
   }
 
   const oldStatus = existing.status;
@@ -257,7 +263,7 @@ export async function updateStudentAction(
   existing.phone = data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined;
   existing.whatsapp = data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined;
   existing.email = data.email;
-  if (data.photo) existing.photo = data.photo;
+  if (data.photo) existing.photo = normalizeOptionalLinkUrl(data.photo);
   else if (raw.photo === "") existing.photo = undefined;
   existing.address = {
     line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
@@ -414,27 +420,58 @@ export async function addStudentNoteAction(
 
 export async function addStudentDocumentAction(
   studentId: string,
-  doc: { name: string; url: string; publicId: string; mimeType: string }
+  doc: { name: string; url: string }
 ): Promise<ActionResult> {
   return runLoggedMutation("addStudentDocumentAction", async () => {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  const validation = validateCloudinaryDocument(doc.url, doc.publicId, "students");
-  if (!validation.valid) {
-    return { success: false, error: validation.error };
+  const name = sanitizeText(doc.name);
+  if (!name) {
+    return { success: false, error: "Document name is required" };
+  }
+
+  const url = normalizeDocumentUrl(doc.url);
+  const urlError = getDocumentUrlError(url);
+  if (urlError) {
+    return { success: false, error: urlError };
   }
 
   await connectDB();
   await Student.findByIdAndUpdate(studentId, {
     $push: {
       documents: {
-        ...doc,
+        name,
+        url,
         uploadedBy: user?.id,
         uploadedAt: new Date(),
       },
     },
   });
+
+  revalidatePath(`/dashboard/students/${studentId}`);
+  return { success: true };
+  });
+}
+
+export async function removeStudentDocumentAction(
+  studentId: string,
+  documentId: string
+): Promise<ActionResult> {
+  return runLoggedMutation("removeStudentDocumentAction", async () => {
+  const user = await getSessionUser();
+  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+  await connectDB();
+  const result = await Student.findByIdAndUpdate(
+    studentId,
+    { $pull: { documents: { _id: new Types.ObjectId(documentId) } } },
+    { new: true }
+  );
+
+  if (!result) {
+    return { success: false, error: "Student not found" };
+  }
 
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };

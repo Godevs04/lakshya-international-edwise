@@ -146,6 +146,7 @@ export interface StudentListItem {
   firstName: string;
   lastName: string;
   phone?: string;
+  whatsapp?: string;
   email?: string;
   status: StudentStatus;
   partnerName?: string;

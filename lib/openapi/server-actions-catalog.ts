@@ -70,7 +70,8 @@ export const SERVER_ACTION_GROUPS: ServerActionGroup[] = [
       { name: "deleteStudentAction", summary: "Delete a student", requestProperties: { id: { type: "string" } }, required: ["id"] },
       { name: "bulkUpdateStudentsAction", summary: "Bulk update student status or partner", requestProperties: { ids: { type: "array", items: { type: "string" } }, updates: { type: "object" } }, required: ["ids"] },
       { name: "addStudentNoteAction", summary: "Add a follow-up note to a student", requestProperties: { studentId: { type: "string" }, note: { type: "object" } }, required: ["studentId"] },
-      { name: "addStudentDocumentAction", summary: "Attach a document URL to a student", requestProperties: { studentId: { type: "string" }, document: { type: "object" } }, required: ["studentId"] },
+      { name: "addStudentDocumentAction", summary: "Attach a Google Drive document link to a student", requestProperties: { studentId: { type: "string" }, name: { type: "string" }, url: { type: "string", format: "uri" } }, required: ["studentId", "name", "url"] },
+      { name: "removeStudentDocumentAction", summary: "Remove a document link from a student", requestProperties: { studentId: { type: "string" }, documentId: { type: "string" } }, required: ["studentId", "documentId"] },
     ],
   },
   {

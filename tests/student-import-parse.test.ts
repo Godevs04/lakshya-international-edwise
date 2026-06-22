@@ -41,6 +41,12 @@ describe("student-import-template", () => {
 });
 
 describe("student-import-parse", () => {
+  it("parses bank lan header aliases", () => {
+    const csv = "First Name,Last Name,Bank LAN\nJane,Doe,HDFC-LAN-2026-001\n";
+    const rows = parseImportFile(encodeCsv(csv), "students.csv");
+    expect(rows[0]?.applicationNumber).toBe("HDFC-LAN-2026-001");
+  });
+
   it("parses CSV rows and normalizes headers", () => {
     const csv = "First Name,Last Name,Phone Number,Status\nJane,Doe,9876543210,new\n";
     const buffer = encodeCsv(csv);

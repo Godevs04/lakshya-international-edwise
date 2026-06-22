@@ -119,7 +119,7 @@ export const studentSchema = z.object({
   loanDisbursed: z.coerce.number().min(0).optional(),
   interest: z.coerce.number().min(0).max(100).optional(),
   bankName: z.string().optional(),
-  applicationNumber: z.string().optional(),
+  applicationNumber: z.string().max(50).optional(),
   partnerId: z.string().optional(),
   status: z.enum([
     "new", "contacted", "documents_pending", "submitted",
