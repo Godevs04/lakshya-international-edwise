@@ -39,6 +39,50 @@ function trimEnv(value: string | undefined): string | undefined {
   return value?.trim();
 }
 
+function isLocalhostUrl(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+  } catch {
+    return false;
+  }
+}
+
+function normalizeBaseUrl(url: string): string {
+  return url.replace(/\/$/, "");
+}
+
+/** Canonical app URL for Auth.js redirects, emails, and password reset links. */
+export function resolveAuthUrl(): string {
+  const explicit =
+    trimEnv(process.env.AUTH_URL) ?? trimEnv(process.env.NEXTAUTH_URL);
+
+  if (
+    explicit &&
+    !(process.env.NODE_ENV === "production" && isLocalhostUrl(explicit))
+  ) {
+    return normalizeBaseUrl(explicit);
+  }
+
+  const vercel = trimEnv(process.env.VERCEL_URL);
+  if (vercel) {
+    return normalizeBaseUrl(`https://${vercel}`);
+  }
+
+  const railway = trimEnv(process.env.RAILWAY_PUBLIC_DOMAIN);
+  if (railway) {
+    return normalizeBaseUrl(railway.startsWith("http") ? railway : `https://${railway}`);
+  }
+
+  if (explicit) {
+    return normalizeBaseUrl(explicit);
+  }
+
+  return normalizeBaseUrl(
+    `http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`
+  );
+}
+
 export function getEnv(): Env {
   const parsed = envSchema.safeParse({
     ...process.env,
@@ -67,11 +111,7 @@ export function getAuthSecret(): string {
 }
 
 export function getAuthUrl(): string {
-  return (
-    trimEnv(process.env.AUTH_URL) ??
-    trimEnv(process.env.NEXTAUTH_URL) ??
-    `http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`
-  );
+  return resolveAuthUrl();
 }
 
 export function getMongoUri(): string {

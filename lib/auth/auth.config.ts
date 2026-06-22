@@ -1,8 +1,12 @@
 import type { NextAuthConfig } from "next-auth";
-import { getAuthSecret } from "@/lib/config/env";
+import { getAuthSecret, resolveAuthUrl } from "@/lib/config/env";
 import { isPublicRegistrationAllowed } from "@/lib/config/env";
 import { getSessionMaxAgeSeconds } from "@/lib/auth/session-expiry";
 import type { UserRole } from "@/types";
+
+const authUrl = resolveAuthUrl();
+process.env.AUTH_URL = authUrl;
+process.env.NEXTAUTH_URL = authUrl;
 
 declare module "next-auth" {
   interface Session {
@@ -46,6 +50,25 @@ export const authConfig = {
   },
   providers: [],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      const canonicalBase = authUrl || baseUrl;
+
+      if (url.startsWith("/")) {
+        return `${canonicalBase}${url}`;
+      }
+
+      try {
+        const target = new URL(url);
+        const allowed = new URL(canonicalBase);
+        if (target.origin === allowed.origin) {
+          return url;
+        }
+      } catch {
+        // Fall through to login redirect.
+      }
+
+      return `${canonicalBase}/login`;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id ?? "";
