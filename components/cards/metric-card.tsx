@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import {
   Users,
   UserPlus,
@@ -32,23 +31,6 @@ export const METRIC_ICONS = {
 } as const;
 
 export type MetricIconName = keyof typeof METRIC_ICONS;
-
-function AnimatedNumber({ value }: { value: string | number }) {
-  const formatted =
-    typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
-
-  return (
-    <motion.span
-      key={formatted}
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="text-2xl font-bold tracking-tight sm:text-3xl"
-    >
-      {formatted}
-    </motion.span>
-  );
-}
 
 function sparklinePoints(seed: number): number[] {
   return Array.from({ length: 12 }, (_, i) => {
@@ -109,6 +91,8 @@ export function MetricCard({
 }: MetricCardProps) {
   const Icon: LucideIcon = METRIC_ICONS[icon];
   const gradient = KPI_GRADIENTS[index % KPI_GRADIENTS.length];
+  const formatted =
+    typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
   const sparkColor = gradient.includes("#6D5EF7") ? "#6D5EF7" :
     gradient.includes("#3B82F6") ? "#3B82F6" :
     gradient.includes("#22C55E") ? "#22C55E" :
@@ -116,41 +100,35 @@ export function MetricCard({
     gradient.includes("#EC4899") ? "#EC4899" : "#06B6D4";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.06, ease: [0.4, 0, 0.2, 1] }}
-    >
-      <GlassCard hover className={cn("p-5", className)}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1 space-y-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}>
-              <Icon className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <AnimatedNumber value={value} />
-              <p className="mt-0.5 text-sm font-medium text-muted-foreground">{title}</p>
-            </div>
-            {trend && (
-              <div className="flex items-center gap-1.5">
-                {trendUp ? (
-                  <TrendingUp className="h-3.5 w-3.5 text-[#22C55E]" />
-                ) : (
-                  <TrendingDown className="h-3.5 w-3.5 text-[#EF4444]" />
-                )}
-                <span className={cn("text-xs font-semibold", trendUp ? "text-[#22C55E]" : "text-[#EF4444]")}>
-                  {trend}
-                </span>
-                <span className="text-xs text-muted-foreground">This month</span>
-              </div>
-            )}
+    <GlassCard hover className={cn("p-5", className)}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-3">
+          <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}>
+            <Icon className="h-5 w-5 text-white" />
           </div>
+          <div>
+            <span className="text-2xl font-bold tracking-tight sm:text-3xl">{formatted}</span>
+            <p className="mt-0.5 text-sm font-medium text-muted-foreground">{title}</p>
+          </div>
+          {trend && (
+            <div className="flex items-center gap-1.5">
+              {trendUp ? (
+                <TrendingUp className="h-3.5 w-3.5 text-[#22C55E]" />
+              ) : (
+                <TrendingDown className="h-3.5 w-3.5 text-[#EF4444]" />
+              )}
+              <span className={cn("text-xs font-semibold", trendUp ? "text-[#22C55E]" : "text-[#EF4444]")}>
+                {trend}
+              </span>
+              <span className="text-xs text-muted-foreground">This month</span>
+            </div>
+          )}
         </div>
-        <div className="mt-4 -mx-1">
-          <Sparkline seed={index * 7 + (typeof value === "number" ? value : 0)} color={sparkColor} />
-        </div>
-      </GlassCard>
-    </motion.div>
+      </div>
+      <div className="mt-4 -mx-1">
+        <Sparkline seed={index * 7 + (typeof value === "number" ? value : 0)} color={sparkColor} />
+      </div>
+    </GlassCard>
   );
 }
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Types } from "mongoose";
 import { revalidateInsightCaches } from "@/lib/cache/revalidate";
 import { connectDB } from "@/lib/db/mongoose";
 import { Partner } from "@/models/Partner";
@@ -9,8 +10,12 @@ import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
-import { getPartnerCommissionSummary } from "@/lib/services/partner-commission.service";
-import { partnerSchema } from "@/lib/validations/schemas";
+import {
+  getPartnerCommissionSummary,
+  getPartnerStudentCommissions,
+  getPartnersCommissionOverview,
+} from "@/lib/services/partner-commission.service";
+import { partnerSchema, commissionSettlementSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encryptSensitiveField, maskBankAccount, safeDecrypt } from "@/lib/utils/pii";
 import {
@@ -316,18 +321,111 @@ export async function getPartnerAnalytics(partnerId: string) {
 
   const commission = await getPartnerCommissionSummary(
     partnerId,
-    partner.commissionPercent ?? 0
+    partner.commissionPercent ?? 0,
+    partner.performance?.commissionSettled ?? 0
   );
 
   return {
     monthlyLeads: partner.performance.monthlyLeads,
     sanctionRate: total > 0 ? Math.round((sanctioned / total) * 100) : 0,
     disbursementTotal: commission.totalDisbursed,
-    commissionEarned: commission.commissionPayout,
+    commissionEarned: commission.commissionEarned,
+    commissionSettled: commission.commissionSettled,
+    commissionPending: commission.commissionPending,
     commissionPercent: commission.commissionPercent,
     disbursedStudentCount: commission.disbursedStudentCount,
     statusCounts,
     disbursed,
+    settlements: (partner.commissionSettlements ?? [])
+      .slice()
+      .sort((a, b) => new Date(b.settledAt ?? 0).getTime() - new Date(a.settledAt ?? 0).getTime())
+      .slice(0, 10)
+      .map((entry) => ({
+        amount: entry.amount,
+        note: entry.note,
+        settledAt: entry.settledAt,
+        settledByName: entry.settledByName,
+      })),
+    studentCommissions: await getPartnerStudentCommissions(
+      partnerId,
+      partner.commissionPercent ?? 0,
+      partner.performance?.commissionSettled ?? 0
+    ),
   };
   }, null);
+}
+
+export async function getPartnersCommissionOverviewAction() {
+  return runLoggedQuery("getPartnersCommissionOverviewAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+    return getPartnersCommissionOverview();
+  }, []);
+}
+
+export async function recordPartnerCommissionSettlementAction(
+  partnerId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("recordPartnerCommissionSettlementAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const parsed = commissionSettlementSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const partner = await Partner.findById(partnerId);
+    if (!partner) return { success: false, error: "Partner not found" };
+
+    const summary = await getPartnerCommissionSummary(
+      partnerId,
+      partner.commissionPercent ?? 0,
+      partner.performance?.commissionSettled ?? 0
+    );
+
+    if (parsed.data.amount > summary.commissionPending) {
+      return {
+        success: false,
+        error: `Amount exceeds pending commission (${summary.commissionPending.toLocaleString("en-IN")})`,
+      };
+    }
+
+    partner.performance ??= {
+      monthlyLeads: 0,
+      sanctionRate: 0,
+      disbursementTotal: 0,
+      commissionEarned: 0,
+      commissionSettled: 0,
+    };
+    partner.performance.commissionSettled =
+      (partner.performance.commissionSettled ?? 0) + parsed.data.amount;
+
+    partner.commissionSettlements ??= [];
+    partner.commissionSettlements.push({
+      amount: parsed.data.amount,
+      note: parsed.data.note?.trim() || undefined,
+      settledAt: new Date(),
+      settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+      settledByName: user?.name,
+    });
+
+    await partner.save();
+
+    await logActivity({
+      action: "partner.commission_settled",
+      description: `Recorded commission settlement of INR ${parsed.data.amount.toLocaleString("en-IN")} for ${partner.companyName}`,
+      resourceType: "partner",
+      resourceId: partnerId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    return { success: true };
+  });
 }

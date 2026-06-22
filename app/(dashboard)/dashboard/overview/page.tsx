@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { auth } from "@/lib/auth/auth";
 import { getGreeting, formatCurrency, formatDate } from "@/lib/utils/format";
 import { getOverviewDashboardAction } from "@/lib/actions/dashboard.actions";
@@ -11,16 +12,28 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { StudentListCard } from "@/components/cards/student-list-card";
 import { FollowUpCards } from "@/components/cards/follow-up-card";
-import {
-  LoanStatusPieChart,
-  MonthlyStudentsAreaChart,
-  LoanAmountBarChart,
-  TopPartnersBarChart,
-} from "@/components/charts/dashboard-charts";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Handshake } from "lucide-react";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
+
+const LoanStatusPieChart = dynamic(
+  () => import("@/components/charts/dashboard-charts").then((m) => m.LoanStatusPieChart),
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+);
+const MonthlyStudentsAreaChart = dynamic(
+  () => import("@/components/charts/dashboard-charts").then((m) => m.MonthlyStudentsAreaChart),
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+);
+const LoanAmountBarChart = dynamic(
+  () => import("@/components/charts/dashboard-charts").then((m) => m.LoanAmountBarChart),
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+);
+const TopPartnersBarChart = dynamic(
+  () => import("@/components/charts/dashboard-charts").then((m) => m.TopPartnersBarChart),
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+);
 
 function withTrend(
   title: string,
@@ -38,6 +51,8 @@ function withTrend(
 }
 
 export default async function OverviewPage() {
+  const session = await auth();
+
   await requireAnyPagePermission([
     PERMISSIONS.STUDENTS_READ,
     PERMISSIONS.PARTNERS_READ,
@@ -46,7 +61,6 @@ export default async function OverviewPage() {
     PERMISSIONS.REPORTS_READ,
   ]);
 
-  const session = await auth();
   const {
     metrics,
     trends,

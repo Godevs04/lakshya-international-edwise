@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import {
   Bell,
   Moon,
@@ -14,6 +14,8 @@ import {
   User,
   Search,
   CheckCheck,
+  Menu,
+  Loader2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,33 +28,85 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils/format";
-import { GlobalSearch } from "@/components/dashboard/global-search";
 import { useSearchShortcutLabel } from "@/hooks/use-search-shortcut";
 import {
+  getNotificationsAction,
   markAllNotificationsReadAction,
   markNotificationReadAction,
   type ClientNotification,
 } from "@/lib/actions/notification.actions";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { MobileNavSheet } from "@/components/dashboard/mobile-nav-sheet";
+import type { AppModules } from "@/types";
+
+const GlobalSearch = dynamic(
+  () => import("@/components/dashboard/global-search").then((m) => m.GlobalSearch),
+  { ssr: false }
+);
+
+interface TopbarUser {
+  name?: string | null;
+  email?: string | null;
+  avatar?: string | null;
+}
 
 interface TopbarProps {
   unreadCount?: number;
-  notifications?: ClientNotification[];
+  companyName: string;
+  logo?: string;
+  modules?: AppModules;
+  user?: TopbarUser;
 }
 
-export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
+export function Topbar({
+  unreadCount = 0,
+  companyName,
+  logo,
+  modules,
+  user: serverUser,
+}: TopbarProps) {
   const { data: session } = useSession();
+  const user = session?.user ?? serverUser;
   const { setTheme } = useTheme();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<ClientNotification[]>([]);
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [pending, startTransition] = useTransition();
   const searchShortcutLabel = useSearchShortcutLabel();
+
+  const loadNotifications = useCallback(async () => {
+    if (notificationsLoaded || notificationsLoading) return;
+    setNotificationsLoading(true);
+    try {
+      const items = await getNotificationsAction();
+      setNotifications(items);
+      setNotificationsLoaded(true);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, [notificationsLoaded, notificationsLoading]);
+
+  function handleNotificationsOpenChange(open: boolean) {
+    setNotificationsOpen(open);
+    if (open) {
+      void loadNotifications();
+    }
+  }
 
   function handleNotificationClick(notification: ClientNotification) {
     startTransition(async () => {
       if (!notification.read) {
         await markNotificationReadAction(notification.id);
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === notification.id ? { ...item, read: true } : item
+          )
+        );
       }
       if (notification.link) {
         router.push(notification.link);
@@ -63,16 +117,24 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
   function handleMarkAllRead() {
     startTransition(async () => {
       await markAllNotificationsReadAction();
+      setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
     });
   }
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex min-h-14 flex-wrap items-center gap-2 sm:gap-3 lg:min-h-16">
-        <motion.button
+      <header className="sticky top-0 z-40 flex min-h-12 flex-wrap items-center gap-2 sm:min-h-14 sm:gap-3">
+        <button
           type="button"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
+          onClick={() => setMenuOpen(true)}
+          aria-label="Open navigation menu"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#6D5EF7]/15 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 lg:hidden dark:bg-white/5"
+        >
+          <Menu className="h-5 w-5 text-[#6D5EF7]" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => setSearchOpen(true)}
           aria-label={`Search students, partners, and applications (${searchShortcutLabel})`}
           className="search-glow group relative flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full border border-[#6D5EF7]/15 bg-white/60 px-3 backdrop-blur-xl transition-all sm:h-11 sm:gap-3 sm:px-5 lg:max-w-md dark:bg-white/5"
@@ -85,10 +147,10 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
           <kbd className="pointer-events-none ml-auto hidden h-6 shrink-0 select-none items-center rounded-full border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 px-2 font-mono text-[10px] font-medium text-[#6D5EF7] sm:flex">
             {searchShortcutLabel}
           </kbd>
-        </motion.button>
+        </button>
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
-          <DropdownMenu>
+          <DropdownMenu open={notificationsOpen} onOpenChange={handleNotificationsOpenChange}>
             <DropdownMenuTrigger className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:h-10 sm:w-10 dark:bg-white/5">
               <Bell className="h-4 w-4 text-muted-foreground" />
               {unreadCount > 0 && (
@@ -115,7 +177,11 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
                     </button>
                   )}
                 </div>
-                {notifications.length === 0 ? (
+                {notificationsLoading ? (
+                  <DropdownMenuItem disabled className="justify-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </DropdownMenuItem>
+                ) : notifications.length === 0 ? (
                   <DropdownMenuItem disabled className="text-muted-foreground">
                     No new notifications
                   </DropdownMenuItem>
@@ -147,7 +213,7 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:h-10 sm:w-10 dark:bg-white/5">
+            <DropdownMenuTrigger className="hidden h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:inline-flex sm:h-10 sm:w-10 dark:bg-white/5">
               <Sun className="h-4 w-4 rotate-0 scale-100 text-muted-foreground transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 text-muted-foreground transition-all dark:rotate-0 dark:scale-100" />
             </DropdownMenuTrigger>
@@ -167,9 +233,9 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex">
               <Avatar className="h-9 w-9 ring-2 ring-[#6D5EF7]/20 transition-all hover:ring-[#6D5EF7]/40 sm:h-10 sm:w-10">
-                <AvatarImage src={session?.user?.avatar} />
+                <AvatarImage src={user?.avatar ?? undefined} />
                 <AvatarFallback className="bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xs text-white">
-                  {getInitials(session?.user?.name ?? "U")}
+                  {getInitials(user?.name ?? "U")}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
@@ -177,9 +243,9 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
               <DropdownMenuGroup>
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span className="font-semibold">{session?.user?.name}</span>
+                    <span className="font-semibold">{user?.name}</span>
                     <span className="text-xs font-normal text-muted-foreground">
-                      {session?.user?.email}
+                      {user?.email}
                     </span>
                   </div>
                 </DropdownMenuLabel>
@@ -208,7 +274,18 @@ export function Topbar({ unreadCount = 0, notifications = [] }: TopbarProps) {
           </DropdownMenu>
         </div>
       </header>
-      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+
+      <MobileNavSheet
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        companyName={companyName}
+        logo={logo}
+        modules={modules}
+      />
+
+      {searchOpen ? (
+        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      ) : null}
     </>
   );
 }

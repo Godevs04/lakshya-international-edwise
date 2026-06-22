@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/models/User";
 import { getPermissionsForRole } from "@/lib/auth/permissions";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { UserRole } from "@/types";
 
 export async function authorizeCredentials(credentials: Record<string, unknown>) {
@@ -9,10 +10,15 @@ export async function authorizeCredentials(credentials: Record<string, unknown>)
     return null;
   }
 
+  const email = (credentials.email as string).toLowerCase();
+  const ip = await getClientIp();
+  const rateLimit = await checkRateLimit("login", `${ip}:${email}`);
+  if (!rateLimit.allowed) {
+    return null;
+  }
+
   await connectDB();
-  const user = await User.findOne({
-    email: (credentials.email as string).toLowerCase(),
-  });
+  const user = await User.findOne({ email });
 
   if (!user) return null;
 

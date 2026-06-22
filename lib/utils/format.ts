@@ -8,6 +8,15 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+export function formatPercent(value: number): string {
+  if (!Number.isFinite(value)) return "0%";
+  const normalized = Math.round(value * 100) / 100;
+  const text = Number.isInteger(normalized)
+    ? String(normalized)
+    : normalized.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  return `${text}%`;
+}
+
 export function formatDate(date: Date | string): string {
   return format(new Date(date), "dd MMM yyyy");
 }

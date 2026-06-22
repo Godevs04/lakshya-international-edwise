@@ -47,7 +47,16 @@ export interface IPartner extends Document {
     sanctionRate: number;
     disbursementTotal: number;
     commissionEarned: number;
+    commissionSettled: number;
   };
+  commissionSettlements: Array<{
+    _id?: mongoose.Types.ObjectId;
+    amount: number;
+    note?: string;
+    settledAt?: Date;
+    settledBy?: mongoose.Types.ObjectId;
+    settledByName?: string;
+  }>;
   metadata: {
     createdBy?: mongoose.Types.ObjectId;
     createdByName?: string;
@@ -87,7 +96,17 @@ const PartnerSchema = new Schema<IPartner>(
       sanctionRate: { type: Number, default: 0 },
       disbursementTotal: { type: Number, default: 0 },
       commissionEarned: { type: Number, default: 0 },
+      commissionSettled: { type: Number, default: 0, min: 0 },
     },
+    commissionSettlements: [
+      {
+        amount: { type: Number, required: true, min: 0 },
+        note: { type: String, trim: true },
+        settledAt: { type: Date, default: Date.now },
+        settledBy: { type: Schema.Types.ObjectId, ref: "User" },
+        settledByName: { type: String, trim: true },
+      },
+    ],
     metadata: {
       createdBy: { type: Schema.Types.ObjectId, ref: "User" },
       createdByName: { type: String },

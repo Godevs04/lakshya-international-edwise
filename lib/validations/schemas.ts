@@ -138,7 +138,11 @@ export const partnerSchema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
   gst: z.string().optional(),
-  commissionPercent: z.coerce.number().min(0).max(100).optional(),
+  commissionPercent: z.coerce
+    .number()
+    .min(0, "Commission cannot be negative")
+    .max(100, "Commission cannot exceed 100%")
+    .optional(),
   accountName: z.string().optional(),
   accountNumber: z.string().optional(),
   ifsc: z.string().optional(),
@@ -154,6 +158,11 @@ export const partnerSchema = z.object({
 export const noteSchema = z.object({
   content: z.string().min(1, "Note content is required"),
   dueDate: z.string().optional(),
+});
+
+export const commissionSettlementSchema = z.object({
+  amount: z.coerce.number().positive("Settlement amount must be greater than zero"),
+  note: z.string().max(500).optional(),
 });
 
 export const settingsSchema = z.object({
