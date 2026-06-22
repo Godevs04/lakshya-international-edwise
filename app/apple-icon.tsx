@@ -1,28 +1,15 @@
 import { ImageResponse } from "next/og";
+import { getAppConfig } from "@/lib/config/app-config";
+import { FaviconMark, getBrandInitial } from "@/lib/brand/favicon-mark";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-export default function AppleIcon() {
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg, #6D5EF7 0%, #1E3A5F 100%)",
-          color: "#ffffff",
-          fontSize: 96,
-          fontWeight: 700,
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        N
-      </div>
-    ),
-    { ...size }
-  );
+export default async function AppleIcon() {
+  const config = await getAppConfig();
+  const initial = getBrandInitial(config.company.name);
+
+  return new ImageResponse(<FaviconMark initial={initial} size={180} />, {
+    ...size,
+  });
 }
