@@ -13,7 +13,7 @@ const cspValue = [
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://res.cloudinary.com",
-  "font-src 'self' data:",
+  "font-src 'self' data: blob:",
   "connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io",
   "worker-src 'self'",
   "manifest-src 'self'",

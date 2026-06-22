@@ -39,8 +39,8 @@ export function getDefaultThemeSettings(): AppTheme {
     primary: process.env.APP_THEME_PRIMARY ?? "oklch(0.488 0.243 264.376)",
     accent: process.env.APP_THEME_ACCENT ?? "oklch(0.556 0 0)",
     radius: process.env.APP_THEME_RADIUS ?? "0.625rem",
-    fontFamily: process.env.APP_THEME_FONT ?? "Geist",
-    mode: (process.env.APP_THEME_MODE as AppTheme["mode"]) ?? "system",
+    fontFamily: process.env.APP_THEME_FONT ?? "SN Pro",
+    mode: (process.env.APP_THEME_MODE as AppTheme["mode"]) ?? "light",
   };
 }
 
