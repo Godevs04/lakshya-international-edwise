@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment } from "react";
+import { useRouter } from "next/navigation";
 import {
   PieChart,
   Pie,
@@ -18,6 +19,7 @@ import {
 } from "recharts";
 import { GlassCard } from "@/components/cards/glass-card";
 import { CHART_COLORS } from "@/lib/design/tokens";
+import { loanStatusChartHref } from "@/lib/utils/loan-status-chart";
 import type { ChartDataPoint } from "@/types";
 
 const tooltipStyle = {
@@ -51,8 +53,10 @@ function ChartCard({ title, subtitle, children, className }: ChartCardProps) {
 }
 
 export function LoanStatusPieChart({ data }: { data: ChartDataPoint[] }) {
+  const router = useRouter();
+
   return (
-    <ChartCard title="Loan Status" subtitle="Distribution by current status">
+    <ChartCard title="Loan Status" subtitle="Click a segment to view matching students">
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -65,6 +69,13 @@ export function LoanStatusPieChart({ data }: { data: ChartDataPoint[] }) {
             dataKey="value"
             nameKey="name"
             strokeWidth={0}
+            className="cursor-pointer"
+            onClick={(_, index) => {
+              const segment = data[index];
+              if (segment?.name) {
+                router.push(loanStatusChartHref(segment.name));
+              }
+            }}
           >
             {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />

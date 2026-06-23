@@ -29,6 +29,8 @@ const ROUTE_PERMISSIONS: { prefix: string; permission: string }[] = [
   { prefix: "/dashboard/students", permission: "students:read" },
   { prefix: "/dashboard/partners", permission: "partners:read" },
   { prefix: "/dashboard/applications", permission: "applications:read" },
+  { prefix: "/dashboard/lenders", permission: "students:read" },
+  { prefix: "/dashboard/tasks", permission: "students:read" },
   { prefix: "/dashboard/reports", permission: "reports:read" },
   { prefix: "/dashboard/analytics", permission: "analytics:read" },
   { prefix: "/dashboard/settings", permission: "settings:read" },

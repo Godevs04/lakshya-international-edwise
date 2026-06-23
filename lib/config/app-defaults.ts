@@ -49,6 +49,8 @@ export function getDefaultModules(): AppModules {
     students: process.env.APP_MODULE_STUDENTS !== "false",
     partners: process.env.APP_MODULE_PARTNERS !== "false",
     applications: process.env.APP_MODULE_APPLICATIONS !== "false",
+    lenders: process.env.APP_MODULE_LENDERS !== "false",
+    tasks: process.env.APP_MODULE_TASKS !== "false",
     reports: process.env.APP_MODULE_REPORTS !== "false",
     analytics: process.env.APP_MODULE_ANALYTICS !== "false",
   };

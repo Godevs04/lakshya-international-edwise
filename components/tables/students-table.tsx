@@ -37,6 +37,7 @@ import {
   buildStudentListQuery,
   type StudentListFilters,
 } from "@/lib/utils/student-list-filters";
+import { QuickAddLeadSheet } from "@/components/dashboard/quick-add-lead-sheet";
 import { Trash2, Download } from "lucide-react";
 
 interface PartnerOption {
@@ -227,9 +228,9 @@ export function StudentsTable({
     navigate({ mine: isMine ? undefined : "1", page: undefined });
   }
 
-  function handleStageChange(stageId: string) {
+  function handleWorkflowChange(workflowId: string) {
     navigate({
-      stage: stageId === "all" ? undefined : stageId,
+      workflow: workflowId === "all" ? undefined : workflowId,
       status: undefined,
       page: undefined,
     });
@@ -249,7 +250,7 @@ export function StudentsTable({
       state: undefined,
       college: undefined,
       course: undefined,
-      bank: undefined,
+      lenderId: undefined,
       dateFrom: undefined,
       dateTo: undefined,
       loanMin: undefined,
@@ -262,8 +263,8 @@ export function StudentsTable({
     <div className="space-y-4">
       <GlassCard className="space-y-4 p-4">
         <StudentStageTabs
-          activeStage={filters.stage ?? "all"}
-          onStageChange={handleStageChange}
+          activeWorkflow={filters.workflow ?? "all"}
+          onWorkflowChange={handleWorkflowChange}
         />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -292,6 +293,9 @@ export function StudentsTable({
               <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
                 <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
               </Button>
+            )}
+            {canWrite && (
+              <QuickAddLeadSheet assignableUsers={assignableUsers} />
             )}
             {canWrite && <StudentImportDialog canWrite={canWrite} />}
             {canExport && (

@@ -21,6 +21,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { STUDENT_STATUSES } from "@/lib/constants/statuses";
+import { LENDER_SEEDS } from "@/lib/constants/lenders";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import type { StudentListFilters } from "@/lib/utils/student-list-filters";
 import { countActiveAdvancedFilters } from "@/lib/utils/student-list-filters";
@@ -47,7 +48,7 @@ interface AdvancedSearchDraft {
   state: string;
   college: string;
   course: string;
-  bank: string;
+  lenderId: string;
   dateFrom: string;
   dateTo: string;
   loanMin: string;
@@ -80,7 +81,7 @@ function createDraftFromFilters(filters: StudentListFilters): AdvancedSearchDraf
     state: filters.state ?? "",
     college: filters.college ?? "",
     course: filters.course ?? "",
-    bank: filters.bank ?? "",
+    lenderId: filters.lenderId ?? "",
     dateFrom: filters.dateFrom ?? "",
     dateTo: filters.dateTo ?? "",
     loanMin: filters.loanMin ?? "",
@@ -99,6 +100,11 @@ export function StudentAdvancedSearch({
   const [draft, setDraft] = useState<AdvancedSearchDraft>(() => createDraftFromFilters(filters));
 
   const activeCount = countActiveAdvancedFilters(filters);
+
+  const assigneeItems = [
+    { value: ANY_OPTION, label: "Any counsellor" },
+    ...assignableUsers.map((user) => ({ value: user._id, label: user.name })),
+  ];
 
   function updateDraft<K extends keyof AdvancedSearchDraft>(key: K, value: AdvancedSearchDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -121,12 +127,12 @@ export function StudentAdvancedSearch({
       state: draft.state || undefined,
       college: draft.college || undefined,
       course: draft.course || undefined,
-      bank: draft.bank || undefined,
+      lenderId: draft.lenderId || undefined,
       dateFrom: draft.dateFrom || undefined,
       dateTo: draft.dateTo || undefined,
       loanMin: draft.loanMin || undefined,
       loanMax: draft.loanMax || undefined,
-      stage: draft.status ? undefined : filters.stage,
+      workflow: draft.status ? undefined : filters.workflow,
       page: undefined,
     });
     setOpen(false);
@@ -186,6 +192,7 @@ export function StudentAdvancedSearch({
             <Select
               value={toSelectValue(draft.assignedToId)}
               onValueChange={(value) => updateDraft("assignedToId", fromSelectValue(value ?? ANY_OPTION))}
+              items={assigneeItems}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Any counsellor" />
@@ -320,12 +327,27 @@ export function StudentAdvancedSearch({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bank">Bank</Label>
-              <Input
-                id="bank"
-                value={draft.bank}
-                onChange={(e) => updateDraft("bank", e.target.value)}
-              />
+              <Label htmlFor="lenderId">Lender</Label>
+              <Select
+                value={toSelectValue(draft.lenderId)}
+                onValueChange={(value) => updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))}
+                items={[
+                  { value: ANY_OPTION, label: "Any lender" },
+                  ...LENDER_SEEDS.map((lender) => ({ value: lender.slug, label: lender.name })),
+                ]}
+              >
+                <SelectTrigger id="lenderId" className="w-full">
+                  <SelectValue placeholder="Any lender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ANY_OPTION}>Any lender</SelectItem>
+                  {LENDER_SEEDS.map((lender) => (
+                    <SelectItem key={lender.slug} value={lender.slug}>
+                      {lender.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

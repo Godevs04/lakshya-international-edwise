@@ -1,20 +1,20 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { STUDENT_LOAN_STAGES } from "@/lib/constants/student-loan-stages";
+import { STUDENT_WORKFLOW_FILTERS } from "@/lib/constants/student-workflow-filters";
 
 interface StudentStageTabsProps {
-  activeStage: string;
-  onStageChange: (stageId: string) => void;
+  activeWorkflow: string;
+  onWorkflowChange: (workflowId: string) => void;
   className?: string;
 }
 
 export function StudentStageTabs({
-  activeStage,
-  onStageChange,
+  activeWorkflow,
+  onWorkflowChange,
   className,
 }: StudentStageTabsProps) {
-  const currentStage = activeStage || "all";
+  const currentWorkflow = activeWorkflow || "all";
 
   return (
     <div
@@ -23,13 +23,13 @@ export function StudentStageTabs({
         className
       )}
     >
-      {STUDENT_LOAN_STAGES.map((stage) => {
-        const isActive = currentStage === stage.id;
+      {STUDENT_WORKFLOW_FILTERS.map((workflow) => {
+        const isActive = currentWorkflow === workflow.id;
         return (
           <button
-            key={stage.id}
+            key={workflow.id}
             type="button"
-            onClick={() => onStageChange(stage.id)}
+            onClick={() => onWorkflowChange(workflow.id)}
             className={cn(
               "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
               isActive
@@ -37,7 +37,7 @@ export function StudentStageTabs({
                 : "border-[#6D5EF7]/15 bg-white/60 text-muted-foreground hover:border-[#6D5EF7]/30 hover:bg-[#6D5EF7]/8 hover:text-foreground dark:bg-white/5"
             )}
           >
-            {stage.label}
+            {workflow.label}
           </button>
         );
       })}

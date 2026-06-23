@@ -56,7 +56,6 @@ export default async function EditStudentPage({
           loanSanctioned: student.loan?.sanctioned,
           loanDisbursed: student.loan?.disbursed,
           interest: student.loan?.interest,
-          bankName: student.loan?.bankName,
           applicationNumber: student.loan?.applicationNumber,
           partnerId:
             student.partnerId && typeof student.partnerId === "object"
@@ -75,9 +74,20 @@ export default async function EditStudentPage({
               : student.assignedTo
                 ? String(student.assignedTo)
                 : "",
+          assignedToName:
+            student.assignedTo && typeof student.assignedTo === "object" && "name" in student.assignedTo
+              ? String(student.assignedTo.name)
+              : undefined,
           targetCountry: student.targetCountry,
           targetIntake: student.targetIntake,
           targetDegree: student.targetDegree,
+          targetUniversity: student.targetUniversity,
+          admissionRevenue: student.admissionRevenue,
+          applicationStatus: student.applicationStatus as string | undefined,
+          loanCurrency: student.loanCurrency as string | undefined,
+          lenderId: student.lenderId as string | undefined,
+          roi: student.roi as number | undefined,
+          processingFee: student.processingFee as number | undefined,
           status: student.status,
           remarks: student.remarks,
         }}

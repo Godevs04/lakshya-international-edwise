@@ -1,4 +1,5 @@
 import type { StudentStatus, PartnerStatus, ApplicationStatus } from "@/lib/constants/statuses";
+import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
 
 export type UserRole =
   | "super_admin"
@@ -85,6 +86,8 @@ export interface AppModules {
   students: boolean;
   partners: boolean;
   applications: boolean;
+  lenders: boolean;
+  tasks: boolean;
   reports: boolean;
   analytics: boolean;
 }
@@ -167,6 +170,7 @@ export interface PartnerListItem {
   phone?: string;
   email?: string;
   status: PartnerStatus;
+  actionStatus: PartnerActionStatus;
   studentsCount: number;
   totalLoanValue: number;
   commissionPercent?: number;
@@ -182,6 +186,28 @@ export interface ApplicationListItem {
   priority?: string;
   dueDate?: Date;
   createdAt: Date;
+}
+
+export interface TaskListItem {
+  _id: string;
+  title: string;
+  description?: string;
+  studentId?: string;
+  studentCode?: string;
+  studentName?: string;
+  assignedToId?: string;
+  assignedToName?: string;
+  dueAt: Date;
+  reminderAt?: Date;
+  status: "open" | "done" | "cancelled";
+  createdAt: Date;
+}
+
+export interface LenderListItem {
+  _id: string;
+  name: string;
+  slug: string;
+  applicationCount: number;
 }
 
 export interface PaginatedResult<T> {

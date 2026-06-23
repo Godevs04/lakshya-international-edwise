@@ -11,14 +11,17 @@ import { Plus, IndianRupee } from "lucide-react";
 export default async function PartnersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; actionStatus?: string }>;
 }) {
   await requireModuleEnabled("partners");
   await requirePagePermission(PERMISSIONS.PARTNERS_READ);
 
   const params = await searchParams;
   const access = await getPartnerPageAccess();
-  const result = await getPartners({ page: parseInt(params.page ?? "1", 10) });
+  const result = await getPartners({
+    page: parseInt(params.page ?? "1", 10),
+    actionStatus: params.actionStatus,
+  });
 
   return (
     <div className="space-y-6">
@@ -41,7 +44,7 @@ export default async function PartnersPage({
           </div>
         }
       />
-      <PartnersTable {...result} {...access} />
+      <PartnersTable {...result} {...access} actionStatus={params.actionStatus} />
     </div>
   );
 }

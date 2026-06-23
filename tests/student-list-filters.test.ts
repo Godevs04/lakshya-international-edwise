@@ -1,31 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { getStatusesForLoanStage, STUDENT_LOAN_STAGES } from "@/lib/constants/student-loan-stages";
+import {
+  STUDENT_WORKFLOW_FILTERS,
+  buildWorkflowMongoFilter,
+} from "@/lib/constants/student-workflow-filters";
 import {
   buildStudentListQuery,
   countActiveAdvancedFilters,
 } from "@/lib/utils/student-list-filters";
 
-describe("student loan stages", () => {
-  it("defines pipeline tabs including all", () => {
-    expect(STUDENT_LOAN_STAGES.map((stage) => stage.id)).toEqual([
+describe("student workflow filters", () => {
+  it("defines workflow tabs including all", () => {
+    expect(STUDENT_WORKFLOW_FILTERS.map((workflow) => workflow.id)).toEqual([
       "all",
-      "new",
-      "documents",
-      "submitted",
+      "docs_pending",
+      "loggedin",
       "sanctioned",
+      "pf_paid",
+      "pf_pending",
       "disbursed",
+      "rejected",
     ]);
   });
 
-  it("maps stage ids to status groups", () => {
-    expect(getStatusesForLoanStage("documents")).toEqual(["documents_pending"]);
-    expect(getStatusesForLoanStage("submitted")).toEqual([
-      "submitted",
-      "under_verification",
-      "approved",
-    ]);
-    expect(getStatusesForLoanStage("all")).toBeUndefined();
-    expect(getStatusesForLoanStage(undefined)).toBeUndefined();
+  it("maps workflow ids to mongo filters", () => {
+    expect(buildWorkflowMongoFilter("docs_pending")).toEqual({ applicationStatus: "docs_pending" });
+    expect(buildWorkflowMongoFilter("loggedin")).toEqual({ applicationStatus: "loggedin" });
+    expect(buildWorkflowMongoFilter("pf_paid")).toEqual({ applicationStatus: "pf_paid" });
+    expect(buildWorkflowMongoFilter("rejected")).toEqual({
+      $or: [{ applicationStatus: "rejected" }, { status: "rejected" }],
+    });
+    expect(buildWorkflowMongoFilter("all")).toBeNull();
+    expect(buildWorkflowMongoFilter(undefined)).toBeNull();
   });
 });
 
@@ -33,14 +38,16 @@ describe("student list filters", () => {
   it("builds query string from active filters", () => {
     const query = buildStudentListQuery({
       search: "kavin",
-      stage: "submitted",
+      workflow: "sanctioned",
+      lenderId: "credila",
       mine: "1",
       partnerId: "abc123",
       loanMin: "100000",
     });
 
     expect(query).toContain("search=kavin");
-    expect(query).toContain("stage=submitted");
+    expect(query).toContain("workflow=sanctioned");
+    expect(query).toContain("lenderId=credila");
     expect(query).toContain("mine=1");
     expect(query).toContain("partnerId=abc123");
     expect(query).toContain("loanMin=100000");
@@ -60,7 +67,7 @@ describe("student list filters", () => {
       countActiveAdvancedFilters({
         search: "kavin",
         mine: "1",
-        stage: "new",
+        workflow: "loggedin",
         partnerId: "abc",
         loanMax: "500000",
       })

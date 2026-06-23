@@ -20,7 +20,8 @@ function parseFilters(
     page: params.page,
     search: params.search,
     status: params.status,
-    stage: params.stage,
+    workflow: params.workflow,
+    lenderId: params.lenderId,
     mine: params.mine,
     partnerId: params.partnerId,
     assignedToId: params.assignedToId,
@@ -33,7 +34,6 @@ function parseFilters(
     state: params.state,
     college: params.college,
     course: params.course,
-    bank: params.bank,
   };
 }
 
@@ -54,7 +54,8 @@ export default async function StudentsPage({
       page: parseInt(params.page ?? "1", 10),
       search: params.search,
       status: params.status,
-      stage: params.stage,
+      workflow: params.workflow,
+      lenderId: params.lenderId,
       partnerId: params.partnerId,
       assignedToId: params.assignedToId,
       targetCountry: params.targetCountry,
@@ -66,7 +67,6 @@ export default async function StudentsPage({
       state: params.state,
       college: params.college,
       course: params.course,
-      bank: params.bank,
       mine: params.mine === "1",
     }),
     getPartnersList(),

@@ -59,7 +59,7 @@ interface SettingsViewProps {
   }>;
 }
 
-const MODULE_KEYS = ["students", "partners", "applications", "reports", "analytics"] as const;
+const MODULE_KEYS = ["students", "partners", "applications", "lenders", "tasks", "reports", "analytics"] as const;
 
 function getCreatableRoles(currentUserRole?: UserRole): UserRole[] {
   return (Object.keys(ROLE_LABELS) as UserRole[]).filter((role) => {

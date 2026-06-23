@@ -12,6 +12,8 @@ import {
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField } from "@/lib/utils/pii";
 import { allocateStudentId } from "@/lib/services/student-id.service";
+import { resolveLenderIdBySlug } from "@/lib/services/lender.service";
+import { findLenderSlugByName } from "@/lib/constants/lenders";
 import { mapRowToStudentInput, parseImportDate } from "@/lib/utils/student-import-parse";
 import { logActivity } from "@/lib/services/activity.service";
 import { Types } from "mongoose";
@@ -119,6 +121,8 @@ export async function importStudentsFromRows(
 
     const data = parsed.data;
     const studentId = await allocateStudentId();
+    const lenderSlug = findLenderSlugByName(data.bankName);
+    const lenderObjectId = lenderSlug ? await resolveLenderIdBySlug(lenderSlug) : undefined;
 
     try {
       const student = await Student.create({
@@ -150,6 +154,7 @@ export async function importStudentsFromRows(
           sanctioned: data.loanSanctioned ?? 0,
           disbursed: data.loanDisbursed ?? 0,
           interest: data.interest ?? 0,
+          lenderId: lenderObjectId,
           bankName: data.bankName,
           applicationNumber: data.applicationNumber,
         },

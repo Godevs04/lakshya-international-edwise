@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Users,
   UserPlus,
@@ -78,6 +79,7 @@ interface MetricCardProps {
   trendUp?: boolean;
   index?: number;
   className?: string;
+  href?: string;
 }
 
 export function MetricCard({
@@ -88,6 +90,7 @@ export function MetricCard({
   trendUp = true,
   index = 0,
   className,
+  href,
 }: MetricCardProps) {
   const Icon: LucideIcon = METRIC_ICONS[icon];
   const gradient = KPI_GRADIENTS[index % KPI_GRADIENTS.length];
@@ -99,8 +102,8 @@ export function MetricCard({
     gradient.includes("#F59E0B") ? "#F59E0B" :
     gradient.includes("#EC4899") ? "#EC4899" : "#06B6D4";
 
-  return (
-    <GlassCard hover className={cn("p-5", className)}>
+  const card = (
+    <GlassCard hover className={cn("p-5", href && "cursor-pointer", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-3">
           <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}>
@@ -130,6 +133,16 @@ export function MetricCard({
       </div>
     </GlassCard>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6D5EF7]">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }
 
 interface MetricCardsGridProps {
@@ -139,6 +152,7 @@ interface MetricCardsGridProps {
     icon: MetricIconName;
     trend?: string;
     trendUp?: boolean;
+    href?: string;
   }>;
 }
 

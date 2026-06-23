@@ -11,7 +11,7 @@ import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
-import { studentSchema, noteSchema } from "@/lib/validations/schemas";
+import { studentSchema, noteSchema, leadSchema } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import {
   formatAadhaarForEdit,
@@ -32,8 +32,15 @@ import {
   normalizeOptionalLinkUrl,
 } from "@/lib/utils/document-url";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
-import { getStatusesForLoanStage } from "@/lib/constants/student-loan-stages";
+import { buildWorkflowMongoFilter } from "@/lib/constants/student-workflow-filters";
+import {
+  applyApplicationStatus,
+  deriveApplicationStatus,
+  getApplicationStatusLabel,
+  type ApplicationStatusId,
+} from "@/lib/constants/application-status";
 import { isStudentProfileVerified } from "@/lib/utils/student-profile";
+import { resolveLenderIdBySlug, resolveLenderNameBySlug, getLenderSlugById } from "@/lib/services/lender.service";
 import { endOfDay, startOfDay } from "date-fns";
 
 function resolveAssignedTo(
@@ -50,6 +57,48 @@ function resolveAssignedTo(
   return {
     assignedTo: existingAssignedTo,
     assignedAt: existingAssignedAt,
+  };
+}
+
+async function buildLoanFields(
+  data: {
+    loanRequested?: number;
+    loanSanctioned?: number;
+    loanDisbursed?: number;
+    interest?: number;
+    bankName?: string;
+    applicationNumber?: string;
+    loanCurrency?: "INR" | "USD";
+    lenderId?: string;
+    roi?: number;
+    processingFee?: number;
+  },
+  existing?: {
+    disbursedAt?: Date;
+    disbursed?: number;
+  },
+  pfPaidOverride?: boolean
+) {
+  const nextDisbursed = data.loanDisbursed ?? 0;
+  const lenderObjectId = await resolveLenderIdBySlug(data.lenderId);
+  const lenderName = await resolveLenderNameBySlug(data.lenderId);
+
+  return {
+    requested: data.loanRequested ?? 0,
+    sanctioned: data.loanSanctioned ?? 0,
+    disbursed: nextDisbursed,
+    disbursedAt:
+      nextDisbursed > 0
+        ? existing?.disbursedAt ?? new Date()
+        : undefined,
+    currency: data.loanCurrency ?? "INR",
+    lenderId: lenderObjectId,
+    roi: data.roi ?? 0,
+    interest: data.interest ?? 0,
+    processingFee: data.processingFee ?? 0,
+    pfPaid: pfPaidOverride ?? false,
+    bankName: lenderName,
+    applicationNumber: data.applicationNumber,
   };
 }
 
@@ -78,7 +127,8 @@ export async function getStudents(params: {
   pageSize?: number;
   search?: string;
   status?: string;
-  stage?: string;
+  workflow?: string;
+  lenderId?: string;
   partnerId?: string;
   assignedToId?: string;
   targetCountry?: string;
@@ -117,9 +167,15 @@ export async function getStudents(params: {
   if (params.status) {
     filter.status = params.status;
   } else {
-    const stageStatuses = getStatusesForLoanStage(params.stage);
-    if (stageStatuses?.length) {
-      filter.status = { $in: stageStatuses };
+    const workflowFilter = buildWorkflowMongoFilter(params.workflow);
+    if (workflowFilter) {
+      Object.assign(filter, workflowFilter);
+    }
+  }
+  if (params.lenderId) {
+    const resolvedLenderId = await resolveLenderIdBySlug(params.lenderId);
+    if (resolvedLenderId) {
+      filter["loan.lenderId"] = resolvedLenderId;
     }
   }
   if (params.partnerId) filter.partnerId = new Types.ObjectId(params.partnerId);
@@ -173,7 +229,6 @@ export async function getStudents(params: {
 
   return {
     data: data.map((s) => {
-      const documents = (s.documents ?? []).map((doc) => ({ name: doc.name }));
       const profileInput = {
         phone: s.phone,
         whatsapp: s.whatsapp,
@@ -183,14 +238,12 @@ export async function getStudents(params: {
         targetCountry: s.targetCountry,
         targetIntake: s.targetIntake,
         targetDegree: s.targetDegree,
+        targetUniversity: s.targetUniversity,
         address: s.address,
         education: s.education,
         loan: s.loan,
         partnerId: s.partnerId,
         partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
-        hasAadhaar: Boolean(s.aadhaar),
-        hasPan: Boolean(s.pan),
-        documents,
       };
 
       return {
@@ -208,8 +261,7 @@ export async function getStudents(params: {
         targetIntake: s.targetIntake,
         targetDegree: s.targetDegree,
         loanRequested: s.loan?.requested,
-        profileVerified: isStudentProfileVerified(profileInput, documents),
-        documentsCount: documents.length,
+        profileVerified: isStudentProfileVerified(profileInput),
         createdAt: s.createdAt,
       };
     }),
@@ -230,6 +282,7 @@ export async function getStudentById(id: string) {
   const student = await Student.findById(id)
     .populate("partnerId")
     .populate("assignedTo", "name email")
+    .populate("loan.lenderId", "name slug")
     .lean();
   if (!student) return null;
 
@@ -247,13 +300,30 @@ export async function getStudentForEdit(id: string) {
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
   await connectDB();
-  const student = await Student.findById(id).lean();
+  const student = await Student.findById(id)
+    .populate("loan.lenderId", "slug")
+    .populate("assignedTo", "name")
+    .lean();
   if (!student) return null;
+
+  const lenderSlug = await getLenderSlugById(student.loan?.lenderId as Types.ObjectId | undefined);
 
   return {
     ...student,
     aadhaar: formatAadhaarForEdit(safeDecrypt(student.aadhaar)),
     pan: normalizePan(safeDecrypt(student.pan)),
+    lenderId: lenderSlug,
+    loanCurrency: student.loan?.currency,
+    roi: student.loan?.roi,
+    processingFee: student.loan?.processingFee,
+    pfPaid: student.loan?.pfPaid,
+    targetUniversity: student.targetUniversity,
+    admissionRevenue: student.admissionRevenue,
+    loggedIn: student.loggedIn,
+    applicationStatus: deriveApplicationStatus(student),
+    sentToBank: student.sentToBank,
+    sentToBankAt: student.sentToBankAt,
+    sentToBankByName: student.sentToBankByName,
   };
   }, null);
 }
@@ -280,6 +350,9 @@ export async function createStudentAction(
   }
 
   const studentId = await allocateStudentId();
+  const applicationStatus = (data.applicationStatus ?? "docs_pending") as ApplicationStatusId;
+  const appFields = applyApplicationStatus(applicationStatus);
+  const loan = await buildLoanFields(data, undefined, appFields.pfPaid);
 
   const student = await Student.create({
     studentId,
@@ -306,27 +379,23 @@ export async function createStudentAction(
       course: data.course,
       year: data.year,
     },
-    loan: {
-      requested: data.loanRequested ?? 0,
-      sanctioned: data.loanSanctioned ?? 0,
-      disbursed: data.loanDisbursed ?? 0,
-      disbursedAt: (data.loanDisbursed ?? 0) > 0 ? new Date() : undefined,
-      interest: data.interest ?? 0,
-      bankName: data.bankName,
-      applicationNumber: data.applicationNumber,
-    },
+    loan,
     partnerId: data.partnerId || undefined,
     ...resolveAssignedTo(data.assignedToId),
     targetCountry: data.targetCountry?.trim() || undefined,
     targetIntake: data.targetIntake?.trim() || undefined,
     targetDegree: data.targetDegree?.trim() || undefined,
+    targetUniversity: data.targetUniversity?.trim() || undefined,
+    admissionRevenue: data.admissionRevenue ?? 0,
+    applicationStatus: appFields.applicationStatus,
+    loggedIn: appFields.loggedIn,
     commissionPercentOverride:
       data.commissionPercentOverride === "" || data.commissionPercentOverride == null
         ? undefined
         : data.commissionPercentOverride,
-    status: data.status ?? "new",
+    status: appFields.status,
     remarks: data.remarks ? sanitizeText(data.remarks) : undefined,
-    timeline: [{ status: data.status ?? "new", createdByName: user?.name, createdAt: new Date() }],
+    timeline: [{ status: appFields.status, note: `Application status: ${getApplicationStatusLabel(appFields.applicationStatus)}`, createdByName: user?.name, createdAt: new Date() }],
     metadata: { createdBy: user?.id, createdByName: user?.name },
   });
 
@@ -334,8 +403,8 @@ export async function createStudentAction(
     studentId: student._id,
     partnerId: data.partnerId || undefined,
     loanAmount: data.loanRequested ?? 0,
-    status: data.status ?? "new",
-    pipelineStage: data.status ?? "new",
+    status: appFields.status,
+    pipelineStage: appFields.status,
     metadata: { createdBy: user?.id, createdByName: user?.name },
   });
 
@@ -358,6 +427,72 @@ export async function createStudentAction(
   revalidatePath("/dashboard/overview");
   revalidateInsightCaches();
   return { success: true, data: { id: student._id.toString() } };
+  });
+}
+
+export async function createLeadAction(
+  formData: FormData
+): Promise<ActionResult<{ id: string }>> {
+  return runLoggedMutation("createLeadAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = leadSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const data = parsed.data;
+    const studentId = await allocateStudentId();
+    const lenderObjectId = await resolveLenderIdBySlug(data.lenderId);
+    const lenderName = await resolveLenderNameBySlug(data.lenderId);
+
+    const student = await Student.create({
+      studentId,
+      firstName: sanitizeText(data.firstName),
+      lastName: sanitizeText(data.lastName),
+      phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
+      targetCountry: data.targetCountry?.trim() || undefined,
+      targetIntake: data.targetIntake?.trim() || undefined,
+      targetUniversity: data.targetUniversity?.trim() || undefined,
+      admissionRevenue: data.admissionRevenue ?? 0,
+      recordType: "lead",
+      applicationStatus: "docs_pending",
+      loggedIn: false,
+      loan: {
+        requested: 0,
+        lenderId: lenderObjectId,
+        bankName: lenderName,
+      },
+      ...resolveAssignedTo(data.assignedToId),
+      status: "new",
+      timeline: [{ status: "new", createdByName: user?.name, createdAt: new Date() }],
+      metadata: { createdBy: user?.id, createdByName: user?.name },
+    });
+
+    await Application.create({
+      studentId: student._id,
+      loanAmount: 0,
+      status: "new",
+      pipelineStage: "new",
+      metadata: { createdBy: user?.id, createdByName: user?.name },
+    });
+
+    await logActivity({
+      action: "student.created",
+      description: `Lead ${data.firstName} ${data.lastName} (${studentId}) was created`,
+      resourceType: "student",
+      resourceId: student._id.toString(),
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath("/dashboard/students");
+    revalidatePath("/dashboard/overview");
+    revalidateInsightCaches();
+    return { success: true, data: { id: student._id.toString() } };
   });
 }
 
@@ -386,6 +521,9 @@ export async function updateStudentAction(
   }
 
   const oldStatus = existing.status;
+  const oldApplicationStatus = deriveApplicationStatus(existing);
+  const applicationStatus = (data.applicationStatus ?? oldApplicationStatus) as ApplicationStatusId;
+  const appFields = applyApplicationStatus(applicationStatus);
   existing.firstName = sanitizeText(data.firstName);
   existing.lastName = sanitizeText(data.lastName);
   existing.gender = data.gender;
@@ -412,23 +550,10 @@ export async function updateStudentAction(
     existing.pan = undefined;
   }
   existing.education = { college: data.college, course: data.course, year: data.year };
-  const nextDisbursed = data.loanDisbursed ?? 0;
-  const previousDisbursed = existing.loan?.disbursed ?? 0;
-  existing.loan = {
-    requested: data.loanRequested ?? 0,
-    sanctioned: data.loanSanctioned ?? 0,
-    disbursed: nextDisbursed,
-    disbursedAt:
-      nextDisbursed > 0
-        ? existing.loan?.disbursedAt ?? new Date()
-        : undefined,
-    interest: data.interest ?? 0,
-    bankName: data.bankName,
-    applicationNumber: data.applicationNumber,
-  };
-  if (nextDisbursed > 0 && previousDisbursed === 0 && !existing.loan.disbursedAt) {
-    existing.loan.disbursedAt = new Date();
-  }
+  existing.loan = await buildLoanFields(data, {
+    disbursed: existing.loan?.disbursed,
+    disbursedAt: existing.loan?.disbursedAt,
+  }, appFields.pfPaid);
   if (data.commissionPercentOverride === "" || data.commissionPercentOverride == null) {
     existing.commissionPercentOverride = undefined;
   } else {
@@ -444,22 +569,26 @@ export async function updateStudentAction(
   existing.targetCountry = data.targetCountry?.trim() || undefined;
   existing.targetIntake = data.targetIntake?.trim() || undefined;
   existing.targetDegree = data.targetDegree?.trim() || undefined;
+  existing.targetUniversity = data.targetUniversity?.trim() || undefined;
+  existing.admissionRevenue = data.admissionRevenue ?? existing.admissionRevenue ?? 0;
+  existing.applicationStatus = appFields.applicationStatus;
+  existing.loggedIn = appFields.loggedIn;
   existing.partnerId = data.partnerId ? new Types.ObjectId(data.partnerId) : existing.partnerId;
-  if (data.status) existing.status = data.status;
+  existing.status = appFields.status;
   existing.remarks = data.remarks ? sanitizeText(data.remarks) : existing.remarks;
   existing.metadata.updatedBy = user?.id ? new Types.ObjectId(user.id) : undefined;
 
-  if (data.status && data.status !== oldStatus) {
+  if (appFields.status !== oldStatus || appFields.applicationStatus !== oldApplicationStatus) {
     existing.timeline.push({
-      status: data.status,
-      note: `Status changed from ${oldStatus} to ${data.status}`,
+      status: appFields.status,
+      note: `Application status changed to ${getApplicationStatusLabel(appFields.applicationStatus)}`,
       createdBy: user?.id ? new Types.ObjectId(user.id) : undefined,
       createdByName: user?.name,
       createdAt: new Date(),
     });
     await Application.updateMany(
       { studentId: existing._id },
-      { status: data.status, pipelineStage: data.status }
+      { status: appFields.status, pipelineStage: appFields.status }
     );
   }
 
@@ -629,5 +758,125 @@ export async function removeStudentDocumentAction(
 
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };
+  });
+}
+
+export async function updateStudentApplicationStatusAction(
+  studentId: string,
+  applicationStatus: ApplicationStatusId
+): Promise<ActionResult> {
+  return runLoggedMutation("updateStudentApplicationStatusAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    const oldStatus = student.status;
+    const oldApplicationStatus = deriveApplicationStatus(student);
+    const appFields = applyApplicationStatus(applicationStatus);
+
+    student.applicationStatus = appFields.applicationStatus;
+    student.status = appFields.status;
+    student.loggedIn = appFields.loggedIn;
+    if (!student.loan) student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+    student.loan.pfPaid = appFields.pfPaid;
+
+    if (appFields.status !== oldStatus || appFields.applicationStatus !== oldApplicationStatus) {
+      student.timeline.push({
+        status: appFields.status,
+        note: `Application status changed to ${getApplicationStatusLabel(appFields.applicationStatus)}`,
+        createdBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+        createdByName: user?.name,
+        createdAt: new Date(),
+      });
+      await Application.updateMany(
+        { studentId: student._id },
+        { status: appFields.status, pipelineStage: appFields.status }
+      );
+    }
+
+    await student.save();
+
+    await logActivity({
+      action: "student.application_status_updated",
+      description: `Application status for ${student.studentId} set to ${getApplicationStatusLabel(appFields.applicationStatus)}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  });
+}
+
+export async function markStudentSentToBankAction(
+  studentId: string
+): Promise<ActionResult<{ sentToBank: true; sentToBankAt: string; sentToBankByName?: string }>> {
+  return runLoggedMutation("markStudentSentToBankAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+    if (student.sentToBank) {
+      return {
+        success: true,
+        data: {
+          sentToBank: true,
+          sentToBankAt: student.sentToBankAt?.toISOString() ?? new Date().toISOString(),
+          sentToBankByName: student.sentToBankByName,
+        },
+      };
+    }
+
+    const sentToBankAt = new Date();
+    const sentToBankByName = user?.name;
+
+    student.sentToBank = true;
+    student.sentToBankAt = sentToBankAt;
+    student.sentToBankByName = sentToBankByName;
+    student.timeline.push({
+      status: student.status,
+      note: "Application marked as sent to bank (internal)",
+      createdBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+      createdByName: sentToBankByName,
+      createdAt: sentToBankAt,
+    });
+
+    await student.save();
+
+    const verified = await Student.findById(studentId).select("sentToBank sentToBankAt sentToBankByName").lean();
+    if (!verified?.sentToBank) {
+      return {
+        success: false,
+        error: "Send-to-bank status could not be saved. Restart the dev server and try again.",
+      };
+    }
+
+    await logActivity({
+      action: "student.sent_to_bank",
+      description: `Student ${student.studentId} marked as sent to bank`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return {
+      success: true,
+      data: {
+        sentToBank: true,
+        sentToBankAt: sentToBankAt.toISOString(),
+        sentToBankByName,
+      },
+    };
   });
 }
