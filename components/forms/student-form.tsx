@@ -17,6 +17,11 @@ import {
 import { FormSection } from "@/components/forms/form-section";
 import { LinkUrlField } from "@/components/forms/link-url-field";
 import { STUDENT_STATUSES } from "@/lib/constants/statuses";
+import {
+  TARGET_COUNTRIES,
+  TARGET_DEGREES,
+  TARGET_INTAKES,
+} from "@/lib/constants/study-abroad";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
 
 interface PartnerOption {
@@ -24,8 +29,14 @@ interface PartnerOption {
   companyName: string;
 }
 
+interface AssigneeOption {
+  _id: string;
+  name: string;
+}
+
 interface StudentFormProps {
   partners: PartnerOption[];
+  assignableUsers?: AssigneeOption[];
   initialData?: Record<string, string | number | undefined>;
   studentId?: string;
   mode: "create" | "edit";
@@ -35,11 +46,15 @@ const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optio
 const AADHAAR_HINT = "Exactly 12 digits, numbers only.";
 const PAN_HINT = "Format: ABCDE1234F (5 letters, 4 digits, 1 letter).";
 
-export function StudentForm({ partners, initialData, studentId, mode }: StudentFormProps) {
+export function StudentForm({ partners, assignableUsers = [], initialData, studentId, mode }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [gender, setGender] = useState((initialData?.gender as string) ?? "");
   const [partnerId, setPartnerId] = useState((initialData?.partnerId as string) ?? "");
+  const [assignedToId, setAssignedToId] = useState((initialData?.assignedToId as string) ?? "");
+  const [targetCountry, setTargetCountry] = useState((initialData?.targetCountry as string) ?? "");
+  const [targetIntake, setTargetIntake] = useState((initialData?.targetIntake as string) ?? "");
+  const [targetDegree, setTargetDegree] = useState((initialData?.targetDegree as string) ?? "");
   const [status, setStatus] = useState((initialData?.status as string) ?? "new");
 
   const selectedPartner = partners.find((p) => p._id === partnerId);
@@ -234,6 +249,79 @@ export function StudentForm({ partners, initialData, studentId, mode }: StudentF
           <div className="space-y-2">
             <Label htmlFor="year">Year</Label>
             <Input id="year" name="year" defaultValue={initialData?.year as string} />
+          </div>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="Optional — Study Abroad & Assignment"
+        description="Target destination, intake, degree, and counsellor assignment."
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="targetCountry">Target Country</Label>
+            <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                {TARGET_COUNTRIES.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="targetCountry" value={targetCountry} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="targetDegree">Target Degree</Label>
+            <Select value={targetDegree} onValueChange={(v) => setTargetDegree(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select degree" />
+              </SelectTrigger>
+              <SelectContent>
+                {TARGET_DEGREES.map((degree) => (
+                  <SelectItem key={degree} value={degree}>
+                    {degree}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="targetDegree" value={targetDegree} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="targetIntake">Target Intake</Label>
+            <Select value={targetIntake} onValueChange={(v) => setTargetIntake(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select intake" />
+              </SelectTrigger>
+              <SelectContent>
+                {TARGET_INTAKES.map((intake) => (
+                  <SelectItem key={intake} value={intake}>
+                    {intake}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="targetIntake" value={targetIntake} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="assignedToId">Assigned Counsellor</Label>
+            <Select value={assignedToId} onValueChange={(v) => setAssignedToId(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Unassigned" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
+                {assignableUsers.map((user) => (
+                  <SelectItem key={user._id} value={user._id}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="assignedToId" value={assignedToId} />
           </div>
         </div>
       </FormSection>

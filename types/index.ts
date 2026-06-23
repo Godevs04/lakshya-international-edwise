@@ -150,7 +150,13 @@ export interface StudentListItem {
   email?: string;
   status: StudentStatus;
   partnerName?: string;
+  assigneeName?: string;
+  targetCountry?: string;
+  targetIntake?: string;
+  targetDegree?: string;
   loanRequested?: number;
+  profileVerified?: boolean;
+  documentsCount?: number;
   createdAt: Date;
 }
 

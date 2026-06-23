@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
 import Link from "next/link";
@@ -14,9 +14,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatCurrency, formatDate, getInitials } from "@/lib/utils/format";
 import { addStudentNoteAction, removeStudentDocumentAction } from "@/lib/actions/student.actions";
 import { DocumentLinkForm } from "@/components/forms/document-link-form";
-import { buildWhatsAppUrl, getStudentWhatsAppNumber } from "@/lib/utils/whatsapp";
+import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
+import { StudentDocumentChecklist } from "@/components/dashboard/student-document-checklist";
+import { ProfileCompleteBadge } from "@/components/dashboard/profile-complete-badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  getStudentProfileCompleteness,
+  isStudentProfileVerified,
+} from "@/lib/utils/student-profile";
 import type { StudentStatus } from "@/lib/constants/statuses";
-import { ExternalLink, MessageCircle, Pencil, Trash2 } from "lucide-react";
+import { ExternalLink, GraduationCap, Globe, Pencil, Trash2, UserRound } from "lucide-react";
 
 interface StudentDetailProps {
   canWrite?: boolean;
@@ -33,6 +40,10 @@ interface StudentDetailProps {
     dob?: Date;
     status: string;
     remarks?: string;
+    targetCountry?: string;
+    targetIntake?: string;
+    targetDegree?: string;
+    assignedAt?: Date;
     address?: { line?: string; city?: string; state?: string; pincode?: string };
     aadhaar?: string;
     pan?: string;
@@ -49,9 +60,19 @@ interface StudentDetailProps {
     timeline?: Array<{ _id?: string; status: string; note?: string; createdByName?: string; createdAt?: Date }>;
     notes?: Array<{ _id?: string; content: string; createdByName?: string; dueDate?: Date; createdAt?: Date }>;
     partnerId?: { _id: string; companyName: string; phone?: string; email?: string } | null;
+    assignedTo?: { _id: string; name: string; email?: string } | null;
     metadata?: { createdByName?: string };
     createdAt: Date;
   };
+}
+
+function SummaryRow({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="flex items-start justify-between gap-3 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right font-medium">{value?.trim() ? value : "—"}</span>
+    </div>
+  );
 }
 
 export function StudentDetailView({ student, canWrite = false }: StudentDetailProps) {
@@ -59,8 +80,64 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
   const [noteLoading, setNoteLoading] = useState(false);
   const [removingDocId, setRemovingDocId] = useState<string | null>(null);
 
-  const whatsappNumber = getStudentWhatsAppNumber(student.whatsapp, student.phone);
-  const whatsappUrl = whatsappNumber ? buildWhatsAppUrl(whatsappNumber) : null;
+  const latestNote = useMemo(() => {
+    const notes = [...(student.notes ?? [])];
+    notes.sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+    return notes[0] ?? null;
+  }, [student.notes]);
+
+  const latestRemark = latestNote?.content ?? student.remarks;
+
+  const profileCompleteness = useMemo(
+    () =>
+      getStudentProfileCompleteness({
+        phone: student.phone,
+        whatsapp: student.whatsapp,
+        email: student.email,
+        gender: student.gender,
+        dob: student.dob,
+        targetCountry: student.targetCountry,
+        targetIntake: student.targetIntake,
+        targetDegree: student.targetDegree,
+        address: student.address,
+        education: student.education,
+        loan: student.loan,
+        partnerId: student.partnerId,
+        hasAadhaar: Boolean(student.aadhaar),
+        hasPan: Boolean(student.pan),
+        documents: student.documents ?? [],
+      }),
+    [student]
+  );
+
+  const profileVerified = useMemo(
+    () =>
+      isStudentProfileVerified(
+        {
+          phone: student.phone,
+          whatsapp: student.whatsapp,
+          email: student.email,
+          gender: student.gender,
+          dob: student.dob,
+          targetCountry: student.targetCountry,
+          targetIntake: student.targetIntake,
+          targetDegree: student.targetDegree,
+          address: student.address,
+          education: student.education,
+          loan: student.loan,
+          partnerId: student.partnerId,
+          hasAadhaar: Boolean(student.aadhaar),
+          hasPan: Boolean(student.pan),
+          documents: student.documents ?? [],
+        },
+        student.documents ?? []
+      ),
+    [student]
+  );
 
   async function handleAddNote(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -90,181 +167,285 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
   }
 
   return (
-    <div className="space-y-6">
-      <GlassCard className="p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
+    <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <GlassCard className="p-5">
+          <div className="flex flex-col items-center text-center">
+            <Avatar className="h-20 w-20">
               <AvatarImage src={student.photo} />
               <AvatarFallback>{getInitials(`${student.firstName} ${student.lastName}`)}</AvatarFallback>
             </Avatar>
-            <div>
-              <h2 className="text-xl font-semibold">{student.firstName} {student.lastName}</h2>
-              <p className="text-sm text-muted-foreground">{student.studentId}</p>
-              {student.loan?.applicationNumber && (
-                <p className="mt-1 text-xs font-mono text-muted-foreground">
-                  Bank LAN: {student.loan.applicationNumber}
+            <h2 className="mt-3 flex items-center justify-center gap-1.5 text-lg font-semibold">
+              <span>
+                {student.firstName} {student.lastName}
+              </span>
+              <ProfileCompleteBadge verified={profileVerified} />
+            </h2>
+            <p className="text-sm text-muted-foreground">{student.studentId}</p>
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <StatusBadge status={student.status as StudentStatus} />
+              {!profileVerified && (
+                <p className="text-xs text-muted-foreground">
+                  Profile {profileCompleteness.percent}% complete
                 </p>
               )}
-              <div className="mt-2"><StatusBadge status={student.status as StudentStatus} /></div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {whatsappUrl && (
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-emerald-500/30 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                >
-                  <MessageCircle className="mr-1 h-4 w-4" />
-                  Chat on WhatsApp
-                </Button>
-              </a>
-            )}
-            {canWrite && (
-              <Link href={`/dashboard/students/${student._id}/edit`}>
-                <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
-              </Link>
-            )}
-          </div>
-        </div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm">{student.phone ?? "—"}</p></div>
-          <div>
-            <p className="text-xs text-muted-foreground">WhatsApp</p>
-            <p className="text-sm">{whatsappNumber ?? "—"}</p>
-          </div>
-          <div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm">{student.email ?? "—"}</p></div>
-          <div><p className="text-xs text-muted-foreground">Created</p><p className="text-sm">{formatDate(student.createdAt)}</p></div>
-          <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
-          <div><p className="text-xs text-muted-foreground">PAN</p><p className="text-sm font-mono">{student.pan ?? "—"}</p></div>
-        </div>
-      </GlassCard>
 
-      <Tabs defaultValue="timeline">
-        <TabsList>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="loan">Loan History</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="partner">Partner</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="timeline" className="mt-4">
-          <GlassCard className="p-5">
-            <Timeline
-              items={(student.timeline ?? []).map((t, i) => ({
-                id: t._id?.toString() ?? String(i),
-                title: t.status.replace(/_/g, " "),
-                description: t.note ?? `Updated by ${t.createdByName ?? "System"}`,
-                timestamp: t.createdAt ?? new Date(),
-              }))}
+          <div className="mt-5 flex justify-center">
+            <StudentContactActions
+              phone={student.phone}
+              whatsapp={student.whatsapp}
+              email={student.email}
+              studentName={`${student.firstName} ${student.lastName}`}
+              variant="icons"
             />
-          </GlassCard>
-        </TabsContent>
+          </div>
 
-        <TabsContent value="documents" className="mt-4">
-          <GlassCard className="p-5 space-y-4">
-            {canWrite && <DocumentLinkForm studentId={student._id} />}
-            {(student.documents ?? []).length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {student.documents!.map((doc) => (
-                  <div
-                    key={doc._id?.toString() ?? doc.url}
-                    className="flex items-center justify-between gap-3 rounded-lg border p-3"
-                  >
-                    <a
-                      href={doc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex min-w-0 flex-1 items-center gap-2 hover:text-primary"
-                    >
-                      <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{doc.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{doc.url}</p>
-                      </div>
-                    </a>
-                    {canWrite && doc._id && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={removingDocId === doc._id.toString()}
-                        onClick={() => handleRemoveDocument(doc._id!.toString())}
-                        aria-label={`Remove ${doc.name}`}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No document links added yet.</p>
+          <div className="mt-5 space-y-3 border-t pt-4">
+            <SummaryRow label="Assignee" value={student.assignedTo?.name} />
+            <SummaryRow label="Partner" value={student.partnerId?.companyName} />
+            <SummaryRow label="Country" value={student.targetCountry} />
+            <SummaryRow label="Degree" value={student.targetDegree} />
+            <SummaryRow label="Intake" value={student.targetIntake} />
+            <SummaryRow
+              label="Loan requested"
+              value={formatCurrency(student.loan?.requested ?? 0)}
+            />
+          </div>
+
+          {canWrite && (
+            <div className="mt-4">
+              <Link href={`/dashboard/students/${student._id}/edit`} className="block">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Pencil className="mr-1 h-4 w-4" /> Edit Profile
+                </Button>
+              </Link>
+            </div>
+          )}
+        </GlassCard>
+
+        <GlassCard className="p-4">
+          <StudentDocumentChecklist documents={student.documents ?? []} compact />
+        </GlassCard>
+
+        {!profileVerified && (
+          <GlassCard className="p-4 space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">Profile completeness</span>
+              <span className="text-muted-foreground">{profileCompleteness.percent}%</span>
+            </div>
+            <Progress value={profileCompleteness.percent} className="h-2" />
+            {profileCompleteness.missingFields.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Missing: {profileCompleteness.missingFields.slice(0, 4).join(", ")}
+                {profileCompleteness.missingFields.length > 4 ? "…" : ""}
+              </p>
             )}
           </GlassCard>
-        </TabsContent>
+        )}
 
-        <TabsContent value="loan" className="mt-4">
-          <GlassCard className="p-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.requested ?? 0)}</p></div>
-              <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.sanctioned ?? 0)}</p></div>
-              <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.disbursed ?? 0)}</p></div>
-              <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest != null ? `${student.loan.interest}%` : "—"}</p></div>
-              <div><p className="text-xs text-muted-foreground">Bank</p><p className="text-sm">{student.loan?.bankName ?? "—"}</p></div>
-              <div><p className="text-xs text-muted-foreground">Bank LAN</p><p className="text-sm font-mono">{student.loan?.applicationNumber ?? "—"}</p></div>
-            </div>
+        {latestRemark && (
+          <GlassCard className="p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Latest Remark
+            </p>
+            <p className="mt-2 text-sm leading-relaxed">{latestRemark}</p>
+            {latestNote && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {latestNote.createdByName ?? "Team"} ·{" "}
+                {latestNote.createdAt ? formatDate(latestNote.createdAt) : ""}
+              </p>
+            )}
           </GlassCard>
-        </TabsContent>
+        )}
+      </aside>
 
-        <TabsContent value="notes" className="mt-4 space-y-4">
-          {canWrite && (
-            <GlassCard className="p-5">
-              <form onSubmit={handleAddNote} className="flex gap-2">
-                <Input name="content" placeholder="Add a note..." required className="flex-1" />
-                <Input name="dueDate" type="date" className="w-40" />
-                <Button type="submit" disabled={noteLoading}>Add</Button>
-              </form>
-            </GlassCard>
-          )}
-          <GlassCard className="p-5">
-            {(student.notes ?? []).length > 0 ? (
-              <div className="space-y-3">
-                {student.notes!.map((note, i) => (
-                  <div key={note._id?.toString() ?? i} className="rounded-lg border p-3">
-                    <p className="text-sm">{note.content}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {note.createdByName} · {note.createdAt ? formatDate(note.createdAt) : ""}
-                      {note.dueDate && ` · Due: ${formatDate(note.dueDate)}`}
+      <div className="min-w-0 space-y-4">
+        <Tabs defaultValue="personal">
+          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
+            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="loan">Loan</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="personal" className="mt-4">
+            <GlassCard className="p-5 space-y-6">
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                  <UserRound className="h-4 w-4 text-muted-foreground" />
+                  Contact & Identity
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm">{student.phone ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm">{student.email ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Gender</p><p className="text-sm capitalize">{student.gender ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Date of Birth</p><p className="text-sm">{student.dob ? formatDate(student.dob) : "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">PAN</p><p className="text-sm font-mono">{student.pan ?? "—"}</p></div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  Study Abroad
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div><p className="text-xs text-muted-foreground">Target Country</p><p className="text-sm">{student.targetCountry ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Target Degree</p><p className="text-sm">{student.targetDegree ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Target Intake</p><p className="text-sm">{student.targetIntake ?? "—"}</p></div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  Education & Address
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div><p className="text-xs text-muted-foreground">College</p><p className="text-sm">{student.education?.college ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Course</p><p className="text-sm">{student.education?.course ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Year</p><p className="text-sm">{student.education?.year ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Created</p><p className="text-sm">{formatDate(student.createdAt)}</p></div>
+                  <div className="sm:col-span-2">
+                    <p className="text-xs text-muted-foreground">Address</p>
+                    <p className="text-sm">
+                      {[student.address?.line, student.address?.city, student.address?.state, student.address?.pincode]
+                        .filter(Boolean)
+                        .join(", ") || "—"}
                     </p>
                   </div>
-                ))}
+                </div>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No notes yet.</p>
-            )}
-          </GlassCard>
-        </TabsContent>
 
-        <TabsContent value="partner" className="mt-4">
-          <GlassCard className="p-5">
-            {student.partnerId ? (
-              <div>
-                <Link href={`/dashboard/partners/${student.partnerId._id}`} className="text-lg font-semibold text-primary hover:underline">
-                  {student.partnerId.companyName}
-                </Link>
-                <p className="mt-2 text-sm text-muted-foreground">{student.partnerId.phone}</p>
-                <p className="text-sm text-muted-foreground">{student.partnerId.email}</p>
+              {student.partnerId && (
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground">Partner</p>
+                  <Link
+                    href={`/dashboard/partners/${student.partnerId._id}`}
+                    className="mt-1 inline-block text-sm font-semibold text-primary hover:underline"
+                  >
+                    {student.partnerId.companyName}
+                  </Link>
+                  {(student.partnerId.phone || student.partnerId.email) && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {[student.partnerId.phone, student.partnerId.email].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="mt-4">
+            <GlassCard className="p-5">
+              <Timeline
+                items={(student.timeline ?? []).map((t, i) => ({
+                  id: t._id?.toString() ?? String(i),
+                  title: t.status.replace(/_/g, " "),
+                  description: t.note ?? `Updated by ${t.createdByName ?? "System"}`,
+                  timestamp: t.createdAt ?? new Date(),
+                }))}
+              />
+            </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-4">
+            <GlassCard className="p-5 space-y-6">
+              <StudentDocumentChecklist documents={student.documents ?? []} />
+              {canWrite && <DocumentLinkForm studentId={student._id} />}
+              {(student.documents ?? []).length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {student.documents!.map((doc) => (
+                    <div
+                      key={doc._id?.toString() ?? doc.url}
+                      className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                    >
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex min-w-0 flex-1 items-center gap-2 hover:text-primary"
+                      >
+                        <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{doc.name}</p>
+                          <p className="truncate text-xs text-muted-foreground">{doc.url}</p>
+                        </div>
+                      </a>
+                      {canWrite && doc._id && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          disabled={removingDocId === doc._id.toString()}
+                          onClick={() => handleRemoveDocument(doc._id!.toString())}
+                          aria-label={`Remove ${doc.name}`}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No document links added yet.</p>
+              )}
+            </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="loan" className="mt-4">
+            <GlassCard className="p-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.requested ?? 0)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.sanctioned ?? 0)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.disbursed ?? 0)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest != null ? `${student.loan.interest}%` : "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Bank</p><p className="text-sm">{student.loan?.bankName ?? "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Bank LAN</p><p className="text-sm font-mono">{student.loan?.applicationNumber ?? "—"}</p></div>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No partner assigned.</p>
+            </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="notes" className="mt-4 space-y-4">
+            {canWrite && (
+              <GlassCard className="p-5">
+                <form onSubmit={handleAddNote} className="flex flex-col gap-2 sm:flex-row">
+                  <Input name="content" placeholder="Add a note..." required className="flex-1" />
+                  <Input name="dueDate" type="date" className="w-full sm:w-40" />
+                  <Button type="submit" disabled={noteLoading}>Add</Button>
+                </form>
+              </GlassCard>
             )}
-          </GlassCard>
-        </TabsContent>
-      </Tabs>
+            <GlassCard className="p-5">
+              {(student.notes ?? []).length > 0 ? (
+                <div className="space-y-3">
+                  {[...(student.notes ?? [])]
+                    .sort((a, b) => {
+                      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                      return bTime - aTime;
+                    })
+                    .map((note, i) => (
+                      <div key={note._id?.toString() ?? i} className="rounded-lg border p-3">
+                        <p className="text-sm">{note.content}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {note.createdByName} · {note.createdAt ? formatDate(note.createdAt) : ""}
+                          {note.dueDate && ` · Due: ${formatDate(note.dueDate)}`}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No notes yet.</p>
+              )}
+            </GlassCard>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
