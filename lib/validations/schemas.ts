@@ -121,6 +121,10 @@ export const studentSchema = z.object({
   bankName: z.string().optional(),
   applicationNumber: z.string().max(50).optional(),
   partnerId: z.string().optional(),
+  assignedToId: z.string().optional().or(z.literal("")),
+  targetCountry: z.string().max(100).optional(),
+  targetIntake: z.string().max(100).optional(),
+  targetDegree: z.string().max(100).optional(),
   commissionPercentOverride: z.coerce
     .number()
     .min(0, "Commission cannot be negative")

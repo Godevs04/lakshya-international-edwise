@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
+import { User } from "@/models/User";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -31,17 +32,66 @@ import {
   normalizeOptionalLinkUrl,
 } from "@/lib/utils/document-url";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
+import { getStatusesForLoanStage } from "@/lib/constants/student-loan-stages";
+import { isStudentProfileVerified } from "@/lib/utils/student-profile";
+import { endOfDay, startOfDay } from "date-fns";
+
+function resolveAssignedTo(
+  assignedToId: string | undefined,
+  existingAssignedTo?: Types.ObjectId,
+  existingAssignedAt?: Date
+): { assignedTo?: Types.ObjectId; assignedAt?: Date } {
+  if (assignedToId === "") {
+    return { assignedTo: undefined, assignedAt: undefined };
+  }
+  if (assignedToId) {
+    return { assignedTo: new Types.ObjectId(assignedToId), assignedAt: new Date() };
+  }
+  return {
+    assignedTo: existingAssignedTo,
+    assignedAt: existingAssignedAt,
+  };
+}
+
+export async function getAssignableUsers() {
+  return runLoggedQuery("getAssignableUsers", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_READ);
+
+    await connectDB();
+    const users = await User.find({ status: "active" })
+      .select("name email role")
+      .sort({ name: 1 })
+      .lean();
+
+    return users.map((entry) => ({
+      _id: entry._id.toString(),
+      name: entry.name,
+      email: entry.email,
+      role: entry.role,
+    }));
+  }, []);
+}
 
 export async function getStudents(params: {
   page?: number;
   pageSize?: number;
   search?: string;
   status?: string;
+  stage?: string;
   partnerId?: string;
+  assignedToId?: string;
+  targetCountry?: string;
+  targetIntake?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  loanMin?: number;
+  loanMax?: number;
   state?: string;
   college?: string;
   course?: string;
   bank?: string;
+  mine?: boolean;
 }): Promise<PaginatedResult<StudentListItem>> {
   return runLoggedQuery("getStudents", async () => {
   const user = await getSessionUser();
@@ -64,16 +114,56 @@ export async function getStudents(params: {
       { studentId: regex },
     ];
   }
-  if (params.status) filter.status = params.status;
-  if (params.partnerId) filter.partnerId = params.partnerId;
-  if (params.state) filter["address.state"] = params.state;
+  if (params.status) {
+    filter.status = params.status;
+  } else {
+    const stageStatuses = getStatusesForLoanStage(params.stage);
+    if (stageStatuses?.length) {
+      filter.status = { $in: stageStatuses };
+    }
+  }
+  if (params.partnerId) filter.partnerId = new Types.ObjectId(params.partnerId);
+  if (params.assignedToId) filter.assignedTo = new Types.ObjectId(params.assignedToId);
+  if (params.targetCountry) filter.targetCountry = params.targetCountry;
+  if (params.targetIntake) filter.targetIntake = params.targetIntake;
+  if (params.state) filter["address.state"] = toSafeRegExp(params.state);
   if (params.college) filter["education.college"] = toSafeRegExp(params.college);
   if (params.course) filter["education.course"] = toSafeRegExp(params.course);
   if (params.bank) filter["loan.bankName"] = toSafeRegExp(params.bank);
+  if (params.dateFrom || params.dateTo) {
+    const createdAt: Record<string, Date> = {};
+    if (params.dateFrom) {
+      const parsed = new Date(params.dateFrom);
+      if (!Number.isNaN(parsed.getTime())) {
+        createdAt.$gte = startOfDay(parsed);
+      }
+    }
+    if (params.dateTo) {
+      const parsed = new Date(params.dateTo);
+      if (!Number.isNaN(parsed.getTime())) {
+        createdAt.$lte = endOfDay(parsed);
+      }
+    }
+    if (Object.keys(createdAt).length) filter.createdAt = createdAt;
+  }
+  if (params.loanMin != null || params.loanMax != null) {
+    const loanRequested: Record<string, number> = {};
+    if (params.loanMin != null && !Number.isNaN(params.loanMin)) {
+      loanRequested.$gte = params.loanMin;
+    }
+    if (params.loanMax != null && !Number.isNaN(params.loanMax)) {
+      loanRequested.$lte = params.loanMax;
+    }
+    if (Object.keys(loanRequested).length) filter["loan.requested"] = loanRequested;
+  }
+  if (params.mine && user?.id) {
+    filter.assignedTo = new Types.ObjectId(user.id);
+  }
 
   const [data, total] = await Promise.all([
     Student.find(filter)
       .populate("partnerId", "companyName")
+      .populate("assignedTo", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize)
@@ -82,19 +172,47 @@ export async function getStudents(params: {
   ]);
 
   return {
-    data: data.map((s) => ({
-      _id: s._id.toString(),
-      studentId: s.studentId,
-      firstName: s.firstName,
-      lastName: s.lastName,
-      phone: s.phone,
-      whatsapp: s.whatsapp,
-      email: s.email,
-      status: s.status as StudentStatus,
-      partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
-      loanRequested: s.loan?.requested,
-      createdAt: s.createdAt,
-    })),
+    data: data.map((s) => {
+      const documents = (s.documents ?? []).map((doc) => ({ name: doc.name }));
+      const profileInput = {
+        phone: s.phone,
+        whatsapp: s.whatsapp,
+        email: s.email,
+        gender: s.gender,
+        dob: s.dob,
+        targetCountry: s.targetCountry,
+        targetIntake: s.targetIntake,
+        targetDegree: s.targetDegree,
+        address: s.address,
+        education: s.education,
+        loan: s.loan,
+        partnerId: s.partnerId,
+        partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
+        hasAadhaar: Boolean(s.aadhaar),
+        hasPan: Boolean(s.pan),
+        documents,
+      };
+
+      return {
+        _id: s._id.toString(),
+        studentId: s.studentId,
+        firstName: s.firstName,
+        lastName: s.lastName,
+        phone: s.phone,
+        whatsapp: s.whatsapp,
+        email: s.email,
+        status: s.status as StudentStatus,
+        partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
+        assigneeName: (s.assignedTo as { name?: string } | null)?.name,
+        targetCountry: s.targetCountry,
+        targetIntake: s.targetIntake,
+        targetDegree: s.targetDegree,
+        loanRequested: s.loan?.requested,
+        profileVerified: isStudentProfileVerified(profileInput, documents),
+        documentsCount: documents.length,
+        createdAt: s.createdAt,
+      };
+    }),
     total,
     page,
     pageSize,
@@ -109,7 +227,10 @@ export async function getStudentById(id: string) {
   requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
   await connectDB();
-  const student = await Student.findById(id).populate("partnerId").lean();
+  const student = await Student.findById(id)
+    .populate("partnerId")
+    .populate("assignedTo", "name email")
+    .lean();
   if (!student) return null;
 
   return {
@@ -195,6 +316,10 @@ export async function createStudentAction(
       applicationNumber: data.applicationNumber,
     },
     partnerId: data.partnerId || undefined,
+    ...resolveAssignedTo(data.assignedToId),
+    targetCountry: data.targetCountry?.trim() || undefined,
+    targetIntake: data.targetIntake?.trim() || undefined,
+    targetDegree: data.targetDegree?.trim() || undefined,
     commissionPercentOverride:
       data.commissionPercentOverride === "" || data.commissionPercentOverride == null
         ? undefined
@@ -309,6 +434,16 @@ export async function updateStudentAction(
   } else {
     existing.commissionPercentOverride = data.commissionPercentOverride;
   }
+  const assignment = resolveAssignedTo(
+    data.assignedToId,
+    existing.assignedTo,
+    existing.assignedAt
+  );
+  existing.assignedTo = assignment.assignedTo;
+  existing.assignedAt = assignment.assignedAt;
+  existing.targetCountry = data.targetCountry?.trim() || undefined;
+  existing.targetIntake = data.targetIntake?.trim() || undefined;
+  existing.targetDegree = data.targetDegree?.trim() || undefined;
   existing.partnerId = data.partnerId ? new Types.ObjectId(data.partnerId) : existing.partnerId;
   if (data.status) existing.status = data.status;
   existing.remarks = data.remarks ? sanitizeText(data.remarks) : existing.remarks;

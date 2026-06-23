@@ -16,13 +16,6 @@ import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -31,14 +24,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { STUDENT_STATUSES } from "@/lib/constants/statuses";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { bulkUpdateStudentsAction } from "@/lib/actions/student.actions";
 import type { StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
-import { Trash2, Download, MessageCircle } from "lucide-react";
+import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
 import { StudentImportDialog } from "@/components/dashboard/student-import-dialog";
-import { buildWhatsAppUrl, getStudentWhatsAppNumber } from "@/lib/utils/whatsapp";
+import { StudentStageTabs } from "@/components/dashboard/student-stage-tabs";
+import { StudentAdvancedSearch } from "@/components/dashboard/student-advanced-search";
+import { ProfileCompleteBadge } from "@/components/dashboard/profile-complete-badge";
+import {
+  buildStudentListQuery,
+  type StudentListFilters,
+} from "@/lib/utils/student-list-filters";
+import { Trash2, Download } from "lucide-react";
+
+interface PartnerOption {
+  _id: string;
+  companyName: string;
+}
+
+interface AssigneeOption {
+  _id: string;
+  name: string;
+}
 
 interface StudentsTableProps {
   data: StudentListItem[];
@@ -49,6 +58,9 @@ interface StudentsTableProps {
   canDelete?: boolean;
   canExport?: boolean;
   canWrite?: boolean;
+  filters: StudentListFilters;
+  partners: PartnerOption[];
+  assignableUsers: AssigneeOption[];
 }
 
 export function StudentsTable({
@@ -59,12 +71,21 @@ export function StudentsTable({
   canDelete = false,
   canExport = false,
   canWrite = false,
+  filters,
+  partners,
+  assignableUsers,
 }: StudentsTableProps) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState(filters.search ?? "");
+
+  const isMine = filters.mine === "1";
+
+  function navigate(next: Partial<StudentListFilters>) {
+    const query = buildStudentListQuery(filters, next);
+    router.push(query ? `/dashboard/students?${query}` : "/dashboard/students");
+  }
 
   const columns: ColumnDef<StudentListItem>[] = [
     {
@@ -100,33 +121,36 @@ export function StudentsTable({
     {
       id: "name",
       header: "Name",
-      cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
+      cell: ({ row }) => (
+        <span className="inline-flex items-center gap-1.5">
+          <span>{row.original.firstName} {row.original.lastName}</span>
+          <ProfileCompleteBadge verified={Boolean(row.original.profileVerified)} />
+        </span>
+      ),
     },
     {
       accessorKey: "phone",
       header: "Phone",
-      cell: ({ row }) => {
-        const number = getStudentWhatsAppNumber(row.original.whatsapp, row.original.phone);
-        const whatsappUrl = number ? buildWhatsAppUrl(number) : null;
-        return (
-          <div className="flex items-center gap-2">
-            <span>{row.original.phone ?? "—"}</span>
-            {whatsappUrl && (
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700"
-                aria-label={`WhatsApp ${row.original.firstName}`}
-              >
-                <MessageCircle className="h-4 w-4" />
-              </a>
-            )}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <StudentContactActions
+          phone={row.original.phone}
+          whatsapp={row.original.whatsapp}
+          studentName={`${row.original.firstName} ${row.original.lastName}`}
+          channels="whatsapp"
+          showPhoneLabel
+        />
+      ),
     },
     { accessorKey: "partnerName", header: "Partner" },
+    { accessorKey: "assigneeName", header: "Assignee", cell: ({ row }) => row.original.assigneeName ?? "—" },
+    {
+      id: "studyAbroad",
+      header: "Target",
+      cell: ({ row }) => {
+        const parts = [row.original.targetCountry, row.original.targetDegree].filter(Boolean);
+        return parts.length ? parts.join(" · ") : "—";
+      },
+    },
     {
       accessorKey: "loanRequested",
       header: "Loan",
@@ -174,12 +198,14 @@ export function StudentsTable({
   }
 
   function handleExportCSV() {
-    const headers = ["Student ID", "Name", "Phone", "Partner", "Loan", "Status", "Created"];
+    const headers = ["Student ID", "Name", "Phone", "Partner", "Assignee", "Target", "Loan", "Status", "Created"];
     const rows = data.map((s) => [
       s.studentId,
       `${s.firstName} ${s.lastName}`,
       s.phone ?? "",
       s.partnerName ?? "",
+      s.assigneeName ?? "",
+      [s.targetCountry, s.targetDegree].filter(Boolean).join(" · "),
       s.loanRequested ?? 0,
       s.status,
       formatDate(s.createdAt),
@@ -193,59 +219,93 @@ export function StudentsTable({
     a.click();
   }
 
-  function applyFilters() {
-    const params = new URLSearchParams();
-    if (search) params.set("search", search);
-    if (statusFilter) params.set("status", statusFilter);
-    router.push(`/dashboard/students?${params.toString()}`);
+  function applySearch() {
+    navigate({ search: search.trim() || undefined, page: undefined });
+  }
+
+  function toggleMine() {
+    navigate({ mine: isMine ? undefined : "1", page: undefined });
+  }
+
+  function handleStageChange(stageId: string) {
+    navigate({
+      stage: stageId === "all" ? undefined : stageId,
+      status: undefined,
+      page: undefined,
+    });
+  }
+
+  function handleAdvancedApply(next: Partial<StudentListFilters>) {
+    navigate({ ...next, page: undefined });
+  }
+
+  function handleAdvancedClear() {
+    navigate({
+      partnerId: undefined,
+      assignedToId: undefined,
+      targetCountry: undefined,
+      targetIntake: undefined,
+      status: undefined,
+      state: undefined,
+      college: undefined,
+      course: undefined,
+      bank: undefined,
+      dateFrom: undefined,
+      dateTo: undefined,
+      loanMin: undefined,
+      loanMax: undefined,
+      page: undefined,
+    });
   }
 
   return (
     <div className="space-y-4">
-      <GlassCard className="p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap gap-2">
-          <Input
-            placeholder="Search students..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-            className="w-full min-w-0 sm:max-w-xs"
-          />
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "")}>
-            <SelectTrigger className="w-full min-w-0 rounded-xl border-[#6D5EF7]/15 bg-white/60 backdrop-blur-xl sm:w-[160px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl">
-              <SelectItem value="">All Status</SelectItem>
-              {STUDENT_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline" onClick={applyFilters}>Filter</Button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {canDelete && selected.length > 0 && (
-            <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
-              <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
+      <GlassCard className="space-y-4 p-4">
+        <StudentStageTabs
+          activeStage={filters.stage ?? "all"}
+          onStageChange={handleStageChange}
+        />
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-wrap gap-2">
+            <Input
+              placeholder="Search students..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && applySearch()}
+              className="w-full min-w-0 sm:max-w-xs"
+            />
+            <Button variant="outline" onClick={applySearch}>Search</Button>
+            <StudentAdvancedSearch
+              filters={filters}
+              partners={partners}
+              assignableUsers={assignableUsers}
+              onApply={handleAdvancedApply}
+              onClear={handleAdvancedClear}
+            />
+            <Button variant={isMine ? "default" : "outline"} onClick={toggleMine}>
+              My Students
             </Button>
-          )}
-          {canWrite && <StudentImportDialog canWrite={canWrite} />}
-          {canExport && (
-            <Button variant="outline" size="sm" onClick={handleExportCSV}>
-              <Download className="mr-1 h-4 w-4" /> Export
-            </Button>
-          )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {canDelete && selected.length > 0 && (
+              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
+              </Button>
+            )}
+            {canWrite && <StudentImportDialog canWrite={canWrite} />}
+            {canExport && (
+              <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                <Download className="mr-1 h-4 w-4" /> Export
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
       </GlassCard>
 
       <div className="space-y-3 md:hidden">
         {data.length ? (
           data.map((student) => {
-            const number = getStudentWhatsAppNumber(student.whatsapp, student.phone);
-            const whatsappUrl = number ? buildWhatsAppUrl(number) : null;
             return (
               <GlassCard key={student._id} className="p-4">
                 <div
@@ -263,7 +323,10 @@ export function StudentsTable({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">
-                        {student.firstName} {student.lastName}
+                        <span className="inline-flex items-center gap-1">
+                          {student.firstName} {student.lastName}
+                          <ProfileCompleteBadge verified={Boolean(student.profileVerified)} />
+                        </span>
                       </p>
                       <p className="text-xs text-muted-foreground">{student.studentId}</p>
                     </div>
@@ -280,21 +343,23 @@ export function StudentsTable({
                     <p>{formatCurrency(student.loanRequested ?? 0)}</p>
                   </div>
                   <div>
+                    <p className="font-medium text-foreground">Assignee</p>
+                    <p className="truncate">{student.assigneeName ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Target</p>
+                    <p className="truncate">
+                      {[student.targetCountry, student.targetDegree].filter(Boolean).join(" · ") || "—"}
+                    </p>
+                  </div>
+                  <div>
                     <p className="font-medium text-foreground">Phone</p>
-                    <div className="flex items-center gap-1.5">
-                      <span>{student.phone ?? "—"}</span>
-                      {whatsappUrl && (
-                        <a
-                          href={whatsappUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-emerald-600"
-                          aria-label={`WhatsApp ${student.firstName}`}
-                        >
-                          <MessageCircle className="h-3.5 w-3.5" />
-                        </a>
-                      )}
-                    </div>
+                    <StudentContactActions
+                      phone={student.phone}
+                      whatsapp={student.whatsapp}
+                      studentName={`${student.firstName} ${student.lastName}`}
+                      channels="whatsapp"
+                    />
                   </div>
                   <div>
                     <p className="font-medium text-foreground">Created</p>
@@ -353,7 +418,7 @@ export function StudentsTable({
             variant="outline"
             size="sm"
             disabled={page <= 1}
-            onClick={() => router.push(`/dashboard/students?page=${page - 1}`)}
+            onClick={() => navigate({ page: page > 1 ? String(page - 1) : undefined })}
           >
             Previous
           </Button>
@@ -362,7 +427,7 @@ export function StudentsTable({
             variant="outline"
             size="sm"
             disabled={page >= totalPages}
-            onClick={() => router.push(`/dashboard/students?page=${page + 1}`)}
+            onClick={() => navigate({ page: String(page + 1) })}
           >
             Next
           </Button>

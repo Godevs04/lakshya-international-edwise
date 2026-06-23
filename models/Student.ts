@@ -69,6 +69,11 @@ export interface IStudent extends Document {
     applicationNumber?: string;
   };
   partnerId?: Types.ObjectId;
+  assignedTo?: Types.ObjectId;
+  assignedAt?: Date;
+  targetCountry?: string;
+  targetIntake?: string;
+  targetDegree?: string;
   commissionPercentOverride?: number;
   commissionSettled: number;
   commissionSettlements: Array<{
@@ -151,6 +156,11 @@ const StudentSchema = new Schema<IStudent>(
       applicationNumber: { type: String },
     },
     partnerId: { type: Schema.Types.ObjectId, ref: "Partner" },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
+    assignedAt: { type: Date },
+    targetCountry: { type: String, trim: true },
+    targetIntake: { type: String, trim: true },
+    targetDegree: { type: String, trim: true },
     commissionPercentOverride: { type: Number, min: 0, max: 100 },
     commissionSettled: { type: Number, default: 0, min: 0 },
     commissionSettlements: [
@@ -194,6 +204,7 @@ const StudentSchema = new Schema<IStudent>(
 
 StudentSchema.index({ status: 1, partnerId: 1, createdAt: -1 });
 StudentSchema.index({ partnerId: 1, status: 1 });
+StudentSchema.index({ assignedTo: 1, createdAt: -1 });
 StudentSchema.index(
   {
     firstName: "text",
