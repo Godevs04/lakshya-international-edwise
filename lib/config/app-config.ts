@@ -39,7 +39,7 @@ async function loadAppConfigFromDatabase(): Promise<AppSettings> {
         accent: settings.theme?.accent?.trim() || envDefaults.theme.accent,
         radius: settings.theme?.radius?.trim() || envDefaults.theme.radius,
       },
-      modules: allModulesDisabled ? envDefaults.modules : modules,
+      modules: allModulesDisabled ? envDefaults.modules : { ...envDefaults.modules, ...modules },
       sessionExpiryHours: settings.sessionExpiryHours ?? envDefaults.sessionExpiryHours,
     };
   } catch (error) {

@@ -64,7 +64,12 @@ export interface IStudent extends Document {
     sanctioned?: number;
     disbursed?: number;
     disbursedAt?: Date;
+    currency?: "INR" | "USD";
+    lenderId?: Types.ObjectId;
+    roi?: number;
     interest?: number;
+    processingFee?: number;
+    pfPaid?: boolean;
     bankName?: string;
     applicationNumber?: string;
   };
@@ -74,6 +79,14 @@ export interface IStudent extends Document {
   targetCountry?: string;
   targetIntake?: string;
   targetDegree?: string;
+  targetUniversity?: string;
+  admissionRevenue?: number;
+  recordType?: "lead" | "student";
+  applicationStatus?: string;
+  loggedIn?: boolean;
+  sentToBank?: boolean;
+  sentToBankAt?: Date;
+  sentToBankByName?: string;
   commissionPercentOverride?: number;
   commissionSettled: number;
   commissionSettlements: Array<{
@@ -151,7 +164,12 @@ const StudentSchema = new Schema<IStudent>(
       sanctioned: { type: Number, default: 0 },
       disbursed: { type: Number, default: 0 },
       disbursedAt: { type: Date },
+      currency: { type: String, enum: ["INR", "USD"], default: "INR" },
+      lenderId: { type: Schema.Types.ObjectId, ref: "Lender" },
+      roi: { type: Number, default: 0 },
       interest: { type: Number, default: 0 },
+      processingFee: { type: Number, default: 0 },
+      pfPaid: { type: Boolean, default: false },
       bankName: { type: String },
       applicationNumber: { type: String },
     },
@@ -161,6 +179,26 @@ const StudentSchema = new Schema<IStudent>(
     targetCountry: { type: String, trim: true },
     targetIntake: { type: String, trim: true },
     targetDegree: { type: String, trim: true },
+    targetUniversity: { type: String, trim: true },
+    admissionRevenue: { type: Number, default: 0, min: 0 },
+    recordType: { type: String, enum: ["lead", "student"], default: "student" },
+    applicationStatus: {
+      type: String,
+      enum: [
+        "docs_pending",
+        "loggedin",
+        "sanctioned",
+        "pf_paid",
+        "pf_pending",
+        "disbursed",
+        "rejected",
+      ],
+      default: "docs_pending",
+    },
+    loggedIn: { type: Boolean, default: false },
+    sentToBank: { type: Boolean, default: false },
+    sentToBankAt: { type: Date },
+    sentToBankByName: { type: String, trim: true },
     commissionPercentOverride: { type: Number, min: 0, max: 100 },
     commissionSettled: { type: Number, default: 0, min: 0 },
     commissionSettlements: [
@@ -205,6 +243,11 @@ const StudentSchema = new Schema<IStudent>(
 StudentSchema.index({ status: 1, partnerId: 1, createdAt: -1 });
 StudentSchema.index({ partnerId: 1, status: 1 });
 StudentSchema.index({ assignedTo: 1, createdAt: -1 });
+StudentSchema.index({ "loan.lenderId": 1, status: 1 });
+StudentSchema.index({ applicationStatus: 1 });
+StudentSchema.index({ sentToBank: 1 });
+StudentSchema.index({ loggedIn: 1 });
+StudentSchema.index({ recordType: 1, createdAt: -1 });
 StudentSchema.index(
   {
     firstName: "text",
@@ -216,6 +259,11 @@ StudentSchema.index(
   },
   { name: "student_text_search" }
 );
+
+// Next.js hot reload keeps a stale Mongoose model; re-register in dev so schema changes apply.
+if (process.env.NODE_ENV !== "production" && mongoose.models.Student) {
+  delete mongoose.models.Student;
+}
 
 export const Student: Model<IStudent> =
   mongoose.models.Student ?? mongoose.model<IStudent>("Student", StudentSchema);

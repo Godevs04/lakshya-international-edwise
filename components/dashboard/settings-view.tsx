@@ -59,7 +59,7 @@ interface SettingsViewProps {
   }>;
 }
 
-const MODULE_KEYS = ["students", "partners", "applications", "reports", "analytics"] as const;
+const MODULE_KEYS = ["students", "partners", "applications", "lenders", "tasks", "reports", "analytics"] as const;
 
 function getCreatableRoles(currentUserRole?: UserRole): UserRole[] {
   return (Object.keys(ROLE_LABELS) as UserRole[]).filter((role) => {
@@ -185,6 +185,7 @@ export function SettingsView({
                     folder="settings"
                     defaultValue={settings.company.logo ?? ""}
                     disabled={!canWriteSettings}
+                    logoPreview
                     hint="JPEG, PNG, or WebP up to 10 MB."
                   />
                 </div>

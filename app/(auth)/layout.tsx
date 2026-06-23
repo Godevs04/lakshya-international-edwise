@@ -1,4 +1,6 @@
 import { PremiumBackground } from "@/components/layout/premium-background";
+import { AppLogo } from "@/components/brand/app-logo";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
 
 export default function AuthLayout({
@@ -23,20 +25,15 @@ async function AuthLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative z-10 w-full max-w-md px-4 sm:max-w-lg sm:px-0">
       <div className="mb-8 text-center">
-        {config.company.logo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={config.company.logo}
-            alt={config.company.name}
-            className="mx-auto mb-4 h-14 w-14 rounded-2xl object-cover ring-4 ring-white/50 shadow-xl shadow-[#6D5EF7]/20"
-          />
-        ) : (
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xl font-bold text-white shadow-xl shadow-[#6D5EF7]/30">
-            {config.company.name.charAt(0)}
-          </div>
-        )}
+        <AppLogo
+          src={config.company.logo}
+          alt={config.company.name}
+          variant="auth"
+          className="mx-auto mb-4 shadow-xl shadow-[#6D5EF7]/20"
+          priority
+        />
         <h1 className="text-2xl font-bold tracking-tight">{config.company.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Premium International Education Consultancy CRM</p>
+        <p className="mt-1 text-sm text-muted-foreground">{APP_TAGLINE}</p>
       </div>
       {children}
     </div>

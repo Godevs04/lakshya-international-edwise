@@ -11,13 +11,18 @@ import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate, getInitials } from "@/lib/utils/format";
 import { addStudentNoteAction, removeStudentDocumentAction } from "@/lib/actions/student.actions";
 import { DocumentLinkForm } from "@/components/forms/document-link-form";
 import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
-import { StudentDocumentChecklist } from "@/components/dashboard/student-document-checklist";
 import { ProfileCompleteBadge } from "@/components/dashboard/profile-complete-badge";
+import { StudentApplicationPanel } from "@/components/dashboard/student-application-panel";
 import { Progress } from "@/components/ui/progress";
+import {
+  getApplicationStatusLabel,
+  type ApplicationStatusId,
+} from "@/lib/constants/application-status";
 import {
   getStudentProfileCompleteness,
   isStudentProfileVerified,
@@ -43,6 +48,13 @@ interface StudentDetailProps {
     targetCountry?: string;
     targetIntake?: string;
     targetDegree?: string;
+    targetUniversity?: string;
+    admissionRevenue?: number;
+    applicationStatus?: ApplicationStatusId;
+    sentToBank?: boolean;
+    sentToBankAt?: Date;
+    sentToBankByName?: string;
+    loggedIn?: boolean;
     assignedAt?: Date;
     address?: { line?: string; city?: string; state?: string; pincode?: string };
     aadhaar?: string;
@@ -52,9 +64,14 @@ interface StudentDetailProps {
       requested?: number;
       sanctioned?: number;
       disbursed?: number;
+      currency?: "INR" | "USD";
+      roi?: number;
       interest?: number;
+      processingFee?: number;
+      pfPaid?: boolean;
       bankName?: string;
       applicationNumber?: string;
+      lenderId?: { _id: string; name: string; slug?: string } | null;
     };
     documents?: Array<{ _id?: string; name: string; url: string; mimeType?: string }>;
     timeline?: Array<{ _id?: string; status: string; note?: string; createdByName?: string; createdAt?: Date }>;
@@ -75,10 +92,59 @@ function SummaryRow({ label, value }: { label: string; value?: string | null }) 
   );
 }
 
+function formatLoanAmount(amount: number, currency?: "INR" | "USD") {
+  if (currency === "USD") {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+  return formatCurrency(amount);
+}
+
 export function StudentDetailView({ student, canWrite = false }: StudentDetailProps) {
   const router = useRouter();
   const [noteLoading, setNoteLoading] = useState(false);
   const [removingDocId, setRemovingDocId] = useState<string | null>(null);
+  const [bankSent, setBankSent] = useState(Boolean(student.sentToBank));
+  const [bankSentAt, setBankSentAt] = useState<Date | undefined>(student.sentToBankAt);
+  const [bankSentBy, setBankSentBy] = useState(student.sentToBankByName);
+  const [timeline, setTimeline] = useState(student.timeline ?? []);
+
+  const profileInput = useMemo(
+    () => ({
+      phone: student.phone,
+      whatsapp: student.whatsapp,
+      email: student.email,
+      gender: student.gender,
+      dob: student.dob,
+      targetCountry: student.targetCountry,
+      targetIntake: student.targetIntake,
+      targetDegree: student.targetDegree,
+      targetUniversity: student.targetUniversity,
+      address: student.address,
+      education: student.education,
+      loan: {
+        requested: student.loan?.requested,
+        lenderId: student.loan?.lenderId,
+        roi: student.loan?.roi,
+      },
+      partnerId: student.partnerId,
+      partnerName: student.partnerId?.companyName,
+    }),
+    [student]
+  );
+
+  const profileCompleteness = useMemo(
+    () => getStudentProfileCompleteness(profileInput),
+    [profileInput]
+  );
+
+  const profileVerified = useMemo(
+    () => isStudentProfileVerified(profileInput),
+    [profileInput]
+  );
 
   const latestNote = useMemo(() => {
     const notes = [...(student.notes ?? [])];
@@ -91,53 +157,23 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
   }, [student.notes]);
 
   const latestRemark = latestNote?.content ?? student.remarks;
+  const lenderName = student.loan?.lenderId?.name ?? student.loan?.bankName;
+  const lenderSlug = student.loan?.lenderId?.slug;
 
-  const profileCompleteness = useMemo(
-    () =>
-      getStudentProfileCompleteness({
-        phone: student.phone,
-        whatsapp: student.whatsapp,
-        email: student.email,
-        gender: student.gender,
-        dob: student.dob,
-        targetCountry: student.targetCountry,
-        targetIntake: student.targetIntake,
-        targetDegree: student.targetDegree,
-        address: student.address,
-        education: student.education,
-        loan: student.loan,
-        partnerId: student.partnerId,
-        hasAadhaar: Boolean(student.aadhaar),
-        hasPan: Boolean(student.pan),
-        documents: student.documents ?? [],
-      }),
-    [student]
-  );
-
-  const profileVerified = useMemo(
-    () =>
-      isStudentProfileVerified(
-        {
-          phone: student.phone,
-          whatsapp: student.whatsapp,
-          email: student.email,
-          gender: student.gender,
-          dob: student.dob,
-          targetCountry: student.targetCountry,
-          targetIntake: student.targetIntake,
-          targetDegree: student.targetDegree,
-          address: student.address,
-          education: student.education,
-          loan: student.loan,
-          partnerId: student.partnerId,
-          hasAadhaar: Boolean(student.aadhaar),
-          hasPan: Boolean(student.pan),
-          documents: student.documents ?? [],
-        },
-        student.documents ?? []
-      ),
-    [student]
-  );
+  function handleSentToBank(data: { sentToBankAt: Date; sentToBankByName?: string }) {
+    setBankSent(true);
+    setBankSentAt(data.sentToBankAt);
+    setBankSentBy(data.sentToBankByName);
+    setTimeline((current) => [
+      {
+        status: student.status,
+        note: "Application marked as sent to bank (internal)",
+        createdByName: data.sentToBankByName,
+        createdAt: data.sentToBankAt,
+      },
+      ...current,
+    ]);
+  }
 
   async function handleAddNote(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -184,6 +220,14 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
             <p className="text-sm text-muted-foreground">{student.studentId}</p>
             <div className="mt-3 flex flex-col items-center gap-2">
               <StatusBadge status={student.status as StudentStatus} />
+              <Badge variant="outline" className="text-xs">
+                {getApplicationStatusLabel(student.applicationStatus)}
+              </Badge>
+              {bankSent ? (
+                <Badge className="bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/15">
+                  Sent to bank
+                </Badge>
+              ) : null}
               {!profileVerified && (
                 <p className="text-xs text-muted-foreground">
                   Profile {profileCompleteness.percent}% complete
@@ -203,15 +247,33 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
           </div>
 
           <div className="mt-5 space-y-3 border-t pt-4">
-            <SummaryRow label="Assignee" value={student.assignedTo?.name} />
+            <SummaryRow label="Lead assigned to" value={student.assignedTo?.name} />
             <SummaryRow label="Partner" value={student.partnerId?.companyName} />
             <SummaryRow label="Country" value={student.targetCountry} />
-            <SummaryRow label="Degree" value={student.targetDegree} />
             <SummaryRow label="Intake" value={student.targetIntake} />
+            <SummaryRow label="Degree" value={student.targetDegree} />
+            <SummaryRow label="University" value={student.targetUniversity} />
+            <SummaryRow label="Lender" value={lenderName} />
+            <SummaryRow label="Currency" value={student.loan?.currency ?? "INR"} />
             <SummaryRow
               label="Loan requested"
-              value={formatCurrency(student.loan?.requested ?? 0)}
+              value={formatLoanAmount(student.loan?.requested ?? 0, student.loan?.currency)}
             />
+            <SummaryRow
+              label="Processing fee"
+              value={formatLoanAmount(student.loan?.processingFee ?? 0, student.loan?.currency)}
+            />
+            <SummaryRow
+              label="ROI"
+              value={student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : undefined}
+            />
+            <SummaryRow label="LAN" value={student.loan?.applicationNumber} />
+            {student.admissionRevenue != null && student.admissionRevenue > 0 && (
+              <SummaryRow
+                label="Admission revenue"
+                value={formatCurrency(student.admissionRevenue)}
+              />
+            )}
           </div>
 
           {canWrite && (
@@ -225,12 +287,8 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
           )}
         </GlassCard>
 
-        <GlassCard className="p-4">
-          <StudentDocumentChecklist documents={student.documents ?? []} compact />
-        </GlassCard>
-
         {!profileVerified && (
-          <GlassCard className="p-4 space-y-3">
+          <GlassCard className="space-y-3 p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">Profile completeness</span>
               <span className="text-muted-foreground">{profileCompleteness.percent}%</span>
@@ -262,29 +320,46 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
       </aside>
 
       <div className="min-w-0 space-y-4">
-        <Tabs defaultValue="personal">
+        <Tabs defaultValue="application">
           <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
+            <TabsTrigger value="application">Application</TabsTrigger>
             <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="loan">Loan</TabsTrigger>
+            <TabsTrigger value="loan">Loan Summary</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="application" className="mt-4">
+            <StudentApplicationPanel
+              key={`${student._id}-${student.applicationStatus}-${bankSent ? "sent" : "pending"}`}
+              studentId={student._id}
+              canWrite={canWrite}
+              applicationStatus={student.applicationStatus ?? "docs_pending"}
+              sentToBank={bankSent}
+              sentToBankAt={bankSentAt}
+              sentToBankByName={bankSentBy}
+              lenderName={lenderName}
+              lenderSlug={lenderSlug}
+              applicationNumber={student.loan?.applicationNumber}
+              latestRemark={latestRemark}
+              loan={student.loan}
+              onSentToBank={handleSentToBank}
+            />
+          </TabsContent>
+
           <TabsContent value="personal" className="mt-4">
-            <GlassCard className="p-5 space-y-6">
+            <GlassCard className="space-y-6 p-5">
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
                   <UserRound className="h-4 w-4 text-muted-foreground" />
-                  Contact & Identity
+                  Contact
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm">{student.phone ?? "—"}</p></div>
                   <div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm">{student.email ?? "—"}</p></div>
                   <div><p className="text-xs text-muted-foreground">Gender</p><p className="text-sm capitalize">{student.gender ?? "—"}</p></div>
                   <div><p className="text-xs text-muted-foreground">Date of Birth</p><p className="text-sm">{student.dob ? formatDate(student.dob) : "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">PAN</p><p className="text-sm font-mono">{student.pan ?? "—"}</p></div>
                 </div>
               </div>
 
@@ -293,10 +368,11 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
                   <Globe className="h-4 w-4 text-muted-foreground" />
                   Study Abroad
                 </h3>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div><p className="text-xs text-muted-foreground">Target Country</p><p className="text-sm">{student.targetCountry ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Target Degree</p><p className="text-sm">{student.targetDegree ?? "—"}</p></div>
                   <div><p className="text-xs text-muted-foreground">Target Intake</p><p className="text-sm">{student.targetIntake ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Target University</p><p className="text-sm">{student.targetUniversity ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Target Degree</p><p className="text-sm">{student.targetDegree ?? "—"}</p></div>
                 </div>
               </div>
 
@@ -337,13 +413,23 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
                   )}
                 </div>
               )}
+
+              <details className="rounded-lg border p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-muted-foreground">
+                  Identity (optional)
+                </summary>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">PAN</p><p className="text-sm font-mono">{student.pan ?? "—"}</p></div>
+                </div>
+              </details>
             </GlassCard>
           </TabsContent>
 
           <TabsContent value="timeline" className="mt-4">
             <GlassCard className="p-5">
               <Timeline
-                items={(student.timeline ?? []).map((t, i) => ({
+                items={timeline.map((t, i) => ({
                   id: t._id?.toString() ?? String(i),
                   title: t.status.replace(/_/g, " "),
                   description: t.note ?? `Updated by ${t.createdByName ?? "System"}`,
@@ -354,8 +440,7 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
           </TabsContent>
 
           <TabsContent value="documents" className="mt-4">
-            <GlassCard className="p-5 space-y-6">
-              <StudentDocumentChecklist documents={student.documents ?? []} />
+            <GlassCard className="space-y-6 p-5">
               {canWrite && <DocumentLinkForm studentId={student._id} />}
               {(student.documents ?? []).length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -400,11 +485,15 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
           <TabsContent value="loan" className="mt-4">
             <GlassCard className="p-5">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.requested ?? 0)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.sanctioned ?? 0)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatCurrency(student.loan?.disbursed ?? 0)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest != null ? `${student.loan.interest}%` : "—"}</p></div>
-                <div><p className="text-xs text-muted-foreground">Bank</p><p className="text-sm">{student.loan?.bankName ?? "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.requested ?? 0, student.loan?.currency)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.sanctioned ?? 0, student.loan?.currency)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.disbursed ?? 0, student.loan?.currency)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Currency</p><p className="text-lg font-semibold">{student.loan?.currency ?? "INR"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Lender</p><p className="text-sm">{lenderName ?? "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">ROI</p><p className="text-lg font-semibold">{student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Processing Fee</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.processingFee ?? 0, student.loan?.currency)}</p></div>
+                <div><p className="text-xs text-muted-foreground">PF Paid</p><p className="text-sm">{student.loan?.pfPaid ? "Yes" : "No"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest != null && student.loan.interest > 0 ? `${student.loan.interest}%` : "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Bank LAN</p><p className="text-sm font-mono">{student.loan?.applicationNumber ?? "—"}</p></div>
               </div>
             </GlassCard>

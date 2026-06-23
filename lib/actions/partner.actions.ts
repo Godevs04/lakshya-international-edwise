@@ -38,13 +38,38 @@ import {
 } from "@/lib/validations/indian-fields";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
+import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
+import type { PartnerInput } from "@/lib/validations/schemas";
+
+function buildPartnerContacts(data: PartnerInput) {
+  const contacts = [];
+
+  for (let index = 0; index < 3; index += 1) {
+    const name = data[`contact${index}Name` as keyof PartnerInput] as string | undefined;
+    const phone = data[`contact${index}Phone` as keyof PartnerInput] as string | undefined;
+    const email = data[`contact${index}Email` as keyof PartnerInput] as string | undefined;
+    const role = data[`contact${index}Role` as keyof PartnerInput] as string | undefined;
+
+    if (name?.trim() || phone?.trim() || email?.trim() || role?.trim()) {
+      contacts.push({
+        name: name?.trim() ? sanitizeText(name) : undefined,
+        phone: phone?.trim() ? normalizeIndianPhone(phone) : undefined,
+        email: email?.trim() || undefined,
+        role: role?.trim() ? sanitizeText(role) : undefined,
+      });
+    }
+  }
+
+  return contacts;
+}
 
 export async function getPartners(params: {
   page?: number;
   pageSize?: number;
   search?: string;
   status?: string;
+  actionStatus?: string;
 }): Promise<PaginatedResult<PartnerListItem>> {
   return runLoggedQuery("getPartners", async () => {
   const user = await getSessionUser();
@@ -66,6 +91,7 @@ export async function getPartners(params: {
     ];
   }
   if (params.status) filter.status = params.status;
+  if (params.actionStatus) filter.actionStatus = params.actionStatus;
 
   const [data, total] = await Promise.all([
     Partner.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),
@@ -80,6 +106,7 @@ export async function getPartners(params: {
       phone: p.phone,
       email: p.email,
       status: p.status as PartnerStatus,
+      actionStatus: p.actionStatus as PartnerActionStatus,
       studentsCount: p.studentsCount,
       totalLoanValue: p.totalLoanValue,
       commissionPercent: p.commissionPercent,
@@ -184,6 +211,13 @@ export async function createPartnerAction(
     phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
     email: data.email,
     address: data.address ? sanitizeText(data.address) : undefined,
+    location: {
+      address: data.locationAddress ? sanitizeText(data.locationAddress) : undefined,
+      city: data.locationCity?.trim() || undefined,
+      state: data.locationState?.trim() || undefined,
+    },
+    contacts: buildPartnerContacts(data),
+    actionStatus: data.actionStatus ?? "active",
     gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
     commissionPercent: data.commissionPercent ?? 0,
     bankDetails: {
@@ -248,6 +282,13 @@ export async function updatePartnerAction(
       phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
       email: data.email,
       address: data.address ? sanitizeText(data.address) : undefined,
+      location: {
+        address: data.locationAddress ? sanitizeText(data.locationAddress) : undefined,
+        city: data.locationCity?.trim() || undefined,
+        state: data.locationState?.trim() || undefined,
+      },
+      contacts: buildPartnerContacts(data),
+      actionStatus: data.actionStatus ?? existing.actionStatus,
       gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
       commissionPercent: data.commissionPercent ?? 0,
       bankDetails: {

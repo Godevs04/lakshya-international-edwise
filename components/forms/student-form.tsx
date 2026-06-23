@@ -16,28 +16,29 @@ import {
 } from "@/components/ui/select";
 import { FormSection } from "@/components/forms/form-section";
 import { LinkUrlField } from "@/components/forms/link-url-field";
-import { STUDENT_STATUSES } from "@/lib/constants/statuses";
+import { LENDER_SEEDS } from "@/lib/constants/lenders";
+import { APPLICATION_STATUS_OPTIONS } from "@/lib/constants/application-status";
 import {
   TARGET_COUNTRIES,
   TARGET_DEGREES,
   TARGET_INTAKES,
 } from "@/lib/constants/study-abroad";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
+import {
+  AssigneeSelect,
+  mergeAssigneeOptions,
+  type AssigneeOption,
+} from "@/components/forms/assignee-select";
 
 interface PartnerOption {
   _id: string;
   companyName: string;
 }
 
-interface AssigneeOption {
-  _id: string;
-  name: string;
-}
-
 interface StudentFormProps {
   partners: PartnerOption[];
   assignableUsers?: AssigneeOption[];
-  initialData?: Record<string, string | number | undefined>;
+  initialData?: Record<string, string | number | boolean | undefined>;
   studentId?: string;
   mode: "create" | "edit";
 }
@@ -49,13 +50,28 @@ const PAN_HINT = "Format: ABCDE1234F (5 letters, 4 digits, 1 letter).";
 export function StudentForm({ partners, assignableUsers = [], initialData, studentId, mode }: StudentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const assigneeOptions = mergeAssigneeOptions(
+    assignableUsers,
+    initialData?.assignedToId as string | undefined,
+    initialData?.assignedToName as string | undefined
+  );
   const [gender, setGender] = useState((initialData?.gender as string) ?? "");
   const [partnerId, setPartnerId] = useState((initialData?.partnerId as string) ?? "");
   const [assignedToId, setAssignedToId] = useState((initialData?.assignedToId as string) ?? "");
   const [targetCountry, setTargetCountry] = useState((initialData?.targetCountry as string) ?? "");
   const [targetIntake, setTargetIntake] = useState((initialData?.targetIntake as string) ?? "");
   const [targetDegree, setTargetDegree] = useState((initialData?.targetDegree as string) ?? "");
-  const [status, setStatus] = useState((initialData?.status as string) ?? "new");
+  const [targetUniversity, setTargetUniversity] = useState((initialData?.targetUniversity as string) ?? "");
+  const [loanCurrency, setLoanCurrency] = useState((initialData?.loanCurrency as string) ?? "INR");
+  const [lenderId, setLenderId] = useState((initialData?.lenderId as string) ?? "");
+  const [applicationStatus, setApplicationStatus] = useState(
+    (initialData?.applicationStatus as string) ?? "docs_pending"
+  );
+
+  const applicationStatusItems = APPLICATION_STATUS_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }));
 
   const selectedPartner = partners.find((p) => p._id === partnerId);
 
@@ -209,35 +225,10 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
       </FormSection>
 
       <FormSection
-        title="Optional — Documents & Education"
-        description="Identity and academic information."
+        title="Optional — Education"
+        description="Academic information."
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="aadhaar">Aadhaar</Label>
-            <Input
-              id="aadhaar"
-              name="aadhaar"
-              inputMode="numeric"
-              maxLength={14}
-              placeholder="1234 5678 9012"
-              defaultValue={initialData?.aadhaar as string}
-              className="font-mono"
-            />
-            <p className="text-xs text-muted-foreground">{AADHAAR_HINT}</p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pan">PAN</Label>
-            <Input
-              id="pan"
-              name="pan"
-              maxLength={10}
-              placeholder="ABCDE1234F"
-              defaultValue={initialData?.pan as string}
-              className="font-mono uppercase"
-            />
-            <p className="text-xs text-muted-foreground">{PAN_HINT}</p>
-          </div>
           <div className="space-y-2">
             <Label htmlFor="college">College</Label>
             <Input id="college" name="college" defaultValue={initialData?.college as string} />
@@ -255,7 +246,7 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
 
       <FormSection
         title="Optional — Study Abroad & Assignment"
-        description="Target destination, intake, degree, and counsellor assignment."
+        description="Target destination, intake, university, and lead assignment."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -275,22 +266,6 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
             <input type="hidden" name="targetCountry" value={targetCountry} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="targetDegree">Target Degree</Label>
-            <Select value={targetDegree} onValueChange={(v) => setTargetDegree(v ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select degree" />
-              </SelectTrigger>
-              <SelectContent>
-                {TARGET_DEGREES.map((degree) => (
-                  <SelectItem key={degree} value={degree}>
-                    {degree}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="targetDegree" value={targetDegree} />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="targetIntake">Target Intake</Label>
             <Select value={targetIntake} onValueChange={(v) => setTargetIntake(v ?? "")}>
               <SelectTrigger className="w-full">
@@ -306,21 +281,41 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
             </Select>
             <input type="hidden" name="targetIntake" value={targetIntake} />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="targetUniversity">Target University</Label>
+            <Input
+              id="targetUniversity"
+              name="targetUniversity"
+              value={targetUniversity}
+              onChange={(e) => setTargetUniversity(e.target.value)}
+            />
+          </div>
           <div className="space-y-2">
-            <Label htmlFor="assignedToId">Assigned Counsellor</Label>
-            <Select value={assignedToId} onValueChange={(v) => setAssignedToId(v ?? "")}>
+            <Label htmlFor="targetDegree">Target Degree (optional)</Label>
+            <Select value={targetDegree} onValueChange={(v) => setTargetDegree(v ?? "")}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Unassigned" />
+                <SelectValue placeholder="Select degree" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
-                {assignableUsers.map((user) => (
-                  <SelectItem key={user._id} value={user._id}>
-                    {user.name}
+                {TARGET_DEGREES.map((degree) => (
+                  <SelectItem key={degree} value={degree}>
+                    {degree}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <input type="hidden" name="targetDegree" value={targetDegree} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="assignedToId">Lead assigned to</Label>
+            <AssigneeSelect
+              id="assignedToId"
+              users={assigneeOptions}
+              value={assignedToId}
+              onValueChange={setAssignedToId}
+              placeholder="Unassigned"
+              allowUnassigned
+            />
             <input type="hidden" name="assignedToId" value={assignedToId} />
           </div>
         </div>
@@ -338,6 +333,68 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               name="loanRequested"
               type="number"
               defaultValue={initialData?.loanRequested as number}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="loanCurrency">Loan Currency</Label>
+            <Select value={loanCurrency} onValueChange={(v) => setLoanCurrency(v ?? "INR")}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="INR">INR</SelectItem>
+                <SelectItem value="USD">USD</SelectItem>
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="loanCurrency" value={loanCurrency} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lenderId">Lender</Label>
+            <Select value={lenderId} onValueChange={(v) => setLenderId(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select lender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">None</SelectItem>
+                {LENDER_SEEDS.map((lender) => (
+                  <SelectItem key={lender.slug} value={lender.slug}>
+                    {lender.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="lenderId" value={lenderId} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="roi">ROI %</Label>
+            <Input
+              id="roi"
+              name="roi"
+              type="number"
+              min={0}
+              max={100}
+              step="0.01"
+              defaultValue={initialData?.roi as number}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="processingFee">Processing Fee</Label>
+            <Input
+              id="processingFee"
+              name="processingFee"
+              type="number"
+              min={0}
+              defaultValue={initialData?.processingFee as number}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="admissionRevenue">Admission Revenue</Label>
+            <Input
+              id="admissionRevenue"
+              name="admissionRevenue"
+              type="number"
+              min={0}
+              defaultValue={initialData?.admissionRevenue as number}
             />
           </div>
           <div className="space-y-2">
@@ -371,10 +428,6 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               placeholder="e.g. 7.8"
               defaultValue={initialData?.interest as number}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="bankName">Bank Name</Label>
-            <Input id="bankName" name="bankName" defaultValue={initialData?.bankName as string} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="applicationNumber">Bank LAN (Loan Application Number)</Label>
@@ -425,27 +478,66 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
             </Select>
             <input type="hidden" name="partnerId" value={partnerId} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v ?? "new")}>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="applicationStatus">Application Status</Label>
+            <Select
+              value={applicationStatus}
+              onValueChange={(value) => setApplicationStatus(value ?? "docs_pending")}
+              items={applicationStatusItems}
+            >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue placeholder="Select application status" />
               </SelectTrigger>
               <SelectContent>
-                {STUDENT_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s.replace(/_/g, " ")}
+                {APPLICATION_STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <input type="hidden" name="status" value={status} />
+            <input type="hidden" name="applicationStatus" value={applicationStatus} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="remarks">Remarks</Label>
             <Textarea id="remarks" name="remarks" defaultValue={initialData?.remarks as string} />
           </div>
         </div>
+      </FormSection>
+
+      <FormSection title="Identity (optional)" description="Government ID details. Optional and stored securely.">
+        <details className="rounded-lg border p-4">
+          <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
+            Show identity fields
+          </summary>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="aadhaar">Aadhaar</Label>
+              <Input
+                id="aadhaar"
+                name="aadhaar"
+                inputMode="numeric"
+                maxLength={14}
+                placeholder="1234 5678 9012"
+                defaultValue={initialData?.aadhaar as string}
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">{AADHAAR_HINT}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pan">PAN</Label>
+              <Input
+                id="pan"
+                name="pan"
+                maxLength={10}
+                placeholder="ABCDE1234F"
+                defaultValue={initialData?.pan as string}
+                className="font-mono uppercase"
+              />
+              <p className="text-xs text-muted-foreground">{PAN_HINT}</p>
+            </div>
+          </div>
+        </details>
       </FormSection>
 
       <div className="flex gap-3">

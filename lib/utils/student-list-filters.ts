@@ -2,7 +2,8 @@ export interface StudentListFilters {
   page?: string;
   search?: string;
   status?: string;
-  stage?: string;
+  workflow?: string;
+  lenderId?: string;
   mine?: string;
   partnerId?: string;
   assignedToId?: string;
@@ -15,14 +16,14 @@ export interface StudentListFilters {
   state?: string;
   college?: string;
   course?: string;
-  bank?: string;
 }
 
 const FILTER_KEYS: (keyof StudentListFilters)[] = [
   "page",
   "search",
   "status",
-  "stage",
+  "workflow",
+  "lenderId",
   "mine",
   "partnerId",
   "assignedToId",
@@ -35,7 +36,6 @@ const FILTER_KEYS: (keyof StudentListFilters)[] = [
   "state",
   "college",
   "course",
-  "bank",
 ];
 
 export function buildStudentListQuery(
@@ -66,8 +66,8 @@ export function countActiveAdvancedFilters(filters: StudentListFilters): number 
     "state",
     "college",
     "course",
-    "bank",
     "status",
+    "lenderId",
   ];
 
   return advancedKeys.filter((key) => Boolean(filters[key]?.trim())).length;

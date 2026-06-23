@@ -25,6 +25,14 @@ export function formatDateTime(date: Date | string): string {
   return format(new Date(date), "dd MMM yyyy, hh:mm a");
 }
 
+export function toDatetimeLocalValue(date?: Date | string | null): string {
+  if (!date) return "";
+  const value = new Date(date);
+  if (Number.isNaN(value.getTime())) return "";
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
+}
+
 export function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return "Good Morning";

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GlassCard } from "@/components/cards/glass-card";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getLoginFailureReasonAction } from "@/lib/actions/auth.actions";
 
 interface LoginFormProps {
@@ -68,6 +69,7 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
         <p className="mt-1.5 text-sm text-muted-foreground">
           Sign in to your enterprise dashboard
         </p>
+        <p className="mt-1 text-xs text-muted-foreground/80">{APP_TAGLINE}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

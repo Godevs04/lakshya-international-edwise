@@ -62,7 +62,7 @@ export async function getSettings(): Promise<AppSettings> {
       accent: settings.theme?.accent?.trim() || defaults.theme.accent,
       radius: settings.theme?.radius?.trim() || defaults.theme.radius,
     },
-    modules: allModulesDisabled ? defaults.modules : modules,
+    modules: allModulesDisabled ? defaults.modules : { ...defaults.modules, ...modules },
     sessionExpiryHours: settings.sessionExpiryHours ?? defaults.sessionExpiryHours,
   };
   }, getDefaultSettings());
@@ -127,6 +127,8 @@ export async function updateSettingsAction(
             students: parseModuleFlag(formData.get("modulesStudents")),
             partners: parseModuleFlag(formData.get("modulesPartners")),
             applications: parseModuleFlag(formData.get("modulesApplications")),
+            lenders: parseModuleFlag(formData.get("modulesLenders")),
+            tasks: parseModuleFlag(formData.get("modulesTasks")),
             reports: parseModuleFlag(formData.get("modulesReports")),
             analytics: parseModuleFlag(formData.get("modulesAnalytics")),
           },

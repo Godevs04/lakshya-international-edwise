@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/cards/glass-card";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { registerAction } from "@/lib/actions/auth.actions";
 
 export function RegisterForm() {
@@ -36,6 +37,7 @@ export function RegisterForm() {
         <p className="mt-1.5 text-sm text-muted-foreground">
           Register to join the approval queue. An admin will onboard you after verification.
         </p>
+        <p className="mt-1 text-xs text-muted-foreground/80">{APP_TAGLINE}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

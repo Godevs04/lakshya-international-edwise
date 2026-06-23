@@ -125,6 +125,21 @@ export const studentSchema = z.object({
   targetCountry: z.string().max(100).optional(),
   targetIntake: z.string().max(100).optional(),
   targetDegree: z.string().max(100).optional(),
+  targetUniversity: z.string().max(200).optional(),
+  loanCurrency: z.enum(["INR", "USD"]).optional(),
+  lenderId: z.string().optional(),
+  roi: z.coerce.number().min(0).max(100).optional(),
+  processingFee: z.coerce.number().min(0).optional(),
+  applicationStatus: z.enum([
+    "docs_pending",
+    "loggedin",
+    "sanctioned",
+    "pf_paid",
+    "pf_pending",
+    "disbursed",
+    "rejected",
+  ]).optional(),
+  admissionRevenue: z.coerce.number().min(0).optional(),
   commissionPercentOverride: z.coerce
     .number()
     .min(0, "Commission cannot be negative")
@@ -141,12 +156,58 @@ export const studentSchema = z.object({
   refineIndianFields(data, ctx);
 });
 
+export const leadSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  phone: z.string().optional(),
+  targetIntake: z.string().max(100).optional(),
+  targetCountry: z.string().max(100).optional(),
+  targetUniversity: z.string().max(200).optional(),
+  admissionRevenue: z.coerce.number().min(0).optional(),
+  assignedToId: z.string().optional(),
+  lenderId: z.string().optional(),
+}).superRefine((data, ctx) => {
+  refineIndianFields(data, ctx);
+});
+
+export const taskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  studentId: z.string().optional().or(z.literal("")),
+  assignedToId: z
+    .string()
+    .min(1, "Assignee is required")
+    .regex(/^[a-f\d]{24}$/i, "Please select a valid assignee"),
+  dueAt: z.string().min(1, "Due date is required"),
+  reminderAt: z.string().optional().or(z.literal("")),
+});
+
+export const updateTaskSchema = taskSchema.extend({
+  taskId: z.string().regex(/^[a-f\d]{24}$/i, "Invalid task id"),
+});
+
 export const partnerSchema = z.object({
   companyName: z.string().min(1, "Company name is required"),
   owner: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
+  locationAddress: z.string().optional(),
+  locationCity: z.string().optional(),
+  locationState: z.string().optional(),
+  contact0Name: z.string().optional(),
+  contact0Phone: z.string().optional(),
+  contact0Email: z.string().email().optional().or(z.literal("")),
+  contact0Role: z.string().optional(),
+  contact1Name: z.string().optional(),
+  contact1Phone: z.string().optional(),
+  contact1Email: z.string().email().optional().or(z.literal("")),
+  contact1Role: z.string().optional(),
+  contact2Name: z.string().optional(),
+  contact2Phone: z.string().optional(),
+  contact2Email: z.string().email().optional().or(z.literal("")),
+  contact2Role: z.string().optional(),
+  actionStatus: z.enum(["active", "need_action", "call_back"]).optional(),
   gst: z.string().optional(),
   commissionPercent: z.coerce
     .number()
@@ -206,6 +267,8 @@ export const settingsSchema = z.object({
   modulesStudents: z.boolean().optional(),
   modulesPartners: z.boolean().optional(),
   modulesApplications: z.boolean().optional(),
+  modulesLenders: z.boolean().optional(),
+  modulesTasks: z.boolean().optional(),
   modulesReports: z.boolean().optional(),
   modulesAnalytics: z.boolean().optional(),
   sessionExpiryHours: z.coerce.number().min(1).max(720).optional(),

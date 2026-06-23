@@ -195,6 +195,7 @@ export function mapRowToStudentInput(row: Record<string, string>): StudentInput 
     applicationNumber: row.applicationNumber || undefined,
     partnerId: row.partnerId || undefined,
     status: (row.status as StudentInput["status"]) || "new",
+    applicationStatus: "docs_pending",
     remarks: row.remarks || undefined,
     photo: undefined,
   };

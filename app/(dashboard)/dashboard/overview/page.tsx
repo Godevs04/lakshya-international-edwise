@@ -39,7 +39,8 @@ function withTrend(
   title: string,
   value: string | number,
   icon: MetricIconName,
-  trendInfo: MetricTrendInfo
+  trendInfo: MetricTrendInfo,
+  href?: string
 ) {
   return {
     title,
@@ -47,6 +48,7 @@ function withTrend(
     icon,
     trend: trendInfo.trend,
     trendUp: trendInfo.trendUp,
+    href,
   };
 }
 
@@ -75,13 +77,13 @@ export default async function OverviewPage() {
   } = await getOverviewDashboardAction();
 
   const metricCards = [
-    withTrend("Total Students", metrics.totalStudents, "users", trends.totalStudents),
-    withTrend("New Students Today", metrics.newStudentsToday, "user-plus", trends.newStudentsToday),
-    withTrend("Partners", metrics.totalPartners, "handshake", trends.totalPartners),
-    withTrend("Pending Applications", metrics.pendingApplications, "clock", trends.pendingApplications),
-    withTrend("Sanctioned", metrics.sanctioned, "check-circle", trends.sanctioned),
-    withTrend("Disbursed", metrics.disbursed, "banknote", trends.disbursed),
-    withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected),
+    withTrend("Total Students", metrics.totalStudents, "users", trends.totalStudents, "/dashboard/students"),
+    withTrend("New Students Today", metrics.newStudentsToday, "user-plus", trends.newStudentsToday, "/dashboard/students"),
+    withTrend("Partners", metrics.totalPartners, "handshake", trends.totalPartners, "/dashboard/partners"),
+    withTrend("Pending Applications", metrics.pendingApplications, "clock", trends.pendingApplications, "/dashboard/students?workflow=docs_pending"),
+    withTrend("Sanctioned", metrics.sanctioned, "check-circle", trends.sanctioned, "/dashboard/students?workflow=sanctioned"),
+    withTrend("Disbursed", metrics.disbursed, "banknote", trends.disbursed, "/dashboard/students?workflow=disbursed"),
+    withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected, "/dashboard/students?status=rejected"),
     withTrend("Loan Amount", formatCurrency(metrics.totalLoanAmount), "indian-rupee", trends.totalLoanAmount),
     withTrend("Today's Collection", formatCurrency(metrics.todaysCollection), "wallet", trends.todaysCollection),
   ];

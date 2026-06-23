@@ -1,4 +1,5 @@
 import type { AppModules, AppTheme, CompanySettings } from "@/types";
+import { DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
 
 function parseSmtpFrom(from: string | undefined): { name?: string; email?: string } {
   if (!from) return {};
@@ -13,7 +14,7 @@ export function getDefaultCompanySettings(): CompanySettings {
   const fromSmtp = parseSmtpFrom(process.env.SMTP_FROM);
   return {
     name: process.env.APP_COMPANY_NAME ?? fromSmtp.name ?? "Lakshya International Edwise",
-    logo: process.env.APP_COMPANY_LOGO ?? "",
+    logo: process.env.APP_COMPANY_LOGO ?? DEFAULT_APP_LOGO,
     email: process.env.APP_COMPANY_EMAIL ?? fromSmtp.email ?? process.env.SMTP_USER ?? "",
     phone: process.env.APP_COMPANY_PHONE ?? "",
     address: process.env.APP_COMPANY_ADDRESS ?? "",
@@ -49,6 +50,8 @@ export function getDefaultModules(): AppModules {
     students: process.env.APP_MODULE_STUDENTS !== "false",
     partners: process.env.APP_MODULE_PARTNERS !== "false",
     applications: process.env.APP_MODULE_APPLICATIONS !== "false",
+    lenders: process.env.APP_MODULE_LENDERS !== "false",
+    tasks: process.env.APP_MODULE_TASKS !== "false",
     reports: process.env.APP_MODULE_REPORTS !== "false",
     analytics: process.env.APP_MODULE_ANALYTICS !== "false",
   };

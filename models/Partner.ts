@@ -1,5 +1,6 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 import type { PartnerStatus } from "@/lib/constants/statuses";
+import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
 
 const DocumentSchema = new Schema(
   {
@@ -21,6 +22,19 @@ export interface IPartner extends Document {
   phone?: string;
   email?: string;
   address?: string;
+  location?: {
+    address?: string;
+    city?: string;
+    state?: string;
+  };
+  contacts: Array<{
+    _id?: mongoose.Types.ObjectId;
+    name?: string;
+    phone?: string;
+    email?: string;
+    role?: string;
+  }>;
+  actionStatus: PartnerActionStatus;
   gst?: string;
   commissionPercent: number;
   bankDetails: {
@@ -76,6 +90,24 @@ const PartnerSchema = new Schema<IPartner>(
     phone: { type: String, trim: true },
     email: { type: String, trim: true, lowercase: true },
     address: { type: String },
+    location: {
+      address: { type: String },
+      city: { type: String },
+      state: { type: String },
+    },
+    contacts: [
+      {
+        name: { type: String, trim: true },
+        phone: { type: String, trim: true },
+        email: { type: String, trim: true, lowercase: true },
+        role: { type: String, trim: true },
+      },
+    ],
+    actionStatus: {
+      type: String,
+      enum: ["active", "need_action", "call_back"],
+      default: "active",
+    },
     gst: { type: String, trim: true },
     commissionPercent: { type: Number, default: 0, min: 0, max: 100 },
     bankDetails: {
@@ -121,6 +153,7 @@ const PartnerSchema = new Schema<IPartner>(
 
 PartnerSchema.index({ companyName: 1 });
 PartnerSchema.index({ status: 1 });
+PartnerSchema.index({ actionStatus: 1 });
 PartnerSchema.index(
   { companyName: "text", owner: "text", phone: "text", email: "text", gst: "text" },
   { name: "partner_text_search" }

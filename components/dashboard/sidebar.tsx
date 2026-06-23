@@ -21,6 +21,8 @@ import {
   type NavItem,
 } from "@/components/dashboard/nav-config";
 import { MobileNavSheet } from "@/components/dashboard/mobile-nav-sheet";
+import { AppLogo } from "@/components/brand/app-logo";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import type { AppModules } from "@/types";
 
 interface SidebarProps {
@@ -41,20 +43,13 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
       className="fixed left-4 top-4 bottom-4 z-50 hidden flex-col overflow-hidden rounded-[30px] glass-sidebar transition-[width] duration-300 ease-out lg:flex"
     >
       <div className="flex h-[72px] items-center gap-3 px-5">
-        {logo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logo} alt={companyName} className="h-10 w-10 rounded-2xl object-cover ring-2 ring-white/50" />
-        ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-sm font-bold text-white shadow-lg shadow-[#6D5EF7]/30">
-            {companyName.charAt(0)}
-          </div>
-        )}
+        <AppLogo src={logo} alt={companyName} variant="sidebar" />
         {!collapsed && (
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-foreground">{companyName}</p>
             <p className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
-              <Sparkles className="h-2.5 w-2.5 text-[#6D5EF7]" />
-              Enterprise CRM
+              <Sparkles className="h-2.5 w-2.5 shrink-0 text-[#6D5EF7]" />
+              <span className="truncate">{APP_TAGLINE}</span>
             </p>
           </div>
         )}
