@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/providers";
 import { PwaRegister } from "@/components/pwa/pwa-register";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
 import { fontMono, fontSans } from "@/lib/fonts";
 import "./globals.css";
@@ -12,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: config.company.name,
       template: `%s | ${config.company.name}`,
     },
-    description: `${config.company.name} - Premium International Education Consultancy CRM`,
+    description: `${config.company.name} — ${APP_TAGLINE}`,
     applicationName: config.company.name,
     appleWebApp: {
       capable: true,

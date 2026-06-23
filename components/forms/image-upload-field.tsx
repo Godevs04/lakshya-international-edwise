@@ -18,6 +18,8 @@ interface ImageUploadFieldProps {
   accept?: string;
   hint?: string;
   variant?: "image" | "document";
+  /** Wide logo preview with object-contain (for company branding). */
+  logoPreview?: boolean;
   disabled?: boolean;
 }
 
@@ -29,6 +31,7 @@ export function ImageUploadField({
   accept = "image/jpeg,image/png,image/webp,image/gif",
   hint,
   variant = "image",
+  logoPreview = false,
   disabled = false,
 }: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,14 +76,26 @@ export function ImageUploadField({
         {value ? (
           <div className="flex items-start gap-3">
             {isImage ? (
-              <Image
-                src={value}
-                alt=""
-                width={64}
-                height={64}
-                unoptimized
-                className="h-16 w-16 shrink-0 rounded-md border object-cover"
-              />
+              <div
+                className={
+                  logoPreview
+                    ? "flex h-24 w-44 shrink-0 items-center justify-center rounded-lg border bg-white p-1.5"
+                    : "h-16 w-16 shrink-0 overflow-hidden rounded-md border"
+                }
+              >
+                <Image
+                  src={value}
+                  alt=""
+                  width={logoPreview ? 176 : 64}
+                  height={logoPreview ? 96 : 64}
+                  unoptimized
+                  className={
+                    logoPreview
+                      ? "h-full w-full object-contain object-center"
+                      : "h-16 w-16 object-cover"
+                  }
+                />
+              </div>
             ) : (
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border bg-background">
                 <FileText className="h-6 w-6 text-muted-foreground" />

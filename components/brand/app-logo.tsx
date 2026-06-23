@@ -1,30 +1,32 @@
 import Image from "next/image";
-import { DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
+import { APP_LOGO_ASPECT_RATIO, DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
 import { cn } from "@/lib/utils";
 
-export type AppLogoVariant = "auth" | "sidebar" | "mobile";
+export type AppLogoVariant = "auth" | "sidebar" | "mobile" | "settings";
 
 const VARIANTS: Record<
   AppLogoVariant,
-  { container: string; width: number; height: number; padding: string }
+  { height: number; maxWidth: number; className: string }
 > = {
   auth: {
-    container: "h-28 w-28",
-    width: 112,
-    height: 112,
-    padding: "p-1.5",
+    height: 120,
+    maxWidth: 220,
+    className: "h-[7.5rem] max-w-[13.75rem]",
   },
   sidebar: {
-    container: "h-12 w-12",
-    width: 48,
-    height: 48,
-    padding: "p-1",
+    height: 56,
+    maxWidth: 104,
+    className: "h-14 max-w-[6.5rem]",
   },
   mobile: {
-    container: "h-10 w-10",
-    width: 40,
-    height: 40,
-    padding: "p-0.5",
+    height: 48,
+    maxWidth: 88,
+    className: "h-12 max-w-[5.5rem]",
+  },
+  settings: {
+    height: 96,
+    maxWidth: 176,
+    className: "h-24 max-w-[11rem]",
   },
 };
 
@@ -36,6 +38,10 @@ interface AppLogoProps {
   priority?: boolean;
 }
 
+function isLocalStaticAsset(src: string) {
+  return src.startsWith("/") && !src.startsWith("//");
+}
+
 export function AppLogo({
   src,
   alt,
@@ -45,22 +51,27 @@ export function AppLogo({
 }: AppLogoProps) {
   const styles = VARIANTS[variant];
   const logoSrc = src?.trim() || DEFAULT_APP_LOGO;
+  const width = Math.round(styles.height * APP_LOGO_ASPECT_RATIO);
 
   return (
     <div
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg shadow-[#6D5EF7]/15 ring-2 ring-white/60",
-        styles.container,
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white px-2 py-1.5 shadow-lg shadow-[#6D5EF7]/15 ring-1 ring-black/5",
+        styles.className,
         className
       )}
+      style={{ aspectRatio: APP_LOGO_ASPECT_RATIO }}
     >
       <Image
         src={logoSrc}
         alt={alt}
-        width={styles.width}
+        width={width}
         height={styles.height}
+        quality={100}
+        unoptimized={isLocalStaticAsset(logoSrc)}
         priority={priority ?? variant === "auth"}
-        className={cn("h-full w-full object-contain object-center", styles.padding)}
+        className="h-full w-full object-contain object-center"
+        sizes={`(max-width: 768px) ${Math.min(width, styles.maxWidth)}px, ${styles.maxWidth}px`}
       />
     </div>
   );

@@ -22,6 +22,7 @@ import {
 } from "@/components/dashboard/nav-config";
 import { MobileNavSheet } from "@/components/dashboard/mobile-nav-sheet";
 import { AppLogo } from "@/components/brand/app-logo";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import type { AppModules } from "@/types";
 
 interface SidebarProps {
@@ -47,8 +48,8 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-foreground">{companyName}</p>
             <p className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
-              <Sparkles className="h-2.5 w-2.5 text-[#6D5EF7]" />
-              Enterprise CRM
+              <Sparkles className="h-2.5 w-2.5 shrink-0 text-[#6D5EF7]" />
+              <span className="truncate">{APP_TAGLINE}</span>
             </p>
           </div>
         )}

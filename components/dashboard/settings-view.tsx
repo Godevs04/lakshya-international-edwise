@@ -185,6 +185,7 @@ export function SettingsView({
                     folder="settings"
                     defaultValue={settings.company.logo ?? ""}
                     disabled={!canWriteSettings}
+                    logoPreview
                     hint="JPEG, PNG, or WebP up to 10 MB."
                   />
                 </div>

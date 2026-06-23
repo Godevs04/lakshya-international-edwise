@@ -1,5 +1,6 @@
 import { PremiumBackground } from "@/components/layout/premium-background";
 import { AppLogo } from "@/components/brand/app-logo";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
 
 export default function AuthLayout({
@@ -32,7 +33,7 @@ async function AuthLayoutInner({ children }: { children: React.ReactNode }) {
           priority
         />
         <h1 className="text-2xl font-bold tracking-tight">{config.company.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Premium International Education Consultancy CRM</p>
+        <p className="mt-1 text-sm text-muted-foreground">{APP_TAGLINE}</p>
       </div>
       {children}
     </div>

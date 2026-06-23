@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -41,7 +42,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: company.name,
     short_name: shortName,
-    description: `${company.name} — International Education Consultancy CRM`,
+    description: `${company.name} — ${APP_TAGLINE}`,
     start_url: "/dashboard/overview",
     scope: "/",
     display: "standalone",
