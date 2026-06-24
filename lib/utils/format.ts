@@ -1,11 +1,25 @@
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays } from "date-fns";
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
+export function roundMoney(amount: number): number {
+  if (!Number.isFinite(amount)) return 0;
+  return Math.round(amount * 100) / 100;
+}
+
+export function formatMoney(amount: number, currency: "INR" | "USD" = "INR"): string {
+  const normalized = roundMoney(amount);
+  const hasFraction = Math.abs(normalized % 1) > 1e-9;
+  const locale = currency === "USD" ? "en-US" : "en-IN";
+
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
+    currency,
+    minimumFractionDigits: hasFraction ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(normalized);
+}
+
+export function formatCurrency(amount: number): string {
+  return formatMoney(amount, "INR");
 }
 
 export function formatPercent(value: number): string {

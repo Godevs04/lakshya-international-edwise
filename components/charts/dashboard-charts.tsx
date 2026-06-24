@@ -3,8 +3,6 @@
 import { Fragment } from "react";
 import { useRouter } from "next/navigation";
 import {
-  PieChart,
-  Pie,
   Cell,
   ResponsiveContainer,
   AreaChart,
@@ -31,6 +29,12 @@ const tooltipStyle = {
   padding: "8px 12px",
 };
 
+const CHART_ANIMATION = {
+  isAnimationActive: true,
+  animationDuration: 900,
+  animationEasing: "ease-out" as const,
+};
+
 interface ChartCardProps {
   title: string;
   subtitle?: string;
@@ -52,41 +56,62 @@ function ChartCard({ title, subtitle, children, className }: ChartCardProps) {
   );
 }
 
-export function LoanStatusPieChart({ data }: { data: ChartDataPoint[] }) {
+export function LoanStatusBarChart({ data }: { data: ChartDataPoint[] }) {
   const router = useRouter();
+  const total = data.reduce((sum, entry) => sum + entry.value, 0);
+  const enriched = data.map((entry) => ({ ...entry, total }));
 
   return (
-    <ChartCard title="Loan Status" subtitle="Click a segment to view matching students">
+    <ChartCard title="Loan Status" subtitle="Click a bar to view matching students">
       <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={70}
-            outerRadius={110}
-            paddingAngle={3}
-            dataKey="value"
-            nameKey="name"
-            strokeWidth={0}
-            className="cursor-pointer"
-            onClick={(_, index) => {
-              const segment = data[index];
-              if (segment?.name) {
-                router.push(loanStatusChartHref(segment.name));
-              }
+        <BarChart data={enriched} margin={{ bottom: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            angle={-22}
+            textAnchor="end"
+            height={56}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <Tooltip
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const item = payload[0];
+              const value = Number(item.value ?? 0);
+              const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
+              return (
+                <div style={tooltipStyle}>
+                  <p className="font-semibold">{item.payload?.name}</p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {value} ({pct}%)
+                  </p>
+                </div>
+              );
             }}
+          />
+          <Bar
+            dataKey="value"
+            radius={[8, 8, 0, 0]}
+            className="cursor-pointer"
+            onClick={(bar) => {
+              const name = (bar as ChartDataPoint).name;
+              if (name) router.push(loanStatusChartHref(name));
+            }}
+            {...CHART_ANIMATION}
           >
             {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+              <Cell key={`loan-status-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
             ))}
-          </Pie>
-          <Tooltip contentStyle={tooltipStyle} />
-          <Legend
-            wrapperStyle={{ fontSize: "12px", paddingTop: "16px" }}
-            iconType="circle"
-          />
-        </PieChart>
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </ChartCard>
   );
@@ -135,7 +160,7 @@ export function LoanAmountBarChart({ data }: { data: ChartDataPoint[] }) {
           <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill="url(#barGradient)" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="value" fill="url(#barGradient)" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -157,7 +182,7 @@ export function TopPartnersBarChart({ data }: { data: ChartDataPoint[] }) {
           <XAxis type="number" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill="url(#partnerGradient)" radius={[0, 8, 8, 0]} />
+          <Bar dataKey="value" fill="url(#partnerGradient)" radius={[0, 8, 8, 0]} {...CHART_ANIMATION} />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -173,7 +198,7 @@ export function ConversionFunnelChart({ data }: { data: ChartDataPoint[] }) {
           <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} angle={-30} textAnchor="end" height={70} />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill="#06B6D4" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="value" fill="#06B6D4" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -212,37 +237,36 @@ export function TrendLineChart({
   );
 }
 
-export function DemographicsPieChart({
+export function DemographicsBarChart({
   data,
   title,
 }: {
   data: ChartDataPoint[];
   title: string;
 }) {
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  const enriched = data.map((d) => ({ ...d, total }));
+  const total = data.reduce((sum, entry) => sum + entry.value, 0);
+  const enriched = data.map((entry) => ({ ...entry, total }));
 
   return (
-    <ChartCard title={title} subtitle="Hover segments for details">
+    <ChartCard title={title} subtitle={`${total.toLocaleString("en-IN")} total · hover bars for share`}>
       <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie
-            data={enriched}
-            cx="50%"
-            cy="46%"
-            innerRadius={58}
-            outerRadius={88}
-            paddingAngle={3}
-            dataKey="value"
-            nameKey="name"
-            strokeWidth={0}
-            isAnimationActive
-            animationDuration={800}
-          >
-            {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-            ))}
-          </Pie>
+        <BarChart data={enriched} layout="vertical" margin={{ left: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" horizontal={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <YAxis
+            dataKey="name"
+            type="category"
+            width={108}
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <Tooltip
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
@@ -251,7 +275,7 @@ export function DemographicsPieChart({
               const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
               return (
                 <div style={tooltipStyle}>
-                  <p className="font-semibold">{item.name}</p>
+                  <p className="font-semibold">{item.payload?.name}</p>
                   <p className="mt-0.5 text-muted-foreground">
                     {value} ({pct}%)
                   </p>
@@ -259,26 +283,12 @@ export function DemographicsPieChart({
               );
             }}
           />
-          <Legend
-            verticalAlign="bottom"
-            wrapperStyle={{ fontSize: "11px", paddingTop: "12px" }}
-            iconType="circle"
-            formatter={(value: string) => {
-              const item = data.find((d) => d.name === value);
-              const count = item?.value ?? 0;
-              const pct = total > 0 ? ((count / total) * 100).toFixed(0) : "0";
-              return `${value} — ${count} (${pct}%)`;
-            }}
-          />
-          <text x="50%" y="44%" textAnchor="middle" dominantBaseline="middle">
-            <tspan x="50%" className="fill-foreground text-2xl font-bold">
-              {total}
-            </tspan>
-            <tspan x="50%" dy="1.4em" className="fill-muted-foreground text-[11px]">
-              Total
-            </tspan>
-          </text>
-        </PieChart>
+          <Bar dataKey="value" radius={[0, 8, 8, 0]} {...CHART_ANIMATION}>
+            {data.map((_, index) => (
+              <Cell key={`demographics-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+            ))}
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </ChartCard>
   );
@@ -293,7 +303,7 @@ export function RevenueBarChart({ data }: { data: ChartDataPoint[] }) {
           <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill="#22C55E" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="value" fill="#22C55E" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>

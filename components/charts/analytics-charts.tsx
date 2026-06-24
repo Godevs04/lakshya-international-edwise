@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  PieChart,
-  Pie,
   Cell,
   ResponsiveContainer,
   AreaChart,
@@ -295,7 +293,7 @@ export function VisualFunnelChart({
   );
 }
 
-export function DemographicsDonutChart({
+export function DemographicsBarChart({
   data,
   title,
   subtitle,
@@ -311,10 +309,10 @@ export function DemographicsDonutChart({
   drillDownKind?: DrillDownKind;
 }) {
   const router = useRouter();
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  const enriched = data.map((d) => ({ ...d, total }));
+  const total = data.reduce((sum, entry) => sum + entry.value, 0);
+  const enriched = data.map((entry) => ({ ...entry, total }));
 
-  const handleSliceClick = useCallback(
+  const handleBarClick = useCallback(
     (point: ChartDataPoint) => {
       if (!drillDownKind) return;
       const href = analyticsChartPointHref(point, drillDownKind);
@@ -326,50 +324,45 @@ export function DemographicsDonutChart({
   return (
     <AnimatedChartCard
       title={title}
-      subtitle={drillDownKind ? drillSubtitle(subtitle) : subtitle}
+      subtitle={
+        drillDownKind
+          ? drillSubtitle(`${total.toLocaleString("en-IN")} total · ${subtitle ?? ""}`.trim())
+          : `${total.toLocaleString("en-IN")} total${subtitle ? ` · ${subtitle}` : ""}`
+      }
       delay={delay}
     >
       <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie
-            data={enriched}
-            cx="50%"
-            cy="46%"
-            innerRadius={58}
-            outerRadius={88}
-            paddingAngle={3}
+        <BarChart data={enriched} layout="vertical" margin={{ left: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" horizontal={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <YAxis
+            dataKey="name"
+            type="category"
+            width={108}
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip content={<CountTooltip unit={unit} />} />
+          <Bar
             dataKey="value"
-            nameKey="name"
-            strokeWidth={0}
+            name={unit}
+            radius={[0, 8, 8, 0]}
             className={drillDownKind ? "cursor-pointer" : undefined}
-            onClick={(_, index) => handleSliceClick(data[index])}
+            onClick={(bar) => handleBarClick(bar as ChartDataPoint)}
             {...CHART_ANIMATION}
           >
             {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+              <Cell key={`demographics-bar-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
             ))}
-          </Pie>
-          <Tooltip content={<CountTooltip unit={unit} />} />
-          <Legend
-            verticalAlign="bottom"
-            wrapperStyle={{ fontSize: "11px", paddingTop: "12px", lineHeight: "1.6" }}
-            iconType="circle"
-            formatter={(value: string) => {
-              const item = data.find((d) => d.name === value);
-              const count = item?.value ?? 0;
-              const pct = total > 0 ? ((count / total) * 100).toFixed(0) : "0";
-              return `${value} — ${count} (${pct}%)`;
-            }}
-          />
-          <text x="50%" y="44%" textAnchor="middle" dominantBaseline="middle">
-            <tspan x="50%" className="fill-foreground text-2xl font-bold">
-              {total}
-            </tspan>
-            <tspan x="50%" dy="1.4em" className="fill-muted-foreground text-[11px]">
-              Total
-            </tspan>
-          </text>
-        </PieChart>
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </AnimatedChartCard>
   );
@@ -623,15 +616,56 @@ export function LenderBarChart({ data, delay = 0 }: { data: ChartDataPoint[]; de
 }
 
 export function LoanRangeChart({ data, delay = 0 }: { data: ChartDataPoint[]; delay?: number }) {
+  const router = useRouter();
+  const total = data.reduce((sum, entry) => sum + entry.value, 0);
+  const enriched = data.map((entry) => ({ ...entry, total }));
+
   return (
-    <DemographicsDonutChart
-      data={data}
+    <AnimatedChartCard
       title="Loan Amount Range"
-      subtitle="Requested loan size distribution"
-      unit="applications"
+      subtitle={drillSubtitle(`${total.toLocaleString("en-IN")} applications · requested loan size distribution`)}
       delay={delay}
-      drillDownKind="loan"
-    />
+    >
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart data={enriched} margin={{ bottom: 8 }}>
+          <defs>
+            <linearGradient id="loanRangeGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#8B5CF6" />
+              <stop offset="100%" stopColor="#6D5EF7" />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 10, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            angle={-18}
+            textAnchor="end"
+            height={52}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <Tooltip content={<CountTooltip unit="applications" />} />
+          <Bar
+            dataKey="value"
+            name="Applications"
+            fill="url(#loanRangeGradient)"
+            radius={[8, 8, 0, 0]}
+            className="cursor-pointer"
+            onClick={(bar) => {
+              const href = analyticsChartPointHref(bar as ChartDataPoint, "loan");
+              if (href) router.push(href);
+            }}
+            {...CHART_ANIMATION}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </AnimatedChartCard>
   );
 }
 

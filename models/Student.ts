@@ -36,6 +36,51 @@ const NoteSchema = new Schema(
   { _id: true }
 );
 
+const LoanApplicationHistorySchema = new Schema(
+  {
+    action: {
+      type: String,
+      enum: ["added", "sent_to_bank", "status_updated", "rejected", "lender_changed"],
+      required: true,
+    },
+    status: { type: String },
+    note: { type: String },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    createdByName: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
+const LoanApplicationSchema = new Schema(
+  {
+    lenderId: { type: Schema.Types.ObjectId, ref: "Lender", required: true },
+    applicationStatus: {
+      type: String,
+      enum: [
+        "docs_pending",
+        "loggedin",
+        "sanctioned",
+        "pf_paid",
+        "pf_pending",
+        "disbursed",
+        "rejected",
+      ],
+      default: "docs_pending",
+    },
+    applicationNumber: { type: String, trim: true },
+    sentToBank: { type: Boolean, default: false },
+    sentToBankAt: { type: Date },
+    sentToBankByName: { type: String, trim: true },
+    rejectedAt: { type: Date },
+    rejectedByName: { type: String, trim: true },
+    rejectionNote: { type: String, trim: true },
+    isPrimary: { type: Boolean, default: false },
+    history: [LoanApplicationHistorySchema],
+  },
+  { timestamps: true }
+);
+
 export interface IStudent extends Document {
   studentId: string;
   photo?: string;
@@ -87,6 +132,30 @@ export interface IStudent extends Document {
   sentToBank?: boolean;
   sentToBankAt?: Date;
   sentToBankByName?: string;
+  loanApplications: Array<{
+    _id?: Types.ObjectId;
+    lenderId?: Types.ObjectId;
+    applicationStatus?: string;
+    applicationNumber?: string;
+    sentToBank?: boolean;
+    sentToBankAt?: Date;
+    sentToBankByName?: string;
+    rejectedAt?: Date;
+    rejectedByName?: string;
+    rejectionNote?: string;
+    isPrimary?: boolean;
+    history?: Array<{
+      _id?: Types.ObjectId;
+      action: string;
+      status?: string;
+      note?: string;
+      createdBy?: Types.ObjectId;
+      createdByName?: string;
+      createdAt?: Date;
+    }>;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }>;
   commissionPercentOverride?: number;
   commissionSettled: number;
   commissionSettlements: Array<{
@@ -199,6 +268,7 @@ const StudentSchema = new Schema<IStudent>(
     sentToBank: { type: Boolean, default: false },
     sentToBankAt: { type: Date },
     sentToBankByName: { type: String, trim: true },
+    loanApplications: [LoanApplicationSchema],
     commissionPercentOverride: { type: Number, min: 0, max: 100 },
     commissionSettled: { type: Number, default: 0, min: 0 },
     commissionSettlements: [

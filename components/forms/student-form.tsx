@@ -15,14 +15,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormSection } from "@/components/forms/form-section";
-import { LinkUrlField } from "@/components/forms/link-url-field";
-import { LENDER_SEEDS } from "@/lib/constants/lenders";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { APPLICATION_STATUS_OPTIONS } from "@/lib/constants/application-status";
 import {
   TARGET_COUNTRIES,
   TARGET_DEGREES,
   TARGET_INTAKES,
 } from "@/lib/constants/study-abroad";
+import { useLenderOptions } from "@/components/lenders/use-lender-options";
+import type { LenderOption } from "@/types";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
 import {
   AssigneeSelect,
@@ -38,6 +43,7 @@ interface PartnerOption {
 interface StudentFormProps {
   partners: PartnerOption[];
   assignableUsers?: AssigneeOption[];
+  lenderOptions?: LenderOption[];
   initialData?: Record<string, string | number | boolean | undefined>;
   studentId?: string;
   mode: "create" | "edit";
@@ -47,8 +53,16 @@ const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optio
 const AADHAAR_HINT = "Exactly 12 digits, numbers only.";
 const PAN_HINT = "Format: ABCDE1234F (5 letters, 4 digits, 1 letter).";
 
-export function StudentForm({ partners, assignableUsers = [], initialData, studentId, mode }: StudentFormProps) {
+export function StudentForm({
+  partners,
+  assignableUsers = [],
+  lenderOptions: initialLenderOptions,
+  initialData,
+  studentId,
+  mode,
+}: StudentFormProps) {
   const router = useRouter();
+  const { options: lenderOptions } = useLenderOptions(initialLenderOptions);
   const [loading, setLoading] = useState(false);
   const assigneeOptions = mergeAssigneeOptions(
     assignableUsers,
@@ -77,6 +91,20 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!partnerId) {
+      notify.error("Please select a consultancy");
+      return;
+    }
+    if (!targetCountry) {
+      notify.error("Please select a target country");
+      return;
+    }
+    if (!targetIntake) {
+      notify.error("Please select a target intake");
+      return;
+    }
+
     setLoading(true);
     const formData = new FormData(e.currentTarget);
 
@@ -102,8 +130,8 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <FormSection
-        title="Required Fields"
-        description="Fields marked with * must be completed before saving."
+        title="Required for onboarding"
+        description="Name, phone, consultancy, country, and intake are required. All other sections are optional."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -124,12 +152,76 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               required
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number *</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={13}
+              placeholder="9363047040"
+              defaultValue={initialData?.phone as string}
+              required
+            />
+            <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="partnerId">Consultancy *</Label>
+            <Select value={partnerId} onValueChange={(v) => setPartnerId(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select consultancy">
+                  {selectedPartner?.companyName}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {partners.map((p) => (
+                  <SelectItem key={p._id} value={p._id}>
+                    {p.companyName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="partnerId" value={partnerId} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="targetCountry">Target Country *</Label>
+            <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                {TARGET_COUNTRIES.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="targetCountry" value={targetCountry} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="targetIntake">Target Intake *</Label>
+            <Select value={targetIntake} onValueChange={(v) => setTargetIntake(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select intake" />
+              </SelectTrigger>
+              <SelectContent>
+                {TARGET_INTAKES.map((intake) => (
+                  <SelectItem key={intake} value={intake}>
+                    {intake}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="targetIntake" value={targetIntake} />
+          </div>
         </div>
       </FormSection>
 
       <FormSection
         title="Optional — Personal & Contact"
-        description="Additional profile details. All fields in this section are optional."
+        description="Additional profile details."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -151,19 +243,6 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
             <Input id="dob" name="dob" type="date" defaultValue={initialData?.dob as string} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              inputMode="numeric"
-              maxLength={13}
-              placeholder="9363047040"
-              defaultValue={initialData?.phone as string}
-            />
-            <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="whatsapp">WhatsApp</Label>
             <Input
               id="whatsapp"
@@ -179,15 +258,6 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" defaultValue={initialData?.email as string} />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <LinkUrlField
-              name="photo"
-              label="Photo link"
-              defaultValue={(initialData?.photo as string) ?? ""}
-              placeholder="https://drive.google.com/file/d/..."
-              hint="Paste a Google Drive or other HTTPS link to the student photo."
-            />
           </div>
         </div>
       </FormSection>
@@ -246,41 +316,9 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
 
       <FormSection
         title="Optional — Study Abroad & Assignment"
-        description="Target destination, intake, university, and lead assignment."
+        description="University, degree, and lead assignment."
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="targetCountry">Target Country</Label>
-            <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                {TARGET_COUNTRIES.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="targetCountry" value={targetCountry} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="targetIntake">Target Intake</Label>
-            <Select value={targetIntake} onValueChange={(v) => setTargetIntake(v ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select intake" />
-              </SelectTrigger>
-              <SelectContent>
-                {TARGET_INTAKES.map((intake) => (
-                  <SelectItem key={intake} value={intake}>
-                    {intake}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="targetIntake" value={targetIntake} />
-          </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="targetUniversity">Target University</Label>
             <Input
@@ -291,7 +329,7 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="targetDegree">Target Degree (optional)</Label>
+            <Label htmlFor="targetDegree">Target Degree</Label>
             <Select value={targetDegree} onValueChange={(v) => setTargetDegree(v ?? "")}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select degree" />
@@ -323,30 +361,42 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
 
       <FormSection
         title="Optional — Loan & Application"
-        description="Loan amounts, partner assignment, and application status."
+        description="Loan amounts and application status."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="loanRequested">Loan Amount Requested</Label>
-            <Input
-              id="loanRequested"
-              name="loanRequested"
-              type="number"
-              defaultValue={initialData?.loanRequested as number}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="loanCurrency">Loan Currency</Label>
-            <Select value={loanCurrency} onValueChange={(v) => setLoanCurrency(v ?? "INR")}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="INR">INR</SelectItem>
-                <SelectItem value="USD">USD</SelectItem>
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="loanCurrency" value={loanCurrency} />
+            <div className="rounded-lg border bg-white/50 p-3 dark:bg-white/5">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Loan amount requested
+              </p>
+              <div className="mt-1.5">
+                <InputGroup className="h-9">
+                  <InputGroupAddon align="inline-start" className="border-r border-input pr-1">
+                    <Select value={loanCurrency} onValueChange={(v) => setLoanCurrency(v ?? "INR")}>
+                      <SelectTrigger className="h-7 w-[4.75rem] border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INR">INR</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="loanRequested"
+                    name="loanRequested"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="Amount"
+                    className="text-sm"
+                    defaultValue={initialData?.loanRequested as number}
+                  />
+                </InputGroup>
+                <input type="hidden" name="loanCurrency" value={loanCurrency} />
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="lenderId">Lender</Label>
@@ -356,7 +406,7 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">None</SelectItem>
-                {LENDER_SEEDS.map((lender) => (
+                {lenderOptions.map((lender) => (
                   <SelectItem key={lender.slug} value={lender.slug}>
                     {lender.name}
                   </SelectItem>
@@ -384,6 +434,8 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               name="processingFee"
               type="number"
               min={0}
+              step="0.01"
+              inputMode="decimal"
               defaultValue={initialData?.processingFee as number}
             />
           </div>
@@ -394,6 +446,8 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               name="admissionRevenue"
               type="number"
               min={0}
+              step="0.01"
+              inputMode="decimal"
               defaultValue={initialData?.admissionRevenue as number}
             />
           </div>
@@ -403,6 +457,9 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               id="loanSanctioned"
               name="loanSanctioned"
               type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
               defaultValue={initialData?.loanSanctioned as number}
             />
           </div>
@@ -412,6 +469,9 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
               id="loanDisbursed"
               name="loanDisbursed"
               type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
               defaultValue={initialData?.loanDisbursed as number}
             />
           </div>
@@ -459,24 +519,6 @@ export function StudentForm({ partners, assignableUsers = [], initialData, stude
             <p className="text-xs text-muted-foreground">
               Optional custom rate for this student. Overrides the partner&apos;s default commission.
             </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="partnerId">Partner</Label>
-            <Select value={partnerId} onValueChange={(v) => setPartnerId(v ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select partner">
-                  {selectedPartner?.companyName}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {partners.map((p) => (
-                  <SelectItem key={p._id} value={p._id}>
-                    {p.companyName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="partnerId" value={partnerId} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="applicationStatus">Application Status</Label>

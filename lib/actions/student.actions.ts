@@ -41,6 +41,17 @@ import {
 } from "@/lib/constants/application-status";
 import { isStudentProfileVerified } from "@/lib/utils/student-profile";
 import { resolveLenderIdBySlug, resolveLenderNameBySlug, getLenderSlugById } from "@/lib/services/lender.service";
+import {
+  addStudentLoanApplication,
+  buildInitialLoanApplications,
+  ensureStudentLoanApplications,
+  rejectLoanApplication,
+  sendLoanApplicationToBank,
+  setStudentPrimaryLender,
+  syncPrimaryLoanApplicationFromStudentEdit,
+  updateLoanApplicationStatus,
+  toSessionUser,
+} from "@/lib/services/loan-application.service";
 import { endOfDay, startOfDay } from "date-fns";
 
 function resolveAssignedTo(
@@ -281,10 +292,22 @@ export async function getStudentById(id: string) {
   requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
   await connectDB();
+  const studentDoc = await Student.findById(id)
+    .populate("partnerId")
+    .populate("assignedTo", "name email")
+    .populate("loan.lenderId", "name slug")
+    .populate("loanApplications.lenderId", "name slug");
+
+  if (!studentDoc) return null;
+
+  const { ensureStudentLoanApplications } = await import("@/lib/services/loan-application.service");
+  await ensureStudentLoanApplications(studentDoc);
+
   const student = await Student.findById(id)
     .populate("partnerId")
     .populate("assignedTo", "name email")
     .populate("loan.lenderId", "name slug")
+    .populate("loanApplications.lenderId", "name slug")
     .lean();
   if (!student) return null;
 
@@ -355,6 +378,7 @@ export async function createStudentAction(
   const applicationStatus = (data.applicationStatus ?? "docs_pending") as ApplicationStatusId;
   const appFields = applyApplicationStatus(applicationStatus);
   const loan = await buildLoanFields(data, undefined, appFields.pfPaid);
+  const sessionUser = toSessionUser(user);
 
   const student = await Student.create({
     studentId,
@@ -382,6 +406,7 @@ export async function createStudentAction(
       year: data.year,
     },
     loan,
+    loanApplications: buildInitialLoanApplications(loan, appFields.applicationStatus, sessionUser),
     partnerId: data.partnerId || undefined,
     ...resolveAssignedTo(data.assignedToId),
     targetCountry: data.targetCountry?.trim() || undefined,
@@ -468,6 +493,11 @@ export async function createLeadAction(
         lenderId: lenderObjectId,
         bankName: lenderName,
       },
+      loanApplications: buildInitialLoanApplications(
+        { lenderId: lenderObjectId },
+        "docs_pending",
+        toSessionUser(user)
+      ),
       ...resolveAssignedTo(data.assignedToId),
       status: "new",
       timeline: [{ status: "new", createdByName: user?.name, createdAt: new Date() }],
@@ -492,6 +522,7 @@ export async function createLeadAction(
     });
 
     revalidatePath("/dashboard/students");
+    revalidatePath("/dashboard/admissions");
     revalidatePath("/dashboard/overview");
     revalidateInsightCaches();
     return { success: true, data: { id: student._id.toString() } };
@@ -516,6 +547,12 @@ export async function updateStudentAction(
   const data = parsed.data;
   const existing = await Student.findById(id);
   if (!existing) return { success: false, error: "Student not found" };
+
+  await ensureStudentLoanApplications(existing);
+
+  const previousLenderId = existing.loan?.lenderId;
+  const previousApplicationStatus = deriveApplicationStatus(existing);
+  const previousApplicationNumber = existing.loan?.applicationNumber;
 
   const photoError = getOptionalLinkUrlError(data.photo);
   if (photoError) {
@@ -594,6 +631,13 @@ export async function updateStudentAction(
     );
   }
 
+  await syncPrimaryLoanApplicationFromStudentEdit(existing, {
+    previousLenderId,
+    previousApplicationStatus,
+    previousApplicationNumber,
+    user: toSessionUser(user),
+  });
+
   await existing.save();
 
   await logActivity({
@@ -606,6 +650,7 @@ export async function updateStudentAction(
   });
 
   revalidatePath("/dashboard/students");
+  revalidatePath("/dashboard/admissions");
   revalidatePath(`/dashboard/students/${id}`);
   return { success: true };
   });
@@ -824,42 +869,18 @@ export async function markStudentSentToBankAction(
     requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
     await connectDB();
-    const student = await Student.findById(studentId);
+    const student = await Student.findById(studentId).populate("loanApplications.lenderId", "name slug");
     if (!student) return { success: false, error: "Student not found" };
-    if (student.sentToBank) {
-      return {
-        success: true,
-        data: {
-          sentToBank: true,
-          sentToBankAt: student.sentToBankAt?.toISOString() ?? new Date().toISOString(),
-          sentToBankByName: student.sentToBankByName,
-        },
-      };
+
+    await ensureStudentLoanApplications(student);
+
+    const primary =
+      student.loanApplications?.find((entry) => entry.isPrimary) ?? student.loanApplications?.[0];
+    if (!primary?._id) {
+      return { success: false, error: "Assign a lender before sending to bank" };
     }
 
-    const sentToBankAt = new Date();
-    const sentToBankByName = user?.name;
-
-    student.sentToBank = true;
-    student.sentToBankAt = sentToBankAt;
-    student.sentToBankByName = sentToBankByName;
-    student.timeline.push({
-      status: student.status,
-      note: "Application marked as sent to bank (internal)",
-      createdBy: user?.id ? new Types.ObjectId(user.id) : undefined,
-      createdByName: sentToBankByName,
-      createdAt: sentToBankAt,
-    });
-
-    await student.save();
-
-    const verified = await Student.findById(studentId).select("sentToBank sentToBankAt sentToBankByName").lean();
-    if (!verified?.sentToBank) {
-      return {
-        success: false,
-        error: "Send-to-bank status could not be saved. Restart the dev server and try again.",
-      };
-    }
+    const result = await sendLoanApplicationToBank(student, primary._id.toString(), toSessionUser(user));
 
     await logActivity({
       action: "student.sent_to_bank",
@@ -876,9 +897,153 @@ export async function markStudentSentToBankAction(
       success: true,
       data: {
         sentToBank: true,
-        sentToBankAt: sentToBankAt.toISOString(),
-        sentToBankByName,
+        sentToBankAt: result.sentToBankAt.toISOString(),
+        sentToBankByName: result.sentToBankByName,
       },
     };
+  });
+}
+
+export async function setStudentPrimaryLenderAction(
+  studentId: string,
+  lenderSlug: string
+): Promise<ActionResult> {
+  return runLoggedMutation("setStudentPrimaryLenderAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    await ensureStudentLoanApplications(student);
+    await setStudentPrimaryLender(student, lenderSlug, toSessionUser(user));
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  });
+}
+
+export async function addStudentLoanApplicationAction(
+  studentId: string,
+  lenderSlug: string
+): Promise<ActionResult> {
+  return runLoggedMutation("addStudentLoanApplicationAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    await ensureStudentLoanApplications(student);
+    try {
+      await addStudentLoanApplication(student, lenderSlug, toSessionUser(user));
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to add bank application",
+      };
+    }
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  });
+}
+
+export async function sendLoanApplicationToBankAction(
+  studentId: string,
+  applicationId: string
+): Promise<ActionResult<{ sentToBankAt: string; sentToBankByName?: string; lenderName?: string }>> {
+  return runLoggedMutation("sendLoanApplicationToBankAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId).populate("loanApplications.lenderId", "name slug");
+    if (!student) return { success: false, error: "Student not found" };
+
+    await ensureStudentLoanApplications(student);
+
+    try {
+      const result = await sendLoanApplicationToBank(student, applicationId, toSessionUser(user));
+      revalidatePath("/dashboard/students");
+      revalidatePath(`/dashboard/students/${studentId}`);
+      return {
+        success: true,
+        data: {
+          sentToBankAt: result.sentToBankAt.toISOString(),
+          sentToBankByName: result.sentToBankByName,
+          lenderName: result.lenderName,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to send application to bank",
+      };
+    }
+  });
+}
+
+export async function updateLoanApplicationStatusAction(
+  studentId: string,
+  applicationId: string,
+  applicationStatus: ApplicationStatusId
+): Promise<ActionResult> {
+  return runLoggedMutation("updateLoanApplicationStatusAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    await ensureStudentLoanApplications(student);
+
+    try {
+      await updateLoanApplicationStatus(student, applicationId, applicationStatus, toSessionUser(user));
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to update application status",
+      };
+    }
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  });
+}
+
+export async function rejectLoanApplicationAction(
+  studentId: string,
+  applicationId: string,
+  rejectionNote?: string
+): Promise<ActionResult> {
+  return runLoggedMutation("rejectLoanApplicationAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    await ensureStudentLoanApplications(student);
+
+    try {
+      await rejectLoanApplication(student, applicationId, toSessionUser(user), rejectionNote);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to record rejection",
+      };
+    }
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
   });
 }

@@ -9,6 +9,7 @@ import {
   buildImportTemplateLabelAliases,
   STUDENT_IMPORT_COLUMN_KEYS,
 } from "@/lib/utils/student-import-template";
+import { roundMoney } from "@/lib/utils/format";
 
 export const IMPORT_TEMPLATE_HEADERS = STUDENT_IMPORT_COLUMN_KEYS;
 
@@ -228,6 +229,13 @@ export function parseImportFile(
     .filter((row) => Object.values(row).some((value) => value.length > 0));
 }
 
+function parseImportMoney(value?: string): number | undefined {
+  if (!value?.trim()) return undefined;
+  const parsed = Number(value);
+  if (Number.isNaN(parsed)) return undefined;
+  return roundMoney(parsed);
+}
+
 export function mapRowToStudentInput(row: Record<string, string>): StudentInput {
   const lenderValue = row.lender || row.bankName || row.lenderId || undefined;
   const applicationStatus = resolveImportApplicationStatus(row);
@@ -236,7 +244,7 @@ export function mapRowToStudentInput(row: Record<string, string>): StudentInput 
   return {
     firstName: row.firstName ?? "",
     lastName: row.lastName ?? "",
-    phone: row.phone || undefined,
+    phone: row.phone || "",
     whatsapp: row.whatsapp || undefined,
     email: row.email || undefined,
     gender: (row.gender as StudentInput["gender"]) || undefined,
@@ -250,23 +258,23 @@ export function mapRowToStudentInput(row: Record<string, string>): StudentInput 
     college: row.college || undefined,
     course: row.course || undefined,
     year: row.year || undefined,
-    targetCountry: row.targetCountry || undefined,
-    targetIntake: row.targetIntake || undefined,
-    targetDegree: row.targetDegree || undefined,
+    targetCountry: row.targetCountry || "",
+    targetIntake: row.targetIntake || "",
+    targetDegree: row.targetDegree || "",
     targetUniversity: row.targetUniversity || undefined,
     loanCurrency: loanCurrency === "USD" || loanCurrency === "INR" ? loanCurrency : undefined,
-    loanRequested: row.loanRequested ? Number(row.loanRequested) : undefined,
-    loanSanctioned: row.loanSanctioned ? Number(row.loanSanctioned) : undefined,
-    loanDisbursed: row.loanDisbursed ? Number(row.loanDisbursed) : undefined,
-    interest: row.interest ? Number(row.interest) : undefined,
-    processingFee: row.processingFee ? Number(row.processingFee) : undefined,
+    loanRequested: parseImportMoney(row.loanRequested),
+    loanSanctioned: parseImportMoney(row.loanSanctioned),
+    loanDisbursed: parseImportMoney(row.loanDisbursed),
+    interest: row.interest ? roundMoney(Number(row.interest)) : undefined,
+    processingFee: parseImportMoney(row.processingFee),
     lenderId: lenderValue,
     bankName: row.bankName || undefined,
     applicationNumber: row.applicationNumber || undefined,
     applicationStatus,
-    partnerId: row.partnerId || undefined,
+    partnerId: row.partnerId || "",
     assignedToId: row.assignedToId || undefined,
-    admissionRevenue: row.admissionRevenue ? Number(row.admissionRevenue) : undefined,
+    admissionRevenue: parseImportMoney(row.admissionRevenue),
     status: (row.status as StudentInput["status"]) || undefined,
     remarks: row.remarks || undefined,
     photo: undefined,

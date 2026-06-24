@@ -27,8 +27,8 @@ const AnalyticsPartnersChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.AnalyticsPartnersChart),
   { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
 );
-const DemographicsDonutChart = dynamic(
-  () => import("@/components/charts/analytics-charts").then((m) => m.DemographicsDonutChart),
+const DemographicsBarChart = dynamic(
+  () => import("@/components/charts/analytics-charts").then((m) => m.DemographicsBarChart),
   { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
 );
 const LoanRangeChart = dynamic(
@@ -133,7 +133,7 @@ export default async function AnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {demographics.gender.length > 0 && (
-          <DemographicsDonutChart
+          <DemographicsBarChart
             data={demographics.gender}
             title="Gender Distribution"
             subtitle="Share of students by gender"
@@ -142,7 +142,7 @@ export default async function AnalyticsPage() {
           />
         )}
         {demographics.states.length > 0 && (
-          <DemographicsDonutChart
+          <DemographicsBarChart
             data={demographics.states}
             title="State Distribution"
             subtitle="Top states by student count"

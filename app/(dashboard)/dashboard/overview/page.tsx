@@ -5,6 +5,7 @@ import { getOverviewDashboardAction } from "@/lib/actions/dashboard.actions";
 import { requireAnyPagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { MetricCardsGrid, type MetricIconName } from "@/components/cards/metric-card";
+import type { MetricThemeKey } from "@/lib/design/metric-themes";
 import { GlassCard } from "@/components/cards/glass-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Timeline } from "@/components/ui/timeline";
@@ -18,8 +19,8 @@ import { Handshake } from "lucide-react";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 
-const LoanStatusPieChart = dynamic(
-  () => import("@/components/charts/dashboard-charts").then((m) => m.LoanStatusPieChart),
+const LoanStatusBarChart = dynamic(
+  () => import("@/components/charts/dashboard-charts").then((m) => m.LoanStatusBarChart),
   { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
 );
 const MonthlyStudentsAreaChart = dynamic(
@@ -40,6 +41,7 @@ function withTrend(
   value: string | number,
   icon: MetricIconName,
   trendInfo: MetricTrendInfo,
+  theme: MetricThemeKey,
   href?: string
 ) {
   return {
@@ -48,6 +50,7 @@ function withTrend(
     icon,
     trend: trendInfo.trend,
     trendUp: trendInfo.trendUp,
+    theme,
     href,
   };
 }
@@ -77,15 +80,15 @@ export default async function OverviewPage() {
   } = await getOverviewDashboardAction();
 
   const metricCards = [
-    withTrend("Total Students", metrics.totalStudents, "users", trends.totalStudents, "/dashboard/students"),
-    withTrend("New Students Today", metrics.newStudentsToday, "user-plus", trends.newStudentsToday, "/dashboard/students"),
-    withTrend("Partners", metrics.totalPartners, "handshake", trends.totalPartners, "/dashboard/partners"),
-    withTrend("Pending Applications", metrics.pendingApplications, "clock", trends.pendingApplications, "/dashboard/students?workflow=docs_pending"),
-    withTrend("Sanctioned", metrics.sanctioned, "check-circle", trends.sanctioned, "/dashboard/students?workflow=sanctioned"),
-    withTrend("Disbursed", metrics.disbursed, "banknote", trends.disbursed, "/dashboard/students?workflow=disbursed"),
-    withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected, "/dashboard/students?status=rejected"),
-    withTrend("Loan Amount", formatCurrency(metrics.totalLoanAmount), "indian-rupee", trends.totalLoanAmount),
-    withTrend("Today's Collection", formatCurrency(metrics.todaysCollection), "wallet", trends.todaysCollection),
+    withTrend("Total Students", metrics.totalStudents, "users", trends.totalStudents, "purple", "/dashboard/students"),
+    withTrend("New Students Today", metrics.newStudentsToday, "user-plus", trends.newStudentsToday, "blue", "/dashboard/students"),
+    withTrend("Partners", metrics.totalPartners, "handshake", trends.totalPartners, "cyan", "/dashboard/partners"),
+    withTrend("Pending Applications", metrics.pendingApplications, "clock", trends.pendingApplications, "amber", "/dashboard/students?workflow=docs_pending"),
+    withTrend("Sanctioned", metrics.sanctioned, "check-circle", trends.sanctioned, "orange", "/dashboard/students?workflow=sanctioned"),
+    withTrend("Disbursed", metrics.disbursed, "banknote", trends.disbursed, "green", "/dashboard/students?workflow=disbursed"),
+    withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected, "red", "/dashboard/students?status=rejected"),
+    withTrend("Loan Amount", formatCurrency(metrics.totalLoanAmount), "indian-rupee", trends.totalLoanAmount, "indigo"),
+    withTrend("Today's Collection", formatCurrency(metrics.todaysCollection), "wallet", trends.todaysCollection, "pink"),
   ];
 
   return (
@@ -100,7 +103,7 @@ export default async function OverviewPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {loanStatus.length > 0 ? (
-          <LoanStatusPieChart data={loanStatus} />
+          <LoanStatusBarChart data={loanStatus} />
         ) : (
           <GlassCard className="p-8"><EmptyState title="No loan data yet" description="Add students to see loan status distribution." /></GlassCard>
         )}

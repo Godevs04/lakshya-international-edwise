@@ -65,8 +65,8 @@ export const STUDENT_IMPORT_COLUMNS: StudentImportColumn[] = [
   { key: "college", label: "College / University", width: 24 },
   { key: "course", label: "Course", width: 16 },
   { key: "year", label: "Year of Study", width: 12 },
-  { key: "targetCountry", label: "Target Country", width: 18 },
-  { key: "targetIntake", label: "Target Intake", width: 22 },
+  { key: "targetCountry", label: "Target Country", required: true, width: 18 },
+  { key: "targetIntake", label: "Target Intake", required: true, width: 22 },
   { key: "targetDegree", label: "Target Degree", width: 16 },
   { key: "targetUniversity", label: "Target University", width: 26 },
   { key: "loanCurrency", label: "Loan Currency", width: 12 },
@@ -78,7 +78,7 @@ export const STUDENT_IMPORT_COLUMNS: StudentImportColumn[] = [
   { key: "lender", label: "Lender", width: 18 },
   { key: "applicationNumber", label: "Bank LAN", width: 18 },
   { key: "applicationStatus", label: "Application Status", width: 18 },
-  { key: "partnerCompanyName", label: "Partner Company", width: 20 },
+  { key: "partnerCompanyName", label: "Consultancy (Partner)", required: true, width: 22 },
   { key: "assigneeEmail", label: "Assignee Email", width: 24 },
   { key: "admissionRevenue", label: "Admission Revenue (INR)", width: 20 },
   { key: "remarks", label: "Remarks", width: 30 },
@@ -217,7 +217,7 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
     loanDisbursed: "650000",
     interest: "7.2",
     processingFee: "11000",
-    lender: "HDFC Credila",
+    lender: "Credila",
     applicationNumber: "HDFC-EDU-2026-8890",
     applicationStatus: "disbursed",
     partnerCompanyName: "Rooted",
@@ -266,7 +266,7 @@ const APPLICATION_STATUS_GUIDE = APPLICATION_STATUS_OPTIONS.map(
   (option) => option.value
 ).join(", ");
 
-const LENDER_GUIDE = LENDER_SEEDS.map((entry) => entry.name).join(", ");
+const LENDER_GUIDE = `${LENDER_SEEDS.map((entry) => entry.name).join(", ")} (plus any banks added on the Lenders page)`;
 
 const LEGACY_STATUS_GUIDE = STUDENT_STATUSES.join(", ");
 

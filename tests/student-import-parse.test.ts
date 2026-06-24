@@ -127,10 +127,12 @@ describe("student-import-parse", () => {
       firstName: "Arun",
       lastName: "Sharma",
       phone: "9876543210",
+      partnerId: "507f1f77bcf86cd799439011",
+      targetCountry: "United Kingdom",
+      targetIntake: "Fall 2026 (Aug - Sep)",
       loanRequested: "250000",
       lender: "Credila",
       applicationStatus: "sanctioned",
-      targetCountry: "United Kingdom",
       loanCurrency: "INR",
       processingFee: "10000",
     });

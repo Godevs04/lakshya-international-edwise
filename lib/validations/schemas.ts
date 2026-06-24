@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { roundMoney } from "@/lib/utils/format";
 import {
   isBlank,
   isValidAadhaar,
@@ -7,6 +8,8 @@ import {
   isValidPan,
   isValidPincode,
 } from "@/lib/validations/indian-fields";
+
+const optionalMoney = z.coerce.number().min(0).transform(roundMoney).optional();
 
 function refineIndianFields(
   data: {
@@ -102,7 +105,7 @@ export const studentSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   gender: z.enum(["male", "female", "other", ""]).optional(),
   dob: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string().min(1, "Phone number is required"),
   whatsapp: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   addressLine: z.string().optional(),
@@ -114,22 +117,22 @@ export const studentSchema = z.object({
   college: z.string().optional(),
   course: z.string().optional(),
   year: z.string().optional(),
-  loanRequested: z.coerce.number().min(0).optional(),
-  loanSanctioned: z.coerce.number().min(0).optional(),
-  loanDisbursed: z.coerce.number().min(0).optional(),
-  interest: z.coerce.number().min(0).max(100).optional(),
+  loanRequested: optionalMoney,
+  loanSanctioned: optionalMoney,
+  loanDisbursed: optionalMoney,
+  interest: z.coerce.number().min(0).max(100).transform(roundMoney).optional(),
   bankName: z.string().optional(),
   applicationNumber: z.string().max(50).optional(),
-  partnerId: z.string().optional(),
+  partnerId: z.string().min(1, "Consultancy is required"),
   assignedToId: z.string().optional().or(z.literal("")),
-  targetCountry: z.string().max(100).optional(),
-  targetIntake: z.string().max(100).optional(),
+  targetCountry: z.string().min(1, "Target country is required").max(100),
+  targetIntake: z.string().min(1, "Target intake is required").max(100),
   targetDegree: z.string().max(100).optional(),
   targetUniversity: z.string().max(200).optional(),
   loanCurrency: z.enum(["INR", "USD"]).optional(),
   lenderId: z.string().optional(),
-  roi: z.coerce.number().min(0).max(100).optional(),
-  processingFee: z.coerce.number().min(0).optional(),
+  roi: z.coerce.number().min(0).max(100).transform(roundMoney).optional(),
+  processingFee: optionalMoney,
   applicationStatus: z.enum([
     "docs_pending",
     "loggedin",
@@ -139,11 +142,12 @@ export const studentSchema = z.object({
     "disbursed",
     "rejected",
   ]).optional(),
-  admissionRevenue: z.coerce.number().min(0).optional(),
+  admissionRevenue: optionalMoney,
   commissionPercentOverride: z.coerce
     .number()
     .min(0, "Commission cannot be negative")
     .max(100, "Commission cannot exceed 100%")
+    .transform(roundMoney)
     .optional()
     .or(z.literal("")),
   status: z.enum([
@@ -154,6 +158,13 @@ export const studentSchema = z.object({
   photo: z.string().optional(),
 }).superRefine((data, ctx) => {
   refineIndianFields(data, ctx);
+  if (data.partnerId && !/^[a-f\d]{24}$/i.test(data.partnerId)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please select a valid consultancy",
+      path: ["partnerId"],
+    });
+  }
 });
 
 export const leadSchema = z.object({
@@ -163,7 +174,7 @@ export const leadSchema = z.object({
   targetIntake: z.string().max(100).optional(),
   targetCountry: z.string().max(100).optional(),
   targetUniversity: z.string().max(200).optional(),
-  admissionRevenue: z.coerce.number().min(0).optional(),
+  admissionRevenue: optionalMoney,
   assignedToId: z.string().optional(),
   lenderId: z.string().optional(),
 }).superRefine((data, ctx) => {
@@ -213,6 +224,7 @@ export const partnerSchema = z.object({
     .number()
     .min(0, "Commission cannot be negative")
     .max(100, "Commission cannot exceed 100%")
+    .transform(roundMoney)
     .optional(),
   accountName: z.string().optional(),
   accountNumber: z.string().optional(),
@@ -232,12 +244,12 @@ export const noteSchema = z.object({
 });
 
 export const commissionSettlementSchema = z.object({
-  amount: z.coerce.number().positive("Settlement amount must be greater than zero"),
+  amount: z.coerce.number().positive("Settlement amount must be greater than zero").transform(roundMoney),
   note: z.string().max(500).optional(),
 });
 
 export const studentCommissionSettlementSchema = z.object({
-  amount: z.coerce.number().positive("Settlement amount must be greater than zero"),
+  amount: z.coerce.number().positive("Settlement amount must be greater than zero").transform(roundMoney),
   note: z.string().max(500).optional(),
 });
 
@@ -246,6 +258,7 @@ export const studentCommissionRateSchema = z.object({
     .number()
     .min(0, "Commission cannot be negative")
     .max(100, "Commission cannot exceed 100%")
+    .transform(roundMoney)
     .optional()
     .or(z.literal("")),
 });
@@ -257,6 +270,23 @@ export const commissionLedgerFilterSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+export const createLenderSchema = z.object({
+  name: z.string().min(1, "Bank name is required").max(100),
+  slug: z.string().max(100).optional().or(z.literal("")),
+  logoUrl: z.string().optional().or(z.literal("")),
+  logoPublicId: z.string().optional().or(z.literal("")),
+  accentColor: z
+    .string()
+    .refine(
+      (value) => !value || /^#[0-9A-Fa-f]{6}$/.test(value),
+      "Accent must be a hex color like #004B8D"
+    )
+    .optional()
+    .or(z.literal("")),
+});
+
+export const updateLenderSchema = createLenderSchema;
 
 export const settingsSchema = z.object({
   companyName: z.string().min(1),

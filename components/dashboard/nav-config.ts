@@ -9,6 +9,7 @@ import {
   LineChart,
   Settings,
   Shield,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 import type { AppModules } from "@/types";
@@ -24,6 +25,7 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { href: "/dashboard/overview", label: "Overview", icon: LayoutDashboard, module: null, permission: null },
   { href: "/dashboard/students", label: "Students", icon: Users, module: "students", permission: null },
+  { href: "/dashboard/admissions", label: "Admission Details", icon: GraduationCap, module: "students", permission: null },
   { href: "/dashboard/partners", label: "Partners", icon: Handshake, module: "partners", permission: null },
   { href: "/dashboard/applications", label: "Applications", icon: FileText, module: "applications", permission: null },
   { href: "/dashboard/lenders", label: "Lenders", icon: Building2, module: "lenders", permission: null },

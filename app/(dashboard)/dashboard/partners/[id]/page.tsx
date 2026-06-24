@@ -5,7 +5,7 @@ import { GlassCard } from "@/components/cards/glass-card";
 import { PartnerCommissionSection } from "@/components/dashboard/partner-commission-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
-import { DemographicsPieChart } from "@/components/charts/dashboard-charts";
+import { DemographicsBarChart } from "@/components/charts/dashboard-charts";
 import { getPartnerById, getPartnerAnalytics, getPartnerCommissionLedgerAction } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
@@ -103,7 +103,7 @@ export default async function PartnerDetailPage({
       </GlassCard>
 
       {analytics?.statusCounts && analytics.statusCounts.length > 0 && (
-        <DemographicsPieChart
+        <DemographicsBarChart
           title="Student Status Distribution"
           data={analytics.statusCounts.map((s: { _id: string; count: number }) => ({
             name: s._id.replace(/_/g, " "),

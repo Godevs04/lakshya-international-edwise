@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
@@ -13,31 +13,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDateTime } from "@/lib/utils/format";
+import { Input } from "@/components/ui/input";
+import { formatDateTime, formatMoney } from "@/lib/utils/format";
 import {
   APPLICATION_STATUS_OPTIONS,
   getApplicationStatusLabel,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
 import {
-  markStudentSentToBankAction,
-  updateStudentApplicationStatusAction,
+  addStudentLoanApplicationAction,
+  rejectLoanApplicationAction,
+  sendLoanApplicationToBankAction,
+  setStudentPrimaryLenderAction,
+  updateLoanApplicationStatusAction,
 } from "@/lib/actions/student.actions";
+import { useLenderOptions } from "@/components/lenders/use-lender-options";
+import type { LenderOption } from "@/types";
+import {
+  getLoanApplicationHistoryLabel,
+  type LoanApplicationHistoryAction,
+  type LoanApplicationItem,
+} from "@/lib/constants/loan-application";
 import { LenderLogo } from "@/components/lenders/lender-logo";
-import { Send } from "lucide-react";
+import { History, Plus, Send, XCircle } from "lucide-react";
 
 interface StudentApplicationPanelProps {
   studentId: string;
   canWrite?: boolean;
-  applicationStatus: ApplicationStatusId;
-  sentToBank?: boolean;
-  sentToBankAt?: Date;
-  sentToBankByName?: string;
-  lenderName?: string;
-  lenderSlug?: string;
-  applicationNumber?: string;
-  latestRemark?: string;
-  loan?: {
+  loanApplications: LoanApplicationItem[];
+  loan?: {  
     requested?: number;
     sanctioned?: number;
     disbursed?: number;
@@ -47,18 +51,12 @@ interface StudentApplicationPanelProps {
     processingFee?: number;
     pfPaid?: boolean;
   };
-  onSentToBank?: (data: { sentToBankAt: Date; sentToBankByName?: string }) => void;
+  onBankActivity?: () => void;
+  lenderOptions?: LenderOption[];
 }
 
 function formatLoanAmount(amount: number, currency?: "INR" | "USD") {
-  if (currency === "USD") {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  }
-  return formatCurrency(amount);
+  return formatMoney(amount, currency ?? "INR");
 }
 
 function DetailItem({ label, value }: { label: string; value?: string | null }) {
@@ -70,24 +68,31 @@ function DetailItem({ label, value }: { label: string; value?: string | null }) 
   );
 }
 
-export function StudentApplicationPanel({
+function BankApplicationCard({
   studentId,
-  canWrite = false,
-  applicationStatus,
-  sentToBank,
-  sentToBankAt,
-  sentToBankByName,
-  lenderName,
-  lenderSlug,
-  applicationNumber,
-  latestRemark,
-  loan,
-  onSentToBank,
-}: StudentApplicationPanelProps) {
+  application,
+  canWrite,
+  onUpdated,
+  lenderLogo,
+  lenderAccent,
+}: {
+  studentId: string;
+  application: LoanApplicationItem;
+  canWrite: boolean;
+  onUpdated: () => void;
+  lenderLogo?: string;
+  lenderAccent?: string;
+}) {
   const router = useRouter();
-  const [status, setStatus] = useState<ApplicationStatusId>(applicationStatus);
+  const [status, setStatus] = useState<ApplicationStatusId>(application.applicationStatus);
   const [statusLoading, setStatusLoading] = useState(false);
   const [sendLoading, setSendLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
+  const [rejectNote, setRejectNote] = useState("");
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [sent, setSent] = useState(application.sentToBank);
+  const [sentAt, setSentAt] = useState(application.sentToBankAt);
+  const [sentBy, setSentBy] = useState(application.sentToBankByName);
 
   const statusItems = APPLICATION_STATUS_OPTIONS.map((option) => ({
     value: option.value,
@@ -97,12 +102,13 @@ export function StudentApplicationPanel({
   async function handleStatusChange(nextStatus: ApplicationStatusId) {
     setStatus(nextStatus);
     setStatusLoading(true);
-    const result = await updateStudentApplicationStatusAction(studentId, nextStatus);
+    const result = await updateLoanApplicationStatusAction(studentId, application._id, nextStatus);
     if (result.success) {
       notify.success("Application status updated");
+      onUpdated();
       router.refresh();
     } else {
-      setStatus(applicationStatus);
+      setStatus(application.applicationStatus);
       notify.error(result.error ?? "Failed to update application status");
     }
     setStatusLoading(false);
@@ -110,121 +116,370 @@ export function StudentApplicationPanel({
 
   async function handleSendToBank() {
     setSendLoading(true);
-    const result = await markStudentSentToBankAction(studentId);
+    const result = await sendLoanApplicationToBankAction(studentId, application._id);
     if (result.success && result.data) {
-      const sentAt = new Date(result.data.sentToBankAt);
-      onSentToBank?.({
-        sentToBankAt: sentAt,
-        sentToBankByName: result.data.sentToBankByName,
-      });
-      notify.success("Marked as sent to bank");
-      router.refresh();
-    } else if (result.success) {
-      onSentToBank?.({ sentToBankAt: new Date() });
-      notify.success("Marked as sent to bank");
+      setSent(true);
+      setSentAt(result.data.sentToBankAt);
+      setSentBy(result.data.sentToBankByName);
+      notify.success(`Sent to ${result.data.lenderName ?? application.lenderName ?? "bank"}`);
+      onUpdated();
       router.refresh();
     } else {
-      notify.error(result.error ?? "Failed to update send-to-bank status");
+      notify.error(result.error ?? "Failed to send application to bank");
     }
     setSendLoading(false);
+  }
+
+  async function handleReject() {
+    setRejectLoading(true);
+    const result = await rejectLoanApplicationAction(studentId, application._id, rejectNote);
+    if (result.success) {
+      setStatus("rejected");
+      setShowRejectForm(false);
+      setRejectNote("");
+      notify.success("Rejection recorded");
+      onUpdated();
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to record rejection");
+    }
+    setRejectLoading(false);
+  }
+
+  const sortedHistory = [...(application.history ?? [])].sort((a, b) => {
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
+  });
+
+  return (
+    <div className="rounded-xl border p-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex items-center gap-4">
+          <LenderLogo
+            slug={application.lenderSlug}
+            name={application.lenderName}
+            logo={lenderLogo}
+            accent={lenderAccent}
+            size="lg"
+          />
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="text-base font-bold">{application.lenderName ?? "Unknown lender"}</h4>
+              {application.isPrimary ? (
+                <Badge variant="outline" className="text-xs">
+                  Primary
+                </Badge>
+              ) : null}
+              {sent ? (
+                <Badge className="bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/15">
+                  Sent to bank
+                </Badge>
+              ) : null}
+              {application.applicationStatus === "rejected" ? (
+                <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/15">
+                  Rejected
+                </Badge>
+              ) : null}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {application.applicationNumber ? (
+                <Badge className="bg-[#1E3A8A] px-3 py-1 font-mono text-white hover:bg-[#1E3A8A]">
+                  LAN {application.applicationNumber}
+                </Badge>
+              ) : (
+                <Badge variant="outline">LAN not assigned</Badge>
+              )}
+            </div>
+            {sent && sentAt ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {sentBy ?? "Team"} · {formatDateTime(sentAt)}
+              </p>
+            ) : null}
+            {application.rejectedAt ? (
+              <p className="mt-1 text-xs text-destructive">
+                Rejected {formatDateTime(application.rejectedAt)}
+                {application.rejectedByName ? ` by ${application.rejectedByName}` : ""}
+                {application.rejectionNote ? ` — ${application.rejectionNote}` : ""}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        {canWrite ? (
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[220px]">
+            {!sent ? (
+              <Button
+                type="button"
+                onClick={handleSendToBank}
+                disabled={sendLoading}
+                className="w-full"
+              >
+                <Send className="mr-1.5 h-4 w-4" />
+                {sendLoading ? "Saving..." : "Send to Bank"}
+              </Button>
+            ) : null}
+            {application.applicationStatus !== "rejected" ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowRejectForm((current) => !current)}
+                className="w-full"
+              >
+                <XCircle className="mr-1.5 h-4 w-4" />
+                Mark rejected
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      {showRejectForm && canWrite ? (
+        <div className="mt-4 space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+          <Input
+            placeholder="Rejection reason (optional)"
+            value={rejectNote}
+            onChange={(event) => setRejectNote(event.target.value)}
+          />
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleReject}
+              disabled={rejectLoading}
+            >
+              {rejectLoading ? "Saving..." : "Confirm rejection"}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowRejectForm(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mt-4 grid gap-4 border-t pt-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Application history
+          </p>
+          {sortedHistory.length > 0 ? (
+            <ul className="space-y-2">
+              {sortedHistory.map((item, index) => (
+                <li
+                  key={item._id ?? `${item.action}-${index}`}
+                  className="rounded-lg border bg-muted/30 px-3 py-2 text-sm"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <History className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="font-medium">
+                      {getLoanApplicationHistoryLabel(item.action as LoanApplicationHistoryAction)}
+                    </span>
+                    {item.status ? (
+                      <Badge variant="outline" className="text-xs">
+                        {getApplicationStatusLabel(item.status)}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  {item.note ? (
+                    <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
+                  ) : null}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {item.createdByName ?? "Team"}
+                    {item.createdAt ? ` · ${formatDateTime(item.createdAt)}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No history yet</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Application Status
+          </p>
+          {canWrite ? (
+            <Select
+              value={status}
+              onValueChange={(value) => handleStatusChange(value as ApplicationStatusId)}
+              items={statusItems}
+            >
+              <SelectTrigger className="w-full" disabled={statusLoading}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {APPLICATION_STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm font-semibold">{getApplicationStatusLabel(status)}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function StudentApplicationPanel({
+  studentId,
+  canWrite = false,
+  loanApplications,
+  loan,
+  onBankActivity,
+  lenderOptions: initialLenderOptions,
+}: StudentApplicationPanelProps) {
+  const router = useRouter();
+  const { options: lenderOptions } = useLenderOptions(initialLenderOptions);
+  const [primaryLoading, setPrimaryLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+
+  const primaryApplication = useMemo(
+    () => loanApplications.find((entry) => entry.isPrimary) ?? loanApplications[0],
+    [loanApplications]
+  );
+
+  const usedLenderSlugs = useMemo(
+    () => new Set(loanApplications.map((entry) => entry.lenderSlug).filter(Boolean)),
+    [loanApplications]
+  );
+
+  const availableLenders = useMemo(
+    () => lenderOptions.filter((lender) => !usedLenderSlugs.has(lender.slug)),
+    [lenderOptions, usedLenderSlugs]
+  );
+
+  const lenderVisualsBySlug = useMemo(
+    () => new Map(lenderOptions.map((lender) => [lender.slug, lender])),
+    [lenderOptions]
+  );
+
+  async function handlePrimaryLenderChange(lenderSlug: string | null) {
+    if (!lenderSlug) return;
+    setPrimaryLoading(true);
+    const result = await setStudentPrimaryLenderAction(studentId, lenderSlug);
+    if (result.success) {
+      notify.success("Primary lender updated");
+      onBankActivity?.();
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to update primary lender");
+    }
+    setPrimaryLoading(false);
+  }
+
+  async function handleAddBank(lenderSlug: string | null) {
+    if (!lenderSlug) return;
+    setAddLoading(true);
+    const result = await addStudentLoanApplicationAction(studentId, lenderSlug);
+    if (result.success) {
+      notify.success("Bank application added");
+      onBankActivity?.();
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to add bank application");
+    }
+    setAddLoading(false);
   }
 
   return (
     <div className="space-y-4">
       <GlassCard className="p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-center gap-5">
-            <LenderLogo slug={lenderSlug} name={lenderName} size="xl" />
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Lender Application
-              </p>
-              <h3 className="mt-1 text-lg font-bold">{lenderName ?? "No lender assigned"}</h3>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {applicationNumber ? (
-                  <Badge className="bg-[#1E3A8A] px-3 py-1 font-mono text-white hover:bg-[#1E3A8A]">
-                    LAN {applicationNumber}
-                  </Badge>
-                ) : (
-                  <Badge variant="outline">LAN not assigned</Badge>
-                )}
-                {sentToBank ? (
-                  <Badge className="bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/15">
-                    Sent to bank
-                  </Badge>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          {canWrite ? (
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[220px]">
-              <Button
-                type="button"
-                onClick={handleSendToBank}
-                disabled={sendLoading || sentToBank}
-                className="w-full"
-              >
-                <Send className="mr-1.5 h-4 w-4" />
-                {sentToBank ? "Already sent to bank" : sendLoading ? "Saving..." : "Send to Bank"}
-              </Button>
-              {sentToBank && sentToBankAt ? (
-                <p className="text-xs text-muted-foreground">
-                  {sentToBankByName ?? "Team"} · {formatDateTime(sentToBankAt)}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-
-        {sentToBank ? (
-          <div className="mt-4 rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/10 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#16A34A]">
-              Bank submission recorded
-            </p>
-            <p className="mt-1 text-sm text-foreground">
-              This application was marked as sent to {lenderName ?? "the lender"}
-              {sentToBankAt ? ` on ${formatDateTime(sentToBankAt)}` : ""}
-              {sentToBankByName ? ` by ${sentToBankByName}` : ""}.
-            </p>
-          </div>
-        ) : null}
-
-        <div className="mt-5 grid gap-4 border-t pt-5 lg:grid-cols-[minmax(0,1fr)_220px]">
-          <div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2 lg:min-w-[260px]">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Latest Remarks
-            </p>
-            <p className="mt-2 text-sm leading-relaxed">
-              {latestRemark?.trim() ? latestRemark : "Not available"}
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Application Status
+              Primary lender
             </p>
             {canWrite ? (
               <Select
-                value={status}
-                onValueChange={(value) => handleStatusChange(value as ApplicationStatusId)}
-                items={statusItems}
+                value={primaryApplication?.lenderSlug ?? ""}
+                onValueChange={handlePrimaryLenderChange}
+                items={lenderOptions.map((lender) => ({
+                  value: lender.slug,
+                  label: lender.name,
+                }))}
               >
-                <SelectTrigger className="w-full" disabled={statusLoading}>
-                  <SelectValue />
+                <SelectTrigger className="w-full" disabled={primaryLoading}>
+                  <SelectValue placeholder="Select lender" />
                 </SelectTrigger>
                 <SelectContent>
-                  {APPLICATION_STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {lenderOptions.map((lender) => (
+                    <SelectItem key={lender.slug} value={lender.slug}>
+                      {lender.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             ) : (
-              <p className="text-sm font-semibold">{getApplicationStatusLabel(status)}</p>
+              <p className="text-sm font-semibold">
+                {primaryApplication?.lenderName ?? "No lender assigned"}
+              </p>
             )}
           </div>
+
+          {canWrite && availableLenders.length > 0 ? (
+            <div className="space-y-2 lg:min-w-[260px]">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Add parallel bank
+              </p>
+              <Select
+                value=""
+                onValueChange={handleAddBank}
+                items={availableLenders.map((lender) => ({
+                  value: lender.slug,
+                  label: lender.name,
+                }))}
+              >
+                <SelectTrigger className="w-full" disabled={addLoading}>
+                  <SelectValue placeholder={addLoading ? "Adding..." : "Select bank to add"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableLenders.map((lender) => (
+                    <SelectItem key={lender.slug} value={lender.slug}>
+                      <span className="flex items-center gap-2">
+                        <Plus className="h-3.5 w-3.5" />
+                        {lender.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-5 space-y-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Bank applications ({loanApplications.length})
+          </p>
+          {loanApplications.length > 0 ? (
+            loanApplications.map((application) => {
+              const visuals = application.lenderSlug
+                ? lenderVisualsBySlug.get(application.lenderSlug)
+                : undefined;
+              return (
+              <BankApplicationCard
+                key={application._id}
+                studentId={studentId}
+                application={application}
+                canWrite={canWrite}
+                onUpdated={() => onBankActivity?.()}
+                lenderLogo={visuals?.logo}
+                lenderAccent={visuals?.accent}
+              />
+            );
+            })
+          ) : (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+              Select a primary lender to start a loan application. You can send the same student to
+              multiple banks in parallel.
+            </div>
+          )}
         </div>
       </GlassCard>
 
@@ -235,7 +490,6 @@ export function StudentApplicationPanel({
             label="Loan amount requested"
             value={formatLoanAmount(loan?.requested ?? 0, loan?.currency)}
           />
-          <DetailItem label="Loan type" value="Education loan" />
           <DetailItem
             label="Sanctioned amount"
             value={formatLoanAmount(loan?.sanctioned ?? 0, loan?.currency)}
@@ -244,7 +498,6 @@ export function StudentApplicationPanel({
             label="Disbursed amount"
             value={formatLoanAmount(loan?.disbursed ?? 0, loan?.currency)}
           />
-          <DetailItem label="Currency" value={loan?.currency ?? "INR"} />
           <DetailItem
             label="ROI"
             value={loan?.roi != null && loan.roi > 0 ? `${loan.roi}%` : undefined}

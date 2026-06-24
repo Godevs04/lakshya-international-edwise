@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StudentForm } from "@/components/forms/student-form";
 import { getStudentForEdit, getAssignableUsers } from "@/lib/actions/student.actions";
+import { getLenderOptionsAction } from "@/lib/actions/lender.actions";
 import { getPartnersList } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getStudentPageAccess } from "@/lib/auth/page-access";
@@ -19,10 +20,11 @@ export default async function EditStudentPage({
   }
 
   const { id } = await params;
-  const [student, partners, assignableUsers] = await Promise.all([
+  const [student, partners, assignableUsers, lenderOptions] = await Promise.all([
     getStudentForEdit(id),
     getPartnersList(),
     getAssignableUsers(),
+    getLenderOptionsAction(),
   ]);
   if (!student) notFound();
 
@@ -34,6 +36,7 @@ export default async function EditStudentPage({
         studentId={id}
         partners={partners.map((p) => ({ _id: p._id.toString(), companyName: p.companyName }))}
         assignableUsers={assignableUsers.map((u) => ({ _id: u._id, name: u.name }))}
+        lenderOptions={lenderOptions}
         initialData={{
           firstName: student.firstName,
           lastName: student.lastName,

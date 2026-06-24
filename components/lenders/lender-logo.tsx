@@ -7,6 +7,8 @@ type LenderLogoSize = "sm" | "md" | "lg" | "xl";
 interface LenderLogoProps {
   slug?: string;
   name?: string;
+  logo?: string;
+  accent?: string;
   size?: LenderLogoSize;
   className?: string;
 }
@@ -44,8 +46,22 @@ const ICON_GLYPH: Record<LenderLogoSize, string> = {
   xl: "h-10 w-10",
 };
 
-export function LenderLogo({ slug, name, size = "md", className }: LenderLogoProps) {
-  const brand = getLenderBrand(slug, name);
+export function LenderLogo({
+  slug,
+  name,
+  logo,
+  accent,
+  size = "md",
+  className,
+}: LenderLogoProps) {
+  const seedBrand = getLenderBrand(slug, name);
+  const brand = logo
+    ? {
+        name: name ?? seedBrand?.name ?? slug ?? "Bank",
+        logo,
+        accent: accent ?? seedBrand?.accent ?? "#6D5EF7",
+      }
+    : seedBrand;
   const sizeStyle = SIZE_STYLES[size];
 
   if (brand?.logo) {
