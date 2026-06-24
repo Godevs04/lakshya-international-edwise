@@ -123,6 +123,9 @@ export interface ChartDataPoint {
   name: string;
   value: number;
   fill?: string;
+  key?: string;
+  loanMin?: number;
+  loanMax?: number;
 }
 
 export interface ActivityItem {
@@ -197,9 +200,11 @@ export interface TaskListItem {
   studentName?: string;
   assignedToId?: string;
   assignedToName?: string;
+  createdByName?: string;
   dueAt: Date;
   reminderAt?: Date;
   status: "open" | "done" | "cancelled";
+  isOverdue?: boolean;
   createdAt: Date;
 }
 

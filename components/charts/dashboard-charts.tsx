@@ -219,16 +219,65 @@ export function DemographicsPieChart({
   data: ChartDataPoint[];
   title: string;
 }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  const enriched = data.map((d) => ({ ...d, total }));
+
   return (
-    <ChartCard title={title}>
-      <ResponsiveContainer width="100%" height={260}>
+    <ChartCard title={title} subtitle="Hover segments for details">
+      <ResponsiveContainer width="100%" height={280}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" outerRadius={90} dataKey="value" nameKey="name" label strokeWidth={0}>
+          <Pie
+            data={enriched}
+            cx="50%"
+            cy="46%"
+            innerRadius={58}
+            outerRadius={88}
+            paddingAngle={3}
+            dataKey="value"
+            nameKey="name"
+            strokeWidth={0}
+            isAnimationActive
+            animationDuration={800}
+          >
             {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const item = payload[0];
+              const value = Number(item.value ?? 0);
+              const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
+              return (
+                <div style={tooltipStyle}>
+                  <p className="font-semibold">{item.name}</p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {value} ({pct}%)
+                  </p>
+                </div>
+              );
+            }}
+          />
+          <Legend
+            verticalAlign="bottom"
+            wrapperStyle={{ fontSize: "11px", paddingTop: "12px" }}
+            iconType="circle"
+            formatter={(value: string) => {
+              const item = data.find((d) => d.name === value);
+              const count = item?.value ?? 0;
+              const pct = total > 0 ? ((count / total) * 100).toFixed(0) : "0";
+              return `${value} — ${count} (${pct}%)`;
+            }}
+          />
+          <text x="50%" y="44%" textAnchor="middle" dominantBaseline="middle">
+            <tspan x="50%" className="fill-foreground text-2xl font-bold">
+              {total}
+            </tspan>
+            <tspan x="50%" dy="1.4em" className="fill-muted-foreground text-[11px]">
+              Total
+            </tspan>
+          </text>
         </PieChart>
       </ResponsiveContainer>
     </ChartCard>

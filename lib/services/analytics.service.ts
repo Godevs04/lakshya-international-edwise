@@ -2,28 +2,91 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import { subMonths, startOfDay, format } from "date-fns";
+import {
+  APPLICATION_STATUS_OPTIONS,
+} from "@/lib/constants/application-status";
+import { STUDENT_STATUS_CONFIG, type StudentStatus } from "@/lib/constants/statuses";
+
+const STUDENT_PIPELINE: StudentStatus[] = [
+  "new",
+  "contacted",
+  "documents_pending",
+  "submitted",
+  "under_verification",
+  "approved",
+  "sanctioned",
+  "disbursed",
+];
+
+function titleCase(value: string): string {
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export async function getAnalyticsSummary() {
+  await connectDB();
+  const [totalStudents, disbursed, disbursedAgg, activePartners, rejected] = await Promise.all([
+    Student.countDocuments(),
+    Student.countDocuments({ status: "disbursed" }),
+    Student.aggregate([
+      { $match: { status: "disbursed" } },
+      { $group: { _id: null, total: { $sum: { $ifNull: ["$loan.disbursed", 0] } } } },
+    ]),
+    Partner.countDocuments({ status: "active" }),
+    Student.countDocuments({ status: "rejected" }),
+  ]);
+
+  const totalDisbursedAmount = disbursedAgg[0]?.total ?? 0;
+  const conversionRate = totalStudents > 0 ? disbursed / totalStudents : 0;
+
+  return {
+    totalStudents,
+    disbursed,
+    rejected,
+    conversionRate,
+    totalDisbursedAmount,
+    activePartners,
+  };
+}
+
+export async function getApplicationPipelineFunnel() {
+  await connectDB();
+  const results = await Student.aggregate([
+    { $group: { _id: "$applicationStatus", count: { $sum: 1 } } },
+  ]);
+  const map = new Map(results.map((r) => [r._id, r.count]));
+
+  return APPLICATION_STATUS_OPTIONS.map((option) => ({
+    name: option.label,
+    value: map.get(option.value) ?? 0,
+    key: option.value,
+  }));
+}
 
 export async function getConversionFunnel() {
   await connectDB();
-  const statuses = [
-    "new",
-    "contacted",
-    "documents_pending",
-    "submitted",
-    "under_verification",
-    "approved",
-    "sanctioned",
-    "disbursed",
-    "rejected",
-  ];
   const results = await Student.aggregate([
     { $group: { _id: "$status", count: { $sum: 1 } } },
   ]);
   const map = new Map(results.map((r) => [r._id, r.count]));
-  return statuses.map((s) => ({
-    name: s.replace(/_/g, " "),
-    value: map.get(s) ?? 0,
+
+  const pipeline = STUDENT_PIPELINE.map((status) => ({
+    name: STUDENT_STATUS_CONFIG[status].label,
+    value: map.get(status) ?? 0,
+    key: status,
   }));
+
+  const rejected = map.get("rejected") ?? 0;
+  if (rejected > 0) {
+    pipeline.push({
+      name: STUDENT_STATUS_CONFIG.rejected.label,
+      value: rejected,
+      key: "rejected",
+    });
+  }
+
+  return pipeline;
 }
 
 export async function getMonthlyRevenue() {
@@ -65,6 +128,8 @@ export async function getLoanDistribution() {
       value: await Student.countDocuments({
         "loan.requested": { $gte: range.min, $lt: range.max === Infinity ? 999999999 : range.max },
       }),
+      loanMin: range.min,
+      loanMax: range.max === Infinity ? undefined : range.max - 1,
     }))
   );
   return results;
@@ -88,10 +153,39 @@ export async function getStudentDemographics() {
     ]),
   ]);
   return {
-    gender: gender.map((g) => ({ name: g._id || "Unknown", value: g.value })),
-    states: states.map((s) => ({ name: s._id, value: s.value })),
-    courses: courses.map((c) => ({ name: c._id, value: c.value })),
+    gender: gender.map((g) => ({
+      name: g._id ? titleCase(String(g._id)) : "Unknown",
+      value: g.value,
+      key: g._id ? String(g._id) : "unknown",
+    })),
+    states: states.map((s) => ({ name: s._id, value: s.value, key: s._id })),
+    courses: courses.map((c) => ({ name: c._id, value: c.value, key: c._id })),
   };
+}
+
+export async function getLenderDistribution() {
+  await connectDB();
+  const results = await Student.aggregate([
+    { $match: { "loan.lenderId": { $exists: true, $ne: null } } },
+    { $group: { _id: "$loan.lenderId", value: { $sum: 1 } } },
+    { $sort: { value: -1 } },
+    { $limit: 8 },
+    {
+      $lookup: {
+        from: "lenders",
+        localField: "_id",
+        foreignField: "_id",
+        as: "lender",
+      },
+    },
+    { $unwind: { path: "$lender", preserveNullAndEmptyArrays: false } },
+  ]);
+
+  return results.map((r) => ({
+    name: r.lender.name as string,
+    value: r.value as number,
+    key: r.lender.slug as string,
+  }));
 }
 
 export async function getPartnerPerformance() {

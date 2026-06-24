@@ -140,6 +140,7 @@ export async function getStudents(params: {
   state?: string;
   college?: string;
   course?: string;
+  gender?: string;
   bank?: string;
   mine?: boolean;
 }): Promise<PaginatedResult<StudentListItem>> {
@@ -185,6 +186,7 @@ export async function getStudents(params: {
   if (params.state) filter["address.state"] = toSafeRegExp(params.state);
   if (params.college) filter["education.college"] = toSafeRegExp(params.college);
   if (params.course) filter["education.course"] = toSafeRegExp(params.course);
+  if (params.gender) filter.gender = params.gender;
   if (params.bank) filter["loan.bankName"] = toSafeRegExp(params.bank);
   if (params.dateFrom || params.dateTo) {
     const createdAt: Record<string, Date> = {};

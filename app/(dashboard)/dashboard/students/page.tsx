@@ -34,6 +34,7 @@ function parseFilters(
     state: params.state,
     college: params.college,
     course: params.course,
+    gender: params.gender,
   };
 }
 
@@ -67,6 +68,7 @@ export default async function StudentsPage({
       state: params.state,
       college: params.college,
       course: params.course,
+      gender: params.gender,
       mine: params.mine === "1",
     }),
     getPartnersList(),

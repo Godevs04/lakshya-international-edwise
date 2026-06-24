@@ -159,10 +159,13 @@ export function Topbar({
                 </span>
               )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[min(calc(100vw-2rem),20rem)] rounded-2xl border-[#6D5EF7]/10 bg-white/95 backdrop-blur-xl">
+            <DropdownMenuContent
+              align="end"
+              className="w-[min(calc(100vw-2rem),20rem)] rounded-2xl border-border bg-popover/95 text-popover-foreground shadow-lg backdrop-blur-xl"
+            >
               <DropdownMenuGroup>
                 <div className="flex items-center justify-between px-2 py-1.5">
-                  <DropdownMenuLabel className="p-0 font-semibold">
+                  <DropdownMenuLabel className="p-0 font-semibold text-foreground">
                     Notifications
                   </DropdownMenuLabel>
                   {unreadCount > 0 && (
@@ -213,11 +216,14 @@ export function Topbar({
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="hidden h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:inline-flex sm:h-10 sm:w-10 dark:bg-white/5">
+            <DropdownMenuTrigger className="relative hidden h-9 w-9 items-center justify-center rounded-full border border-[#6D5EF7]/10 bg-white/60 backdrop-blur-xl transition-all hover:bg-[#6D5EF7]/8 sm:inline-flex sm:h-10 sm:w-10 dark:bg-white/5">
               <Sun className="h-4 w-4 rotate-0 scale-100 text-muted-foreground transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 text-muted-foreground transition-all dark:rotate-0 dark:scale-100" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-2xl border-[#6D5EF7]/10 bg-white/95 backdrop-blur-xl">
+            <DropdownMenuContent
+              align="end"
+              className="rounded-2xl border-border bg-popover/95 text-popover-foreground shadow-lg backdrop-blur-xl"
+            >
               <DropdownMenuItem onClick={() => setTheme("light")} className="rounded-xl">
                 <Sun className="mr-2 h-4 w-4" /> Light
               </DropdownMenuItem>
@@ -239,9 +245,12 @@ export function Topbar({
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl border-[#6D5EF7]/10 bg-white/95 backdrop-blur-xl">
+            <DropdownMenuContent
+              align="end"
+              className="w-56 rounded-2xl border-border bg-popover/95 text-popover-foreground shadow-lg backdrop-blur-xl"
+            >
               <DropdownMenuGroup>
-                <DropdownMenuLabel>
+                <DropdownMenuLabel className="text-foreground">
                   <div className="flex flex-col">
                     <span className="font-semibold">{user?.name}</span>
                     <span className="text-xs font-normal text-muted-foreground">

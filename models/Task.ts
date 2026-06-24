@@ -41,6 +41,11 @@ const TaskSchema = new Schema<ITask>(
 
 TaskSchema.index({ assignedTo: 1, status: 1, dueAt: 1 });
 TaskSchema.index({ dueAt: 1, status: 1 });
+TaskSchema.index({ reminderAt: 1, status: 1, reminderSentAt: 1 });
+
+if (process.env.NODE_ENV !== "production" && mongoose.models.Task) {
+  delete mongoose.models.Task;
+}
 
 export const Task: Model<ITask> =
   mongoose.models.Task ?? mongoose.model<ITask>("Task", TaskSchema);
