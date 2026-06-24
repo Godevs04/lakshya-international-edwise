@@ -10,6 +10,10 @@ import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { taskSchema, updateTaskSchema } from "@/lib/validations/schemas";
 import { logActivity } from "@/lib/services/activity.service";
+import { createNotification } from "@/lib/services/notification.service";
+import { sendTaskAssignedEmail } from "@/lib/services/email.service";
+import { getAuthUrl } from "@/lib/config/env";
+import { User } from "@/models/User";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 import type { ActionResult, PaginatedResult, TaskListItem } from "@/types";
 
@@ -38,11 +42,97 @@ async function resolveTaskStudentId(
   return student?._id ?? null;
 }
 
+async function notifyTaskAssignee(params: {
+  assigneeId: string;
+  title: string;
+  dueAt: Date;
+  assignedById?: string;
+  assignedByName?: string;
+  studentId?: string;
+  isReassignment?: boolean;
+}) {
+  if (params.assignedById && params.assigneeId === params.assignedById) {
+    return;
+  }
+
+  const assignee = await User.findOne({ _id: params.assigneeId, status: "active" })
+    .select("_id email name")
+    .lean();
+  if (!assignee) return;
+
+  const link = params.studentId
+    ? `/dashboard/students/${params.studentId}`
+    : "/dashboard/tasks?status=open&mine=1";
+
+  await createNotification({
+    userId: assignee._id,
+    type: "info",
+    title: params.isReassignment ? `Task reassigned: ${params.title}` : `New task: ${params.title}`,
+    body: params.assignedByName
+      ? `${params.assignedByName} assigned this to you. Due ${params.dueAt.toLocaleString("en-IN")}.`
+      : `Due ${params.dueAt.toLocaleString("en-IN")}.`,
+    link,
+  });
+
+  if (assignee.email) {
+    const authUrl = getAuthUrl();
+    await sendTaskAssignedEmail({
+      email: assignee.email,
+      name: assignee.name,
+      taskTitle: params.title,
+      assignedByName: params.assignedByName,
+      dueAt: params.dueAt,
+      taskUrl: `${authUrl}${link}`,
+    });
+  }
+}
+
+export async function getTaskSummary(): Promise<{
+  myOpen: number;
+  overdue: number;
+  dueToday: number;
+}> {
+  return runLoggedQuery(
+    "getTaskSummary",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+
+      await connectDB();
+      const now = new Date();
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(now);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const userId = user?.id && isObjectId(user.id) ? toObjectId(user.id) : null;
+      const openFilter = { status: "open" as const };
+
+      const [myOpen, overdue, dueToday] = await Promise.all([
+        userId
+          ? Task.countDocuments({ ...openFilter, assignedTo: userId })
+          : Promise.resolve(0),
+        Task.countDocuments({ ...openFilter, dueAt: { $lt: now } }),
+        Task.countDocuments({
+          ...openFilter,
+          dueAt: { $gte: startOfDay, $lte: endOfDay },
+        }),
+      ]);
+
+      return { myOpen, overdue, dueToday };
+    },
+    { myOpen: 0, overdue: 0, dueToday: 0 }
+  );
+}
+
 export async function getTasks(params: {
   page?: number;
   pageSize?: number;
   status?: string;
   mine?: boolean;
+  overdue?: boolean;
+  dueToday?: boolean;
+  assigneeId?: string;
 }): Promise<PaginatedResult<TaskListItem>> {
   return runLoggedQuery("getTasks", async () => {
     const user = await getSessionUser();
@@ -54,8 +144,27 @@ export async function getTasks(params: {
     const skip = (page - 1) * pageSize;
 
     const filter: Record<string, unknown> = {};
+    const now = new Date();
+
     if (params.status) filter.status = params.status;
-    if (params.mine && user?.id) filter.assignedTo = new Types.ObjectId(user.id);
+    if (params.mine && user?.id && isObjectId(user.id)) {
+      filter.assignedTo = toObjectId(user.id);
+    }
+    if (params.assigneeId && isObjectId(params.assigneeId)) {
+      filter.assignedTo = toObjectId(params.assigneeId);
+    }
+    if (params.overdue) {
+      filter.status = "open";
+      filter.dueAt = { $lt: now };
+    }
+    if (params.dueToday) {
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(now);
+      endOfDay.setHours(23, 59, 59, 999);
+      filter.status = "open";
+      filter.dueAt = { $gte: startOfDay, $lte: endOfDay };
+    }
 
     const [data, total] = await Promise.all([
       Task.find(filter)
@@ -88,9 +197,11 @@ export async function getTasks(params: {
             : undefined,
           assignedToId: (task.assignedTo as { _id?: Types.ObjectId } | null)?._id?.toString(),
           assignedToName: (task.assignedTo as { name?: string } | null)?.name,
+          createdByName: task.metadata?.createdByName,
           dueAt: task.dueAt,
           reminderAt: task.reminderAt,
           status: task.status,
+          isOverdue: task.status === "open" && task.dueAt < now,
           createdAt: task.createdAt,
         };
       }),
@@ -149,6 +260,15 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
       userName: user?.name,
     });
 
+    await notifyTaskAssignee({
+      assigneeId: assignedToId,
+      title: data.title.trim(),
+      dueAt: task.dueAt,
+      assignedById: user?.id,
+      assignedByName: user?.name,
+      studentId: studentObjectId?.toString(),
+    });
+
     revalidatePath("/dashboard/tasks");
     return { success: true, data: { id: task._id.toString() } };
   });
@@ -201,6 +321,9 @@ export async function updateTaskAction(formData: FormData): Promise<ActionResult
       return { success: false, error: "Linked student not found. Use a student ID (e.g. STU-001) or profile ID." };
     }
 
+    const previousAssigneeId = existing.assignedTo?.toString();
+    const previousReminderAt = existing.reminderAt?.getTime();
+
     existing.title = data.title.trim();
     existing.description = data.description?.trim() || undefined;
     if (studentObjectId) {
@@ -210,8 +333,24 @@ export async function updateTaskAction(formData: FormData): Promise<ActionResult
     }
     existing.assignedTo = toObjectId(assignedToId);
     existing.dueAt = new Date(data.dueAt);
-    existing.reminderAt = data.reminderAt?.trim() ? new Date(data.reminderAt) : undefined;
+    const nextReminderAt = data.reminderAt?.trim() ? new Date(data.reminderAt) : undefined;
+    existing.reminderAt = nextReminderAt;
+    if (nextReminderAt?.getTime() !== previousReminderAt) {
+      existing.set("reminderSentAt", undefined);
+    }
     await existing.save();
+
+    if (previousAssigneeId !== assignedToId) {
+      await notifyTaskAssignee({
+        assigneeId: assignedToId,
+        title: data.title.trim(),
+        dueAt: existing.dueAt,
+        assignedById: user?.id,
+        assignedByName: user?.name,
+        studentId: studentObjectId?.toString(),
+        isReassignment: true,
+      });
+    }
 
     await logActivity({
       action: "task.updated",
@@ -221,6 +360,42 @@ export async function updateTaskAction(formData: FormData): Promise<ActionResult
       userId: user?.id,
       userName: user?.name,
     });
+
+    revalidatePath("/dashboard/tasks");
+    return { success: true };
+  });
+}
+
+export async function assignTaskToMeAction(taskId: string): Promise<ActionResult> {
+  return runLoggedMutation("assignTaskToMeAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    if (!user?.id || !isObjectId(user.id)) {
+      return { success: false, error: "Invalid session" };
+    }
+
+    await connectDB();
+    const task = await Task.findById(taskId);
+    if (!task) return { success: false, error: "Task not found" };
+    if (task.status !== "open") {
+      return { success: false, error: "Only open tasks can be reassigned" };
+    }
+
+    const previousAssigneeId = task.assignedTo?.toString();
+    task.assignedTo = toObjectId(user.id);
+    await task.save();
+
+    if (previousAssigneeId !== user.id) {
+      await notifyTaskAssignee({
+        assigneeId: user.id,
+        title: task.title,
+        dueAt: task.dueAt,
+        assignedById: user.id,
+        assignedByName: user.name,
+        studentId: task.studentId?.toString(),
+        isReassignment: true,
+      });
+    }
 
     revalidatePath("/dashboard/tasks");
     return { success: true };

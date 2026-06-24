@@ -25,40 +25,40 @@ import {
 import { createLeadAction } from "@/lib/actions/student.actions";
 import { AssigneeSelect } from "@/components/forms/assignee-select";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
-import { useLenderOptions } from "@/components/lenders/use-lender-options";
-import { UserPlus } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 
 interface AssigneeOption {
   _id: string;
   name: string;
 }
 
-interface QuickAddLeadSheetProps {
+interface AddAdmissionSheetProps {
   assignableUsers: AssigneeOption[];
 }
 
-export function QuickAddLeadSheet({ assignableUsers }: QuickAddLeadSheetProps) {
+export function AddAdmissionSheet({ assignableUsers }: AddAdmissionSheetProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [targetCountry, setTargetCountry] = useState("");
   const [targetIntake, setTargetIntake] = useState("");
   const [assignedToId, setAssignedToId] = useState("");
-  const [lenderId, setLenderId] = useState("");
-  const { options: lenderOptions } = useLenderOptions();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(event.currentTarget);
     const result = await createLeadAction(formData);
     if (result.success) {
-      notify.success("Lead created");
+      notify.success("Admission lead added");
       setOpen(false);
-      router.push(`/dashboard/students/${result.data?.id}`);
+      setTargetCountry("");
+      setTargetIntake("");
+      setAssignedToId("");
+      (event.target as HTMLFormElement).reset();
       router.refresh();
     } else {
-      notify.error(result.error ?? "Failed to create lead");
+      notify.error(result.error ?? "Failed to add admission");
     }
     setLoading(false);
   }
@@ -67,39 +67,46 @@ export function QuickAddLeadSheet({ assignableUsers }: QuickAddLeadSheetProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="outline" size="sm">
-            <UserPlus className="mr-1.5 h-4 w-4" />
-            Quick Add Lead
+          <Button size="sm">
+            <GraduationCap className="mr-1.5 h-4 w-4" />
+            Add Admission
           </Button>
         }
       />
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Quick Add Lead</SheetTitle>
+          <SheetTitle>Add Admission</SheetTitle>
           <SheetDescription>
-            Capture a minimal lead profile. You can complete the full profile later.
+            Capture admission details for a new lead. Link to the full student profile anytime from the list.
           </SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="lead-firstName">First Name *</Label>
-              <Input id="lead-firstName" name="firstName" required />
+              <Label htmlFor="admission-firstName">Student first name *</Label>
+              <Input id="admission-firstName" name="firstName" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lead-lastName">Last Name *</Label>
-              <Input id="lead-lastName" name="lastName" required />
+              <Label htmlFor="admission-lastName">Student last name *</Label>
+              <Input id="admission-lastName" name="lastName" required />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-phone">Phone</Label>
-            <Input id="lead-phone" name="phone" type="tel" inputMode="numeric" maxLength={13} />
+            <Label htmlFor="admission-phone">Number</Label>
+            <Input
+              id="admission-phone"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={13}
+              placeholder="9363047040"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-targetCountry">Target Country</Label>
+            <Label htmlFor="admission-targetCountry">Country</Label>
             <Select value={targetCountry} onValueChange={(value) => setTargetCountry(value ?? "")}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select country" />
@@ -116,7 +123,7 @@ export function QuickAddLeadSheet({ assignableUsers }: QuickAddLeadSheetProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-targetIntake">Target Intake</Label>
+            <Label htmlFor="admission-targetIntake">Intake</Label>
             <Select value={targetIntake} onValueChange={(value) => setTargetIntake(value ?? "")}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select intake" />
@@ -133,19 +140,27 @@ export function QuickAddLeadSheet({ assignableUsers }: QuickAddLeadSheetProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-targetUniversity">Target University</Label>
-            <Input id="lead-targetUniversity" name="targetUniversity" />
+            <Label htmlFor="admission-targetUniversity">University</Label>
+            <Input id="admission-targetUniversity" name="targetUniversity" placeholder="e.g. University of Melbourne" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-admissionRevenue">Admission Revenue</Label>
-            <Input id="lead-admissionRevenue" name="admissionRevenue" type="number" min={0} step="0.01" inputMode="decimal" />
+            <Label htmlFor="admission-admissionRevenue">Revenue</Label>
+            <Input
+              id="admission-admissionRevenue"
+              name="admissionRevenue"
+              type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
+              placeholder="0.00"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-assignedToId">Lead assigned to</Label>
+            <Label htmlFor="admission-assignedToId">Assigned to</Label>
             <AssigneeSelect
-              id="lead-assignedToId"
+              id="admission-assignedToId"
               users={assignableUsers}
               value={assignedToId}
               onValueChange={setAssignedToId}
@@ -155,27 +170,9 @@ export function QuickAddLeadSheet({ assignableUsers }: QuickAddLeadSheetProps) {
             <input type="hidden" name="assignedToId" value={assignedToId} />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="lead-lenderId">Lender</Label>
-            <Select value={lenderId} onValueChange={(value) => setLenderId(value ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select lender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">None</SelectItem>
-                {lenderOptions.map((lender) => (
-                  <SelectItem key={lender.slug} value={lender.slug}>
-                    {lender.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="lenderId" value={lenderId} />
-          </div>
-
           <SheetFooter className="px-0">
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Creating..." : "Create Lead"}
+              {loading ? "Saving..." : "Save Admission"}
             </Button>
           </SheetFooter>
         </form>

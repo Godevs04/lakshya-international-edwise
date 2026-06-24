@@ -241,3 +241,98 @@ export async function sendFollowUpReminderEmail(params: {
     }),
   });
 }
+
+export async function sendTaskReminderEmail(params: {
+  email: string;
+  name: string;
+  taskTitle: string;
+  taskDescription?: string;
+  dueAt: Date;
+  studentName?: string;
+  studentCode?: string;
+  taskUrl: string;
+}): Promise<boolean> {
+  const company = await getEmailBranding();
+  const dueLabel = params.dueAt.toLocaleString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const detail = params.taskDescription?.trim()
+    ? escapeHtml(params.taskDescription)
+    : `Due ${escapeHtml(dueLabel)}`;
+
+  const studentLine =
+    params.studentName && params.studentCode
+      ? `<strong>${escapeHtml(params.studentName)}</strong> (${escapeHtml(params.studentCode)})<br/>`
+      : params.studentName
+        ? `<strong>${escapeHtml(params.studentName)}</strong><br/>`
+        : "";
+
+  const bodyHtml = `
+    ${renderGreeting(params.name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      Reminder for your assigned task <strong>${escapeHtml(params.taskTitle)}</strong>.
+    </p>
+    ${renderInfoBox(`${studentLine}${detail}`)}
+    ${emailButton(params.taskUrl, "Open Task")}
+    ${renderLinkFallback(params.taskUrl)}
+    ${renderMutedNote("This reminder was sent automatically by your CRM task scheduler.")}`;
+
+  return sendEmail({
+    to: params.email,
+    subject: `Task Reminder — ${params.taskTitle}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `Reminder: ${params.taskTitle}`,
+      title: "Task Reminder",
+      subtitle: dueLabel,
+      bodyHtml,
+    }),
+  });
+}
+
+export async function sendTaskAssignedEmail(params: {
+  email: string;
+  name: string;
+  taskTitle: string;
+  assignedByName?: string;
+  dueAt: Date;
+  taskUrl: string;
+}): Promise<boolean> {
+  const company = await getEmailBranding();
+  const dueLabel = params.dueAt.toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const bodyHtml = `
+    ${renderGreeting(params.name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      ${params.assignedByName ? `<strong>${escapeHtml(params.assignedByName)}</strong> assigned you a task:` : "You have been assigned a new task:"}
+      <strong>${escapeHtml(params.taskTitle)}</strong>
+    </p>
+    ${renderInfoBox(`Due: ${escapeHtml(dueLabel)}`)}
+    ${emailButton(params.taskUrl, "View Tasks")}
+    ${renderLinkFallback(params.taskUrl)}
+    ${renderMutedNote("You will receive a separate reminder if a reminder time was set on this task.")}`;
+
+  return sendEmail({
+    to: params.email,
+    subject: `New Task — ${params.taskTitle}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `New task: ${params.taskTitle}`,
+      title: "Task Assigned",
+      subtitle: dueLabel,
+      bodyHtml,
+    }),
+  });
+}

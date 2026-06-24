@@ -16,6 +16,7 @@ export interface StudentListFilters {
   state?: string;
   college?: string;
   course?: string;
+  gender?: string;
 }
 
 const FILTER_KEYS: (keyof StudentListFilters)[] = [
@@ -36,6 +37,7 @@ const FILTER_KEYS: (keyof StudentListFilters)[] = [
   "state",
   "college",
   "course",
+  "gender",
 ];
 
 export function buildStudentListQuery(
@@ -66,6 +68,7 @@ export function countActiveAdvancedFilters(filters: StudentListFilters): number 
     "state",
     "college",
     "course",
+    "gender",
     "status",
     "lenderId",
   ];

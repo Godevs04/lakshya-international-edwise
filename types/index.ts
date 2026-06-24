@@ -123,6 +123,9 @@ export interface ChartDataPoint {
   name: string;
   value: number;
   fill?: string;
+  key?: string;
+  loanMin?: number;
+  loanMax?: number;
 }
 
 export interface ActivityItem {
@@ -163,6 +166,20 @@ export interface StudentListItem {
   createdAt: Date;
 }
 
+export interface AdmissionListItem {
+  _id: string;
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  targetCountry?: string;
+  targetIntake?: string;
+  targetUniversity?: string;
+  admissionRevenue?: number;
+  recordType?: "lead" | "student";
+  createdAt: Date;
+}
+
 export interface PartnerListItem {
   _id: string;
   companyName: string;
@@ -197,9 +214,11 @@ export interface TaskListItem {
   studentName?: string;
   assignedToId?: string;
   assignedToName?: string;
+  createdByName?: string;
   dueAt: Date;
   reminderAt?: Date;
   status: "open" | "done" | "cancelled";
+  isOverdue?: boolean;
   createdAt: Date;
 }
 
@@ -207,7 +226,17 @@ export interface LenderListItem {
   _id: string;
   name: string;
   slug: string;
+  logo?: string;
+  accent?: string;
   applicationCount: number;
+  isSeed?: boolean;
+}
+
+export interface LenderOption {
+  slug: string;
+  name: string;
+  logo?: string;
+  accent?: string;
 }
 
 export interface PaginatedResult<T> {

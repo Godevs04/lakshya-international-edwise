@@ -18,6 +18,9 @@ import {
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/cards/glass-card";
 import { KPI_GRADIENTS } from "@/lib/design/tokens";
+import { METRIC_THEMES, type MetricThemeKey } from "@/lib/design/metric-themes";
+
+export type { MetricThemeKey };
 
 export const METRIC_ICONS = {
   users: Users,
@@ -78,6 +81,7 @@ interface MetricCardProps {
   trend?: string;
   trendUp?: boolean;
   index?: number;
+  theme?: MetricThemeKey;
   className?: string;
   href?: string;
 }
@@ -89,18 +93,22 @@ export function MetricCard({
   trend,
   trendUp = true,
   index = 0,
+  theme,
   className,
   href,
 }: MetricCardProps) {
   const Icon: LucideIcon = METRIC_ICONS[icon];
-  const gradient = KPI_GRADIENTS[index % KPI_GRADIENTS.length];
+  const palette = theme ? METRIC_THEMES[theme] : null;
+  const gradient = palette?.gradient ?? KPI_GRADIENTS[index % KPI_GRADIENTS.length];
   const formatted =
     typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
-  const sparkColor = gradient.includes("#6D5EF7") ? "#6D5EF7" :
+  const sparkColor = palette?.spark ?? (
+    gradient.includes("#6D5EF7") ? "#6D5EF7" :
     gradient.includes("#3B82F6") ? "#3B82F6" :
     gradient.includes("#22C55E") ? "#22C55E" :
     gradient.includes("#F59E0B") ? "#F59E0B" :
-    gradient.includes("#EC4899") ? "#EC4899" : "#06B6D4";
+    gradient.includes("#EC4899") ? "#EC4899" : "#06B6D4"
+  );
 
   const card = (
     <GlassCard hover className={cn("p-5", href && "cursor-pointer", className)}>
@@ -152,6 +160,7 @@ interface MetricCardsGridProps {
     icon: MetricIconName;
     trend?: string;
     trendUp?: boolean;
+    theme?: MetricThemeKey;
     href?: string;
   }>;
 }

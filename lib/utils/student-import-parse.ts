@@ -1,9 +1,15 @@
 import * as XLSX from "xlsx";
 import type { StudentInput } from "@/lib/validations/schemas";
 import {
+  APPLICATION_STATUS_VALUES,
+  type ApplicationStatusId,
+} from "@/lib/constants/application-status";
+import type { StudentStatus } from "@/lib/constants/statuses";
+import {
   buildImportTemplateLabelAliases,
   STUDENT_IMPORT_COLUMN_KEYS,
 } from "@/lib/utils/student-import-template";
+import { roundMoney } from "@/lib/utils/format";
 
 export const IMPORT_TEMPLATE_HEADERS = STUDENT_IMPORT_COLUMN_KEYS;
 
@@ -23,6 +29,12 @@ const HEADER_ALIASES: Record<string, string> = {
   "pan number": "pan",
   "college / university": "college",
   "year of study": "year",
+  "target country": "targetCountry",
+  "target intake": "targetIntake",
+  "target degree": "targetDegree",
+  "target university": "targetUniversity",
+  loancurrency: "loanCurrency",
+  "loan currency": "loanCurrency",
   loanrequested: "loanRequested",
   "loan requested": "loanRequested",
   "loan requested (inr)": "loanRequested",
@@ -33,17 +45,30 @@ const HEADER_ALIASES: Record<string, string> = {
   "loan disbursed": "loanDisbursed",
   "loan disbursed (inr)": "loanDisbursed",
   "interest rate (%)": "interest",
-  bankname: "bankName",
-  "bank name": "bankName",
+  processingfee: "processingFee",
+  "processing fee": "processingFee",
+  "processing fee (inr)": "processingFee",
+  lender: "lender",
+  "lender name": "lender",
+  bankname: "lender",
+  "bank name": "lender",
   applicationnumber: "applicationNumber",
   "application number": "applicationNumber",
   "bank lan": "applicationNumber",
   lan: "applicationNumber",
   "loan application number": "applicationNumber",
+  applicationstatus: "applicationStatus",
+  "application status": "applicationStatus",
   partnercompanyname: "partnerCompanyName",
   "partner company name": "partnerCompanyName",
   "partner company": "partnerCompanyName",
   partner: "partnerCompanyName",
+  assigneeemail: "assigneeEmail",
+  "assignee email": "assigneeEmail",
+  "assigned to email": "assigneeEmail",
+  admissionrevenue: "admissionRevenue",
+  "admission revenue": "admissionRevenue",
+  "admission revenue (inr)": "admissionRevenue",
   phone: "phone",
   whatsapp: "whatsapp",
   email: "email",
@@ -63,6 +88,14 @@ const HEADER_ALIASES: Record<string, string> = {
 
 const TEMPLATE_LABEL_ALIASES = buildImportTemplateLabelAliases();
 
+const LEGACY_STATUS_TO_APPLICATION: Partial<Record<StudentStatus, ApplicationStatusId>> = {
+  documents_pending: "docs_pending",
+  submitted: "loggedin",
+  sanctioned: "sanctioned",
+  disbursed: "disbursed",
+  rejected: "rejected",
+};
+
 function normalizeHeader(header: string): string {
   const trimmed = header.trim().replace(/\s*\*+\s*$/, "");
   const lower = trimmed.toLowerCase();
@@ -73,6 +106,33 @@ function normalizeHeader(header: string): string {
     return TEMPLATE_LABEL_ALIASES[lower];
   }
   return HEADER_ALIASES[lower] ?? trimmed;
+}
+
+function normalizeApplicationStatus(value?: string): ApplicationStatusId | undefined {
+  const trimmed = value?.trim().toLowerCase().replace(/\s+/g, "_");
+  if (!trimmed) return undefined;
+  if (APPLICATION_STATUS_VALUES.includes(trimmed as ApplicationStatusId)) {
+    return trimmed as ApplicationStatusId;
+  }
+  if (trimmed === "logged_in") return "loggedin";
+  if (trimmed === "docs_pending" || trimmed === "documents_pending") return "docs_pending";
+  if (trimmed === "pf_paid") return "pf_paid";
+  if (trimmed === "pf_pending") return "pf_pending";
+  return undefined;
+}
+
+export function resolveImportApplicationStatus(
+  row: Record<string, string>
+): ApplicationStatusId {
+  const fromColumn = normalizeApplicationStatus(row.applicationStatus);
+  if (fromColumn) return fromColumn;
+
+  const legacyStatus = row.status?.trim() as StudentStatus | undefined;
+  if (legacyStatus && LEGACY_STATUS_TO_APPLICATION[legacyStatus]) {
+    return LEGACY_STATUS_TO_APPLICATION[legacyStatus]!;
+  }
+
+  return "docs_pending";
 }
 
 const DATE_FIELD_KEYS = new Set<string>(["dob"]);
@@ -169,11 +229,22 @@ export function parseImportFile(
     .filter((row) => Object.values(row).some((value) => value.length > 0));
 }
 
+function parseImportMoney(value?: string): number | undefined {
+  if (!value?.trim()) return undefined;
+  const parsed = Number(value);
+  if (Number.isNaN(parsed)) return undefined;
+  return roundMoney(parsed);
+}
+
 export function mapRowToStudentInput(row: Record<string, string>): StudentInput {
+  const lenderValue = row.lender || row.bankName || row.lenderId || undefined;
+  const applicationStatus = resolveImportApplicationStatus(row);
+  const loanCurrency = row.loanCurrency?.trim().toUpperCase();
+
   return {
     firstName: row.firstName ?? "",
     lastName: row.lastName ?? "",
-    phone: row.phone || undefined,
+    phone: row.phone || "",
     whatsapp: row.whatsapp || undefined,
     email: row.email || undefined,
     gender: (row.gender as StudentInput["gender"]) || undefined,
@@ -187,15 +258,24 @@ export function mapRowToStudentInput(row: Record<string, string>): StudentInput 
     college: row.college || undefined,
     course: row.course || undefined,
     year: row.year || undefined,
-    loanRequested: row.loanRequested ? Number(row.loanRequested) : undefined,
-    loanSanctioned: row.loanSanctioned ? Number(row.loanSanctioned) : undefined,
-    loanDisbursed: row.loanDisbursed ? Number(row.loanDisbursed) : undefined,
-    interest: row.interest ? Number(row.interest) : undefined,
+    targetCountry: row.targetCountry || "",
+    targetIntake: row.targetIntake || "",
+    targetDegree: row.targetDegree || "",
+    targetUniversity: row.targetUniversity || undefined,
+    loanCurrency: loanCurrency === "USD" || loanCurrency === "INR" ? loanCurrency : undefined,
+    loanRequested: parseImportMoney(row.loanRequested),
+    loanSanctioned: parseImportMoney(row.loanSanctioned),
+    loanDisbursed: parseImportMoney(row.loanDisbursed),
+    interest: row.interest ? roundMoney(Number(row.interest)) : undefined,
+    processingFee: parseImportMoney(row.processingFee),
+    lenderId: lenderValue,
     bankName: row.bankName || undefined,
     applicationNumber: row.applicationNumber || undefined,
-    partnerId: row.partnerId || undefined,
-    status: (row.status as StudentInput["status"]) || "new",
-    applicationStatus: "docs_pending",
+    applicationStatus,
+    partnerId: row.partnerId || "",
+    assignedToId: row.assignedToId || undefined,
+    admissionRevenue: parseImportMoney(row.admissionRevenue),
+    status: (row.status as StudentInput["status"]) || undefined,
     remarks: row.remarks || undefined,
     photo: undefined,
   };

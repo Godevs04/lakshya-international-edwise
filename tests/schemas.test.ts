@@ -31,11 +31,23 @@ describe("schemas", () => {
     const result = studentSchema.safeParse({
       firstName: "Test",
       lastName: "Student",
+      phone: "9876543210",
+      partnerId: "507f1f77bcf86cd799439011",
+      targetCountry: "Canada",
+      targetIntake: "Fall 2026 (Aug - Sep)",
       interest: "7.8",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.interest).toBe(7.8);
     }
+  });
+
+  it("requires onboarding fields on student payload", () => {
+    const result = studentSchema.safeParse({
+      firstName: "Test",
+      lastName: "Student",
+    });
+    expect(result.success).toBe(false);
   });
 });

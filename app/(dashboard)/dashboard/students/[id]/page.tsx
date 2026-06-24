@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StudentDetailView } from "@/components/dashboard/student-detail";
 import { getStudentById } from "@/lib/actions/student.actions";
 import { deriveApplicationStatus } from "@/lib/constants/application-status";
+import { serializeLoanApplications } from "@/lib/services/loan-application.service";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getStudentPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -86,6 +87,7 @@ export default async function StudentDetailPage({
   if (!student) notFound();
 
   const lender = resolveLender(student.loan?.lenderId);
+  const loanApplications = serializeLoanApplications(student);
 
   return (
     <div className="space-y-6">
@@ -126,6 +128,7 @@ export default async function StudentDetailPage({
                 lenderId: lender,
               }
             : undefined,
+          loanApplications,
           documents: student.documents?.map((d) => ({
             _id: d._id?.toString(),
             name: d.name,

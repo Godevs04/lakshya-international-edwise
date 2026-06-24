@@ -21,7 +21,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { STUDENT_STATUSES } from "@/lib/constants/statuses";
-import { LENDER_SEEDS } from "@/lib/constants/lenders";
+import { useLenderOptions } from "@/components/lenders/use-lender-options";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import type { StudentListFilters } from "@/lib/utils/student-list-filters";
 import { countActiveAdvancedFilters } from "@/lib/utils/student-list-filters";
@@ -98,6 +98,7 @@ export function StudentAdvancedSearch({
 }: StudentAdvancedSearchProps) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<AdvancedSearchDraft>(() => createDraftFromFilters(filters));
+  const { options: lenderOptions } = useLenderOptions();
 
   const activeCount = countActiveAdvancedFilters(filters);
 
@@ -297,7 +298,8 @@ export function StudentAdvancedSearch({
                 id="loanMin"
                 type="number"
                 min={0}
-                inputMode="numeric"
+                step="0.01"
+                inputMode="decimal"
                 value={draft.loanMin}
                 onChange={(e) => updateDraft("loanMin", e.target.value)}
                 placeholder="0"
@@ -309,7 +311,8 @@ export function StudentAdvancedSearch({
                 id="loanMax"
                 type="number"
                 min={0}
-                inputMode="numeric"
+                step="0.01"
+                inputMode="decimal"
                 value={draft.loanMax}
                 onChange={(e) => updateDraft("loanMax", e.target.value)}
                 placeholder="1000000"
@@ -333,7 +336,7 @@ export function StudentAdvancedSearch({
                 onValueChange={(value) => updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))}
                 items={[
                   { value: ANY_OPTION, label: "Any lender" },
-                  ...LENDER_SEEDS.map((lender) => ({ value: lender.slug, label: lender.name })),
+                  ...lenderOptions.map((lender) => ({ value: lender.slug, label: lender.name })),
                 ]}
               >
                 <SelectTrigger id="lenderId" className="w-full">
@@ -341,7 +344,7 @@ export function StudentAdvancedSearch({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ANY_OPTION}>Any lender</SelectItem>
-                  {LENDER_SEEDS.map((lender) => (
+                  {lenderOptions.map((lender) => (
                     <SelectItem key={lender.slug} value={lender.slug}>
                       {lender.name}
                     </SelectItem>

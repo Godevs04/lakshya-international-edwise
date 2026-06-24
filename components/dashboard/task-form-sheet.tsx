@@ -28,16 +28,30 @@ interface AssigneeOption {
 interface TaskFormSheetProps {
   assignableUsers: AssigneeOption[];
   canWrite?: boolean;
+  currentUserId?: string;
 }
 
-export function TaskFormSheet({ assignableUsers, canWrite = true }: TaskFormSheetProps) {
+export function TaskFormSheet({
+  assignableUsers,
+  canWrite = true,
+  currentUserId,
+}: TaskFormSheetProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [assignedToId, setAssignedToId] = useState("");
 
   function resetForm() {
-    setAssignedToId("");
+    setAssignedToId(currentUserId ?? "");
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setAssignedToId(currentUserId ?? "");
+    } else {
+      resetForm();
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -74,13 +88,7 @@ export function TaskFormSheet({ assignableUsers, canWrite = true }: TaskFormShee
   if (!canWrite) return null;
 
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen);
-        if (!nextOpen) resetForm();
-      }}
-    >
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger
         render={
           <Button>
@@ -93,7 +101,8 @@ export function TaskFormSheet({ assignableUsers, canWrite = true }: TaskFormShee
         <SheetHeader className="border-b border-[#6D5EF7]/10">
           <SheetTitle>New Task</SheetTitle>
           <SheetDescription>
-            Schedule a follow-up with date, reminder, and assignee.
+            Assign to a team member — they will get an in-app notification and email when the
+            reminder time is reached.
           </SheetDescription>
         </SheetHeader>
 
@@ -133,13 +142,26 @@ export function TaskFormSheet({ assignableUsers, canWrite = true }: TaskFormShee
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="task-assignedToId">Assigned to</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="task-assignedToId">Assigned to</Label>
+              {currentUserId ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-[#6D5EF7]"
+                  onClick={() => setAssignedToId(currentUserId)}
+                >
+                  Assign to me
+                </Button>
+              ) : null}
+            </div>
             <AssigneeSelect
               id="task-assignedToId"
               users={assignableUsers}
               value={assignedToId}
               onValueChange={setAssignedToId}
-              placeholder="Select assignee"
+              placeholder="Select team member"
             />
             <input type="hidden" name="assignedToId" value={assignedToId} />
           </div>

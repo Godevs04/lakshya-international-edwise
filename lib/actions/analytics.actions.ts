@@ -12,6 +12,9 @@ import {
   getHeatMapData,
   getPartnerPerformance,
   getLoanDistribution,
+  getAnalyticsSummary,
+  getApplicationPipelineFunnel,
+  getLenderDistribution,
 } from "@/lib/services/analytics.service";
 import { CACHE_TAGS } from "@/lib/cache/revalidate";
 import { runLogged } from "@/lib/action-utils";
@@ -53,22 +56,61 @@ const cachedLoanDistribution = unstable_cache(getLoanDistribution, ["analytics-l
   tags: [CACHE_TAGS.analytics],
 });
 
+const cachedAnalyticsSummary = unstable_cache(getAnalyticsSummary, ["analytics-summary"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.analytics],
+});
+
+const cachedApplicationPipeline = unstable_cache(getApplicationPipelineFunnel, ["analytics-app-pipeline"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.analytics],
+});
+
+const cachedLenderDistribution = unstable_cache(getLenderDistribution, ["analytics-lenders"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.analytics],
+});
+
 export async function getAnalyticsDashboardAction() {
   return runLogged("getAnalyticsDashboardAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.ANALYTICS_READ);
 
-    const [funnel, trends, revenue, demographics, heatmap, partners, loanDist] =
-      await Promise.all([
-        cachedConversionFunnel(),
-        cachedTrendData(),
-        cachedMonthlyRevenue(),
-        cachedStudentDemographics(),
-        cachedHeatMapData(),
-        cachedPartnerPerformance(),
-        cachedLoanDistribution(),
-      ]);
+    const [
+      summary,
+      appPipeline,
+      funnel,
+      trends,
+      revenue,
+      demographics,
+      heatmap,
+      partners,
+      loanDist,
+      lenderDist,
+    ] = await Promise.all([
+      cachedAnalyticsSummary(),
+      cachedApplicationPipeline(),
+      cachedConversionFunnel(),
+      cachedTrendData(),
+      cachedMonthlyRevenue(),
+      cachedStudentDemographics(),
+      cachedHeatMapData(),
+      cachedPartnerPerformance(),
+      cachedLoanDistribution(),
+      cachedLenderDistribution(),
+    ]);
 
-    return { funnel, trends, revenue, demographics, heatmap, partners, loanDist };
+    return {
+      summary,
+      appPipeline,
+      funnel,
+      trends,
+      revenue,
+      demographics,
+      heatmap,
+      partners,
+      loanDist,
+      lenderDist,
+    };
   });
 }

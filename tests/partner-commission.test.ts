@@ -21,8 +21,9 @@ describe("calculateCommissionPayout", () => {
     expect(calculateCommissionPayout(2_280_000, 1.5)).toBe(34_200);
   });
 
-  it("rounds payout to nearest rupee", () => {
-    expect(calculateCommissionPayout(100_001, 3)).toBe(3_000);
+  it("rounds payout to two decimal places", () => {
+    expect(calculateCommissionPayout(100_001, 3)).toBe(3_000.03);
+    expect(calculateCommissionPayout(100_000, 2.555)).toBe(2_555);
   });
 });
 

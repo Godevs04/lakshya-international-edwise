@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDate, getInitials } from "@/lib/utils/format";
+import { formatCurrency, formatDate, formatMoney, getInitials } from "@/lib/utils/format";
 import { addStudentNoteAction, removeStudentDocumentAction } from "@/lib/actions/student.actions";
 import { DocumentLinkForm } from "@/components/forms/document-link-form";
 import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
@@ -23,12 +23,13 @@ import {
   getApplicationStatusLabel,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
+import type { LoanApplicationItem } from "@/lib/constants/loan-application";
 import {
   getStudentProfileCompleteness,
   isStudentProfileVerified,
 } from "@/lib/utils/student-profile";
 import type { StudentStatus } from "@/lib/constants/statuses";
-import { ExternalLink, GraduationCap, Globe, Pencil, Trash2, UserRound } from "lucide-react";
+import { ExternalLink, GraduationCap, Pencil, Trash2, UserRound } from "lucide-react";
 
 interface StudentDetailProps {
   canWrite?: boolean;
@@ -73,6 +74,7 @@ interface StudentDetailProps {
       applicationNumber?: string;
       lenderId?: { _id: string; name: string; slug?: string } | null;
     };
+    loanApplications?: LoanApplicationItem[];
     documents?: Array<{ _id?: string; name: string; url: string; mimeType?: string }>;
     timeline?: Array<{ _id?: string; status: string; note?: string; createdByName?: string; createdAt?: Date }>;
     notes?: Array<{ _id?: string; content: string; createdByName?: string; dueDate?: Date; createdAt?: Date }>;
@@ -93,24 +95,23 @@ function SummaryRow({ label, value }: { label: string; value?: string | null }) 
 }
 
 function formatLoanAmount(amount: number, currency?: "INR" | "USD") {
-  if (currency === "USD") {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  }
-  return formatCurrency(amount);
+  return formatMoney(amount, currency ?? "INR");
 }
 
 export function StudentDetailView({ student, canWrite = false }: StudentDetailProps) {
   const router = useRouter();
   const [noteLoading, setNoteLoading] = useState(false);
   const [removingDocId, setRemovingDocId] = useState<string | null>(null);
-  const [bankSent, setBankSent] = useState(Boolean(student.sentToBank));
-  const [bankSentAt, setBankSentAt] = useState<Date | undefined>(student.sentToBankAt);
-  const [bankSentBy, setBankSentBy] = useState(student.sentToBankByName);
-  const [timeline, setTimeline] = useState(student.timeline ?? []);
+  const loanApplications = useMemo(
+    () => student.loanApplications ?? [],
+    [student.loanApplications]
+  );
+  const timeline = student.timeline ?? [];
+  const sentBanks = useMemo(
+    () => loanApplications.filter((entry) => entry.sentToBank),
+    [loanApplications]
+  );
+  const bankSent = sentBanks.length > 0 || Boolean(student.sentToBank);
 
   const profileInput = useMemo(
     () => ({
@@ -158,21 +159,15 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
 
   const latestRemark = latestNote?.content ?? student.remarks;
   const lenderName = student.loan?.lenderId?.name ?? student.loan?.bankName;
-  const lenderSlug = student.loan?.lenderId?.slug;
+  const banksSummary = useMemo(() => {
+    if (loanApplications.length > 0) {
+      return loanApplications.map((entry) => entry.lenderName).filter(Boolean).join(", ");
+    }
+    return lenderName;
+  }, [loanApplications, lenderName]);
 
-  function handleSentToBank(data: { sentToBankAt: Date; sentToBankByName?: string }) {
-    setBankSent(true);
-    setBankSentAt(data.sentToBankAt);
-    setBankSentBy(data.sentToBankByName);
-    setTimeline((current) => [
-      {
-        status: student.status,
-        note: "Application marked as sent to bank (internal)",
-        createdByName: data.sentToBankByName,
-        createdAt: data.sentToBankAt,
-      },
-      ...current,
-    ]);
+  function handleBankActivity() {
+    router.refresh();
   }
 
   async function handleAddNote(e: React.FormEvent<HTMLFormElement>) {
@@ -225,7 +220,9 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
               </Badge>
               {bankSent ? (
                 <Badge className="bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/15">
-                  Sent to bank
+                  {sentBanks.length > 1
+                    ? `Sent to ${sentBanks.length} banks`
+                    : "Sent to bank"}
                 </Badge>
               ) : null}
               {!profileVerified && (
@@ -253,7 +250,7 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
             <SummaryRow label="Intake" value={student.targetIntake} />
             <SummaryRow label="Degree" value={student.targetDegree} />
             <SummaryRow label="University" value={student.targetUniversity} />
-            <SummaryRow label="Lender" value={lenderName} />
+            <SummaryRow label="Banks" value={banksSummary} />
             <SummaryRow label="Currency" value={student.loan?.currency ?? "INR"} />
             <SummaryRow
               label="Loan requested"
@@ -320,59 +317,62 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
       </aside>
 
       <div className="min-w-0 space-y-4">
-        <Tabs defaultValue="application">
+        <Tabs defaultValue="personal">
           <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
-            <TabsTrigger value="application">Application</TabsTrigger>
-            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="personal">Student profile</TabsTrigger>
+            <TabsTrigger value="application">Loan Details</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="loan">Loan Summary</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="application" className="mt-4">
-            <StudentApplicationPanel
-              key={`${student._id}-${student.applicationStatus}-${bankSent ? "sent" : "pending"}`}
-              studentId={student._id}
-              canWrite={canWrite}
-              applicationStatus={student.applicationStatus ?? "docs_pending"}
-              sentToBank={bankSent}
-              sentToBankAt={bankSentAt}
-              sentToBankByName={bankSentBy}
-              lenderName={lenderName}
-              lenderSlug={lenderSlug}
-              applicationNumber={student.loan?.applicationNumber}
-              latestRemark={latestRemark}
-              loan={student.loan}
-              onSentToBank={handleSentToBank}
-            />
-          </TabsContent>
-
           <TabsContent value="personal" className="mt-4">
             <GlassCard className="space-y-6 p-5">
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
                   <UserRound className="h-4 w-4 text-muted-foreground" />
-                  Contact
+                  Student profile
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm">{student.phone ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm">{student.email ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Gender</p><p className="text-sm capitalize">{student.gender ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Date of Birth</p><p className="text-sm">{student.dob ? formatDate(student.dob) : "—"}</p></div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  Study Abroad
-                </h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div><p className="text-xs text-muted-foreground">Target Country</p><p className="text-sm">{student.targetCountry ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Target Intake</p><p className="text-sm">{student.targetIntake ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Target University</p><p className="text-sm">{student.targetUniversity ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Target Degree</p><p className="text-sm">{student.targetDegree ?? "—"}</p></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Name</p>
+                    <p className="text-sm font-medium">
+                      {[student.firstName, student.lastName].filter(Boolean).join(" ") || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Phone Number</p>
+                    <p className="text-sm">{student.phone ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm">{student.email ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Gender</p>
+                    <p className="text-sm capitalize">{student.gender ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Date of Birth</p>
+                    <p className="text-sm">{student.dob ? formatDate(student.dob) : "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Country</p>
+                    <p className="text-sm">{student.targetCountry ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Intake</p>
+                    <p className="text-sm">{student.targetIntake ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">University</p>
+                    <p className="text-sm">{student.targetUniversity ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Target Degree</p>
+                    <p className="text-sm">{student.targetDegree ?? "—"}</p>
+                  </div>
                 </div>
               </div>
 
@@ -424,6 +424,17 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
                 </div>
               </details>
             </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="application" className="mt-4">
+            <StudentApplicationPanel
+              key={`${student._id}-${loanApplications.length}-${loanApplications.map((entry) => `${entry._id}-${entry.sentToBank}`).join("-")}`}
+              studentId={student._id}
+              canWrite={canWrite}
+              loanApplications={loanApplications}
+              loan={student.loan}
+              onBankActivity={handleBankActivity}
+            />
           </TabsContent>
 
           <TabsContent value="timeline" className="mt-4">

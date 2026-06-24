@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import { connectDB } from "@/lib/db/mongoose";
 import { Partner } from "@/models/Partner";
 import { Student } from "@/models/Student";
+import { roundMoney } from "@/lib/utils/format";
 
 export interface PartnerCommissionSummary {
   totalDisbursed: number;
@@ -78,7 +79,7 @@ export function calculateCommissionPayout(
   if (totalDisbursed <= 0 || commissionPercent <= 0) {
     return 0;
   }
-  return Math.round((totalDisbursed * commissionPercent) / 100);
+  return roundMoney((totalDisbursed * commissionPercent) / 100);
 }
 
 export function calculatePendingCommission(
@@ -121,7 +122,7 @@ export function allocateSettledToStudents(
     const isLast = index === sorted.length - 1;
     const settled = isLast
       ? Math.max(0, settledCap - allocated)
-      : Math.round((row.commissionEarned / totalEarned) * settledCap);
+      : roundMoney((row.commissionEarned / totalEarned) * settledCap);
     allocated += settled;
     result.set(row.id, {
       settled,
