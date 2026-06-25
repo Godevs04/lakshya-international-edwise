@@ -45,6 +45,7 @@ import {
   getApplicationStatusLabel,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
+import type { DisbursementType } from "@/lib/constants/disbursement";
 import { isStudentProfileVerified } from "@/lib/utils/student-profile";
 import { resolveLenderIdBySlug, resolveLenderNameBySlug, getLenderSlugById } from "@/lib/services/lender.service";
 import {
@@ -84,6 +85,7 @@ async function buildLoanFields(
     loanRequested?: number;
     loanSanctioned?: number;
     loanDisbursed?: number;
+    disbursementType?: DisbursementType | "";
     interest?: number;
     bankName?: string;
     applicationNumber?: string;
@@ -95,12 +97,19 @@ async function buildLoanFields(
   existing?: {
     disbursedAt?: Date;
     disbursed?: number;
+    disbursementType?: DisbursementType;
   },
   pfPaidOverride?: boolean
 ) {
   const nextDisbursed = data.loanDisbursed ?? 0;
   const lenderObjectId = await resolveLenderIdBySlug(data.lenderId);
   const lenderName = await resolveLenderNameBySlug(data.lenderId);
+  const disbursementType =
+    data.disbursementType === "full" || data.disbursementType === "tranche"
+      ? data.disbursementType
+      : nextDisbursed > 0
+        ? existing?.disbursementType
+        : undefined;
 
   return {
     requested: data.loanRequested ?? 0,
@@ -110,6 +119,7 @@ async function buildLoanFields(
       nextDisbursed > 0
         ? existing?.disbursedAt ?? new Date()
         : undefined,
+    disbursementType: nextDisbursed > 0 ? disbursementType : undefined,
     currency: data.loanCurrency ?? "INR",
     lenderId: lenderObjectId,
     roi: data.roi ?? 0,
@@ -600,6 +610,7 @@ export async function updateStudentAction(
   existing.loan = await buildLoanFields(data, {
     disbursed: existing.loan?.disbursed,
     disbursedAt: existing.loan?.disbursedAt,
+    disbursementType: existing.loan?.disbursementType,
   }, appFields.pfPaid);
   if (data.commissionPercentOverride === "" || data.commissionPercentOverride == null) {
     existing.commissionPercentOverride = undefined;
@@ -1087,6 +1098,10 @@ export async function updateStudentLoanDetailsAction(
       requested: parsed.data.loanRequested,
       sanctioned: parsed.data.loanSanctioned,
       disbursed: parsed.data.loanDisbursed,
+      disbursementType:
+        parsed.data.disbursementType === "full" || parsed.data.disbursementType === "tranche"
+          ? parsed.data.disbursementType
+          : undefined,
       currency: parsed.data.loanCurrency,
       roi: parsed.data.roi,
       interest: parsed.data.interest,

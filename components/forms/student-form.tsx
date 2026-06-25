@@ -21,6 +21,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { APPLICATION_STATUS_OPTIONS } from "@/lib/constants/application-status";
+import { DISBURSEMENT_TYPE_OPTIONS } from "@/lib/constants/disbursement";
 import {
   TARGET_COUNTRIES,
   TARGET_DEGREES,
@@ -81,8 +82,15 @@ export function StudentForm({
   const [applicationStatus, setApplicationStatus] = useState(
     (initialData?.applicationStatus as string) ?? "docs_pending"
   );
+  const [disbursementType, setDisbursementType] = useState(
+    (initialData?.disbursementType as string) ?? ""
+  );
 
   const applicationStatusItems = APPLICATION_STATUS_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+  }));
+  const disbursementTypeItems = DISBURSEMENT_TYPE_OPTIONS.map((option) => ({
     value: option.value,
     label: option.label,
   }));
@@ -474,6 +482,27 @@ export function StudentForm({
               inputMode="decimal"
               defaultValue={initialData?.loanDisbursed as number}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="disbursementType">Disbursement Type</Label>
+            <Select
+              value={disbursementType}
+              onValueChange={(value) => setDisbursementType(value ?? "")}
+              items={[{ value: "", label: "Not set" }, ...disbursementTypeItems]}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select disbursement type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Not set</SelectItem>
+                {DISBURSEMENT_TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="disbursementType" value={disbursementType} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="interest">Interest %</Label>

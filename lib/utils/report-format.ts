@@ -1,4 +1,5 @@
 import { formatCurrency, formatDate, formatPercent } from "@/lib/utils/format";
+import { getDisbursementTypeLabel } from "@/lib/constants/disbursement";
 import { maskAadhaar, maskPan } from "@/lib/utils/pii";
 
 export type ReportSourceRow = Record<string, unknown>;
@@ -61,6 +62,7 @@ export function formatStudentReportRows(students: LooseRecord[]): Record<string,
       "Loan Requested": formatCurrency(Number(loan?.requested ?? 0)),
       "Loan Sanctioned": formatCurrency(Number(loan?.sanctioned ?? 0)),
       "Loan Disbursed": formatCurrency(Number(loan?.disbursed ?? 0)),
+      "Disbursement Type": getDisbursementTypeLabel(loan?.disbursementType as string | undefined),
       "Interest %": loan?.interest != null ? `${loan.interest}%` : "",
       Bank: String(loan?.bankName ?? ""),
       "Bank LAN": String(loan?.applicationNumber ?? ""),

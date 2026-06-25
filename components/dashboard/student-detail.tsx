@@ -23,6 +23,7 @@ import {
   getApplicationStatusLabel,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
+import { getDisbursementTypeLabel } from "@/lib/constants/disbursement";
 import type { LoanApplicationItem } from "@/lib/constants/loan-application";
 import {
   getStudentProfileCompleteness,
@@ -65,6 +66,7 @@ interface StudentDetailProps {
       requested?: number;
       sanctioned?: number;
       disbursed?: number;
+      disbursementType?: "full" | "tranche";
       currency?: "INR" | "USD";
       roi?: number;
       interest?: number;
@@ -498,6 +500,7 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
                 <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.requested ?? 0, student.loan?.currency)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.sanctioned ?? 0, student.loan?.currency)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.disbursed ?? 0, student.loan?.currency)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Disbursement Type</p><p className="text-lg font-semibold">{getDisbursementTypeLabel(student.loan?.disbursementType)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Currency</p><p className="text-lg font-semibold">{student.loan?.currency ?? "INR"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Lender</p><p className="text-sm">{lenderName ?? "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">ROI</p><p className="text-lg font-semibold">{student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : "—"}</p></div>

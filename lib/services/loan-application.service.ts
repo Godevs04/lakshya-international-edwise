@@ -456,6 +456,7 @@ export async function updateStudentLoanDetails(
     sanctioned?: number;
     disbursed?: number;
     currency?: "INR" | "USD";
+    disbursementType?: "full" | "tranche";
     roi?: number;
     interest?: number;
     processingFee?: number;
@@ -474,7 +475,11 @@ export async function updateStudentLoanDetails(
       student.loan.disbursedAt = student.loan.disbursedAt ?? new Date();
     } else {
       student.loan.disbursedAt = undefined;
+      student.loan.disbursementType = undefined;
     }
+  }
+  if (data.disbursementType !== undefined) {
+    student.loan.disbursementType = data.disbursementType;
   }
   if (data.currency !== undefined) student.loan.currency = data.currency;
   if (data.roi !== undefined) student.loan.roi = data.roi;

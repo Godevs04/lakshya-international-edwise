@@ -109,6 +109,7 @@ export interface IStudent extends Document {
     sanctioned?: number;
     disbursed?: number;
     disbursedAt?: Date;
+    disbursementType?: "full" | "tranche";
     currency?: "INR" | "USD";
     lenderId?: Types.ObjectId;
     roi?: number;
@@ -233,6 +234,7 @@ const StudentSchema = new Schema<IStudent>(
       sanctioned: { type: Number, default: 0 },
       disbursed: { type: Number, default: 0 },
       disbursedAt: { type: Date },
+      disbursementType: { type: String, enum: ["full", "tranche"], required: false },
       currency: { type: String, enum: ["INR", "USD"], default: "INR" },
       lenderId: { type: Schema.Types.ObjectId, ref: "Lender" },
       roi: { type: Number, default: 0 },
