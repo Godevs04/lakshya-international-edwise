@@ -1,24 +1,28 @@
+import { APP_TAGLINE, APP_LOGO_ASPECT_RATIO, DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
+import { getAuthUrl } from "@/lib/config/env";
+import { resolveEmailAssetUrl } from "@/lib/utils/email-asset-url";
 import type { CompanySettings } from "@/types";
 
-/** Corporate / MNC palette — navy, gold accent, clean neutrals */
+/** Design 06 palette — deep indigo, violet accent, clean neutrals */
 const BRAND = {
-  navy: "#0B1F3A",
-  navyMid: "#1E3A5F",
-  gold: "#B8965A",
-  goldLight: "#D4BC82",
+  primary: "#2D1B69",
+  primaryMid: "#6D5EF7",
+  accent: "#8B5CF6",
+  accentLight: "#C4B5FD",
   text: "#1E293B",
   muted: "#64748B",
   border: "#E5E7EB",
-  surface: "#F9FAFB",
+  surface: "#F8F7FC",
+  otpCell: "#EDEAFD",
   white: "#FFFFFF",
-  link: "#1E3A5F",
+  link: "#6D5EF7",
   success: "#166534",
   successBg: "#F0FDF4",
+  footerBg: "#1E0B4A",
 };
 
-const FONT =
-  "'Helvetica Neue', Helvetica, Arial, 'Segoe UI', sans-serif";
+const FONT = "'SN Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 export function escapeHtml(value: string): string {
   return value
@@ -29,9 +33,21 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function emailFontStyles(): string {
+  const fontUrl = `${getAuthUrl()}/fonts/SNPro-Variable.woff2`;
+  return `
+    @font-face {
+      font-family: 'SN Pro';
+      font-style: normal;
+      font-weight: 200 900;
+      font-display: swap;
+      src: url('${escapeHtml(fontUrl)}') format('woff2');
+    }`;
+}
+
 export function getEmailBannerUrl(): string | undefined {
   const url = process.env.APP_EMAIL_BANNER_URL?.trim();
-  return url || undefined;
+  return url ? resolveEmailAssetUrl(url) : undefined;
 }
 
 export async function getEmailBranding(): Promise<CompanySettings> {
@@ -50,7 +66,7 @@ function emailButton(href: string, label: string): string {
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 32px 0 24px;">
       <tr>
-        <td align="left" style="background-color: ${BRAND.navy}; border-radius: 4px;">
+        <td align="left" style="background-color: ${BRAND.primaryMid}; border-radius: 8px;">
           <a href="${safeHref}" target="_blank" rel="noopener noreferrer"
             style="display: inline-block; padding: 14px 36px; font-family: ${FONT}; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; color: #ffffff; text-decoration: none; border-radius: 4px;">
             ${safeLabel}
@@ -62,12 +78,15 @@ function emailButton(href: string, label: string): string {
 
 function emailHeader(company: CompanySettings): string {
   const name = escapeHtml(company.name);
-  const logo = company.logo?.trim();
+  const logo = resolveEmailAssetUrl(company.logo?.trim() || DEFAULT_APP_LOGO);
+  const tagline = escapeHtml(APP_TAGLINE);
   const banner = getEmailBannerUrl();
+  const logoWidth = 72;
+  const logoHeight = Math.round(logoWidth / APP_LOGO_ASPECT_RATIO);
 
   const logoBlock = logo
-    ? `<img src="${escapeHtml(logo)}" alt="${name}" width="48" height="48" style="display: block; border: 0; border-radius: 4px; object-fit: contain;" />`
-    : `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td width="48" height="48" align="center" valign="middle" style="width: 48px; height: 48px; background-color: ${BRAND.navy}; border-radius: 4px; font-family: ${FONT}; font-size: 20px; font-weight: 700; color: #ffffff;">${escapeHtml(company.name.charAt(0).toUpperCase())}</td></tr></table>`;
+    ? `<img src="${escapeHtml(logo)}" alt="${name}" width="${logoWidth}" height="${logoHeight}" style="display: block; border: 0; border-radius: 12px; object-fit: contain; background-color: ${BRAND.white}; box-shadow: 0 4px 14px rgba(109, 94, 247, 0.18);" />`
+    : `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td width="56" height="56" align="center" valign="middle" style="width: 56px; height: 56px; background: linear-gradient(135deg, ${BRAND.primaryMid}, ${BRAND.accent}); border-radius: 50%; font-family: ${FONT}; font-size: 22px; font-weight: 700; color: #ffffff;">${escapeHtml(company.name.charAt(0).toUpperCase())}</td></tr></table>`;
 
   const bannerBlock = banner
     ? `<tr>
@@ -79,16 +98,16 @@ function emailHeader(company: CompanySettings): string {
 
   return `
     <tr>
-      <td style="padding: 0; background-color: ${BRAND.gold}; height: 3px; font-size: 0; line-height: 0;">&nbsp;</td>
+      <td style="padding: 0; background: linear-gradient(90deg, ${BRAND.primaryMid}, ${BRAND.accent}); height: 3px; font-size: 0; line-height: 0;">&nbsp;</td>
     </tr>
     <tr>
-      <td style="padding: 28px 40px 24px; background-color: ${BRAND.white}; border-bottom: 1px solid ${BRAND.border};">
+      <td class="email-header" style="padding: 28px 40px 24px; background-color: ${BRAND.white}; border-bottom: 1px solid ${BRAND.border};">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
           <tr>
-            <td style="width: 56px; vertical-align: middle; padding-right: 16px;">${logoBlock}</td>
+            <td style="width: ${logoWidth}px; vertical-align: middle; padding-right: 16px;">${logoBlock}</td>
             <td style="vertical-align: middle;">
-              <p style="margin: 0; font-family: ${FONT}; font-size: 20px; font-weight: 600; color: ${BRAND.navy}; letter-spacing: -0.01em; line-height: 1.3;">${name}</p>
-              <p style="margin: 4px 0 0; font-family: ${FONT}; font-size: 11px; font-weight: 500; color: ${BRAND.muted}; text-transform: uppercase; letter-spacing: 0.14em;">International Education &amp; Career Consultancy</p>
+              <p style="margin: 0; font-family: ${FONT}; font-size: 20px; font-weight: 600; color: ${BRAND.primary}; letter-spacing: -0.02em; line-height: 1.3;">${name}</p>
+              <p style="margin: 4px 0 0; font-family: ${FONT}; font-size: 12px; font-weight: 500; color: ${BRAND.muted}; letter-spacing: 0.02em;">${tagline}</p>
             </td>
           </tr>
         </table>
@@ -103,16 +122,16 @@ function emailFooter(company: CompanySettings): string {
   if (company.phone?.trim()) contactLines.push(`Tel: ${escapeHtml(company.phone.trim())}`);
   if (company.email?.trim()) {
     contactLines.push(
-      `<a href="mailto:${escapeHtml(company.email.trim())}" style="color: ${BRAND.goldLight}; text-decoration: none;">${escapeHtml(company.email.trim())}</a>`
+      `<a href="mailto:${escapeHtml(company.email.trim())}" style="color: ${BRAND.accentLight}; text-decoration: none;">${escapeHtml(company.email.trim())}</a>`
     );
   }
 
   return `
     <tr>
-      <td style="padding: 0; background-color: ${BRAND.gold}; height: 2px; font-size: 0; line-height: 0;">&nbsp;</td>
+      <td style="padding: 0; background: linear-gradient(90deg, ${BRAND.primaryMid}, ${BRAND.accent}); height: 2px; font-size: 0; line-height: 0;">&nbsp;</td>
     </tr>
     <tr>
-      <td style="padding: 28px 40px 32px; background-color: ${BRAND.navy};">
+      <td class="email-footer" style="padding: 28px 40px 32px; background-color: ${BRAND.footerBg};">
         <p style="margin: 0 0 10px; font-family: ${FONT}; font-size: 14px; font-weight: 600; color: #ffffff;">${escapeHtml(company.name)}</p>
         ${contactLines.length ? `<p style="margin: 0 0 16px; font-family: ${FONT}; font-size: 12px; line-height: 1.7; color: rgba(255,255,255,0.65);">${contactLines.join("<br />")}</p>` : ""}
         <p style="margin: 0 0 12px; font-family: ${FONT}; font-size: 11px; line-height: 1.6; color: rgba(255,255,255,0.45);">
@@ -147,6 +166,7 @@ export function renderEmailLayout(options: EmailLayoutOptions): string {
   <title>${safeTitle}</title>
   <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
   <style>
+    ${emailFontStyles()}
     @media only screen and (max-width: 620px) {
       .email-container { width: 100% !important; }
       .email-body { padding: 28px 24px !important; }
@@ -164,7 +184,7 @@ export function renderEmailLayout(options: EmailLayoutOptions): string {
           ${emailHeader(company)}
           <tr>
             <td class="email-body" style="padding: 36px 40px 32px; font-family: ${FONT};">
-              <h1 style="margin: 0 0 6px; font-family: ${FONT}; font-size: 22px; font-weight: 600; color: ${BRAND.navy}; letter-spacing: -0.01em; line-height: 1.35;">${safeTitle}</h1>
+              <h1 style="margin: 0 0 6px; font-family: ${FONT}; font-size: 22px; font-weight: 600; color: ${BRAND.primary}; letter-spacing: -0.02em; line-height: 1.35;">${safeTitle}</h1>
               ${safeSubtitle ? `<p style="margin: 0 0 24px; font-size: 14px; color: ${BRAND.muted}; line-height: 1.5;">${safeSubtitle}</p>` : `<div style="margin-bottom: 24px;"></div>`}
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 28px;">
                 <tr><td style="border-top: 1px solid ${BRAND.border}; font-size: 0; line-height: 0;">&nbsp;</td></tr>
@@ -189,7 +209,7 @@ export function renderMutedNote(text: string): string {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 28px;">
       <tr>
-        <td style="padding: 16px 20px; background-color: ${BRAND.surface}; border: 1px solid ${BRAND.border}; border-left: 3px solid ${BRAND.gold};">
+        <td style="padding: 16px 20px; background-color: ${BRAND.surface}; border: 1px solid ${BRAND.border}; border-left: 3px solid ${BRAND.primaryMid};">
           <p style="margin: 0; font-size: 13px; line-height: 1.65; color: ${BRAND.muted};">${text}</p>
         </td>
       </tr>
@@ -208,14 +228,32 @@ export function renderInfoBox(message: string): string {
 }
 
 export function renderOtpBlock(otp: string): string {
-  const digits = escapeHtml(otp);
+  const digitCells = otp
+    .replace(/\D/g, "")
+    .split("")
+    .map(
+      (digit) => `
+        <td style="padding: 0 4px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <td align="center" valign="middle" width="44" height="52" style="width: 44px; height: 52px; background-color: ${BRAND.otpCell}; border-radius: 8px; font-family: ${FONT}; font-size: 26px; font-weight: 700; color: ${BRAND.primary}; line-height: 52px;">
+                ${escapeHtml(digit)}
+              </td>
+            </tr>
+          </table>
+        </td>`
+    )
+    .join("");
+
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 28px 0;">
       <tr>
-        <td align="center" style="padding: 28px 24px; background-color: ${BRAND.surface}; border: 1px solid ${BRAND.border};">
-          <p style="margin: 0 0 14px; font-family: ${FONT}; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: ${BRAND.muted};">Verification Code</p>
-          <p style="margin: 0; font-family: 'Courier New', Courier, monospace; font-size: 32px; font-weight: 700; letter-spacing: 12px; color: ${BRAND.navy};">${digits}</p>
-          <p style="margin: 16px 0 0; font-size: 12px; color: ${BRAND.muted};">Expires in 10 minutes</p>
+        <td align="center" style="padding: 28px 24px; background-color: ${BRAND.surface}; border: 1px solid ${BRAND.border}; border-radius: 8px;">
+          <p style="margin: 0 0 16px; font-family: ${FONT}; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: ${BRAND.muted};">Verification Code</p>
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+            <tr>${digitCells}</tr>
+          </table>
+          <p style="margin: 16px 0 0; font-family: ${FONT}; font-size: 12px; color: ${BRAND.muted};">Expires in 10 minutes</p>
         </td>
       </tr>
     </table>`;
@@ -226,7 +264,7 @@ export function renderFeatureList(items: string[]): string {
     .map(
       (item) => `
       <tr>
-        <td style="padding: 5px 0; vertical-align: top; width: 20px; font-size: 14px; color: ${BRAND.gold};">&#8226;</td>
+        <td style="padding: 5px 0; vertical-align: top; width: 20px; font-size: 14px; color: ${BRAND.primaryMid};">&#8226;</td>
         <td style="padding: 5px 0 5px 4px; font-size: 14px; line-height: 1.55; color: ${BRAND.text};">${escapeHtml(item)}</td>
       </tr>`
     )
