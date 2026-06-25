@@ -6,7 +6,7 @@ import { useId } from "react";
 
 interface Design06RibbonWavesProps {
   className?: string;
-  variant?: "hero" | "compact" | "ambient";
+  variant?: "hero" | "compact" | "ambient" | "full";
 }
 
 /** Contour lines — right half only, no hard left cutoff */
@@ -125,6 +125,7 @@ export function Design06RibbonWaves({
   const reducedMotion = useReducedMotion();
 
   const isHero = variant === "hero";
+  const isFull = variant === "full";
   const isCompact = variant === "compact";
   const isAmbient = variant === "ambient";
 
@@ -147,6 +148,7 @@ export function Design06RibbonWaves({
       className={cn(
         "pointer-events-none select-none",
         isHero && "absolute inset-0 overflow-hidden",
+        isFull && "absolute inset-0 overflow-hidden",
         isCompact && "absolute inset-0 overflow-hidden",
         isAmbient && "absolute inset-0 overflow-hidden",
         className
@@ -159,7 +161,9 @@ export function Design06RibbonWaves({
           className={cn(
             "absolute z-[1]",
             isHero
-              ? "left-[36%] top-[5%] h-12 w-28 sm:left-[40%] sm:top-[7%] sm:h-14 sm:w-32"
+              ? "left-[28%] top-[4%] h-14 w-32 sm:left-[32%] sm:top-[6%] sm:h-16 sm:w-36"
+              : isFull
+                ? "left-[18%] top-[8%] h-16 w-40 sm:left-[22%] sm:top-[10%] sm:h-[4.5rem] sm:w-44"
               : "left-[30%] top-2 h-10 w-24"
           )}
         />
@@ -169,7 +173,8 @@ export function Design06RibbonWaves({
       <div
         className={cn(
           "absolute inset-0",
-          isHero && "[mask-image:linear-gradient(to_right,transparent_0%,transparent_42%,rgba(0,0,0,0.35)_58%,black_78%,black_100%)]",
+          isHero && "[mask-image:linear-gradient(to_right,transparent_0%,transparent_22%,rgba(0,0,0,0.4)_45%,black_72%,black_100%)]",
+          isFull && "[mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.25)_18%,black_55%,black_100%)]",
           isCompact && "[mask-image:linear-gradient(to_right,transparent_0%,transparent_50%,black_85%,black_100%)]",
           isAmbient && "[mask-image:radial-gradient(ellipse_80%_60%_at_70%_40%,black_20%,transparent_70%)]"
         )}
@@ -178,6 +183,7 @@ export function Design06RibbonWaves({
           className={cn(
             "absolute h-full w-full",
             isHero && "right-0 top-0",
+            isFull && "inset-0 h-full w-full",
             isCompact && "right-0 top-0",
             isAmbient && "left-1/2 top-[6%] -translate-x-1/2 opacity-50"
           )}
@@ -237,6 +243,13 @@ export function Design06RibbonWaves({
                 d="M580 300 C580 278, 618 252, 678 242 C738 232, 788 268, 848 242 C898 222, 948 262, 1002 238 L1002 300 Z"
                 fill={`url(#${uid}-ribbonB)`}
               />
+              {(isHero || isFull) && (
+                <path
+                  d="M420 300 C420 275, 468 248, 528 238 C588 228, 628 268, 688 248 C738 232, 788 272, 848 252 L848 300 Z"
+                  fill={`url(#${uid}-ribbonB)`}
+                  opacity={isFull ? 0.85 : 0.55}
+                />
+              )}
             </motion.g>
 
             <motion.g {...gentleDrift}>
@@ -284,10 +297,13 @@ export function Design06RibbonWaves({
         </svg>
       </div>
 
-      {isHero && !reducedMotion && (
+      {(isHero || isFull) && !reducedMotion && (
         <motion.div
-          className="absolute bottom-0 right-0 h-40 w-[45%] bg-gradient-to-l from-[#8B5CF6]/8 via-[#8B5CF6]/3 to-transparent"
-          animate={{ opacity: [0.6, 0.9, 0.6] }}
+          className={cn(
+            "absolute bottom-0 right-0 bg-gradient-to-l from-[#8B5CF6]/8 via-[#8B5CF6]/3 to-transparent",
+            isFull ? "h-full w-[65%] from-[#8B5CF6]/12" : "h-40 w-[45%]"
+          )}
+          animate={{ opacity: [0.6, 0.95, 0.6] }}
           transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" as const }}
         />
       )}

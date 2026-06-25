@@ -46,9 +46,9 @@ export function DashboardHero({ greeting, userName, displayDate }: DashboardHero
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="hero-surface relative min-h-[200px] overflow-hidden rounded-2xl p-5 sm:min-h-[220px] sm:rounded-[28px] sm:p-8"
+      className="hero-surface relative min-h-[210px] overflow-hidden rounded-2xl p-5 sm:min-h-[240px] sm:rounded-[28px] sm:p-8"
     >
-      <Design06RibbonWaves variant="hero" />
+      <Design06RibbonWaves variant="full" />
 
       <div className="relative z-10">
         <motion.p

@@ -24,8 +24,7 @@ import {
   studentCommissionRateSchema,
   commissionLedgerFilterSchema,
 } from "@/lib/validations/schemas";
-import { exportToCSV } from "@/lib/services/report.service";
-import { exportToPdf } from "@/lib/utils/report-export";
+import { exportToCsv, exportToPdf } from "@/lib/utils/report-export";
 import { getAppConfig } from "@/lib/config/app-config";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
@@ -661,20 +660,8 @@ export async function exportPartnerCommissionAction(
 
     const stamp = monthFilter ?? new Date().toISOString().slice(0, 10);
     const safeName = partner.companyName.replace(/[^\w\-]+/g, "_");
-
-    if (format === "csv") {
-      return {
-        success: true,
-        data: {
-          filename: `${safeName}-commission-${stamp}.csv`,
-          mimeType: "text/csv",
-          data: Buffer.from(exportToCSV(exportRows)).toString("base64"),
-        },
-      };
-    }
-
     const config = await getAppConfig();
-    const pdf = await exportToPdf(exportRows, {
+    const exportOptions = {
       title: "Commission Statement",
       subtitle: `${partner.companyName}${monthFilter ? ` — ${monthFilter}` : ""}`,
       companyName: config.company.name,
@@ -682,7 +669,20 @@ export async function exportPartnerCommissionAction(
       logoSrc: config.company.logo,
       generatedBy: user?.name ?? user?.email ?? "System",
       generatedAt: new Date(),
-    });
+    };
+
+    if (format === "csv") {
+      return {
+        success: true,
+        data: {
+          filename: `${safeName}-commission-${stamp}.csv`,
+          mimeType: "text/csv;charset=utf-8",
+          data: Buffer.from(exportToCsv(exportRows, exportOptions)).toString("base64"),
+        },
+      };
+    }
+
+    const pdf = await exportToPdf(exportRows, exportOptions);
 
     return {
       success: true,
