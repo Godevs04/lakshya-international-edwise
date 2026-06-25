@@ -128,9 +128,9 @@ export function Topbar({
           type="button"
           onClick={() => setMenuOpen(true)}
           aria-label="Open navigation menu"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full glass-surface transition-all hover:bg-[#6D5EF7]/8 lg:hidden dark:bg-white/5"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full glass-surface transition-all hover:bg-[#E8952E]/8 lg:hidden dark:bg-white/5"
         >
-          <Menu className="h-5 w-5 text-[#6D5EF7]" />
+          <Menu className="h-5 w-5 text-[#E8952E]" />
         </button>
 
         <button
@@ -139,19 +139,19 @@ export function Topbar({
           aria-label={`Search students, partners, and applications (${searchShortcutLabel})`}
           className="search-glow group relative flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full glass-surface px-3 transition-all sm:h-11 sm:gap-3 sm:px-5 lg:max-w-md dark:bg-white/5"
         >
-          <Search className="h-4 w-4 shrink-0 text-[#6D5EF7]/60 transition-colors group-hover:text-[#6D5EF7]" />
+          <Search className="h-4 w-4 shrink-0 text-[#E8952E]/60 transition-colors group-hover:text-[#E8952E]" />
           <span className="min-w-0 truncate text-sm text-muted-foreground">
             <span className="hidden sm:inline">Search students, partners...</span>
             <span className="sm:hidden">Search...</span>
           </span>
-          <kbd className="pointer-events-none ml-auto hidden h-6 shrink-0 select-none items-center rounded-full border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 px-2 font-mono text-[10px] font-medium text-[#6D5EF7] sm:flex">
+          <kbd className="pointer-events-none ml-auto hidden h-6 shrink-0 select-none items-center rounded-full border border-[#E8952E]/15 bg-[#E8952E]/5 px-2 font-mono text-[10px] font-medium text-[#E8952E] sm:flex">
             {searchShortcutLabel}
           </kbd>
         </button>
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
           <DropdownMenu open={notificationsOpen} onOpenChange={handleNotificationsOpenChange}>
-            <DropdownMenuTrigger className="relative inline-flex h-9 w-9 items-center justify-center rounded-full glass-surface transition-all hover:bg-[#6D5EF7]/8 sm:h-10 sm:w-10 dark:bg-white/5">
+            <DropdownMenuTrigger className="relative inline-flex h-9 w-9 items-center justify-center rounded-full glass-surface transition-all hover:bg-[#E8952E]/8 sm:h-10 sm:w-10 dark:bg-white/5">
               <Bell className="h-4 w-4 text-muted-foreground" />
               {unreadCount > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#EF4444] to-[#EC4899] text-[10px] font-bold text-white">
@@ -216,7 +216,7 @@ export function Topbar({
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="relative hidden h-9 w-9 items-center justify-center rounded-full glass-surface transition-all hover:bg-[#6D5EF7]/8 sm:inline-flex sm:h-10 sm:w-10 dark:bg-white/5">
+            <DropdownMenuTrigger className="relative hidden h-9 w-9 items-center justify-center rounded-full glass-surface transition-all hover:bg-[#E8952E]/8 sm:inline-flex sm:h-10 sm:w-10 dark:bg-white/5">
               <Sun className="h-4 w-4 rotate-0 scale-100 text-muted-foreground transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 text-muted-foreground transition-all dark:rotate-0 dark:scale-100" />
             </DropdownMenuTrigger>
@@ -238,9 +238,9 @@ export function Topbar({
 
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex">
-              <Avatar className="h-9 w-9 ring-2 ring-[#6D5EF7]/20 transition-all hover:ring-[#6D5EF7]/40 sm:h-10 sm:w-10">
+              <Avatar className="h-9 w-9 ring-2 ring-[#E8952E]/20 transition-all hover:ring-[#E8952E]/40 sm:h-10 sm:w-10">
                 <AvatarImage src={user?.avatar ?? undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xs text-white">
+                <AvatarFallback className="bg-gradient-to-br from-[#E8952E] to-[#F59E0B] text-xs text-white">
                   {getInitials(user?.name ?? "U")}
                 </AvatarFallback>
               </Avatar>

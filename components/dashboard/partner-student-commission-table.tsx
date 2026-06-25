@@ -193,7 +193,7 @@ export function PartnerStudentCommissionTable({
                         <span>
                           {formatPercent(row.partnerSharePercent)}
                           {row.partnerSharePercentOverride != null && (
-                            <span className="ml-1 text-[10px] text-[#6D5EF7]">custom</span>
+                            <span className="ml-1 text-[10px] text-[#E8952E]">custom</span>
                           )}
                         </span>
                         {canWrite && (
@@ -224,7 +224,7 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(row.disbursed)}</TableCell>
                   <TableCell>{formatCurrency(row.commissionExpected)}</TableCell>
                   <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
-                  <TableCell className="text-[#6D5EF7]">
+                  <TableCell className="text-[#E8952E]">
                     {formatCurrency(row.projectedNetEarned)}
                   </TableCell>
                   <TableCell className="text-[#22C55E]">{formatCurrency(row.commissionReceived)}</TableCell>
@@ -316,8 +316,8 @@ export function PartnerStudentCommissionTable({
 
 function GlassHelp() {
   return (
-    <div className="rounded-xl border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 p-4 text-sm">
-      <p className="font-medium text-[#6D5EF7]">Where to mark received & paid</p>
+    <div className="rounded-xl border border-[#E8952E]/15 bg-[#E8952E]/5 p-4 text-sm">
+      <p className="font-medium text-[#E8952E]">Where to mark received & paid</p>
       <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
         <li>
           <strong>Received</strong> — money from lender/bank (use Actions → Received; full or partial amount)

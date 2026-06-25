@@ -37,8 +37,8 @@ export function resolveCompanySettings(stored?: Partial<CompanySettings>): Compa
 
 export function getDefaultThemeSettings(): AppTheme {
   return {
-    primary: process.env.APP_THEME_PRIMARY ?? "oklch(0.488 0.243 264.376)",
-    accent: process.env.APP_THEME_ACCENT ?? "oklch(0.556 0 0)",
+    primary: process.env.APP_THEME_PRIMARY ?? "oklch(0.72 0.16 65)",
+    accent: process.env.APP_THEME_ACCENT ?? "oklch(0.78 0.14 75)",
     radius: process.env.APP_THEME_RADIUS ?? "0.625rem",
     fontFamily: process.env.APP_THEME_FONT ?? "SN Pro",
     mode: (process.env.APP_THEME_MODE as AppTheme["mode"]) ?? "light",

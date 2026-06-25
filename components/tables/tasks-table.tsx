@@ -64,7 +64,7 @@ const VIEW_TABS = [
 ] as const;
 
 const STATUS_STYLES: Record<TaskListItem["status"], string> = {
-  open: "bg-[#6D5EF7]/12 text-[#6D5EF7] border-[#6D5EF7]/25",
+  open: "bg-[#E8952E]/12 text-[#E8952E] border-[#E8952E]/25",
   done: "bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/25",
   cancelled: "bg-muted/80 text-muted-foreground border-border/50",
 };
@@ -185,8 +185,8 @@ export function TasksTable({
                 className={cn(
                   "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#6D5EF7] bg-[#6D5EF7]/12 text-[#6D5EF7]"
-                    : "border-[#6D5EF7]/15 bg-white/60 text-muted-foreground hover:border-[#6D5EF7]/30 hover:bg-[#6D5EF7]/8 hover:text-foreground dark:bg-white/5"
+                    ? "border-[#E8952E] bg-[#E8952E]/12 text-[#E8952E]"
+                    : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
                 )}
               >
                 {tab.label}
@@ -206,8 +206,8 @@ export function TasksTable({
                 className={cn(
                   "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#6D5EF7] bg-[#6D5EF7] text-white shadow-sm"
-                    : "border-[#6D5EF7]/15 bg-white/60 text-muted-foreground hover:border-[#6D5EF7]/30 hover:bg-[#6D5EF7]/8 hover:text-foreground dark:bg-white/5"
+                    ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
+                    : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
                 )}
               >
                 {tab.label}
@@ -267,7 +267,7 @@ export function TasksTable({
                     <TableCell className="whitespace-nowrap py-4 align-top text-sm text-muted-foreground">
                       {task.reminderAt ? (
                         <span className="inline-flex items-center gap-1">
-                          <Bell className="h-3.5 w-3.5 text-[#6D5EF7]" />
+                          <Bell className="h-3.5 w-3.5 text-[#E8952E]" />
                           {formatDateTime(task.reminderAt)}
                         </span>
                       ) : (
@@ -275,7 +275,7 @@ export function TasksTable({
                       )}
                     </TableCell>
                     <TableCell className="py-4 align-top text-sm">
-                      <span className={isAssignedToMe ? "font-semibold text-[#6D5EF7]" : undefined}>
+                      <span className={isAssignedToMe ? "font-semibold text-[#E8952E]" : undefined}>
                         {task.assignedToName ?? "—"}
                         {isAssignedToMe ? " (you)" : ""}
                       </span>
@@ -287,7 +287,7 @@ export function TasksTable({
                       {task.studentId ? (
                         <Link
                           href={`/dashboard/students/${task.studentId}`}
-                          className="text-[#6D5EF7] hover:underline"
+                          className="text-[#E8952E] hover:underline"
                         >
                           {task.studentName || "View student"}
                         </Link>
@@ -312,7 +312,7 @@ export function TasksTable({
                                   title="Assign to me"
                                   onClick={() => claimTask(task._id)}
                                 >
-                                  <UserPlus className="h-4 w-4 text-[#6D5EF7]" />
+                                  <UserPlus className="h-4 w-4 text-[#E8952E]" />
                                 </Button>
                               ) : null}
                               <Button
@@ -322,7 +322,7 @@ export function TasksTable({
                                 aria-label="Edit task"
                                 onClick={() => setEditingTask(task)}
                               >
-                                <Pencil className="h-4 w-4 text-[#6D5EF7]" />
+                                <Pencil className="h-4 w-4 text-[#E8952E]" />
                               </Button>
                               <Button
                                 type="button"
@@ -351,7 +351,7 @@ export function TasksTable({
                               aria-label="Reopen task"
                               onClick={() => updateStatus(task._id, "open", "Task reopened")}
                             >
-                              <RotateCcw className="h-4 w-4 text-[#6D5EF7]" />
+                              <RotateCcw className="h-4 w-4 text-[#E8952E]" />
                             </Button>
                           )}
                           <Button

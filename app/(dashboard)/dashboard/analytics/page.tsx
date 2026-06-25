@@ -9,43 +9,43 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 
 const AnalyticsKpiCards = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.AnalyticsKpiCards),
-  { loading: () => <Skeleton className="h-24 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-24 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const VisualFunnelChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.VisualFunnelChart),
-  { loading: () => <Skeleton className="h-96 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-96 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const AnalyticsTrendChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.AnalyticsTrendChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const AnalyticsRevenueChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.AnalyticsRevenueChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const AnalyticsPartnersChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.AnalyticsPartnersChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const DemographicsBarChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.DemographicsBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const LoanRangeChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.LoanRangeChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const CourseBarChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.CourseBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const LenderBarChart = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.LenderBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const AnalyticsHeatMap = dynamic(
   () => import("@/components/charts/analytics-charts").then((m) => m.AnalyticsHeatMap),
-  { loading: () => <Skeleton className="h-64 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-64 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 
 export default async function AnalyticsPage() {

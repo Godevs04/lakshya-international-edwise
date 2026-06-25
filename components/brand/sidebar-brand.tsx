@@ -45,13 +45,13 @@ export function SidebarBrand({
           className="min-w-0 flex-1 py-0.5"
         >
           <p
-            className="text-[13px] font-semibold leading-[1.35] tracking-tight text-white line-clamp-2"
+            className="text-[13px] font-semibold leading-[1.35] tracking-tight text-sidebar-foreground line-clamp-2"
             title={companyName}
           >
             {companyName}
           </p>
           <p
-            className="mt-1 flex items-start gap-1.5 text-[10px] font-medium leading-[1.45] text-white/55"
+            className="mt-1 flex items-start gap-1.5 text-[10px] font-medium leading-[1.45] text-sidebar-foreground/65"
             title={APP_TAGLINE}
           >
             <motion.span
@@ -67,7 +67,7 @@ export function SidebarBrand({
                   : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
               }
             >
-              <Sparkles className="h-3 w-3 text-[#C4B5FD]" aria-hidden />
+              <Sparkles className="h-3 w-3 text-primary" aria-hidden />
             </motion.span>
             <span className="line-clamp-2">{APP_TAGLINE}</span>
           </p>
@@ -80,7 +80,7 @@ export function SidebarBrand({
     return (
       <Link
         href="/dashboard/overview"
-        className="block rounded-2xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/30"
+        className="block rounded-2xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/25"
       >
         {content}
       </Link>

@@ -40,7 +40,7 @@ export function getAuditActionTone(action: string): string {
     return "bg-[#22C55E]/10 text-[#15803D] border-[#22C55E]/20";
   }
   if (action.includes("updated") || action.includes("changed")) {
-    return "bg-[#6D5EF7]/10 text-[#6D5EF7] border-[#6D5EF7]/20";
+    return "bg-[#E8952E]/10 text-[#E8952E] border-[#E8952E]/20";
   }
   if (action.includes("settings")) {
     return "bg-[#F59E0B]/10 text-[#B45309] border-[#F59E0B]/20";

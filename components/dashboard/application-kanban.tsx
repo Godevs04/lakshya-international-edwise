@@ -64,7 +64,7 @@ function KanbanCard({ app, canWrite }: { app: ApplicationListItem; canWrite: boo
       >
         <p className="text-sm font-semibold">{app.studentName}</p>
         <p className="text-xs text-muted-foreground">{app.studentId}</p>
-        <p className="mt-2 text-base font-bold text-[#6D5EF7]">{formatCurrency(app.loanAmount)}</p>
+        <p className="mt-2 text-base font-bold text-[#E8952E]">{formatCurrency(app.loanAmount)}</p>
         {app.partnerName && <p className="mt-1 text-xs text-muted-foreground">{app.partnerName}</p>}
       </GlassCard>
     </div>
@@ -288,7 +288,7 @@ function KanbanColumnInner({
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[200px] max-h-[min(70vh,720px)] overflow-y-auto rounded-2xl border border-[#6D5EF7]/10 p-2 transition-all ${isOver ? "bg-[#6D5EF7]/10 ring-2 ring-[#6D5EF7]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
+      className={`min-h-[200px] max-h-[min(70vh,720px)] overflow-y-auto rounded-2xl border border-[#E8952E]/10 p-2 transition-all ${isOver ? "bg-[#E8952E]/10 ring-2 ring-[#E8952E]/20" : "bg-white/40 backdrop-blur-sm dark:bg-white/5"}`}
     >
       {apps.map((app) => (
         <KanbanCard key={app._id} app={app} canWrite={canWrite} />

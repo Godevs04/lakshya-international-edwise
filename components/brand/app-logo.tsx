@@ -63,7 +63,7 @@ export function AppLogo({
         "relative flex shrink-0 items-center justify-center overflow-hidden",
         onDark
           ? "rounded-full bg-white/10 p-0.5 ring-1 ring-white/20 backdrop-blur-sm"
-          : "rounded-2xl bg-white px-2 py-1.5 shadow-lg shadow-[#6D5EF7]/15 ring-1 ring-black/5",
+          : "rounded-2xl bg-white px-2 py-1.5 shadow-lg shadow-[#E8952E]/15 ring-1 ring-black/5",
         variant === "sidebar" && onDark && "aspect-square",
         variant !== "sidebar" && "overflow-hidden",
         styles.className,

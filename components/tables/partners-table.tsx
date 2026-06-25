@@ -60,8 +60,8 @@ export function PartnersTable({
             className={cn(
               "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
               currentActionStatus === "all"
-                ? "border-[#6D5EF7] bg-[#6D5EF7] text-white shadow-sm"
-                : "border-[#6D5EF7]/15 bg-white/60 text-muted-foreground hover:border-[#6D5EF7]/30 hover:bg-[#6D5EF7]/8 hover:text-foreground dark:bg-white/5"
+                ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
+                : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
             )}
           >
             All
@@ -76,8 +76,8 @@ export function PartnersTable({
                 className={cn(
                   "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#6D5EF7] bg-[#6D5EF7] text-white shadow-sm"
-                    : "border-[#6D5EF7]/15 bg-white/60 text-muted-foreground hover:border-[#6D5EF7]/30 hover:bg-[#6D5EF7]/8 hover:text-foreground dark:bg-white/5"
+                    ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
+                    : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
                 )}
               >
                 {PARTNER_ACTION_STATUS_LABELS[status]}
@@ -105,7 +105,7 @@ export function PartnersTable({
             {data.length ? data.map((p) => (
               <TableRow key={p._id}>
                 <TableCell>
-                  <Link href={`/dashboard/partners/${p._id}`} className="font-semibold text-[#6D5EF7] hover:underline">
+                  <Link href={`/dashboard/partners/${p._id}`} className="font-semibold text-[#E8952E] hover:underline">
                     {p.companyName}
                   </Link>
                 </TableCell>

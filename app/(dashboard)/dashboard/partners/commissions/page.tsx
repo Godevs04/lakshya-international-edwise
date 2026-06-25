@@ -91,7 +91,7 @@ export default async function PartnerCommissionsPage({
         </GlassCard>
         <GlassCard className="p-4 sm:col-span-2 xl:col-span-1">
           <p className="text-xs text-muted-foreground">Net Commission Earned</p>
-          <p className="text-2xl font-semibold text-[#6D5EF7]">{formatCurrency(totals.earned)}</p>
+          <p className="text-2xl font-semibold text-[#E8952E]">{formatCurrency(totals.earned)}</p>
         </GlassCard>
       </div>
 

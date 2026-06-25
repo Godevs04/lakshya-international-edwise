@@ -131,7 +131,7 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
               "relative flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed p-6 transition-colors",
               selectedFile
                 ? "border-[#22C55E]/40 bg-[#22C55E]/5 hover:bg-[#22C55E]/10"
-                : "border-[#6D5EF7]/25 bg-[#6D5EF7]/5 hover:bg-[#6D5EF7]/10"
+                : "border-[#E8952E]/25 bg-[#E8952E]/5 hover:bg-[#E8952E]/10"
             )}
           >
             {selectedFile ? (
@@ -158,7 +158,7 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
               </>
             ) : (
               <>
-                <FileSpreadsheet className="h-8 w-8 text-[#6D5EF7]" />
+                <FileSpreadsheet className="h-8 w-8 text-[#E8952E]" />
                 <span className="text-sm font-medium">Choose CSV or Excel file</span>
                 <span className="text-xs text-muted-foreground">.csv, .xlsx, .xls — up to 5 MB</span>
               </>

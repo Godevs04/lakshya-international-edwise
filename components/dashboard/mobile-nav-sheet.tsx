@@ -40,8 +40,8 @@ export function MobileNavSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sidebar-solid w-[min(100vw-2rem,320px)] border-white/10 p-0 text-white">
-        <SheetHeader className="border-b border-white/10 px-4 py-3.5 text-left">
+      <SheetContent side="right" className="sidebar-solid w-[min(100vw-2rem,320px)] border-sidebar-border p-0 text-sidebar-foreground">
+        <SheetHeader className="border-b border-sidebar-border px-4 py-3.5 text-left">
           <SidebarBrand companyName={companyName} logo={logo} linkToOverview={false} />
         </SheetHeader>
         <nav className="space-y-1 p-3">
@@ -57,8 +57,8 @@ export function MobileNavSheet({
                   className={cn(
                     "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-gradient-to-r from-[#7C6CF8] to-[#9B8AFB] text-white shadow-md"
-                      : "text-white/70 hover:bg-white/10 hover:text-white"
+                      ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md shadow-primary/20"
+                      : "text-sidebar-foreground/75 hover:bg-primary/10 hover:text-sidebar-foreground"
                   )}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />

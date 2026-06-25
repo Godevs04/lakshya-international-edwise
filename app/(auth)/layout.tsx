@@ -25,7 +25,7 @@ async function AuthLayoutInner({ children }: { children: React.ReactNode }) {
           src={config.company.logo}
           alt={config.company.name}
           variant="auth"
-          className="mx-auto mb-4 shadow-xl shadow-[#6D5EF7]/20"
+          className="mx-auto mb-4 shadow-xl shadow-[#E8952E]/20"
           priority
         />
         <h1 className="text-2xl font-bold tracking-tight">{config.company.name}</h1>

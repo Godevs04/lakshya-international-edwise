@@ -5,7 +5,7 @@ import { Clock, Mail } from "lucide-react";
 
 export default function PendingApprovalPage() {
   return (
-    <GlassCard className="p-8 text-center shadow-2xl shadow-[#6D5EF7]/10">
+    <GlassCard className="p-8 text-center shadow-2xl shadow-[#E8952E]/10">
       <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-[#F59E0B] to-[#EF4444] shadow-lg">
         <Clock className="h-8 w-8 text-white" />
       </div>
@@ -15,8 +15,8 @@ export default function PendingApprovalPage() {
         Once an administrator or super admin reviews and approves your request with the
         correct role, you will be onboarded to the CRM.
       </p>
-      <div className="mx-auto mt-6 max-w-md rounded-2xl border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 p-4 text-left text-sm">
-        <p className="font-semibold text-[#6D5EF7]">What happens next?</p>
+      <div className="mx-auto mt-6 max-w-md rounded-2xl border border-[#E8952E]/15 bg-[#E8952E]/5 p-4 text-left text-sm">
+        <p className="font-semibold text-[#E8952E]">What happens next?</p>
         <ul className="mt-2 space-y-2 text-muted-foreground">
           <li className="flex items-start gap-2">
             <Mail className="mt-0.5 h-4 w-4 shrink-0" />

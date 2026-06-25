@@ -184,7 +184,7 @@ export function PartnerCommissionLedgerPanel({
                           ? "text-[#22C55E]"
                           : entry.type === "received"
                             ? "text-[#22C55E]"
-                            : "text-[#6D5EF7]"
+                            : "text-[#E8952E]"
                       }
                     >
                       {formatCurrency(entry.amount)}

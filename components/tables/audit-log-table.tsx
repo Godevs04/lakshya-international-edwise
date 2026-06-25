@@ -139,7 +139,7 @@ export function AuditLogTable({
       label: "Total events",
       value: stats.total,
       icon: Shield,
-      tone: "from-[#6D5EF7] to-[#8B5CF6]",
+      tone: "from-[#E8952E] to-[#F59E0B]",
     },
     {
       label: "Today",
@@ -304,7 +304,7 @@ export function AuditLogTable({
                         resourceHref ? (
                           <Link
                             href={resourceHref}
-                            className="mt-0.5 block font-mono text-xs text-[#6D5EF7] hover:underline"
+                            className="mt-0.5 block font-mono text-xs text-[#E8952E] hover:underline"
                           >
                             {log.resourceId.slice(-8)}
                           </Link>

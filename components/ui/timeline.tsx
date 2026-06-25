@@ -17,11 +17,11 @@ interface TimelineProps {
 }
 
 const DOT_COLORS = [
-  "from-[#6D5EF7] to-[#8B5CF6]",
+  "from-[#E8952E] to-[#F59E0B]",
   "from-[#3B82F6] to-[#06B6D4]",
   "from-[#22C55E] to-[#10B981]",
   "from-[#F59E0B] to-[#EF4444]",
-  "from-[#EC4899] to-[#8B5CF6]",
+  "from-[#EC4899] to-[#F59E0B]",
 ];
 
 const DEFAULT_ICONS = [Activity, UserPlus, FileText, CheckCircle, Clock];
@@ -38,7 +38,7 @@ export function Timeline({ items, className }: TimelineProps) {
         return (
           <div key={item.id} className="relative flex gap-4 pb-6 last:pb-0">
             {index < items.length - 1 && (
-              <div className="absolute left-[19px] top-10 h-[calc(100%-20px)] w-px bg-gradient-to-b from-[#6D5EF7]/30 to-transparent" />
+              <div className="absolute left-[19px] top-10 h-[calc(100%-20px)] w-px bg-gradient-to-b from-[#E8952E]/30 to-transparent" />
             )}
             <div
               className={cn(
@@ -48,12 +48,12 @@ export function Timeline({ items, className }: TimelineProps) {
             >
               {item.icon ?? <DefaultIcon className="h-4 w-4 text-white" />}
             </div>
-            <div className="min-w-0 flex-1 rounded-2xl bg-[#6D5EF7]/4 p-3 transition-colors hover:bg-[#6D5EF7]/8">
+            <div className="min-w-0 flex-1 rounded-2xl bg-[#E8952E]/4 p-3 transition-colors hover:bg-[#E8952E]/8">
               <p className="text-sm font-semibold text-foreground">{item.title}</p>
               {item.description && (
                 <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
               )}
-              <p className="mt-1.5 text-[11px] font-medium text-[#6D5EF7]/70">
+              <p className="mt-1.5 text-[11px] font-medium text-[#E8952E]/70">
                 {formatDateTime(item.timestamp)}
               </p>
             </div>

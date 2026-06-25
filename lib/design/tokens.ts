@@ -1,46 +1,46 @@
-/** Premium CRM design tokens — single source of truth */
+/** Premium CRM design tokens — Design 08 warm amber / gold */
 
 export const BRAND = {
-  primary: "#6D5EF7",
-  secondary: "#8B5CF6",
-  accent: "#06B6D4",
+  primary: "#E8952E",
+  secondary: "#F59E0B",
+  accent: "#FBBF24",
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
-  pink: "#EC4899",
-  background: "#F8F9FF",
-  sidebarFrom: "#1E0B4A",
-  sidebarTo: "#5B21B6",
+  pink: "#FB923C",
+  background: "#FFFBF5",
+  sidebarFrom: "#9A3412",
+  sidebarTo: "#EA580C",
 } as const;
 
 export const KPI_GRADIENTS = [
-  "from-[#6D5EF7] to-[#8B5CF6]",
-  "from-[#3B82F6] to-[#06B6D4]",
+  "from-[#E8952E] to-[#F59E0B]",
+  "from-[#F97316] to-[#FB923C]",
   "from-[#22C55E] to-[#10B981]",
-  "from-[#F59E0B] to-[#EF4444]",
-  "from-[#EC4899] to-[#8B5CF6]",
-  "from-[#06B6D4] to-[#3B82F6]",
-  "from-[#6366F1] to-[#4F46E5]",
+  "from-[#3B82F6] to-[#60A5FA]",
+  "from-[#FBBF24] to-[#FCD34D]",
+  "from-[#D97706] to-[#EA580C]",
   "from-[#14B8A6] to-[#22C55E]",
-  "from-[#F97316] to-[#F59E0B]",
+  "from-[#EF4444] to-[#F87171]",
+  "from-[#EAB308] to-[#FACC15]",
 ] as const;
 
 export const CHART_COLORS = [
-  "#6D5EF7",
-  "#8B5CF6",
-  "#06B6D4",
-  "#22C55E",
+  "#E8952E",
   "#F59E0B",
-  "#EC4899",
+  "#FBBF24",
+  "#22C55E",
   "#3B82F6",
+  "#F97316",
+  "#FB923C",
   "#EF4444",
 ] as const;
 
 export const HERO_GRADIENT =
-  "linear-gradient(90deg, #6D5EF7, #8B5CF6, #06B6D4)";
+  "linear-gradient(90deg, #E8952E, #F59E0B, #FBBF24)";
 
 export const CARD_GRADIENT =
-  "linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88))";
+  "linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,251,245,.9))";
 
 export const SIDEBAR_GRADIENT =
-  "linear-gradient(180deg, #1E0B4A 0%, #3B1578 42%, #5B21B6 100%)";
+  "linear-gradient(180deg, #FFFBF5 0%, #FFF7ED 45%, #FFEDD5 100%)";

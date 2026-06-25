@@ -36,7 +36,7 @@ export function FaviconMark({ initial, size }: FaviconMarkProps) {
           borderRadius: radius,
           background: `linear-gradient(145deg, ${BRAND.primary} 0%, ${BRAND.secondary} 55%, #4F46E5 100%)`,
           border: `${ring}px solid rgba(255, 255, 255, 0.28)`,
-          boxShadow: `0 ${Math.round(size * 0.06)}px ${Math.round(size * 0.14)}px rgba(109, 94, 247, 0.45)`,
+          boxShadow: `0 ${Math.round(size * 0.06)}px ${Math.round(size * 0.14)}px rgba(232, 149, 46, 0.45)`,
         }}
       >
         {/* Top highlight */}

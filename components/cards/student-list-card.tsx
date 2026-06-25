@@ -28,7 +28,7 @@ export function StudentListCard({ students, viewAllHref = "/dashboard/students" 
     <div className="space-y-3">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-bold">Latest Students</h3>
-        <Link href={viewAllHref} className="text-xs font-semibold text-[#6D5EF7] hover:underline">
+        <Link href={viewAllHref} className="text-xs font-semibold text-[#E8952E] hover:underline">
           View all →
         </Link>
       </div>
@@ -39,10 +39,10 @@ export function StudentListCard({ students, viewAllHref = "/dashboard/students" 
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
             whileHover={{ x: 4, scale: 1.01 }}
-            className="group flex items-center gap-3 rounded-2xl border border-transparent bg-[#6D5EF7]/4 p-3 transition-all hover:border-[#6D5EF7]/15 hover:bg-[#6D5EF7]/8 hover:shadow-md hover:shadow-[#6D5EF7]/10"
+            className="group flex items-center gap-3 rounded-2xl border border-transparent bg-[#E8952E]/4 p-3 transition-all hover:border-[#E8952E]/15 hover:bg-[#E8952E]/8 hover:shadow-md hover:shadow-[#E8952E]/10"
           >
-            <Avatar className="h-10 w-10 ring-2 ring-[#6D5EF7]/15 transition-all group-hover:ring-[#6D5EF7]/30">
-              <AvatarFallback className="bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xs font-bold text-white">
+            <Avatar className="h-10 w-10 ring-2 ring-[#E8952E]/15 transition-all group-hover:ring-[#E8952E]/30">
+              <AvatarFallback className="bg-gradient-to-br from-[#E8952E] to-[#F59E0B] text-xs font-bold text-white">
                 {getInitials(`${s.firstName} ${s.lastName}`)}
               </AvatarFallback>
             </Avatar>
@@ -53,7 +53,7 @@ export function StudentListCard({ students, viewAllHref = "/dashboard/students" 
                 {s.partner && ` · ${s.partner}`}
               </p>
               {s.loanAmount && (
-                <p className="mt-0.5 text-xs font-medium text-[#6D5EF7]">{s.loanAmount}</p>
+                <p className="mt-0.5 text-xs font-medium text-[#E8952E]">{s.loanAmount}</p>
               )}
             </div>
             <StatusBadge status={s.status} />

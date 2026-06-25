@@ -152,7 +152,7 @@ export function StudentAdvancedSearch({
             <SlidersHorizontal className="mr-1.5 h-4 w-4" />
             Advanced
             {activeCount > 0 && (
-              <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6D5EF7] px-1.5 text-xs font-semibold text-white">
+              <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#E8952E] px-1.5 text-xs font-semibold text-white">
                 {activeCount}
               </span>
             )}

@@ -21,19 +21,19 @@ import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 
 const LoanStatusBarChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.LoanStatusBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const MonthlyStudentsAreaChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.MonthlyStudentsAreaChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const LoanAmountBarChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.LoanAmountBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 const TopPartnersBarChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.TopPartnersBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#6D5EF7]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
 );
 
 function withTrend(
@@ -169,7 +169,7 @@ export default async function OverviewPage() {
         <GlassCard className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-base font-bold">Latest Partners</h3>
-            <Link href="/dashboard/partners" className="text-xs font-semibold text-[#6D5EF7] hover:underline">
+            <Link href="/dashboard/partners" className="text-xs font-semibold text-[#E8952E] hover:underline">
               View all →
             </Link>
           </div>
@@ -177,7 +177,7 @@ export default async function OverviewPage() {
             <div className="space-y-3">
               {latestPartners.map((p) => (
                 <Link key={p._id.toString()} href={`/dashboard/partners/${p._id}`}>
-                  <div className="group flex items-center gap-3 rounded-2xl bg-[#6D5EF7]/4 p-3 transition-all hover:translate-x-1 hover:bg-[#6D5EF7]/8">
+                  <div className="group flex items-center gap-3 rounded-2xl bg-[#E8952E]/4 p-3 transition-all hover:translate-x-1 hover:bg-[#E8952E]/8">
                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] shadow-md">
                       <Handshake className="h-4 w-4 text-white" />
                     </div>

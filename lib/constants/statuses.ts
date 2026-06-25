@@ -43,8 +43,8 @@ export interface StatusConfig {
 export const STUDENT_STATUS_CONFIG: Record<StudentStatus, StatusConfig> = {
   new: {
     label: "New",
-    color: "bg-[#6D5EF7]/12 text-[#6D5EF7] border-[#6D5EF7]/25",
-    dotColor: "bg-[#6D5EF7]",
+    color: "bg-[#E8952E]/12 text-[#E8952E] border-[#E8952E]/25",
+    dotColor: "bg-[#E8952E]",
   },
   contacted: {
     label: "Contacted",
@@ -58,8 +58,8 @@ export const STUDENT_STATUS_CONFIG: Record<StudentStatus, StatusConfig> = {
   },
   submitted: {
     label: "Submitted",
-    color: "bg-[#8B5CF6]/12 text-[#8B5CF6] border-[#8B5CF6]/25",
-    dotColor: "bg-[#8B5CF6]",
+    color: "bg-[#F59E0B]/12 text-[#F59E0B] border-[#F59E0B]/25",
+    dotColor: "bg-[#F59E0B]",
   },
   under_verification: {
     label: "Under Verification",
