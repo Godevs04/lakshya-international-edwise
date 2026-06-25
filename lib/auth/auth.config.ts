@@ -1,12 +1,14 @@
 import type { NextAuthConfig } from "next-auth";
-import { getAuthSecret, resolveAuthUrl } from "@/lib/config/env";
+import { getAuthSecret, getConfiguredAuthUrl } from "@/lib/config/env";
 import { isPublicRegistrationAllowed } from "@/lib/config/env";
 import { getSessionMaxAgeSeconds } from "@/lib/auth/session-expiry";
 import type { UserRole } from "@/types";
 
-const authUrl = resolveAuthUrl();
-process.env.AUTH_URL = authUrl;
-process.env.NEXTAUTH_URL = authUrl;
+const configuredAuthUrl = getConfiguredAuthUrl();
+if (configuredAuthUrl) {
+  process.env.AUTH_URL = configuredAuthUrl;
+  process.env.NEXTAUTH_URL = configuredAuthUrl;
+}
 
 declare module "next-auth" {
   interface Session {
@@ -51,16 +53,21 @@ export const authConfig = {
   providers: [],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      const canonicalBase = authUrl || baseUrl;
+      const requestBase = baseUrl.replace(/\/$/, "");
+      const canonicalBase = configuredAuthUrl ?? requestBase;
 
       if (url.startsWith("/")) {
-        return `${canonicalBase}${url}`;
+        return `${requestBase}${url}`;
       }
 
       try {
         const target = new URL(url);
-        const allowed = new URL(canonicalBase);
-        if (target.origin === allowed.origin) {
+        const allowedOrigins = new Set(
+          [requestBase, configuredAuthUrl]
+            .filter((value): value is string => Boolean(value))
+            .map((value) => new URL(value).origin)
+        );
+        if (allowedOrigins.has(target.origin)) {
           return url;
         }
       } catch {
