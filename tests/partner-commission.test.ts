@@ -21,25 +21,28 @@ describe("two-tier commission formulas", () => {
     expect(calculateExpectedCommission(100_000, 0)).toBe(0);
   });
 
-  it("calculates partner share from expected commission", () => {
-    expect(calculatePartnerShareExpected(1_600, 0.8)).toBe(12.8);
+  it("calculates partner share from disbursement", () => {
+    expect(calculatePartnerShareExpected(100_000, 0.8)).toBe(800);
   });
 
   it("calculates pending received and shared", () => {
     expect(calculatePendingReceived(1_600, 1_000)).toBe(600);
-    expect(calculatePendingShared(12.8, 5)).toBe(7.8);
+    expect(calculatePendingShared(800, 5)).toBe(795);
   });
 
   it("calculates net earned as received minus shared", () => {
-    expect(calculateNetEarned(1_600, 12.8)).toBe(1_587.2);
+    expect(calculateNetEarned(1_600, 800)).toBe(800);
   });
 
   it("matches the user example end-to-end", () => {
-    const expected = calculateExpectedCommission(100_000, 1.6);
-    const share = calculatePartnerShareExpected(expected, 0.8);
-    expect(expected).toBe(1_600);
-    expect(share).toBe(12.8);
-    expect(calculateNetEarned(expected, share)).toBe(1_587.2);
+    const disbursed = 4_000_000;
+    const ourRate = 1.2;
+    const partnerRate = 0.6;
+    const expected = calculateExpectedCommission(disbursed, ourRate);
+    const share = calculatePartnerShareExpected(disbursed, partnerRate);
+    expect(expected).toBe(48_000);
+    expect(share).toBe(24_000);
+    expect(calculateNetEarned(expected, share)).toBe(24_000);
   });
 });
 
@@ -54,7 +57,7 @@ describe("legacy aliases", () => {
   });
 
   it("keeps calculatePendingCommission as pending shared", () => {
-    expect(calculatePendingCommission(12.8, 5)).toBe(7.8);
+    expect(calculatePendingCommission(800, 5)).toBe(795);
   });
 });
 
@@ -80,7 +83,7 @@ describe("matchesCommissionStatusFilter", () => {
     commissionReceived: 0,
     pendingReceived: 600,
     commissionShared: 0,
-    pendingShared: 7.8,
+    pendingShared: 795,
   };
 
   it("filters received pending", () => {
@@ -107,7 +110,7 @@ describe("matchesCommissionStatusFilter", () => {
   it("filters shared partial", () => {
     expect(
       matchesCommissionStatusFilter(
-        { ...row, commissionShared: 3, pendingShared: 4.8 },
+        { ...row, commissionShared: 3, pendingShared: 400 },
         "shared_partial"
       )
     ).toBe(true);

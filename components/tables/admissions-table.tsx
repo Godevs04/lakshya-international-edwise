@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
@@ -28,7 +29,8 @@ import { updateAdmissionRevenueAction } from "@/lib/actions/admission.actions";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import { formatCurrency } from "@/lib/utils/format";
 import type { AdmissionListItem } from "@/types";
-import { Search, X } from "lucide-react";
+import { Search, X, Pencil } from "lucide-react";
+import { getAdmissionDetailHref } from "@/lib/constants/admission-edit-sections";
 
 interface AssigneeOption {
   _id: string;
@@ -284,6 +286,7 @@ export function AdmissionsTable({
               <TableHead>Country</TableHead>
               <TableHead>University</TableHead>
               {canViewRevenue ? <TableHead>Revenue</TableHead> : null}
+              {canWrite ? <TableHead className="text-right">Actions</TableHead> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -292,9 +295,12 @@ export function AdmissionsTable({
                 <TableRow key={row._id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-semibold">
+                      <Link
+                        href={getAdmissionDetailHref(row._id)}
+                        className="font-semibold text-primary hover:underline"
+                      >
                         {row.firstName} {row.lastName}
-                      </p>
+                      </Link>
                       <p className="text-xs text-muted-foreground">{row.studentId}</p>
                     </div>
                   </TableCell>
@@ -313,11 +319,21 @@ export function AdmissionsTable({
                       />
                     </TableCell>
                   ) : null}
+                  {canWrite ? (
+                    <TableCell className="text-right">
+                      <Link href={getAdmissionDetailHref(row._id)}>
+                        <Button variant="ghost" size="sm" className="h-8">
+                          <Pencil className="mr-1 h-3.5 w-3.5" />
+                          View / Edit
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={canViewRevenue ? 6 : 5} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={canWrite ? (canViewRevenue ? 7 : 6) : canViewRevenue ? 6 : 5} className="h-24 text-center text-muted-foreground">
                   No admission records found.
                 </TableCell>
               </TableRow>

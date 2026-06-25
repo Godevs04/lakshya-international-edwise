@@ -4,11 +4,17 @@ import { PartnerForm } from "@/components/forms/partner-form";
 import { getPartnerForEdit } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess } from "@/lib/auth/page-access";
+import {
+  parsePartnerEditSection,
+  PARTNER_EDIT_SECTIONS,
+} from "@/lib/constants/partner-edit-sections";
 
 export default async function EditPartnerPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ section?: string }>;
 }) {
   await requireModuleEnabled("partners");
   const access = await getPartnerPageAccess();
@@ -17,15 +23,25 @@ export default async function EditPartnerPage({
   }
 
   const { id } = await params;
+  const { section: sectionParam } = await searchParams;
+  const focusSection = parsePartnerEditSection(sectionParam);
   const partner = await getPartnerForEdit(id);
   if (!partner) notFound();
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Edit Partner" description={partner.companyName} />
+      <PageHeader
+        title={
+          focusSection
+            ? `Edit ${PARTNER_EDIT_SECTIONS[focusSection].label}`
+            : "Edit Partner"
+        }
+        description={partner.companyName}
+      />
       <PartnerForm
         mode="edit"
         partnerId={id}
+        focusSection={focusSection}
         initialData={{
           companyName: partner.companyName,
           owner: partner.owner,

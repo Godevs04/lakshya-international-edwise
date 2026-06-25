@@ -286,6 +286,16 @@ export async function updateTaskStatusAction(
     const task = await Task.findByIdAndUpdate(id, { status }, { new: true });
     if (!task) return { success: false, error: "Task not found" };
 
+    await logActivity({
+      action: "task.status_changed",
+      description: `Task "${task.title}" marked as ${status}`,
+      resourceType: "task",
+      resourceId: id,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { status },
+    });
+
     revalidatePath("/dashboard/tasks");
     return { success: true };
   });
@@ -397,6 +407,15 @@ export async function assignTaskToMeAction(taskId: string): Promise<ActionResult
       });
     }
 
+    await logActivity({
+      action: "task.assigned_to_me",
+      description: `Task "${task.title}" assigned to ${user.name}`,
+      resourceType: "task",
+      resourceId: taskId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
     revalidatePath("/dashboard/tasks");
     return { success: true };
   });
@@ -410,6 +429,15 @@ export async function deleteTaskAction(id: string): Promise<ActionResult> {
     await connectDB();
     const task = await Task.findByIdAndDelete(id);
     if (!task) return { success: false, error: "Task not found" };
+
+    await logActivity({
+      action: "task.deleted",
+      description: `Task "${task.title}" was deleted`,
+      resourceType: "task",
+      resourceId: id,
+      userId: user?.id,
+      userName: user?.name,
+    });
 
     revalidatePath("/dashboard/tasks");
     return { success: true };

@@ -33,6 +33,10 @@ import {
 } from "@/lib/utils/student-profile";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { ExternalLink, GraduationCap, Pencil, Trash2, UserRound } from "lucide-react";
+import {
+  getStudentEditHref,
+  type StudentEditSectionKey,
+} from "@/lib/constants/student-edit-sections";
 
 interface StudentDetailProps {
   canWrite?: boolean;
@@ -94,6 +98,47 @@ function SummaryRow({ label, value }: { label: string; value?: string | null }) 
     <div className="flex items-start justify-between gap-3 text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span className="text-right font-medium">{value?.trim() ? value : "—"}</span>
+    </div>
+  );
+}
+
+function SectionEditButton({
+  studentId,
+  section,
+}: {
+  studentId: string;
+  section: StudentEditSectionKey;
+}) {
+  return (
+    <Link href={getStudentEditHref(studentId, section)}>
+      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+        <Pencil className="mr-1 h-3 w-3" />
+        Edit
+      </Button>
+    </Link>
+  );
+}
+
+function SectionHeader({
+  title,
+  icon: Icon,
+  studentId,
+  section,
+  canWrite,
+}: {
+  title: string;
+  icon: typeof UserRound;
+  studentId: string;
+  section: StudentEditSectionKey;
+  canWrite: boolean;
+}) {
+  return (
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <h3 className="flex items-center gap-2 text-sm font-semibold">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        {title}
+      </h3>
+      {canWrite ? <SectionEditButton studentId={studentId} section={section} /> : null}
     </div>
   );
 }
@@ -286,7 +331,7 @@ export function StudentDetailView({
             <div className="mt-4">
               <Link href={`/dashboard/students/${student._id}/edit`} className="block">
                 <Button variant="outline" size="sm" className="w-full">
-                  <Pencil className="mr-1 h-4 w-4" /> Edit Profile
+                  <Pencil className="mr-1 h-4 w-4" /> Edit all sections
                 </Button>
               </Link>
             </div>
@@ -339,10 +384,13 @@ export function StudentDetailView({
           <TabsContent value="personal" className="mt-4">
             <GlassCard className="space-y-6 p-5">
               <div>
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                  <UserRound className="h-4 w-4 text-muted-foreground" />
-                  Student profile
-                </h3>
+                <SectionHeader
+                  title="Student profile"
+                  icon={UserRound}
+                  studentId={student._id}
+                  section="profile"
+                  canWrite={canWrite}
+                />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-xs text-muted-foreground">Name</p>
@@ -386,10 +434,13 @@ export function StudentDetailView({
               </div>
 
               <div>
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  Education & Address
-                </h3>
+                <SectionHeader
+                  title="Education & Address"
+                  icon={GraduationCap}
+                  studentId={student._id}
+                  section="education"
+                  canWrite={canWrite}
+                />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div><p className="text-xs text-muted-foreground">College</p><p className="text-sm">{student.education?.college ?? "—"}</p></div>
                   <div><p className="text-xs text-muted-foreground">Course</p><p className="text-sm">{student.education?.course ?? "—"}</p></div>
@@ -424,8 +475,13 @@ export function StudentDetailView({
               )}
 
               <details className="rounded-lg border p-4">
-                <summary className="cursor-pointer text-sm font-semibold text-muted-foreground">
-                  Identity (optional)
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-muted-foreground [&::-webkit-details-marker]:hidden">
+                  <span>Identity (optional)</span>
+                  {canWrite ? (
+                    <span onClick={(e) => e.preventDefault()} onKeyDown={(e) => e.stopPropagation()}>
+                      <SectionEditButton studentId={student._id} section="identity" />
+                    </span>
+                  ) : null}
                 </summary>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
@@ -435,7 +491,12 @@ export function StudentDetailView({
             </GlassCard>
           </TabsContent>
 
-          <TabsContent value="application" className="mt-4">
+          <TabsContent value="application" className="mt-4 space-y-3">
+            {canWrite ? (
+              <div className="flex justify-end">
+                <SectionEditButton studentId={student._id} section="loan" />
+              </div>
+            ) : null}
             <StudentApplicationPanel
               key={`${student._id}-${loanApplications.length}-${loanApplications.map((entry) => `${entry._id}-${entry.sentToBank}`).join("-")}`}
               studentId={student._id}
@@ -503,6 +564,12 @@ export function StudentDetailView({
 
           <TabsContent value="loan" className="mt-4">
             <GlassCard className="p-5">
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold">Loan summary</h3>
+                {canWrite ? (
+                  <SectionEditButton studentId={student._id} section="loan" />
+                ) : null}
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.requested ?? 0, student.loan?.currency)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.sanctioned ?? 0, student.loan?.currency)}</p></div>

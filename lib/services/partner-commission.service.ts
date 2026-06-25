@@ -226,7 +226,7 @@ function buildStudentCommissionBaseRows(
     );
     const commissionExpected = calculateExpectedCommission(disbursed, ourCommissionPercent);
     const partnerShareExpected = calculatePartnerShareExpected(
-      commissionExpected,
+      disbursed,
       effectivePartnerShare
     );
     const commissionReceived = Math.max(0, student.commissionReceived ?? 0);

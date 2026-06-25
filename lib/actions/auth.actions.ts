@@ -18,6 +18,7 @@ import { runLoggedMutation } from "@/lib/action-utils";
 import { checkRateLimit, getClientIp, getRateLimitRetryAfter } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/utils/token-hash";
 import { getPublicAuthUrl, isPublicRegistrationAllowed } from "@/lib/config/env";
+import { logActivity } from "@/lib/services/activity.service";
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
 
@@ -99,6 +100,16 @@ export async function registerAction(
     type: "info",
   });
 
+  await logActivity({
+    action: "user.registered",
+    description: `New registration: ${parsed.data.name} (${email})`,
+    resourceType: "user",
+    resourceId: user._id.toString(),
+    userId: user._id.toString(),
+    userName: parsed.data.name,
+    metadata: { email },
+  });
+
   return { success: true, data: undefined, code: "OTP_SENT" };
   });
 }
@@ -141,6 +152,16 @@ export async function verifyOtpAction(
   user.emailOtpExpiry = undefined;
   user.status = "pending";
   await user.save();
+
+  await logActivity({
+    action: "user.email_verified",
+    description: `Email verified for ${user.email}`,
+    resourceType: "user",
+    resourceId: user._id.toString(),
+    userId: user._id.toString(),
+    userName: user.name,
+    metadata: { email: user.email },
+  });
 
   return { success: true, code: "AWAITING_APPROVAL" };
   });
@@ -351,6 +372,16 @@ export async function resetPasswordAction(
   user.resetTokenExpiry = undefined;
   await user.save();
 
+  await logActivity({
+    action: "user.password_reset",
+    description: `Password reset for ${user.email}`,
+    resourceType: "user",
+    resourceId: user._id.toString(),
+    userId: user._id.toString(),
+    userName: user.name,
+    metadata: { email: user.email },
+  });
+
   return { success: true };
   });
 }
@@ -374,6 +405,16 @@ export async function verifyEmailAction(token: string): Promise<ActionResult> {
     user.status = "pending";
   }
   await user.save();
+
+  await logActivity({
+    action: "user.email_verified",
+    description: `Email verified for ${user.email}`,
+    resourceType: "user",
+    resourceId: user._id.toString(),
+    userId: user._id.toString(),
+    userName: user.name,
+    metadata: { email: user.email },
+  });
 
   return { success: true, code: "AWAITING_APPROVAL" };
   });

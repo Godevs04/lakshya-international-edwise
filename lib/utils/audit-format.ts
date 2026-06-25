@@ -2,6 +2,9 @@ export const AUDIT_RESOURCE_TYPES = [
   "student",
   "partner",
   "application",
+  "admission",
+  "task",
+  "lender",
   "settings",
   "user",
 ] as const;
@@ -19,9 +22,13 @@ export const AUDIT_ACTION_GROUPS = [
   { value: "all", label: "All actions" },
   { value: "student", label: "Student events" },
   { value: "students", label: "Bulk student events" },
+  { value: "admission", label: "Admission events" },
   { value: "application", label: "Application events" },
   { value: "partner", label: "Partner events" },
+  { value: "lender", label: "Lender events" },
+  { value: "task", label: "Task events" },
   { value: "settings", label: "Settings events" },
+  { value: "user", label: "User events" },
 ] as const;
 
 export function formatAuditAction(action: string): string {
@@ -36,10 +43,23 @@ export function getAuditActionTone(action: string): string {
   if (action.includes("deleted") || action.includes("rejected")) {
     return "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20";
   }
-  if (action.includes("imported") || action.includes("created")) {
+  if (
+    action.includes("imported") ||
+    action.includes("created") ||
+    action.includes("approved") ||
+    action.includes("verified") ||
+    action.includes("received") ||
+    action.includes("settled")
+  ) {
     return "bg-[#22C55E]/10 text-[#15803D] border-[#22C55E]/20";
   }
-  if (action.includes("updated") || action.includes("changed")) {
+  if (
+    action.includes("updated") ||
+    action.includes("changed") ||
+    action.includes("commission") ||
+    action.includes("revenue") ||
+    action.includes("exported")
+  ) {
     return "bg-[#E8952E]/10 text-[#E8952E] border-[#E8952E]/20";
   }
   if (action.includes("settings")) {
@@ -60,6 +80,16 @@ export function getAuditResourceHref(
       return `/dashboard/partners/${resourceId}`;
     case "application":
       return `/dashboard/applications?highlight=${resourceId}`;
+    case "admission":
+      return `/dashboard/admissions/${resourceId}`;
+    case "task":
+      return `/dashboard/tasks`;
+    case "lender":
+      return `/dashboard/lenders`;
+    case "user":
+      return `/dashboard/settings`;
+    case "settings":
+      return `/dashboard/settings`;
     default:
       return undefined;
   }
