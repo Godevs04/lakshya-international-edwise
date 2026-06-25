@@ -1,4 +1,4 @@
-import { getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl } from "@/lib/config/env";
 
 /** Email clients require absolute URLs for images and web fonts. */
 export function resolveEmailAssetUrl(url?: string): string | undefined {
@@ -13,7 +13,7 @@ export function resolveEmailAssetUrl(url?: string): string | undefined {
     return `https:${src}`;
   }
 
-  const base = getAuthUrl();
+  const base = getPublicAuthUrl();
   if (src.startsWith("/")) {
     return `${base}${src}`;
   }

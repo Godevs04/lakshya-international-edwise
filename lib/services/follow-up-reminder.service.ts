@@ -1,6 +1,6 @@
 import { endOfDay } from "date-fns";
 import { connectDB } from "@/lib/db/mongoose";
-import { getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl } from "@/lib/config/env";
 import { Student } from "@/models/Student";
 import { User } from "@/models/User";
 import { sendFollowUpReminderEmail } from "@/lib/services/email.service";
@@ -108,7 +108,7 @@ export async function sendFollowUpReminders(): Promise<FollowUpReminderSummary> 
     skipped: 0,
   };
 
-  const authUrl = getAuthUrl();
+  const authUrl = getPublicAuthUrl();
 
   for (const followUp of followUps) {
     summary.processed++;
