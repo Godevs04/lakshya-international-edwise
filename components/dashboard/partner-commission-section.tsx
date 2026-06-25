@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { notify } from "@/lib/toast";
 import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,13 @@ interface PartnerCommissionSectionProps {
   commissionPercent: number;
   totalDisbursed: number;
   disbursedStudentCount: number;
+  commissionExpected?: number;
+  commissionReceived?: number;
+  pendingReceived?: number;
+  partnerShareExpected?: number;
+  commissionShared?: number;
+  pendingShared?: number;
+  projectedNetEarned?: number;
   commissionEarned: number;
   commissionSettled: number;
   commissionPending: number;
@@ -54,6 +61,15 @@ interface PartnerCommissionSectionProps {
   studentCommissions: PartnerStudentCommissionRow[];
   ledger: PartnerCommissionLedger;
   initialTab?: "summary" | "students" | "ledger";
+  statusFilter?: import("@/lib/constants/commission-status").CommissionStatusFilter;
+}
+
+type CommissionTab = "summary" | "students" | "ledger";
+
+function resolveCommissionTab(value: string | null | undefined): CommissionTab {
+  if (value === "students") return "students";
+  if (value === "ledger") return "ledger";
+  return "summary";
 }
 
 export function PartnerCommissionSection({
@@ -62,6 +78,13 @@ export function PartnerCommissionSection({
   commissionPercent,
   totalDisbursed,
   disbursedStudentCount,
+  commissionExpected = 0,
+  commissionReceived = 0,
+  pendingReceived = 0,
+  partnerShareExpected = 0,
+  commissionShared = 0,
+  pendingShared = 0,
+  projectedNetEarned = 0,
   commissionEarned,
   commissionSettled,
   commissionPending,
@@ -69,11 +92,25 @@ export function PartnerCommissionSection({
   studentCommissions,
   ledger,
   initialTab = "summary",
+  statusFilter = "all",
 }: PartnerCommissionSectionProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const tab =
-    initialTab === "students" ? "students" : initialTab === "ledger" ? "ledger" : "summary";
+  const tab = resolveCommissionTab(searchParams.get("tab") ?? initialTab);
+
+  function handleTabChange(value: string | null) {
+    if (!value) return;
+    const next = new URLSearchParams(searchParams.toString());
+    if (value === "summary") {
+      next.delete("tab");
+    } else {
+      next.set("tab", value);
+    }
+    const query = next.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   async function handleSettlementSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -103,7 +140,7 @@ export function PartnerCommissionSection({
   }
 
   return (
-    <Tabs defaultValue={tab} className="space-y-4">
+    <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4">
       <TabsList className="flex h-auto flex-wrap">
         <TabsTrigger value="summary">Commission Summary</TabsTrigger>
         <TabsTrigger value="students">Student-wise Breakdown</TabsTrigger>
@@ -113,8 +150,9 @@ export function PartnerCommissionSection({
       <TabsContent value="summary" className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Commission Rate</p>
+            <p className="text-xs text-muted-foreground">Partner Share Rate</p>
             <p className="text-2xl font-semibold">{formatPercent(commissionPercent)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">% of your commission</p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Total Disbursed</p>
@@ -124,24 +162,36 @@ export function PartnerCommissionSection({
             </p>
           </GlassCard>
           <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Total Commission Earned</p>
-            <p className="text-2xl font-semibold text-[#6D5EF7]">{formatCurrency(commissionEarned)}</p>
+            <p className="text-xs text-muted-foreground">Commission Expected</p>
+            <p className="text-2xl font-semibold">{formatCurrency(commissionExpected)}</p>
           </GlassCard>
           <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Commission Settled</p>
-            <p className="text-2xl font-semibold text-[#22C55E]">{formatCurrency(commissionSettled)}</p>
+            <p className="text-xs text-muted-foreground">Commission Received</p>
+            <p className="text-2xl font-semibold text-[#22C55E]">{formatCurrency(commissionReceived)}</p>
           </GlassCard>
           <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Pending Commission</p>
-            <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(commissionPending)}</p>
+            <p className="text-xs text-muted-foreground">Pending Received</p>
+            <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(pendingReceived)}</p>
           </GlassCard>
           <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Settlement Progress</p>
-            <p className="text-2xl font-semibold">
-              {commissionEarned > 0
-                ? formatPercent(Math.min(100, (commissionSettled / commissionEarned) * 100))
-                : "0%"}
-            </p>
+            <p className="text-xs text-muted-foreground">Partner Share Expected</p>
+            <p className="text-2xl font-semibold">{formatCurrency(partnerShareExpected)}</p>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <p className="text-xs text-muted-foreground">Commission Shared</p>
+            <p className="text-2xl font-semibold text-[#22C55E]">{formatCurrency(commissionShared || commissionSettled)}</p>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <p className="text-xs text-muted-foreground">Pending Shared</p>
+            <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(pendingShared || commissionPending)}</p>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <p className="text-xs text-muted-foreground">Projected Net (auto)</p>
+            <p className="text-2xl font-semibold text-[#6D5EF7]">{formatCurrency(projectedNetEarned)}</p>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <p className="text-xs text-muted-foreground">Net Earned (after marks)</p>
+            <p className="text-2xl font-semibold">{formatCurrency(commissionEarned)}</p>
           </GlassCard>
         </div>
 
@@ -154,25 +204,25 @@ export function PartnerCommissionSection({
           </Button>
         </div>
 
-        {canWrite && commissionPending > 0 && (
+        {canWrite && (pendingShared || commissionPending) > 0 && (
           <GlassCard className="p-5">
-            <h3 className="mb-1 text-sm font-semibold">Record Bulk Settlement</h3>
+            <h3 className="mb-1 text-sm font-semibold">Record Bulk Partner Share</h3>
             <p className="mb-4 text-xs text-muted-foreground">
-              For precise tracking, use <strong>Mark Paid</strong> on individual students in the
-              Student-wise tab. Bulk settlement is kept for legacy lump-sum payments.
+              Amounts are calculated automatically. Use per-student <strong>Received</strong> and <strong>Paid</strong> buttons in the Student-wise tab.
+              Bulk entry below is only for legacy lump-sum partner payments.
             </p>
             <form onSubmit={handleSettlementSubmit} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="settlementAmount">Settlement Amount (INR)</Label>
+                <Label htmlFor="settlementAmount">Shared Amount (INR)</Label>
                 <Input
                   id="settlementAmount"
                   name="amount"
                   type="number"
                   step="0.01"
                   min={0.01}
-                  max={commissionPending}
+                  max={pendingShared || commissionPending}
                   inputMode="decimal"
-                  placeholder={`Up to ${commissionPending.toLocaleString("en-IN")}`}
+                  placeholder={`Up to ${(pendingShared || commissionPending).toLocaleString("en-IN")}`}
                   required
                 />
               </div>
@@ -196,7 +246,7 @@ export function PartnerCommissionSection({
 
         {settlements.length > 0 && (
           <GlassCard className="p-5">
-            <h3 className="mb-4 text-sm font-semibold">Recent Settlements</h3>
+            <h3 className="mb-4 text-sm font-semibold">Recent Partner Share Payments</h3>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -230,7 +280,7 @@ export function PartnerCommissionSection({
           <div className="mb-4">
             <h3 className="text-sm font-semibold">Student-wise Commission & Payout</h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              Settle each student individually, or override the commission rate for special cases.
+              Mark commission received from lender and partner share paid per student.
             </p>
           </div>
           <PartnerStudentCommissionTable
@@ -238,6 +288,8 @@ export function PartnerCommissionSection({
             defaultCommissionPercent={commissionPercent}
             rows={studentCommissions}
             canWrite={canWrite}
+            statusFilter={statusFilter}
+            showStatusFilter
           />
         </GlassCard>
       </TabsContent>

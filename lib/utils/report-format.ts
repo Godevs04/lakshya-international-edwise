@@ -63,7 +63,10 @@ export function formatStudentReportRows(students: LooseRecord[]): Record<string,
       "Loan Sanctioned": formatCurrency(Number(loan?.sanctioned ?? 0)),
       "Loan Disbursed": formatCurrency(Number(loan?.disbursed ?? 0)),
       "Disbursement Type": getDisbursementTypeLabel(loan?.disbursementType as string | undefined),
-      "Interest %": loan?.interest != null ? `${loan.interest}%` : "",
+      "ROI / Interest %": (() => {
+        const rate = Number(loan?.roi ?? loan?.interest ?? 0);
+        return rate > 0 ? `${rate}%` : "";
+      })(),
       Bank: String(loan?.bankName ?? ""),
       "Bank LAN": String(loan?.applicationNumber ?? ""),
       Partner: partnerName(student.partnerId),
@@ -87,12 +90,20 @@ export function formatPartnerReportRows(partners: LooseRecord[]): Record<string,
     Company: String(partner.companyName ?? ""),
     Students: Number(partner.studentsCount ?? 0),
     "Total Loan Value": formatCurrency(Number(partner.totalLoanValue ?? 0)),
-    "Commission %": partner.commissionPercent != null ? formatPercent(Number(partner.commissionPercent)) : "",
-    "Commission Earned": formatCurrency(Number(partner.commissionEarned ?? 0)),
-    "Commission Settled": formatCurrency(Number(partner.commissionSettled ?? 0)),
-    "Pending Commission": formatCurrency(
-      Math.max(0, Number(partner.commissionEarned ?? 0) - Number(partner.commissionSettled ?? 0))
+    "Partner Share %": partner.commissionPercent != null ? formatPercent(Number(partner.commissionPercent)) : "",
+    Expected: formatCurrency(Number(partner.commissionExpected ?? 0)),
+    Received: formatCurrency(Number(partner.commissionReceived ?? 0)),
+    "Pending Received": formatCurrency(Number(partner.pendingReceived ?? 0)),
+    "Share Expected": formatCurrency(Number(partner.partnerShareExpected ?? 0)),
+    Shared: formatCurrency(Number(partner.commissionShared ?? partner.commissionSettled ?? 0)),
+    "Pending Shared": formatCurrency(
+      Math.max(
+        0,
+        Number(partner.partnerShareExpected ?? 0) -
+          Number(partner.commissionShared ?? partner.commissionSettled ?? 0)
+      )
     ),
+    "Net Earned": formatCurrency(Number(partner.commissionEarned ?? 0)),
     Status: String(partner.status ?? ""),
   }));
 }

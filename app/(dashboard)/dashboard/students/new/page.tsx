@@ -23,7 +23,11 @@ export default async function NewStudentPage() {
     <div className="space-y-6">
       <PageHeader title="Add Student" description="Create a new student record" />
       <StudentForm
-        partners={partners.map((p) => ({ _id: p._id.toString(), companyName: p.companyName }))}
+        partners={partners.map((p) => ({
+          _id: p._id.toString(),
+          companyName: p.companyName,
+          commissionPercent: p.commissionPercent,
+        }))}
         assignableUsers={assignableUsers.map((u) => ({ _id: u._id, name: u.name }))}
         lenderOptions={lenderOptions}
         mode="create"

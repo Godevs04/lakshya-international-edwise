@@ -3,6 +3,11 @@ import { auth } from "@/lib/auth/auth";
 import { canAccessRoute, hasPermission, hasAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import type { Permission } from "@/lib/constants/permissions";
+import type { UserRole } from "@/types";
+
+export function canViewAdmissionRevenue(role?: UserRole): boolean {
+  return role === "admin" || role === "super_admin";
+}
 
 export async function requirePagePermission(permission: Permission): Promise<void> {
   const session = await auth();
@@ -52,5 +57,15 @@ export async function getApplicationPageAccess() {
 
   return {
     canWrite: hasPermission(user, PERMISSIONS.APPLICATIONS_WRITE),
+  };
+}
+
+export async function getAdmissionsPageAccess() {
+  const session = await auth();
+  const user = session?.user;
+
+  return {
+    canWrite: hasPermission(user, PERMISSIONS.STUDENTS_WRITE),
+    canViewRevenue: canViewAdmissionRevenue(user?.role),
   };
 }

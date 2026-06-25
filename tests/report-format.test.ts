@@ -72,16 +72,21 @@ describe("report-format", () => {
         companyName: "Godevs",
         studentsCount: 12,
         totalLoanValue: 5000000,
-        commissionPercent: 2,
-        commissionEarned: 100000,
+        commissionPercent: 0.8,
+        commissionExpected: 100000,
+        commissionReceived: 80000,
+        pendingReceived: 20000,
+        partnerShareExpected: 800,
+        commissionShared: 400,
+        commissionEarned: 79600,
         status: "active",
       },
     ]);
 
     expect(partners[0]?.Company).toBe("Godevs");
     expect(partners[0]?.Students).toBe(12);
-    expect(partners[0]?.["Commission Earned"]).toContain("1,00,000");
-    expect(partners[0]?.["Commission %"]).toBe("2%");
+    expect(partners[0]?.["Net Earned"]).toContain("79,600");
+    expect(partners[0]?.["Partner Share %"]).toBe("0.8%");
 
     const loans = formatLoanReportRows([
       {

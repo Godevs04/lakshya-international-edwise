@@ -336,3 +336,38 @@ export async function sendTaskAssignedEmail(params: {
     }),
   });
 }
+
+export async function sendNoteMentionEmail(params: {
+  email: string;
+  name: string;
+  mentionedByName?: string;
+  studentName: string;
+  studentCode?: string;
+  noteContent: string;
+  studentUrl: string;
+}): Promise<boolean> {
+  const company = await getEmailBranding();
+
+  const bodyHtml = `
+    ${renderGreeting(params.name)}
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      ${params.mentionedByName ? `<strong>${escapeHtml(params.mentionedByName)}</strong> tagged you in a note` : "You were tagged in a note"}
+      for <strong>${escapeHtml(params.studentName)}</strong>${params.studentCode ? ` (${escapeHtml(params.studentCode)})` : ""}.
+    </p>
+    ${renderInfoBox(escapeHtml(params.noteContent))}
+    ${emailButton(params.studentUrl, "Open Student")}
+    ${renderLinkFallback(params.studentUrl)}
+    ${renderMutedNote("Reply on the student record so your team can work from the same place.")}`;
+
+  return sendEmail({
+    to: params.email,
+    subject: `You were tagged — ${params.studentName}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `${params.mentionedByName ?? "A teammate"} tagged you on ${params.studentName}`,
+      title: "Team Mention",
+      subtitle: params.studentCode,
+      bodyHtml,
+    }),
+  });
+}

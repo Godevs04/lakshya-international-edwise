@@ -3,7 +3,7 @@ import { AdmissionsTable } from "@/components/tables/admissions-table";
 import { getAdmissions } from "@/lib/actions/admission.actions";
 import { getAssignableUsers } from "@/lib/actions/student.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
-import { getStudentPageAccess, requirePagePermission } from "@/lib/auth/page-access";
+import { getAdmissionsPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 
 export default async function AdmissionsPage({
@@ -15,7 +15,7 @@ export default async function AdmissionsPage({
   await requirePagePermission(PERMISSIONS.STUDENTS_READ);
 
   const params = await searchParams;
-  const access = await getStudentPageAccess();
+  const access = await getAdmissionsPageAccess();
 
   const [result, assignableUsers] = await Promise.all([
     getAdmissions({
@@ -37,6 +37,7 @@ export default async function AdmissionsPage({
       <AdmissionsTable
         {...result}
         canWrite={access.canWrite}
+        canViewRevenue={access.canViewRevenue}
         search={params.search}
         targetCountry={params.targetCountry}
         targetIntake={params.targetIntake}

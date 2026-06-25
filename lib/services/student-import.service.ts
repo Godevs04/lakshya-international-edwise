@@ -13,6 +13,7 @@ import {
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField } from "@/lib/utils/pii";
 import { allocateStudentId } from "@/lib/services/student-id.service";
+import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
 import {
   resolveLenderIdBySlug,
   resolveLenderNameBySlug,
@@ -193,7 +194,7 @@ export async function importStudentsFromRows(
         targetIntake: data.targetIntake,
         targetDegree: data.targetDegree,
         targetUniversity: data.targetUniversity,
-        admissionRevenue: data.admissionRevenue ?? 0,
+        recordType: STUDENT_RECORD_TYPE.STUDENT,
         applicationStatus: appFields.applicationStatus,
         loggedIn: appFields.loggedIn,
         loan: {

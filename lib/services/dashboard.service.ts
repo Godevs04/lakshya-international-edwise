@@ -6,6 +6,7 @@ import { PENDING_STATUSES } from "@/lib/constants/statuses";
 import type { DashboardMetrics, ChartDataPoint } from "@/types";
 import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 import { formatMetricTrend } from "@/lib/utils/metrics-trend";
+import { excludeAdmissionLeadsFilter } from "@/lib/constants/student-record-type";
 import { startOfDay, subMonths, format, startOfMonth, endOfMonth, subDays } from "date-fns";
 
 interface DashboardDateBounds {
@@ -489,7 +490,7 @@ export async function getTopPartnersChart(): Promise<ChartDataPoint[]> {
 
 export async function getLatestStudents(limit = 5) {
   await connectDB();
-  return Student.find()
+  return Student.find(excludeAdmissionLeadsFilter())
     .sort({ createdAt: -1 })
     .limit(limit)
     .populate("partnerId", "companyName")
@@ -508,6 +509,7 @@ export async function getUpcomingFollowups(limit = 5) {
   await connectDB();
   const now = new Date();
   return Student.aggregate([
+    { $match: excludeAdmissionLeadsFilter() },
     { $unwind: "$notes" },
     {
       $match: {

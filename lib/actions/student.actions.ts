@@ -10,11 +10,17 @@ import { User } from "@/models/User";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
+import {
+  excludeAdmissionLeadsFilter,
+  isAdmissionLead,
+  STUDENT_RECORD_TYPE,
+} from "@/lib/constants/student-record-type";
 import { logActivity } from "@/lib/services/activity.service";
 import {
   studentSchema,
   noteSchema,
   leadSchema,
+  quickStudentSchema,
   loanApplicationLanSchema,
   studentLoanDetailsSchema,
 } from "@/lib/validations/schemas";
@@ -111,6 +117,8 @@ async function buildLoanFields(
         ? existing?.disbursementType
         : undefined;
 
+  const rate = data.roi ?? data.interest ?? 0;
+
   return {
     requested: data.loanRequested ?? 0,
     sanctioned: data.loanSanctioned ?? 0,
@@ -122,8 +130,8 @@ async function buildLoanFields(
     disbursementType: nextDisbursed > 0 ? disbursementType : undefined,
     currency: data.loanCurrency ?? "INR",
     lenderId: lenderObjectId,
-    roi: data.roi ?? 0,
-    interest: data.interest ?? 0,
+    roi: rate,
+    interest: rate,
     processingFee: data.processingFee ?? 0,
     pfPaid: pfPaidOverride ?? false,
     bankName: lenderName,
@@ -182,7 +190,9 @@ export async function getStudents(params: {
   const pageSize = params.pageSize ?? 10;
   const skip = (page - 1) * pageSize;
 
-  const filter: Record<string, unknown> = {};
+  const filter: Record<string, unknown> = {
+    ...excludeAdmissionLeadsFilter(),
+  };
 
   if (params.search) {
     const regex = toSafeRegExp(params.search);
@@ -317,6 +327,7 @@ export async function getStudentById(id: string) {
     .populate("loanApplications.lenderId", "name slug");
 
   if (!studentDoc) return null;
+  if (isAdmissionLead(studentDoc.recordType)) return null;
 
   const { ensureStudentLoanApplications } = await import("@/lib/services/loan-application.service");
   await ensureStudentLoanApplications(studentDoc);
@@ -328,6 +339,7 @@ export async function getStudentById(id: string) {
     .populate("loanApplications.lenderId", "name slug")
     .lean();
   if (!student) return null;
+  if (isAdmissionLead(student.recordType)) return null;
 
   return {
     ...student,
@@ -348,6 +360,7 @@ export async function getStudentForEdit(id: string) {
     .populate("assignedTo", "name")
     .lean();
   if (!student) return null;
+  if (isAdmissionLead(student.recordType)) return null;
 
   const lenderSlug = await getLenderSlugById(student.loan?.lenderId as Types.ObjectId | undefined);
 
@@ -357,11 +370,10 @@ export async function getStudentForEdit(id: string) {
     pan: normalizePan(safeDecrypt(student.pan)),
     lenderId: lenderSlug,
     loanCurrency: student.loan?.currency,
-    roi: student.loan?.roi,
+    roi: student.loan?.roi ?? student.loan?.interest,
     processingFee: student.loan?.processingFee,
     pfPaid: student.loan?.pfPaid,
     targetUniversity: student.targetUniversity,
-    admissionRevenue: student.admissionRevenue,
     loggedIn: student.loggedIn,
     applicationStatus: deriveApplicationStatus(student),
     sentToBank: student.sentToBank,
@@ -431,13 +443,17 @@ export async function createStudentAction(
     targetIntake: data.targetIntake?.trim() || undefined,
     targetDegree: data.targetDegree?.trim() || undefined,
     targetUniversity: data.targetUniversity?.trim() || undefined,
-    admissionRevenue: data.admissionRevenue ?? 0,
+    recordType: STUDENT_RECORD_TYPE.STUDENT,
     applicationStatus: appFields.applicationStatus,
     loggedIn: appFields.loggedIn,
     commissionPercentOverride:
       data.commissionPercentOverride === "" || data.commissionPercentOverride == null
         ? undefined
         : data.commissionPercentOverride,
+    ourCommissionPercent:
+      data.ourCommissionPercent === "" || data.ourCommissionPercent == null
+        ? undefined
+        : data.ourCommissionPercent,
     status: appFields.status,
     remarks: data.remarks ? sanitizeText(data.remarks) : undefined,
     timeline: [{ status: appFields.status, note: `Application status: ${getApplicationStatusLabel(appFields.applicationStatus)}`, createdByName: user?.name, createdAt: new Date() }],
@@ -475,6 +491,84 @@ export async function createStudentAction(
   });
 }
 
+export async function createQuickStudentAction(
+  formData: FormData
+): Promise<ActionResult<{ id: string }>> {
+  return runLoggedMutation("createQuickStudentAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = quickStudentSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const data = parsed.data;
+    const studentId = await allocateStudentId();
+    const lenderObjectId = await resolveLenderIdBySlug(data.lenderId);
+    const lenderName = await resolveLenderNameBySlug(data.lenderId);
+    const appFields = applyApplicationStatus("docs_pending");
+
+    const student = await Student.create({
+      studentId,
+      firstName: sanitizeText(data.firstName),
+      lastName: sanitizeText(data.lastName),
+      phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
+      targetCountry: data.targetCountry?.trim() || undefined,
+      targetIntake: data.targetIntake?.trim() || undefined,
+      targetUniversity: data.targetUniversity?.trim() || undefined,
+      recordType: STUDENT_RECORD_TYPE.STUDENT,
+      applicationStatus: appFields.applicationStatus,
+      loggedIn: appFields.loggedIn,
+      loan: {
+        requested: 0,
+        lenderId: lenderObjectId,
+        bankName: lenderName,
+      },
+      loanApplications: buildInitialLoanApplications(
+        { lenderId: lenderObjectId },
+        "docs_pending",
+        toSessionUser(user)
+      ),
+      ...resolveAssignedTo(data.assignedToId),
+      status: appFields.status,
+      timeline: [
+        {
+          status: appFields.status,
+          note: `Quick student profile created (${getApplicationStatusLabel(appFields.applicationStatus)})`,
+          createdByName: user?.name,
+          createdAt: new Date(),
+        },
+      ],
+      metadata: { createdBy: user?.id, createdByName: user?.name },
+    });
+
+    await Application.create({
+      studentId: student._id,
+      loanAmount: 0,
+      status: appFields.status,
+      pipelineStage: appFields.status,
+      metadata: { createdBy: user?.id, createdByName: user?.name },
+    });
+
+    await logActivity({
+      action: "student.created",
+      description: `Student ${data.firstName} ${data.lastName} (${studentId}) was quick-added`,
+      resourceType: "student",
+      resourceId: student._id.toString(),
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath("/dashboard/students");
+    revalidatePath("/dashboard/overview");
+    revalidateInsightCaches();
+    return { success: true, data: { id: student._id.toString() } };
+  });
+}
+
 export async function createLeadAction(
   formData: FormData
 ): Promise<ActionResult<{ id: string }>> {
@@ -503,7 +597,7 @@ export async function createLeadAction(
       targetIntake: data.targetIntake?.trim() || undefined,
       targetUniversity: data.targetUniversity?.trim() || undefined,
       admissionRevenue: data.admissionRevenue ?? 0,
-      recordType: "lead",
+      recordType: STUDENT_RECORD_TYPE.ADMISSION,
       applicationStatus: "docs_pending",
       loggedIn: false,
       loan: {
@@ -531,15 +625,14 @@ export async function createLeadAction(
     });
 
     await logActivity({
-      action: "student.created",
-      description: `Lead ${data.firstName} ${data.lastName} (${studentId}) was created`,
+      action: "admission.created",
+      description: `Admission lead ${data.firstName} ${data.lastName} (${studentId}) was created`,
       resourceType: "student",
       resourceId: student._id.toString(),
       userId: user?.id,
       userName: user?.name,
     });
 
-    revalidatePath("/dashboard/students");
     revalidatePath("/dashboard/admissions");
     revalidatePath("/dashboard/overview");
     revalidateInsightCaches();
@@ -617,6 +710,11 @@ export async function updateStudentAction(
   } else {
     existing.commissionPercentOverride = data.commissionPercentOverride;
   }
+  if (data.ourCommissionPercent === "" || data.ourCommissionPercent == null) {
+    existing.ourCommissionPercent = undefined;
+  } else {
+    existing.ourCommissionPercent = data.ourCommissionPercent;
+  }
   const assignment = resolveAssignedTo(
     data.assignedToId,
     existing.assignedTo,
@@ -628,7 +726,6 @@ export async function updateStudentAction(
   existing.targetIntake = data.targetIntake?.trim() || undefined;
   existing.targetDegree = data.targetDegree?.trim() || undefined;
   existing.targetUniversity = data.targetUniversity?.trim() || undefined;
-  existing.admissionRevenue = data.admissionRevenue ?? existing.admissionRevenue ?? 0;
   existing.applicationStatus = appFields.applicationStatus;
   existing.loggedIn = appFields.loggedIn;
   existing.partnerId = data.partnerId ? new Types.ObjectId(data.partnerId) : existing.partnerId;
@@ -741,26 +838,106 @@ export async function addStudentNoteAction(
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
+  const mentionedRaw = formData.get("mentionedUserIds");
+  let mentionedUserIds: string[] = [];
+  if (typeof mentionedRaw === "string" && mentionedRaw.trim()) {
+    try {
+      const parsedIds = JSON.parse(mentionedRaw);
+      if (Array.isArray(parsedIds)) {
+        mentionedUserIds = parsedIds.filter((id): id is string => typeof id === "string");
+      }
+    } catch {
+      mentionedUserIds = [];
+    }
+  }
+
   const parsed = noteSchema.safeParse({
     content: formData.get("content"),
     dueDate: formData.get("dueDate"),
+    mentionedUserIds,
   });
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
   }
 
   await connectDB();
+  const student = await Student.findById(studentId)
+    .select("firstName lastName studentId recordType")
+    .lean();
+  if (!student) {
+    return { success: false, error: "Student not found" };
+  }
+  if (isAdmissionLead(student.recordType)) {
+    return { success: false, error: "Student not found" };
+  }
+
+  const teamUsers = await User.find({ status: "active" })
+    .select("_id name")
+    .lean();
+  const { resolveMentionedUserIds } = await import("@/lib/utils/note-mentions");
+  const resolvedMentionIds = resolveMentionedUserIds(
+    parsed.data.content,
+    teamUsers.map((entry) => ({ _id: entry._id.toString(), name: entry.name })),
+    parsed.data.mentionedUserIds ?? []
+  );
+
+  const mentionObjectIds = resolvedMentionIds
+    .filter((id) => id !== user?.id)
+    .map((id) => new Types.ObjectId(id));
+
   await Student.findByIdAndUpdate(studentId, {
     $push: {
       notes: {
         content: sanitizeText(parsed.data.content),
         createdBy: user?.id,
         createdByName: user?.name,
+        mentionedUserIds: mentionObjectIds,
         dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : undefined,
         createdAt: new Date(),
       },
     },
   });
+
+  if (mentionObjectIds.length > 0) {
+    const { createNotification } = await import("@/lib/services/notification.service");
+    const { sendNoteMentionEmail } = await import("@/lib/services/email.service");
+    const { getAuthUrl } = await import("@/lib/config/env");
+
+    const studentName = `${student.firstName} ${student.lastName}`.trim();
+    const link = `/dashboard/students/${studentId}`;
+    const studentUrl = `${getAuthUrl()}${link}`;
+
+    const mentionedUsers = await User.find({
+      _id: { $in: mentionObjectIds },
+      status: "active",
+    })
+      .select("_id email name")
+      .lean();
+
+    await Promise.all(
+      mentionedUsers.map(async (mentionedUser) => {
+        await createNotification({
+          userId: mentionedUser._id,
+          type: "info",
+          title: `You were tagged on ${studentName}`,
+          body: parsed.data.content,
+          link,
+        });
+
+        if (mentionedUser.email) {
+          await sendNoteMentionEmail({
+            email: mentionedUser.email,
+            name: mentionedUser.name,
+            mentionedByName: user?.name,
+            studentName,
+            studentCode: student.studentId,
+            noteContent: parsed.data.content,
+            studentUrl,
+          });
+        }
+      })
+    );
+  }
 
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };
@@ -1103,8 +1280,8 @@ export async function updateStudentLoanDetailsAction(
           ? parsed.data.disbursementType
           : undefined,
       currency: parsed.data.loanCurrency,
-      roi: parsed.data.roi,
-      interest: parsed.data.interest,
+      roi: parsed.data.roi ?? parsed.data.interest,
+      interest: parsed.data.roi ?? parsed.data.interest,
       processingFee: parsed.data.processingFee,
       pfPaid: parsed.data.pfPaid,
     });

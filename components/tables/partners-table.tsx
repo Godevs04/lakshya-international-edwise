@@ -96,7 +96,7 @@ export function PartnersTable({
               <TableHead>Phone</TableHead>
               <TableHead>Students</TableHead>
               <TableHead>Loan Value</TableHead>
-              <TableHead>Commission</TableHead>
+              <TableHead>Partner Share</TableHead>
               <TableHead>Action</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>

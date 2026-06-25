@@ -144,8 +144,14 @@ export const studentSchema = z.object({
     "not_interested",
     "rejected",
   ]).optional(),
-  admissionRevenue: optionalMoney,
   commissionPercentOverride: z.coerce
+    .number()
+    .min(0, "Partner share cannot be negative")
+    .max(100, "Partner share cannot exceed 100%")
+    .transform(roundMoney)
+    .optional()
+    .or(z.literal("")),
+  ourCommissionPercent: z.coerce
     .number()
     .min(0, "Commission cannot be negative")
     .max(100, "Commission cannot exceed 100%")
@@ -188,6 +194,19 @@ export const studentLoanDetailsSchema = z.object({
     .transform((value) => value === true || value === "true"),
 });
 
+export const quickStudentSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  phone: z.string().optional(),
+  targetIntake: z.string().max(100).optional(),
+  targetCountry: z.string().max(100).optional(),
+  targetUniversity: z.string().max(200).optional(),
+  assignedToId: z.string().optional(),
+  lenderId: z.string().optional(),
+}).superRefine((data, ctx) => {
+  refineIndianFields(data, ctx);
+});
+
 export const leadSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -200,6 +219,11 @@ export const leadSchema = z.object({
   lenderId: z.string().optional(),
 }).superRefine((data, ctx) => {
   refineIndianFields(data, ctx);
+});
+
+export const admissionRevenueSchema = z.object({
+  studentId: z.string().regex(/^[a-f\d]{24}$/i, "Invalid student id"),
+  admissionRevenue: optionalMoney,
 });
 
 export const taskSchema = z.object({
@@ -262,6 +286,7 @@ export const partnerSchema = z.object({
 export const noteSchema = z.object({
   content: z.string().min(1, "Note content is required"),
   dueDate: z.string().optional(),
+  mentionedUserIds: z.array(z.string()).optional(),
 });
 
 export const commissionSettlementSchema = z.object({
@@ -274,15 +299,31 @@ export const studentCommissionSettlementSchema = z.object({
   note: z.string().max(500).optional(),
 });
 
+export const commissionReceiptSchema = z.object({
+  amount: z.coerce.number().positive("Received amount must be greater than zero").transform(roundMoney),
+  note: z.string().max(500).optional(),
+});
+
 export const studentCommissionRateSchema = z.object({
   commissionPercentOverride: z.coerce
     .number()
-    .min(0, "Commission cannot be negative")
-    .max(100, "Commission cannot exceed 100%")
+    .min(0, "Partner share cannot be negative")
+    .max(100, "Partner share cannot exceed 100%")
     .transform(roundMoney)
     .optional()
     .or(z.literal("")),
 });
+
+export const commissionStatusFilterSchema = z.enum([
+  "all",
+  "received_pending",
+  "received_partial",
+  "received_complete",
+  "shared_pending",
+  "shared_partial",
+  "shared_complete",
+  "fully_complete",
+]);
 
 export const commissionLedgerFilterSchema = z.object({
   month: z

@@ -14,6 +14,7 @@ import {
   getLatestPartners,
   getUpcomingFollowups,
 } from "@/lib/services/dashboard.service";
+import { getGlobalCommissionTotals } from "@/lib/services/partner-commission.service";
 import { getRecentActivities } from "@/lib/services/activity.service";
 import { CACHE_TAGS } from "@/lib/cache/revalidate";
 import { runLogged } from "@/lib/action-utils";
@@ -92,6 +93,7 @@ export async function getOverviewDashboardAction() {
       latestStudents,
       latestPartners,
       followups,
+      commissionTotals,
     ] = await Promise.all([
       cachedDashboardCoreStats(),
       cachedLoanStatusChart(),
@@ -102,6 +104,7 @@ export async function getOverviewDashboardAction() {
       cachedLatestStudents(),
       cachedLatestPartners(),
       cachedFollowups(),
+      getGlobalCommissionTotals(),
     ]);
 
     return {
@@ -115,6 +118,7 @@ export async function getOverviewDashboardAction() {
       latestStudents,
       latestPartners,
       followups,
+      commissionTotals,
     };
   });
 }
