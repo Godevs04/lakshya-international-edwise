@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db/mongoose";
-import { getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl } from "@/lib/config/env";
 import { Task } from "@/models/Task";
 import { User } from "@/models/User";
 import { sendTaskReminderEmail } from "@/lib/services/email.service";
@@ -74,7 +74,7 @@ export async function sendTaskReminders(): Promise<TaskReminderSummary> {
     skipped: 0,
   };
 
-  const authUrl = getAuthUrl();
+  const authUrl = getPublicAuthUrl();
 
   for (const task of tasks) {
     summary.processed++;

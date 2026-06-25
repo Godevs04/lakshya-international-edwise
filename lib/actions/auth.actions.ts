@@ -17,7 +17,7 @@ import type { ActionResult } from "@/types";
 import { runLoggedMutation } from "@/lib/action-utils";
 import { checkRateLimit, getClientIp, getRateLimitRetryAfter } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/utils/token-hash";
-import { isPublicRegistrationAllowed, getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl, isPublicRegistrationAllowed } from "@/lib/config/env";
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
 
@@ -309,7 +309,7 @@ export async function forgotPasswordAction(
   user.resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
   await user.save();
 
-  const resetUrl = `${getAuthUrl()}/reset-password?token=${resetToken}`;
+  const resetUrl = `${getPublicAuthUrl()}/reset-password?token=${resetToken}`;
   await sendPasswordResetEmail(user.email, user.name, resetUrl);
 
   return { success: true };

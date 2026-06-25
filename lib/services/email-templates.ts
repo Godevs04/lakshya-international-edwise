@@ -1,6 +1,6 @@
 import { APP_TAGLINE, APP_LOGO_ASPECT_RATIO, DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
-import { getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl } from "@/lib/config/env";
 import { resolveEmailAssetUrl } from "@/lib/utils/email-asset-url";
 import type { CompanySettings } from "@/types";
 
@@ -34,7 +34,7 @@ export function escapeHtml(value: string): string {
 }
 
 function emailFontStyles(): string {
-  const fontUrl = `${getAuthUrl()}/fonts/SNPro-Variable.woff2`;
+  const fontUrl = `${getPublicAuthUrl()}/fonts/SNPro-Variable.woff2`;
   return `
     @font-face {
       font-family: 'SN Pro';

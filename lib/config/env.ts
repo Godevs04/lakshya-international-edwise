@@ -102,6 +102,17 @@ export function getConfiguredAuthUrl(): string | undefined {
   return normalizeBaseUrl(explicit);
 }
 
+/**
+ * Public app URL for links shown to users in emails and notifications.
+ * This intentionally avoids platform fallback hosts like `*.vercel.app`.
+ */
+export function getPublicAuthUrl(): string {
+  return (
+    getConfiguredAuthUrl() ??
+    normalizeBaseUrl(`http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`)
+  );
+}
+
 export function getEnv(): Env {
   const parsed = envSchema.safeParse({
     ...process.env,

@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
-import { getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
 import {
   getEmailBranding,
@@ -171,7 +171,7 @@ export async function sendApprovalEmail(
   roleLabel: string
 ): Promise<boolean> {
   const company = await getEmailBranding();
-  const loginUrl = `${getAuthUrl()}/login`;
+  const loginUrl = `${getPublicAuthUrl()}/login`;
   const bodyHtml = `
     ${renderGreeting(name)}
     <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">

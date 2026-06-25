@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getConfiguredAuthUrl, resolveAuthUrl } from "@/lib/config/env";
+import { getConfiguredAuthUrl, getPublicAuthUrl, resolveAuthUrl } from "@/lib/config/env";
 
 describe("resolveAuthUrl", () => {
   afterEach(() => {
@@ -49,5 +49,26 @@ describe("getConfiguredAuthUrl", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("AUTH_URL", "http://localhost:4000");
     expect(getConfiguredAuthUrl()).toBeUndefined();
+  });
+});
+
+describe("getPublicAuthUrl", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("uses AUTH_URL instead of Vercel fallback for user-facing links", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
+    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+  });
+
+  it("falls back to localhost when no explicit auth URL is set", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("AUTH_URL", "");
+    vi.stubEnv("NEXTAUTH_URL", "");
+    vi.stubEnv("PORT", "4000");
+    expect(getPublicAuthUrl()).toBe("http://localhost:4000");
   });
 });
