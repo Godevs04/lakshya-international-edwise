@@ -140,6 +140,7 @@ export const studentSchema = z.object({
     "pf_paid",
     "pf_pending",
     "disbursed",
+    "not_interested",
     "rejected",
   ]).optional(),
   admissionRevenue: optionalMoney,

@@ -55,7 +55,7 @@ export function DashboardHero({ greeting, userName, displayDate }: DashboardHero
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-sm font-medium text-muted-foreground"
+          className="text-sm font-medium text-muted-foreground dark:text-slate-300"
         >
           {displayDate}
         </motion.p>
@@ -63,7 +63,7 @@ export function DashboardHero({ greeting, userName, displayDate }: DashboardHero
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="mt-2 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl"
+          className="mt-2 max-w-2xl text-2xl font-bold tracking-tight text-slate-950 dark:text-slate-50 sm:text-3xl md:text-4xl"
         >
           {greeting},{" "}
           <span className="gradient-text">{firstName}</span>
@@ -72,7 +72,7 @@ export function DashboardHero({ greeting, userName, displayDate }: DashboardHero
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="mt-2 max-w-xl text-base text-muted-foreground"
+          className="mt-2 max-w-xl text-base text-muted-foreground dark:text-slate-300"
         >
           Here&apos;s what&apos;s happening with your consultancy today.
         </motion.p>
@@ -91,7 +91,7 @@ export function DashboardHero({ greeting, userName, displayDate }: DashboardHero
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.05 }}
-                className="flex w-full items-center gap-2.5 rounded-2xl border border-[#EDE9FE]/80 bg-white/90 px-3 py-2.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur-[2px] transition-all hover:border-[#6D5EF7]/18 hover:bg-white hover:shadow-md hover:shadow-[#6D5EF7]/8 sm:w-auto sm:px-4 sm:py-3 sm:text-sm"
+                className="flex w-full items-center gap-2.5 rounded-2xl border border-[#EDE9FE]/80 bg-white/90 px-3 py-2.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur-[2px] transition-all hover:border-[#6D5EF7]/18 hover:bg-white hover:shadow-md hover:shadow-[#6D5EF7]/8 dark:border-white/10 dark:bg-slate-950/42 dark:text-slate-100 dark:shadow-black/20 dark:hover:border-[#8B7CF8]/28 dark:hover:bg-slate-950/56 dark:hover:shadow-[#8B7CF8]/10 sm:w-auto sm:px-4 sm:py-3 sm:text-sm"
               >
                 <div
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient} shadow-md sm:h-9 sm:w-9`}
