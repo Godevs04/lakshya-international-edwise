@@ -11,7 +11,13 @@ import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { logActivity } from "@/lib/services/activity.service";
-import { studentSchema, noteSchema, leadSchema } from "@/lib/validations/schemas";
+import {
+  studentSchema,
+  noteSchema,
+  leadSchema,
+  loanApplicationLanSchema,
+  studentLoanDetailsSchema,
+} from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import {
   formatAadhaarForEdit,
@@ -50,6 +56,8 @@ import {
   setStudentPrimaryLender,
   syncPrimaryLoanApplicationFromStudentEdit,
   updateLoanApplicationStatus,
+  updateLoanApplicationLan,
+  updateStudentLoanDetails,
   toSessionUser,
 } from "@/lib/services/loan-application.service";
 import { endOfDay, startOfDay } from "date-fns";
@@ -1011,6 +1019,80 @@ export async function updateLoanApplicationStatusAction(
         error: error instanceof Error ? error.message : "Failed to update application status",
       };
     }
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  });
+}
+
+export async function updateLoanApplicationLanAction(
+  studentId: string,
+  applicationId: string,
+  applicationNumber: string
+): Promise<ActionResult> {
+  return runLoggedMutation("updateLoanApplicationLanAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    const parsed = loanApplicationLanSchema.safeParse({ applicationNumber });
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid LAN" };
+    }
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    await ensureStudentLoanApplications(student);
+
+    try {
+      await updateLoanApplicationLan(
+        student,
+        applicationId,
+        parsed.data.applicationNumber?.trim() || undefined
+      );
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to update LAN",
+      };
+    }
+
+    revalidatePath("/dashboard/students");
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  });
+}
+
+export async function updateStudentLoanDetailsAction(
+  studentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("updateStudentLoanDetailsAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = studentLoanDetailsSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const student = await Student.findById(studentId);
+    if (!student) return { success: false, error: "Student not found" };
+
+    await updateStudentLoanDetails(student, {
+      requested: parsed.data.loanRequested,
+      sanctioned: parsed.data.loanSanctioned,
+      disbursed: parsed.data.loanDisbursed,
+      currency: parsed.data.loanCurrency,
+      roi: parsed.data.roi,
+      interest: parsed.data.interest,
+      processingFee: parsed.data.processingFee,
+      pfPaid: parsed.data.pfPaid,
+    });
 
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);

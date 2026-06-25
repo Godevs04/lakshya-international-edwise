@@ -175,7 +175,6 @@ export interface AdmissionListItem {
   targetCountry?: string;
   targetIntake?: string;
   targetUniversity?: string;
-  admissionRevenue?: number;
   recordType?: "lead" | "student";
   createdAt: Date;
 }

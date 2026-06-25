@@ -86,16 +86,3 @@ export async function getReportData(
       );
   }
 }
-
-export function exportToCSV(data: Record<string, string | number>[]): string {
-  if (data.length === 0) return "";
-  const headers = Object.keys(data[0] ?? {});
-  const rows = data.map((row) =>
-    headers.map((h) => {
-      const val = row[h];
-      const str = val === null || val === undefined ? "" : String(val);
-      return `"${str.replace(/"/g, '""')}"`;
-    }).join(",")
-  );
-  return [headers.join(","), ...rows].join("\n");
-}

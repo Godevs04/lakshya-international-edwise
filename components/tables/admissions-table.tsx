@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/utils/format";
 import { AddAdmissionSheet } from "@/components/dashboard/add-admission-sheet";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import type { AdmissionListItem } from "@/types";
@@ -207,7 +206,6 @@ export function AdmissionsTable({
               <TableHead>Intake</TableHead>
               <TableHead>Country</TableHead>
               <TableHead>University</TableHead>
-              <TableHead className="text-right">Revenue</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -238,16 +236,11 @@ export function AdmissionsTable({
                   <TableCell className="max-w-[220px] truncate">
                     {row.targetUniversity?.trim() ? row.targetUniversity : "—"}
                   </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {row.admissionRevenue != null && row.admissionRevenue > 0
-                      ? formatCurrency(row.admissionRevenue)
-                      : "—"}
-                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                   No admission records found.
                 </TableCell>
               </TableRow>

@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   MoreHorizontal,
 } from "lucide-react";
 import { useState } from "react";
@@ -21,8 +20,7 @@ import {
   type NavItem,
 } from "@/components/dashboard/nav-config";
 import { MobileNavSheet } from "@/components/dashboard/mobile-nav-sheet";
-import { AppLogo } from "@/components/brand/app-logo";
-import { APP_TAGLINE } from "@/lib/brand/app-logo";
+import { SidebarBrand } from "@/components/brand/sidebar-brand";
 import type { AppModules } from "@/types";
 
 interface SidebarProps {
@@ -40,19 +38,14 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
   return (
     <aside
       style={{ width: collapsed ? 80 : 260 }}
-      className="fixed left-4 top-4 bottom-4 z-50 hidden flex-col overflow-hidden rounded-[30px] glass-sidebar transition-[width] duration-300 ease-out lg:flex"
+      className="fixed left-0 top-0 bottom-0 z-50 hidden flex-col overflow-hidden rounded-none sidebar-solid transition-[width] duration-300 ease-out lg:flex lg:rounded-r-[28px]"
     >
-      <div className="flex h-[72px] items-center gap-3 px-5">
-        <AppLogo src={logo} alt={companyName} variant="sidebar" />
-        {!collapsed && (
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-foreground">{companyName}</p>
-            <p className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
-              <Sparkles className="h-2.5 w-2.5 shrink-0 text-[#6D5EF7]" />
-              <span className="truncate">{APP_TAGLINE}</span>
-            </p>
-          </div>
-        )}
+      <div className="shrink-0 border-b border-white/8 px-4 py-3.5">
+        <SidebarBrand
+          companyName={companyName}
+          logo={logo}
+          collapsed={collapsed}
+        />
       </div>
 
       <ScrollArea className="flex-1 px-3">
@@ -65,17 +58,17 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
                   className={cn(
                     "group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-gradient-to-r from-[#6D5EF7] to-[#8B5CF6] text-white shadow-lg shadow-[#6D5EF7]/30"
-                      : "text-muted-foreground hover:bg-[#6D5EF7]/8 hover:text-foreground"
+                      ? "bg-gradient-to-r from-[#7C6CF8] to-[#9B8AFB] text-white shadow-lg shadow-black/20"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
                   )}
                 >
                   <div
                     className={cn(
                       "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all",
-                      isActive ? "bg-white/20" : "bg-[#6D5EF7]/8 group-hover:bg-[#6D5EF7]/15"
+                      isActive ? "bg-white/20" : "bg-white/10 group-hover:bg-white/15"
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-[#6D5EF7]")} />
+                    <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-white/85")} />
                   </div>
                   {!collapsed && (
                     <span className="relative z-10 truncate">{item.label}</span>
@@ -87,24 +80,24 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
         </nav>
       </ScrollArea>
 
-      <div className="space-y-2 border-t border-[#6D5EF7]/10 p-3">
+      <div className="space-y-2 border-t border-white/10 p-3">
         <Link href="/dashboard/profile">
           <div
             className={cn(
-              "flex items-center gap-3 rounded-2xl p-2.5 transition-colors hover:bg-[#6D5EF7]/8",
+              "flex items-center gap-3 rounded-2xl p-2.5 transition-colors hover:bg-white/10",
               collapsed && "justify-center"
             )}
           >
-            <Avatar className="h-9 w-9 ring-2 ring-[#6D5EF7]/20">
+            <Avatar className="h-9 w-9 ring-2 ring-white/20">
               <AvatarImage src={session?.user?.avatar} />
-              <AvatarFallback className="bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-xs text-white">
+              <AvatarFallback className="bg-white/20 text-xs text-white">
                 {getInitials(session?.user?.name ?? "U")}
               </AvatarFallback>
             </Avatar>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{session?.user?.name}</p>
-                <p className="truncate text-[11px] text-muted-foreground">{session?.user?.email}</p>
+                <p className="truncate text-sm font-semibold text-white">{session?.user?.name}</p>
+                <p className="truncate text-[11px] text-white/55">{session?.user?.email}</p>
               </div>
             )}
           </div>
@@ -112,7 +105,7 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="flex w-full items-center justify-center rounded-xl py-2 text-muted-foreground transition-colors hover:bg-[#6D5EF7]/8 hover:text-[#6D5EF7]"
+          className="flex w-full items-center justify-center rounded-xl py-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -137,7 +130,7 @@ function NavLinkItem({
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
           isActive
-            ? "bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-white shadow-lg shadow-[#6D5EF7]/30"
+            ? "bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-white shadow-lg shadow-[#6D5EF7]/25"
             : "bg-[#6D5EF7]/8 text-muted-foreground"
         )}
       >
@@ -179,7 +172,7 @@ export function MobileNav({
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#6D5EF7]/10 glass-sidebar pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#6D5EF7]/10 glass-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="flex items-stretch gap-0.5 px-2 py-2">
           {primaryNav.map((item) => (
             <NavLinkItem
@@ -198,7 +191,7 @@ export function MobileNav({
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
                   moreActive
-                    ? "bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-white shadow-lg shadow-[#6D5EF7]/30"
+                    ? "bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6] text-white shadow-lg shadow-[#6D5EF7]/25"
                     : "bg-[#6D5EF7]/8 text-muted-foreground"
                 )}
               >

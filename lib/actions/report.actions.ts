@@ -1,8 +1,10 @@
 "use server";
 
-import { getReportData, exportToCSV, type ReportType } from "@/lib/services/report.service";
+import { getReportData, type ReportType } from "@/lib/services/report.service";
 import type { DateRangePreset } from "@/lib/utils/format";
-import { exportToExcel, exportToPdf } from "@/lib/utils/report-export";
+import { exportToCsv, exportToExcel, exportToPdf } from "@/lib/utils/report-export";
+import { getAppConfig } from "@/lib/config/app-config";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -26,6 +28,23 @@ export async function getReportAction(
   });
 }
 
+async function buildReportExportOptions(
+  preset: DateRangePreset,
+  reportType: ReportType,
+  generatedBy: string
+) {
+  const config = await getAppConfig();
+  return {
+    title: `${reportType.charAt(0).toUpperCase()}${reportType.slice(1)} Report`,
+    subtitle: `${preset.charAt(0).toUpperCase()}${preset.slice(1)} period`,
+    companyName: config.company.name,
+    tagline: APP_TAGLINE,
+    logoSrc: config.company.logo,
+    generatedBy,
+    generatedAt: new Date(),
+  };
+}
+
 export async function exportReportCSVAction(
   preset: DateRangePreset,
   reportType: ReportType
@@ -33,8 +52,15 @@ export async function exportReportCSVAction(
   return runLogged("exportReportCSVAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.REPORTS_EXPORT);
-    const data = await getAuthorizedReportData(preset, reportType);
-    return exportToCSV(data);
+    const [data, options] = await Promise.all([
+      getAuthorizedReportData(preset, reportType),
+      buildReportExportOptions(
+        preset,
+        reportType,
+        user?.name ?? user?.email ?? "System"
+      ),
+    ]);
+    return exportToCsv(data, options);
   });
 }
 
@@ -45,8 +71,15 @@ export async function exportReportExcelAction(
   return runLogged("exportReportExcelAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.REPORTS_EXPORT);
-    const data = await getAuthorizedReportData(preset, reportType);
-    const buffer = exportToExcel(data);
+    const [data, options] = await Promise.all([
+      getAuthorizedReportData(preset, reportType),
+      buildReportExportOptions(
+        preset,
+        reportType,
+        user?.name ?? user?.email ?? "System"
+      ),
+    ]);
+    const buffer = exportToExcel(data, options);
     return buffer.toString("base64");
   });
 }
@@ -58,8 +91,15 @@ export async function exportReportPdfAction(
   return runLogged("exportReportPdfAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.REPORTS_EXPORT);
-    const data = await getAuthorizedReportData(preset, reportType);
-    const pdf = exportToPdf(data, `Report — ${reportType} (${preset})`);
+    const [data, options] = await Promise.all([
+      getAuthorizedReportData(preset, reportType),
+      buildReportExportOptions(
+        preset,
+        reportType,
+        user?.name ?? user?.email ?? "System"
+      ),
+    ]);
+    const pdf = await exportToPdf(data, options);
     return Buffer.from(pdf).toString("base64");
   });
 }

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { formatDateTime, formatMoney } from "@/lib/utils/format";
+import { formatDateTime } from "@/lib/utils/format";
 import {
   APPLICATION_STATUS_OPTIONS,
   getApplicationStatusLabel,
@@ -25,47 +25,21 @@ import {
   rejectLoanApplicationAction,
   sendLoanApplicationToBankAction,
   setStudentPrimaryLenderAction,
+  updateLoanApplicationLanAction,
   updateLoanApplicationStatusAction,
 } from "@/lib/actions/student.actions";
 import { useLenderOptions } from "@/components/lenders/use-lender-options";
 import type { LenderOption } from "@/types";
-import {
-  getLoanApplicationHistoryLabel,
-  type LoanApplicationHistoryAction,
-  type LoanApplicationItem,
-} from "@/lib/constants/loan-application";
+import type { LoanApplicationItem } from "@/lib/constants/loan-application";
 import { LenderLogo } from "@/components/lenders/lender-logo";
-import { History, Plus, Send, XCircle } from "lucide-react";
+import { Pencil, Plus, Send, XCircle } from "lucide-react";
 
 interface StudentApplicationPanelProps {
   studentId: string;
   canWrite?: boolean;
   loanApplications: LoanApplicationItem[];
-  loan?: {  
-    requested?: number;
-    sanctioned?: number;
-    disbursed?: number;
-    currency?: "INR" | "USD";
-    roi?: number;
-    interest?: number;
-    processingFee?: number;
-    pfPaid?: boolean;
-  };
   onBankActivity?: () => void;
   lenderOptions?: LenderOption[];
-}
-
-function formatLoanAmount(amount: number, currency?: "INR" | "USD") {
-  return formatMoney(amount, currency ?? "INR");
-}
-
-function DetailItem({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="rounded-xl border bg-white/50 p-4 dark:bg-white/5">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 text-sm font-semibold">{value?.trim() ? value : "—"}</p>
-    </div>
-  );
 }
 
 function BankApplicationCard({
@@ -90,6 +64,9 @@ function BankApplicationCard({
   const [rejectLoading, setRejectLoading] = useState(false);
   const [rejectNote, setRejectNote] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [lan, setLan] = useState(application.applicationNumber ?? "");
+  const [lanLoading, setLanLoading] = useState(false);
+  const [editingLan, setEditingLan] = useState(false);
   const [sent, setSent] = useState(application.sentToBank);
   const [sentAt, setSentAt] = useState(application.sentToBankAt);
   const [sentBy, setSentBy] = useState(application.sentToBankByName);
@@ -146,11 +123,19 @@ function BankApplicationCard({
     setRejectLoading(false);
   }
 
-  const sortedHistory = [...(application.history ?? [])].sort((a, b) => {
-    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    return bTime - aTime;
-  });
+  async function handleSaveLan() {
+    setLanLoading(true);
+    const result = await updateLoanApplicationLanAction(studentId, application._id, lan);
+    if (result.success) {
+      notify.success("LAN updated");
+      setEditingLan(false);
+      onUpdated();
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to update LAN");
+    }
+    setLanLoading(false);
+  }
 
   return (
     <div className="rounded-xl border p-4">
@@ -163,7 +148,7 @@ function BankApplicationCard({
             accent={lenderAccent}
             size="lg"
           />
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h4 className="text-base font-bold">{application.lenderName ?? "Unknown lender"}</h4>
               {application.isPrimary ? (
@@ -182,15 +167,63 @@ function BankApplicationCard({
                 </Badge>
               ) : null}
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              {application.applicationNumber ? (
-                <Badge className="bg-[#1E3A8A] px-3 py-1 font-mono text-white hover:bg-[#1E3A8A]">
-                  LAN {application.applicationNumber}
-                </Badge>
+
+            <div className="mt-2 space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Bank LAN
+              </p>
+              {canWrite && editingLan ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input
+                    value={lan}
+                    onChange={(event) => setLan(event.target.value)}
+                    placeholder="Enter bank LAN"
+                    className="h-9 max-w-xs font-mono text-sm"
+                  />
+                  <Button type="button" size="sm" onClick={handleSaveLan} disabled={lanLoading}>
+                    {lanLoading ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setLan(application.applicationNumber ?? "");
+                      setEditingLan(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : application.applicationNumber ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="bg-[#1E3A8A] px-3 py-1 font-mono text-white hover:bg-[#1E3A8A]">
+                    LAN {application.applicationNumber}
+                  </Badge>
+                  {canWrite ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2"
+                      onClick={() => setEditingLan(true)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : null}
+                </div>
               ) : (
-                <Badge variant="outline">LAN not assigned</Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline">LAN not assigned</Badge>
+                  {canWrite ? (
+                    <Button type="button" size="sm" variant="outline" onClick={() => setEditingLan(true)}>
+                      Add LAN
+                    </Button>
+                  ) : null}
+                </div>
               )}
             </div>
+
             {sent && sentAt ? (
               <p className="mt-2 text-xs text-muted-foreground">
                 {sentBy ?? "Team"} · {formatDateTime(sentAt)}
@@ -258,48 +291,11 @@ function BankApplicationCard({
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-4 border-t pt-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Application history
-          </p>
-          {sortedHistory.length > 0 ? (
-            <ul className="space-y-2">
-              {sortedHistory.map((item, index) => (
-                <li
-                  key={item._id ?? `${item.action}-${index}`}
-                  className="rounded-lg border bg-muted/30 px-3 py-2 text-sm"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <History className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="font-medium">
-                      {getLoanApplicationHistoryLabel(item.action as LoanApplicationHistoryAction)}
-                    </span>
-                    {item.status ? (
-                      <Badge variant="outline" className="text-xs">
-                        {getApplicationStatusLabel(item.status)}
-                      </Badge>
-                    ) : null}
-                  </div>
-                  {item.note ? (
-                    <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
-                  ) : null}
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.createdByName ?? "Team"}
-                    {item.createdAt ? ` · ${formatDateTime(item.createdAt)}` : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">No history yet</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Application Status
-          </p>
+      <div className="mt-4 border-t pt-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Application Status
+        </p>
+        <div className="mt-2 max-w-xs">
           {canWrite ? (
             <Select
               value={status}
@@ -330,7 +326,6 @@ export function StudentApplicationPanel({
   studentId,
   canWrite = false,
   loanApplications,
-  loan,
   onBankActivity,
   lenderOptions: initialLenderOptions,
 }: StudentApplicationPanelProps) {
@@ -480,40 +475,6 @@ export function StudentApplicationPanel({
               multiple banks in parallel.
             </div>
           )}
-        </div>
-      </GlassCard>
-
-      <GlassCard className="p-5">
-        <h3 className="mb-4 text-base font-bold">Loan Details</h3>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <DetailItem
-            label="Loan amount requested"
-            value={formatLoanAmount(loan?.requested ?? 0, loan?.currency)}
-          />
-          <DetailItem
-            label="Sanctioned amount"
-            value={formatLoanAmount(loan?.sanctioned ?? 0, loan?.currency)}
-          />
-          <DetailItem
-            label="Disbursed amount"
-            value={formatLoanAmount(loan?.disbursed ?? 0, loan?.currency)}
-          />
-          <DetailItem
-            label="ROI"
-            value={loan?.roi != null && loan.roi > 0 ? `${loan.roi}%` : undefined}
-          />
-          <DetailItem
-            label="Processing fee"
-            value={formatLoanAmount(loan?.processingFee ?? 0, loan?.currency)}
-          />
-          <DetailItem
-            label="PF status"
-            value={loan?.pfPaid ? "Paid" : loan?.processingFee ? "Pending" : "Not applicable"}
-          />
-          <DetailItem
-            label="Interest"
-            value={loan?.interest != null && loan.interest > 0 ? `${loan.interest}%` : undefined}
-          />
         </div>
       </GlassCard>
     </div>

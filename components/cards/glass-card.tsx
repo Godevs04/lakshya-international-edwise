@@ -22,7 +22,7 @@ export function GlassCard({
   return (
     <div
       className={cn(
-        "glass-card relative overflow-hidden rounded-[20px]",
+        "glass-card relative overflow-hidden rounded-2xl",
         animate && "animate-fade-in-up",
         hover && "cursor-pointer transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#6D5EF7]/10",
         glow && "ring-1 ring-[#6D5EF7]/20",
