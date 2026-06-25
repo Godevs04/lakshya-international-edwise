@@ -39,7 +39,7 @@ export default async function PartnerCommissionsPage({
     <div className="space-y-6">
       <PageHeader
         title="Partner Commissions"
-        description="Two-tier commission: your rate on disbursement, partner share on your commission"
+        description="Both rates on disbursement; partner share is paid from your commission"
         badge="Payouts"
         action={
           <Link href="/dashboard/partners">

@@ -14,7 +14,10 @@ describe("audit-format", () => {
 
   it("builds resource links for supported types", () => {
     expect(getAuditResourceHref("student", "abc123")).toBe("/dashboard/students/abc123");
-    expect(getAuditResourceHref("settings", "abc123")).toBeUndefined();
+    expect(getAuditResourceHref("admission", "abc123")).toBe("/dashboard/admissions/abc123");
+    expect(getAuditResourceHref("lender", "abc123")).toBe("/dashboard/lenders");
+    expect(getAuditResourceHref("user", "abc123")).toBe("/dashboard/settings");
+    expect(getAuditResourceHref("settings", "company")).toBe("/dashboard/settings");
   });
 
   it("summarizes metadata", () => {

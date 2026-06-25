@@ -477,6 +477,7 @@ export async function recordPartnerCommissionSettlementAction(
       resourceId: partnerId,
       userId: user?.id,
       userName: user?.name,
+      metadata: { amount: parsed.data.amount, note: parsed.data.note?.trim() || undefined },
     });
 
     revalidatePath(`/dashboard/partners/${partnerId}`);
@@ -580,6 +581,12 @@ export async function recordStudentCommissionSettlementAction(
       resourceId: partnerId,
       userId: user?.id,
       userName: user?.name,
+      metadata: {
+        amount: parsed.data.amount,
+        studentId: student.studentId,
+        studentDbId: studentId,
+        note: parsed.data.note?.trim() || undefined,
+      },
     });
 
     revalidatePath(`/dashboard/partners/${partnerId}`);
@@ -701,6 +708,12 @@ export async function recordStudentCommissionReceivedAction(
       resourceId: partnerId,
       userId: user?.id,
       userName: user?.name,
+      metadata: {
+        amount: parsed.data.amount,
+        studentId: student.studentId,
+        studentDbId: studentId,
+        note: parsed.data.note?.trim() || undefined,
+      },
     });
 
     revalidatePath(`/dashboard/partners/${partnerId}`);
@@ -727,25 +740,73 @@ export async function updateStudentCommissionRateAction(
     }
 
     await connectDB();
-    const student = await Student.findOne({ _id: studentId, partnerId });
+    const student = await Student.findOne({ _id: studentId, partnerId })
+      .select("studentId ourCommissionPercent commissionPercentOverride")
+      .lean();
     if (!student) return { success: false, error: "Student not found for this partner" };
 
-    const rawOverride = formData.get("commissionPercentOverride");
-    if (rawOverride === "" || parsed.data.commissionPercentOverride === "") {
-      student.commissionPercentOverride = undefined;
-    } else if (parsed.data.commissionPercentOverride != null) {
-      student.commissionPercentOverride = parsed.data.commissionPercentOverride;
+    const before = {
+      ourCommissionPercent: student.ourCommissionPercent ?? null,
+      commissionPercentOverride: student.commissionPercentOverride ?? null,
+    };
+
+    const $set: Record<string, number> = {};
+    const $unset: Record<string, 1> = {};
+    const updates: string[] = [];
+
+    if (formData.has("commissionPercentOverride")) {
+      const rawOverride = formData.get("commissionPercentOverride");
+      if (rawOverride === "" || parsed.data.commissionPercentOverride === "") {
+        $unset.commissionPercentOverride = 1;
+        updates.push("partner share");
+      } else if (parsed.data.commissionPercentOverride != null) {
+        $set.commissionPercentOverride = parsed.data.commissionPercentOverride;
+        updates.push("partner share");
+      }
     }
 
-    await student.save();
+    if (formData.has("ourCommissionPercent")) {
+      const rawOur = formData.get("ourCommissionPercent");
+      if (rawOur === "" || parsed.data.ourCommissionPercent === "") {
+        $unset.ourCommissionPercent = 1;
+        updates.push("our commission");
+      } else if (parsed.data.ourCommissionPercent != null) {
+        $set.ourCommissionPercent = parsed.data.ourCommissionPercent;
+        updates.push("our commission");
+      }
+    }
+
+    if (!updates.length) {
+      return { success: false, error: "No commission rate to update" };
+    }
+
+    await Student.updateOne(
+      { _id: studentId, partnerId },
+      {
+        ...(Object.keys($set).length ? { $set } : {}),
+        ...(Object.keys($unset).length ? { $unset } : {}),
+      }
+    );
 
     await logActivity({
       action: "partner.student_commission_rate_updated",
-      description: `Updated commission rate override for ${student.studentId}`,
+      description: `Updated ${updates.join(" and ")} rate for ${student.studentId}`,
       resourceType: "student",
       resourceId: studentId,
       userId: user?.id,
       userName: user?.name,
+      metadata: {
+        partnerId,
+        fieldsUpdated: updates,
+        before,
+        after: {
+          ourCommissionPercent:
+            $set.ourCommissionPercent ?? ($unset.ourCommissionPercent ? null : before.ourCommissionPercent),
+          commissionPercentOverride:
+            $set.commissionPercentOverride ??
+            ($unset.commissionPercentOverride ? null : before.commissionPercentOverride),
+        },
+      },
     });
 
     revalidatePath(`/dashboard/partners/${partnerId}`);
@@ -805,6 +866,16 @@ export async function exportPartnerCommissionAction(
       generatedBy: user?.name ?? user?.email ?? "System",
       generatedAt: new Date(),
     };
+
+    await logActivity({
+      action: "partner.commission_exported",
+      description: `Exported ${format.toUpperCase()} commission statement for ${partner.companyName}${monthFilter ? ` (${monthFilter})` : ""}`,
+      resourceType: "partner",
+      resourceId: partnerId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { format, month: monthFilter, rowCount: exportRows.length },
+    });
 
     if (format === "csv") {
       return {

@@ -152,7 +152,7 @@ export function PartnerCommissionSection({
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Partner Share Rate</p>
             <p className="text-2xl font-semibold">{formatPercent(commissionPercent)}</p>
-            <p className="mt-1 text-xs text-muted-foreground">% of your commission</p>
+            <p className="mt-1 text-xs text-muted-foreground">% of disbursement</p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Total Disbursed</p>

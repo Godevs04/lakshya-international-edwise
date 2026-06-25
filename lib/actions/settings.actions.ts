@@ -21,19 +21,36 @@ import { createNotification } from "@/lib/services/notification.service";
 
 async function logSettingsActivity(
   user: { id: string; name: string },
-  action: string,
   description: string,
   resourceId?: string,
   diff?: Record<string, unknown>
 ): Promise<void> {
   await logActivity({
-    action,
+    action: "settings.updated",
     description,
     resourceType: "settings",
     resourceId,
     userId: user.id,
     userName: user.name,
     diff,
+  });
+}
+
+async function logUserActivity(
+  user: { id: string; name: string },
+  action: string,
+  description: string,
+  resourceId?: string,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  await logActivity({
+    action,
+    description,
+    resourceType: "user",
+    resourceId,
+    userId: user.id,
+    userName: user.name,
+    metadata,
   });
 }
 
@@ -155,7 +172,7 @@ export async function updateSettingsAction(
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");
   updateTag(APP_CONFIG_CACHE_TAG);
-  await logSettingsActivity(user!, "settings.update", `Updated ${section} settings`, section);
+  await logSettingsActivity(user!, `Updated ${section} settings`, section, { section });
   return { success: true };
   });
 }
@@ -220,12 +237,12 @@ export async function approveUserAction(
     link: "/login",
   });
 
-  await logSettingsActivity(
+  await logUserActivity(
     user!,
-    "user.approve",
+    "user.approved",
     `Approved user ${pendingUser.email} as ${role}`,
     pendingUser._id.toString(),
-    { role }
+    { role, email: pendingUser.email }
   );
 
   revalidatePath("/dashboard/settings");
@@ -258,11 +275,12 @@ export async function rejectUserAction(userId: string): Promise<ActionResult> {
     body: "Your registration request was not approved. Contact your administrator for details.",
   });
 
-  await logSettingsActivity(
+  await logUserActivity(
     user!,
-    "user.reject",
+    "user.rejected",
     `Rejected user ${pendingUser.email}`,
-    pendingUser._id.toString()
+    pendingUser._id.toString(),
+    { email: pendingUser.email }
   );
 
   revalidatePath("/dashboard/settings");
@@ -306,12 +324,12 @@ export async function createUserAction(formData: FormData): Promise<ActionResult
     status: "active",
   });
 
-  await logSettingsActivity(
+  await logUserActivity(
     user!,
-    "user.create",
+    "user.created",
     `Created user ${email.toLowerCase()} with role ${role ?? "staff"}`,
     email.toLowerCase(),
-    { role: role ?? "staff" }
+    { role: role ?? "staff", email: email.toLowerCase() }
   );
 
   revalidatePath("/dashboard/settings");
@@ -352,12 +370,12 @@ export async function updateUserRoleAction(
     link: "/dashboard/profile",
   });
 
-  await logSettingsActivity(
+  await logUserActivity(
     user!,
-    "user.role_update",
-    `Updated role for user ${userId} to ${role}`,
+    "user.role_updated",
+    `Updated role for ${targetUser.email} to ${role}`,
     userId,
-    { role }
+    { role, email: targetUser.email }
   );
   revalidatePath("/dashboard/settings");
   return { success: true };
@@ -376,11 +394,12 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
   await connectDB();
   const target = await User.findById(userId).select("email").lean();
   await User.findByIdAndDelete(userId);
-  await logSettingsActivity(
+  await logUserActivity(
     user!,
-    "user.delete",
+    "user.deleted",
     `Deleted user ${target?.email ?? userId}`,
-    userId
+    userId,
+    { email: target?.email }
   );
   revalidatePath("/dashboard/settings");
   return { success: true };
@@ -434,6 +453,15 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
   }
 
   await user.save();
+
+  await logUserActivity(
+    sessionUser,
+    "user.profile_updated",
+    `Profile updated for ${user.email}`,
+    user._id.toString(),
+    { passwordChanged: Boolean(parsed.data.newPassword), email: user.email }
+  );
+
   revalidatePath("/dashboard/profile");
   return { success: true };
   });

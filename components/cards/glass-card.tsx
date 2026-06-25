@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface GlassCardProps {
   children: React.ReactNode;
   className?: string;
+  id?: string;
   hover?: boolean;
   glow?: boolean;
   padding?: boolean;
@@ -14,6 +15,7 @@ interface GlassCardProps {
 export function GlassCard({
   children,
   className,
+  id,
   hover = false,
   glow = false,
   padding = false,
@@ -21,6 +23,7 @@ export function GlassCard({
 }: GlassCardProps) {
   return (
     <div
+      id={id}
       className={cn(
         "glass-card relative overflow-hidden rounded-2xl",
         animate && "animate-fade-in-up",

@@ -21,13 +21,13 @@ export function calculateExpectedCommission(
 }
 
 export function calculatePartnerShareExpected(
-  expectedCommission: number,
+  totalDisbursed: number,
   partnerSharePercent: number
 ): number {
-  if (expectedCommission <= 0 || partnerSharePercent <= 0) {
+  if (totalDisbursed <= 0 || partnerSharePercent <= 0) {
     return 0;
   }
-  return roundMoney((expectedCommission * partnerSharePercent) / 100);
+  return roundMoney((totalDisbursed * partnerSharePercent) / 100);
 }
 
 export function calculatePendingReceived(expected: number, received: number): number {

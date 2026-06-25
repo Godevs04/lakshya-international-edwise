@@ -11,9 +11,30 @@ import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import type { PartnerStatus } from "@/lib/constants/statuses";
-import { Pencil, IndianRupee } from "lucide-react";
+import { Pencil, IndianRupee, Building2, Users, Landmark } from "lucide-react";
 import { Suspense } from "react";
 import { commissionStatusFilterSchema } from "@/lib/validations/schemas";
+import {
+  getPartnerEditHref,
+  type PartnerEditSectionKey,
+} from "@/lib/constants/partner-edit-sections";
+
+function PartnerSectionEditLink({
+  partnerId,
+  section,
+}: {
+  partnerId: string;
+  section: PartnerEditSectionKey;
+}) {
+  return (
+    <Link href={getPartnerEditHref(partnerId, section)}>
+      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+        <Pencil className="mr-1 h-3 w-3" />
+        Edit
+      </Button>
+    </Link>
+  );
+}
 
 export default async function PartnerDetailPage({
   params,
@@ -51,7 +72,9 @@ export default async function PartnerDetailPage({
             </Link>
             {access.canWrite ? (
               <Link href={`/dashboard/partners/${id}/edit`}>
-                <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
+                <Button variant="outline" size="sm">
+                  <Pencil className="mr-1 h-4 w-4" /> Edit all sections
+                </Button>
               </Link>
             ) : null}
           </div>
@@ -110,24 +133,85 @@ export default async function PartnerDetailPage({
         />
       </Suspense>
 
-      <GlassCard className="p-5">
+      <GlassCard className="space-y-4 p-5">
         <div className="flex flex-wrap items-center gap-4">
           <StatusBadge status={partner.status as PartnerStatus} type="partner" />
           <span className="text-sm text-muted-foreground">
             Commission is calculated from disbursed loan amounts. Use the Student-wise tab for per-student payout view.
           </span>
         </div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 text-sm">
-          <p><span className="text-muted-foreground">Phone:</span> {partner.phone ?? "—"}</p>
-          <p><span className="text-muted-foreground">Email:</span> {partner.email ?? "—"}</p>
-          <p><span className="text-muted-foreground">GST:</span> {partner.gst ?? "—"}</p>
-          <p><span className="text-muted-foreground">Address:</span> {partner.address ?? "—"}</p>
-          {partner.bankDetails?.accountNumber && (
-            <>
+
+        <div className="rounded-xl border p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+              Company details
+            </h3>
+            {access.canWrite ? (
+              <PartnerSectionEditLink partnerId={id} section="company" />
+            ) : null}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 text-sm">
+            <p><span className="text-muted-foreground">Phone:</span> {partner.phone ?? "—"}</p>
+            <p><span className="text-muted-foreground">Email:</span> {partner.email ?? "—"}</p>
+            <p><span className="text-muted-foreground">GST:</span> {partner.gst ?? "—"}</p>
+            <p><span className="text-muted-foreground">Partner share:</span> {partner.commissionPercent ?? 0}%</p>
+            <p className="sm:col-span-2">
+              <span className="text-muted-foreground">Address:</span> {partner.address ?? "—"}
+            </p>
+          </div>
+        </div>
+
+        {partner.contacts?.length ? (
+          <div className="rounded-xl border p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h3 className="flex items-center gap-2 text-sm font-semibold">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                Points of contact
+              </h3>
+              {access.canWrite ? (
+                <PartnerSectionEditLink partnerId={id} section="contacts" />
+              ) : null}
+            </div>
+            <div className="space-y-2 text-sm">
+              {partner.contacts.map((contact, index) => (
+                <p key={`${contact.name}-${index}`}>
+                  <span className="font-medium">{contact.name ?? "Contact"}</span>
+                  {contact.role ? ` · ${contact.role}` : ""}
+                  {contact.phone || contact.email
+                    ? ` — ${[contact.phone, contact.email].filter(Boolean).join(" · ")}`
+                    : ""}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : access.canWrite ? (
+          <div className="rounded-xl border border-dashed p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm text-muted-foreground">No contacts added yet.</p>
+              <PartnerSectionEditLink partnerId={id} section="contacts" />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="rounded-xl border p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <Landmark className="h-4 w-4 text-muted-foreground" />
+              Bank details
+            </h3>
+            {access.canWrite ? (
+              <PartnerSectionEditLink partnerId={id} section="bank" />
+            ) : null}
+          </div>
+          {partner.bankDetails?.accountNumber ? (
+            <div className="grid gap-2 sm:grid-cols-2 text-sm">
               <p><span className="text-muted-foreground">Bank:</span> {partner.bankDetails.bankName ?? "—"}</p>
               <p><span className="text-muted-foreground">Account:</span> {partner.bankDetails.accountNumber}</p>
               <p><span className="text-muted-foreground">IFSC:</span> {partner.bankDetails.ifsc ?? "—"}</p>
-            </>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No bank details added yet.</p>
           )}
         </div>
       </GlassCard>

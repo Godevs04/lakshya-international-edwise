@@ -312,6 +312,13 @@ export const studentCommissionRateSchema = z.object({
     .transform(roundMoney)
     .optional()
     .or(z.literal("")),
+  ourCommissionPercent: z.coerce
+    .number()
+    .min(0, "Our commission cannot be negative")
+    .max(100, "Our commission cannot exceed 100%")
+    .transform(roundMoney)
+    .optional()
+    .or(z.literal("")),
 });
 
 export const commissionStatusFilterSchema = z.enum([

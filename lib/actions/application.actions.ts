@@ -166,7 +166,23 @@ export async function updateApplicationPriorityAction(
     requirePermission(user, PERMISSIONS.APPLICATIONS_WRITE);
 
     await connectDB();
-    await Application.findByIdAndUpdate(applicationId, { priority });
+    const app = await Application.findById(applicationId);
+    if (!app) return { success: false, error: "Application not found" };
+
+    const oldPriority = app.priority;
+    app.priority = priority;
+    await app.save();
+
+    await logActivity({
+      action: "application.priority_changed",
+      description: `Application priority changed from ${oldPriority ?? "unset"} to ${priority}`,
+      resourceType: "application",
+      resourceId: applicationId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { oldPriority, priority },
+    });
+
     revalidatePath("/dashboard/applications");
     return { success: true };
   });

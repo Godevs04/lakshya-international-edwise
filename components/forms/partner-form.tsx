@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
@@ -22,20 +22,44 @@ import {
   PARTNER_ACTION_STATUS_LABELS,
 } from "@/lib/constants/partner-action-statuses";
 import { createPartnerAction, updatePartnerAction } from "@/lib/actions/partner.actions";
+import {
+  PARTNER_EDIT_SECTIONS,
+  type PartnerEditSectionKey,
+} from "@/lib/constants/partner-edit-sections";
 
 interface PartnerFormProps {
   initialData?: Record<string, string | number | undefined>;
   partnerId?: string;
   mode: "create" | "edit";
+  focusSection?: PartnerEditSectionKey;
 }
 
 const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optional.";
 
-export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) {
+export function PartnerForm({ initialData, partnerId, mode, focusSection }: PartnerFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState((initialData?.status as string) ?? "active");
   const [actionStatus, setActionStatus] = useState((initialData?.actionStatus as string) ?? "active");
+
+  const focusedConfig = focusSection ? PARTNER_EDIT_SECTIONS[focusSection] : undefined;
+  const isSectionEdit = mode === "edit" && Boolean(focusedConfig);
+
+  function isFormSectionVisible(sectionKey: string) {
+    if (!isSectionEdit || !focusedConfig) return true;
+    return focusedConfig.formSections.includes(sectionKey);
+  }
+
+  function isFormSectionHighlighted(sectionKey: string) {
+    if (!isSectionEdit || !focusedConfig) return false;
+    return focusedConfig.formSections.includes(sectionKey);
+  }
+
+  useEffect(() => {
+    if (!focusedConfig) return;
+    const target = document.getElementById(focusedConfig.scrollTarget);
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focusedConfig]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -51,7 +75,9 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
       router.push(
         mode === "create"
           ? `/dashboard/partners/${result.data?.id}`
-          : `/dashboard/partners/${partnerId}`
+          : isSectionEdit && partnerId
+            ? `/dashboard/partners/${partnerId}`
+            : `/dashboard/partners/${partnerId}`
       );
       router.refresh();
     } else {
@@ -62,7 +88,79 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {isSectionEdit && !isFormSectionVisible("required") ? (
+        <input type="hidden" name="companyName" value={String(initialData?.companyName ?? "")} />
+      ) : null}
+
+      {isSectionEdit && !isFormSectionVisible("company") ? (
+        <>
+          <input type="hidden" name="owner" value={String(initialData?.owner ?? "")} />
+          <input type="hidden" name="phone" value={String(initialData?.phone ?? "")} />
+          <input type="hidden" name="email" value={String(initialData?.email ?? "")} />
+          <input type="hidden" name="gst" value={String(initialData?.gst ?? "")} />
+          <input
+            type="hidden"
+            name="commissionPercent"
+            value={String(initialData?.commissionPercent ?? "")}
+          />
+          <input type="hidden" name="status" value={status} />
+          <input type="hidden" name="actionStatus" value={actionStatus} />
+          <input type="hidden" name="address" value={String(initialData?.address ?? "")} />
+          <input
+            type="hidden"
+            name="locationAddress"
+            value={String(initialData?.locationAddress ?? "")}
+          />
+          <input type="hidden" name="locationCity" value={String(initialData?.locationCity ?? "")} />
+          <input type="hidden" name="locationState" value={String(initialData?.locationState ?? "")} />
+          <input type="hidden" name="companyLogo" value={String(initialData?.companyLogo ?? "")} />
+        </>
+      ) : null}
+
+      {isSectionEdit && !isFormSectionVisible("contacts")
+        ? [0, 1, 2].map((index) => (
+            <span key={index} className="hidden">
+              <input
+                type="hidden"
+                name={`contact${index}Name`}
+                value={String(initialData?.[`contact${index}Name`] ?? "")}
+              />
+              <input
+                type="hidden"
+                name={`contact${index}Role`}
+                value={String(initialData?.[`contact${index}Role`] ?? "")}
+              />
+              <input
+                type="hidden"
+                name={`contact${index}Phone`}
+                value={String(initialData?.[`contact${index}Phone`] ?? "")}
+              />
+              <input
+                type="hidden"
+                name={`contact${index}Email`}
+                value={String(initialData?.[`contact${index}Email`] ?? "")}
+              />
+            </span>
+          ))
+        : null}
+
+      {isSectionEdit && !isFormSectionVisible("bank") ? (
+        <>
+          <input type="hidden" name="accountName" value={String(initialData?.accountName ?? "")} />
+          <input
+            type="hidden"
+            name="accountNumber"
+            value={String(initialData?.accountNumber ?? "")}
+          />
+          <input type="hidden" name="ifsc" value={String(initialData?.ifsc ?? "")} />
+          <input type="hidden" name="bankName" value={String(initialData?.bankName ?? "")} />
+        </>
+      ) : null}
+
+      {isFormSectionVisible("required") ? (
       <FormSection
+        id="section-required"
+        highlighted={isFormSectionHighlighted("required")}
         title="Required Fields"
         description="Fields marked with * must be completed before saving."
       >
@@ -78,8 +176,12 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("company") ? (
       <FormSection
+        id="section-company"
+        highlighted={isFormSectionHighlighted("company")}
         title="Optional — Company Details"
         description="Contact information, branding, and status."
       >
@@ -110,7 +212,7 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
             <Input id="gst" name="gst" defaultValue={initialData?.gst as string} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="commissionPercent">Partner Share % (of your commission)</Label>
+            <Label htmlFor="commissionPercent">Partner Share % (of disbursement)</Label>
             <Input
               id="commissionPercent"
               name="commissionPercent"
@@ -122,7 +224,7 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
               defaultValue={initialData?.commissionPercent as number}
             />
             <p className="text-xs text-muted-foreground">
-              Used to calculate payout from disbursed loan amounts(Payout = disbursed × rate.)
+              Partner share is calculated from disbursement (share = disbursed × rate).
             </p>
           </div>
           <div className="space-y-2">
@@ -188,8 +290,12 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("contacts") ? (
       <FormSection
+        id="section-contacts"
+        highlighted={isFormSectionHighlighted("contacts")}
         title="Optional — Points of Contact"
         description="Add up to three partner contacts."
       >
@@ -237,8 +343,12 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           ))}
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("bank") ? (
       <FormSection
+        id="section-bank"
+        highlighted={isFormSectionHighlighted("bank")}
         title="Optional — Bank Details"
         description="Banking information for commission payouts."
       >
@@ -278,14 +388,38 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
           </div>
         </div>
       </FormSection>
+      ) : null}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : mode === "create" ? "Create Partner" : "Update Partner"}
+          {loading
+            ? "Saving..."
+            : isSectionEdit
+              ? `Save ${focusedConfig?.label ?? "section"}`
+              : mode === "create"
+                ? "Create Partner"
+                : "Update Partner"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            isSectionEdit && partnerId
+              ? router.push(`/dashboard/partners/${partnerId}`)
+              : router.back()
+          }
+        >
           Cancel
         </Button>
+        {isSectionEdit && partnerId ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.push(`/dashboard/partners/${partnerId}/edit`)}
+          >
+            Edit all sections
+          </Button>
+        ) : null}
       </div>
     </form>
   );

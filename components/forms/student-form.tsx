@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,10 @@ import {
   mergeAssigneeOptions,
   type AssigneeOption,
 } from "@/components/forms/assignee-select";
+import {
+  STUDENT_EDIT_SECTIONS,
+  type StudentEditSectionKey,
+} from "@/lib/constants/student-edit-sections";
 
 interface PartnerOption {
   _id: string;
@@ -56,6 +60,7 @@ interface StudentFormProps {
   initialData?: Record<string, string | number | boolean | undefined>;
   studentId?: string;
   mode: "create" | "edit";
+  focusSection?: StudentEditSectionKey;
 }
 
 const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optional.";
@@ -69,6 +74,7 @@ export function StudentForm({
   initialData,
   studentId,
   mode,
+  focusSection,
 }: StudentFormProps) {
   const router = useRouter();
   const { options: lenderOptions } = useLenderOptions(initialLenderOptions);
@@ -122,10 +128,29 @@ export function StudentForm({
       partnerShareOverride.trim() ? Number(partnerShareOverride) : null
     );
     const expected = calculateExpectedCommission(disbursed, ourRate);
-    const partnerShare = calculatePartnerShareExpected(expected, partnerRate);
+    const partnerShare = calculatePartnerShareExpected(disbursed, partnerRate);
     const net = calculateNetEarned(expected, partnerShare);
     return { expected, partnerShare, net, partnerRate };
   }, [loanDisbursed, ourCommissionPercent, partnerShareOverride, selectedPartner?.commissionPercent]);
+
+  const focusedConfig = focusSection ? STUDENT_EDIT_SECTIONS[focusSection] : undefined;
+  const isSectionEdit = mode === "edit" && Boolean(focusedConfig);
+
+  function isFormSectionVisible(sectionKey: string) {
+    if (!isSectionEdit || !focusedConfig) return true;
+    return focusedConfig.formSections.includes(sectionKey);
+  }
+
+  function isFormSectionHighlighted(sectionKey: string) {
+    if (!isSectionEdit || !focusedConfig) return false;
+    return focusedConfig.formSections.includes(sectionKey);
+  }
+
+  useEffect(() => {
+    if (!focusedConfig) return;
+    const target = document.getElementById(focusedConfig.scrollTarget);
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focusedConfig]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -167,7 +192,21 @@ export function StudentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {isSectionEdit && !isFormSectionVisible("onboarding") ? (
+        <>
+          <input type="hidden" name="firstName" value={String(initialData?.firstName ?? "")} />
+          <input type="hidden" name="lastName" value={String(initialData?.lastName ?? "")} />
+          <input type="hidden" name="phone" value={String(initialData?.phone ?? "")} />
+          <input type="hidden" name="partnerId" value={partnerId} />
+          <input type="hidden" name="targetCountry" value={targetCountry} />
+          <input type="hidden" name="targetIntake" value={targetIntake} />
+        </>
+      ) : null}
+
+      {isFormSectionVisible("onboarding") ? (
       <FormSection
+        id="section-onboarding"
+        highlighted={isFormSectionHighlighted("onboarding")}
         title="Required for onboarding"
         description="Name, phone, consultancy, country, and intake are required. All other sections are optional."
       >
@@ -256,8 +295,12 @@ export function StudentForm({
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("personal") ? (
       <FormSection
+        id="section-personal"
+        highlighted={isFormSectionHighlighted("personal")}
         title="Optional — Personal & Contact"
         description="Additional profile details."
       >
@@ -299,8 +342,12 @@ export function StudentForm({
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("address") ? (
       <FormSection
+        id="section-address"
+        highlighted={isFormSectionHighlighted("address")}
         title="Optional — Address"
         description="Residential address details."
       >
@@ -331,8 +378,12 @@ export function StudentForm({
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("education") ? (
       <FormSection
+        id="section-education"
+        highlighted={isFormSectionHighlighted("education")}
         title="Optional — Education"
         description="Academic information."
       >
@@ -351,8 +402,12 @@ export function StudentForm({
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("study-abroad") ? (
       <FormSection
+        id="section-study-abroad"
+        highlighted={isFormSectionHighlighted("study-abroad")}
         title="Optional — Study Abroad & Assignment"
         description="University, degree, and lead assignment."
       >
@@ -396,8 +451,12 @@ export function StudentForm({
           </div>
         </div>
       </FormSection>
+      ) : null}
 
+      {isFormSectionVisible("loan") ? (
       <FormSection
+        id="section-loan"
+        highlighted={isFormSectionHighlighted("loan")}
         title="Optional — Loan & Application"
         description="Loan amounts and application status."
       >
@@ -556,7 +615,7 @@ export function StudentForm({
             </p>
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="commissionPercentOverride">Partner Share Override % (of your commission)</Label>
+            <Label htmlFor="commissionPercentOverride">Partner Share Override % (of disbursement)</Label>
             <Input
               id="commissionPercentOverride"
               name="commissionPercentOverride"
@@ -568,14 +627,15 @@ export function StudentForm({
               placeholder={
                 partnerId
                   ? `Leave blank for partner default (${formatPercent(selectedPartner?.commissionPercent ?? 0)})`
-                  : "Optional — set after selecting a partner"
+                  : "Select a consultancy above first"
               }
               value={partnerShareOverride}
               onChange={(e) => setPartnerShareOverride(e.target.value)}
               disabled={!partnerId}
             />
             <p className="text-xs text-muted-foreground">
-              Partner share is calculated from your commission, not disbursement.
+              Both rates apply to disbursement; net is your commission minus partner share.
+              {!partnerId ? " Select a consultancy in the first section to enable this field." : null}
             </p>
           </div>
           {Number(loanDisbursed) > 0 && Number(ourCommissionPercent) > 0 ? (
@@ -614,8 +674,15 @@ export function StudentForm({
           </div>
         </div>
       </FormSection>
+      ) : null}
 
-      <FormSection title="Identity (optional)" description="Government ID details. Optional and stored securely.">
+      {isFormSectionVisible("identity") ? (
+      <FormSection
+        id="section-identity"
+        highlighted={isFormSectionHighlighted("identity")}
+        title="Identity (optional)"
+        description="Government ID details. Optional and stored securely."
+      >
         <details className="rounded-lg border p-4">
           <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
             Show identity fields
@@ -649,14 +716,38 @@ export function StudentForm({
           </div>
         </details>
       </FormSection>
+      ) : null}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : mode === "create" ? "Create Student" : "Update Student"}
+          {loading
+            ? "Saving..."
+            : isSectionEdit
+              ? `Save ${focusedConfig?.label ?? "section"}`
+              : mode === "create"
+                ? "Create Student"
+                : "Update Student"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            isSectionEdit && studentId
+              ? router.push(`/dashboard/students/${studentId}`)
+              : router.back()
+          }
+        >
           Cancel
         </Button>
+        {isSectionEdit && studentId ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.push(`/dashboard/students/${studentId}/edit`)}
+          >
+            Edit all sections
+          </Button>
+        ) : null}
       </div>
     </form>
   );

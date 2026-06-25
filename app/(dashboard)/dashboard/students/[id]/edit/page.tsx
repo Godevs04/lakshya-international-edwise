@@ -6,12 +6,18 @@ import { getLenderOptionsAction } from "@/lib/actions/lender.actions";
 import { getPartnersList } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getStudentPageAccess } from "@/lib/auth/page-access";
+import {
+  parseStudentEditSection,
+  STUDENT_EDIT_SECTIONS,
+} from "@/lib/constants/student-edit-sections";
 import { format } from "date-fns";
 
 export default async function EditStudentPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ section?: string }>;
 }) {
   await requireModuleEnabled("students");
   const access = await getStudentPageAccess();
@@ -20,6 +26,8 @@ export default async function EditStudentPage({
   }
 
   const { id } = await params;
+  const { section: sectionParam } = await searchParams;
+  const focusSection = parseStudentEditSection(sectionParam);
   const [student, partners, assignableUsers, lenderOptions] = await Promise.all([
     getStudentForEdit(id),
     getPartnersList(),
@@ -30,10 +38,18 @@ export default async function EditStudentPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Edit Student" description={student.studentId} />
+      <PageHeader
+        title={
+          focusSection
+            ? `Edit ${STUDENT_EDIT_SECTIONS[focusSection].label}`
+            : "Edit Student"
+        }
+        description={student.studentId}
+      />
       <StudentForm
         mode="edit"
         studentId={id}
+        focusSection={focusSection}
         partners={partners.map((p) => ({
           _id: p._id.toString(),
           companyName: p.companyName,
@@ -64,14 +80,7 @@ export default async function EditStudentPage({
           loanDisbursed: student.loan?.disbursed,
           disbursementType: student.loan?.disbursementType,
           applicationNumber: student.loan?.applicationNumber,
-          partnerId:
-            student.partnerId && typeof student.partnerId === "object"
-              ? "_id" in student.partnerId
-                ? String(student.partnerId._id)
-                : String(student.partnerId)
-              : student.partnerId
-                ? String(student.partnerId)
-                : undefined,
+          partnerId: student.partnerId as string | undefined,
           commissionPercentOverride: student.commissionPercentOverride,
           ourCommissionPercent: student.ourCommissionPercent,
           assignedToId:

@@ -51,7 +51,10 @@ export function PartnerStudentCommissionTable({
 }: PartnerStudentCommissionTableProps) {
   const router = useRouter();
   const [pendingStudentId, setPendingStudentId] = useState<string | null>(null);
-  const [editingRateId, setEditingRateId] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<{
+    studentId: string;
+    field: "our" | "partner";
+  } | null>(null);
   const [rateDraft, setRateDraft] = useState("");
   const [markDialog, setMarkDialog] = useState<{
     open: boolean;
@@ -93,10 +96,17 @@ export function PartnerStudentCommissionTable({
     setMarkDialog({ open: true, type, student });
   }
 
-  async function handleSaveRate(student: PartnerStudentCommissionRow) {
+  async function handleSaveRate(
+    student: PartnerStudentCommissionRow,
+    field: "our" | "partner"
+  ) {
     setPendingStudentId(student.studentDbId);
     const formData = new FormData();
-    formData.set("commissionPercentOverride", rateDraft.trim());
+    if (field === "our") {
+      formData.set("ourCommissionPercent", rateDraft.trim());
+    } else {
+      formData.set("commissionPercentOverride", rateDraft.trim());
+    }
 
     const result = await updateStudentCommissionRateAction(
       partnerId,
@@ -105,13 +115,88 @@ export function PartnerStudentCommissionTable({
     );
 
     if (result.success) {
-      notify.success("Partner share rate updated");
-      setEditingRateId(null);
+      notify.success(
+        field === "our" ? "Our commission rate updated" : "Partner share rate updated"
+      );
+      setEditingField(null);
       router.refresh();
     } else {
       notify.error(result.error ?? "Failed to update rate");
     }
     setPendingStudentId(null);
+  }
+
+  function renderRateEditor(
+    student: PartnerStudentCommissionRow,
+    field: "our" | "partner"
+  ) {
+    const isEditing =
+      editingField?.studentId === student.studentDbId && editingField.field === field;
+
+    if (isEditing) {
+      return (
+        <div className="flex min-w-[120px] items-center gap-2">
+          <Input
+            type="number"
+            step="0.01"
+            min={0}
+            max={100}
+            value={rateDraft}
+            onChange={(e) => setRateDraft(e.target.value)}
+            className="h-8 w-20"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={pendingStudentId === student.studentDbId}
+            onClick={() => handleSaveRate(student, field)}
+          >
+            Save
+          </Button>
+        </div>
+      );
+    }
+
+    const label =
+      field === "our"
+        ? formatPercent(student.ourCommissionPercent)
+        : formatPercent(student.partnerSharePercent);
+
+    return (
+      <div className="flex items-center gap-2">
+        <span>
+          {label}
+          {field === "partner" && student.partnerSharePercentOverride != null && (
+            <span className="ml-1 text-[10px] text-[#E8952E]">custom</span>
+          )}
+        </span>
+        {canWrite && (
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground"
+            aria-label={
+              field === "our"
+                ? `Edit our commission for ${student.studentName}`
+                : `Edit partner share for ${student.studentName}`
+            }
+            onClick={() => {
+              setEditingField({ studentId: student.studentDbId, field });
+              setRateDraft(
+                field === "our"
+                  ? student.ourCommissionPercent
+                    ? String(student.ourCommissionPercent)
+                    : ""
+                  : student.partnerSharePercentOverride != null
+                    ? String(student.partnerSharePercentOverride)
+                    : ""
+              );
+            }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -166,55 +251,9 @@ export function PartnerStudentCommissionTable({
                   <TableCell>
                     <StatusBadge status={row.status as StudentStatus} />
                   </TableCell>
-                  <TableCell>{formatPercent(row.ourCommissionPercent)}</TableCell>
+                  <TableCell>{renderRateEditor(row, "our")}</TableCell>
                   <TableCell>
-                    {editingRateId === row.studentDbId ? (
-                      <div className="flex min-w-[120px] items-center gap-2">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          max={100}
-                          value={rateDraft}
-                          onChange={(e) => setRateDraft(e.target.value)}
-                          className="h-8 w-20"
-                        />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={pendingStudentId === row.studentDbId}
-                          onClick={() => handleSaveRate(row)}
-                        >
-                          Save
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <span>
-                          {formatPercent(row.partnerSharePercent)}
-                          {row.partnerSharePercentOverride != null && (
-                            <span className="ml-1 text-[10px] text-[#E8952E]">custom</span>
-                          )}
-                        </span>
-                        {canWrite && (
-                          <button
-                            type="button"
-                            className="text-muted-foreground hover:text-foreground"
-                            aria-label={`Edit partner share for ${row.studentName}`}
-                            onClick={() => {
-                              setEditingRateId(row.studentDbId);
-                              setRateDraft(
-                                row.partnerSharePercentOverride != null
-                                  ? String(row.partnerSharePercentOverride)
-                                  : ""
-                              );
-                            }}
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    {renderRateEditor(row, "partner")}
                     {row.partnerSharePercentOverride == null && (
                       <p className="text-[10px] text-muted-foreground">
                         Default {formatPercent(defaultCommissionPercent)}
@@ -324,6 +363,9 @@ function GlassHelp() {
         </li>
         <li>
           <strong>Paid</strong> — money paid to partner (use Actions → Paid; full or partial amount)
+        </li>
+        <li>
+          Click the pencil on <strong>Our %</strong> or <strong>Partner %</strong> to update rates per student
         </li>
         <li>
           Expected, share, and pending columns update automatically from disbursement + rates

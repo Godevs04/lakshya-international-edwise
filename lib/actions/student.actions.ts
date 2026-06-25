@@ -358,14 +358,22 @@ export async function getStudentForEdit(id: string) {
   const student = await Student.findById(id)
     .populate("loan.lenderId", "slug")
     .populate("assignedTo", "name")
+    .populate("partnerId", "companyName commissionPercent")
     .lean();
   if (!student) return null;
   if (isAdmissionLead(student.recordType)) return null;
 
   const lenderSlug = await getLenderSlugById(student.loan?.lenderId as Types.ObjectId | undefined);
+  const partnerId =
+    student.partnerId && typeof student.partnerId === "object" && "_id" in student.partnerId
+      ? String(student.partnerId._id)
+      : student.partnerId
+        ? String(student.partnerId)
+        : undefined;
 
   return {
     ...student,
+    partnerId,
     aadhaar: formatAadhaarForEdit(safeDecrypt(student.aadhaar)),
     pan: normalizePan(safeDecrypt(student.pan)),
     lenderId: lenderSlug,
@@ -812,17 +820,42 @@ export async function bulkUpdateStudentsAction(
     requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
     await Student.deleteMany({ _id: { $in: ids } });
     await Application.deleteMany({ studentId: { $in: ids } });
+    await logActivity({
+      action: "students.bulk_deleted",
+      description: `Deleted ${ids.length} student record(s)`,
+      resourceType: "student",
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { count: ids.length, studentIds: ids },
+    });
   } else if (action === "assign_partner" && value) {
     await Student.updateMany(
       { _id: { $in: ids } },
       { partnerId: new Types.ObjectId(value) }
     );
+    await logActivity({
+      action: "students.bulk_partner_assigned",
+      description: `Assigned ${ids.length} student(s) to partner ${value}`,
+      resourceType: "partner",
+      resourceId: value,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { count: ids.length, studentIds: ids },
+    });
   } else if (action === "change_status" && value) {
     await Student.updateMany({ _id: { $in: ids } }, { status: value });
     await Application.updateMany(
       { studentId: { $in: ids } },
       { status: value, pipelineStage: value }
     );
+    await logActivity({
+      action: "students.bulk_status_changed",
+      description: `Changed status to ${value} for ${ids.length} student(s)`,
+      resourceType: "student",
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { count: ids.length, status: value, studentIds: ids },
+    });
   }
 
   revalidatePath("/dashboard/students");
@@ -885,6 +918,8 @@ export async function addStudentNoteAction(
     .filter((id) => id !== user?.id)
     .map((id) => new Types.ObjectId(id));
 
+  const studentName = `${student.firstName} ${student.lastName}`.trim();
+
   await Student.findByIdAndUpdate(studentId, {
     $push: {
       notes: {
@@ -903,7 +938,6 @@ export async function addStudentNoteAction(
     const { sendNoteMentionEmail } = await import("@/lib/services/email.service");
     const { getAuthUrl } = await import("@/lib/config/env");
 
-    const studentName = `${student.firstName} ${student.lastName}`.trim();
     const link = `/dashboard/students/${studentId}`;
     const studentUrl = `${getAuthUrl()}${link}`;
 
@@ -939,6 +973,19 @@ export async function addStudentNoteAction(
     );
   }
 
+  await logActivity({
+    action: "student.note_added",
+    description: `Note added on ${student.studentId} (${studentName})`,
+    resourceType: "student",
+    resourceId: studentId,
+    userId: user?.id,
+    userName: user?.name,
+    metadata: {
+      preview: parsed.data.content.slice(0, 120),
+      mentionCount: mentionObjectIds.length,
+    },
+  });
+
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };
   });
@@ -964,6 +1011,11 @@ export async function addStudentDocumentAction(
   }
 
   await connectDB();
+  const student = await Student.findById(studentId).select("studentId firstName lastName").lean();
+  if (!student) {
+    return { success: false, error: "Student not found" };
+  }
+
   await Student.findByIdAndUpdate(studentId, {
     $push: {
       documents: {
@@ -973,6 +1025,16 @@ export async function addStudentDocumentAction(
         uploadedAt: new Date(),
       },
     },
+  });
+
+  await logActivity({
+    action: "student.document_added",
+    description: `Document "${name}" added for ${student.studentId}`,
+    resourceType: "student",
+    resourceId: studentId,
+    userId: user?.id,
+    userName: user?.name,
+    metadata: { documentName: name },
   });
 
   revalidatePath(`/dashboard/students/${studentId}`);
@@ -998,6 +1060,16 @@ export async function removeStudentDocumentAction(
   if (!result) {
     return { success: false, error: "Student not found" };
   }
+
+  await logActivity({
+    action: "student.document_removed",
+    description: `Document removed from ${result.studentId}`,
+    resourceType: "student",
+    resourceId: studentId,
+    userId: user?.id,
+    userName: user?.name,
+    metadata: { documentId },
+  });
 
   revalidatePath(`/dashboard/students/${studentId}`);
   return { success: true };
@@ -1115,6 +1187,16 @@ export async function setStudentPrimaryLenderAction(
     await ensureStudentLoanApplications(student);
     await setStudentPrimaryLender(student, lenderSlug, toSessionUser(user));
 
+    await logActivity({
+      action: "student.primary_lender_set",
+      description: `Primary lender set to ${lenderSlug} for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { lenderSlug },
+    });
+
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
     return { success: true };
@@ -1143,6 +1225,16 @@ export async function addStudentLoanApplicationAction(
       };
     }
 
+    await logActivity({
+      action: "student.loan_application_added",
+      description: `Bank application added (${lenderSlug}) for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { lenderSlug },
+    });
+
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
     return { success: true };
@@ -1165,6 +1257,15 @@ export async function sendLoanApplicationToBankAction(
 
     try {
       const result = await sendLoanApplicationToBank(student, applicationId, toSessionUser(user));
+      await logActivity({
+        action: "student.loan_application_sent_to_bank",
+        description: `Loan application sent to bank for ${student.studentId}${result.lenderName ? ` (${result.lenderName})` : ""}`,
+        resourceType: "student",
+        resourceId: studentId,
+        userId: user?.id,
+        userName: user?.name,
+        metadata: { applicationId, lenderName: result.lenderName },
+      });
       revalidatePath("/dashboard/students");
       revalidatePath(`/dashboard/students/${studentId}`);
       return {
@@ -1208,6 +1309,16 @@ export async function updateLoanApplicationStatusAction(
       };
     }
 
+    await logActivity({
+      action: "student.loan_application_status_updated",
+      description: `Loan application status for ${student.studentId} set to ${getApplicationStatusLabel(applicationStatus)}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { applicationId, applicationStatus },
+    });
+
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
     return { success: true };
@@ -1246,6 +1357,19 @@ export async function updateLoanApplicationLanAction(
         error: error instanceof Error ? error.message : "Failed to update LAN",
       };
     }
+
+    await logActivity({
+      action: "student.loan_application_lan_updated",
+      description: `Bank LAN updated for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: {
+        applicationId,
+        applicationNumber: parsed.data.applicationNumber?.trim() || undefined,
+      },
+    });
 
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
@@ -1286,6 +1410,20 @@ export async function updateStudentLoanDetailsAction(
       pfPaid: parsed.data.pfPaid,
     });
 
+    await logActivity({
+      action: "student.loan_details_updated",
+      description: `Loan details updated for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: {
+        loanRequested: parsed.data.loanRequested,
+        loanSanctioned: parsed.data.loanSanctioned,
+        loanDisbursed: parsed.data.loanDisbursed,
+      },
+    });
+
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
     return { success: true };
@@ -1315,6 +1453,16 @@ export async function rejectLoanApplicationAction(
         error: error instanceof Error ? error.message : "Failed to record rejection",
       };
     }
+
+    await logActivity({
+      action: "student.loan_application_rejected",
+      description: `Loan application rejected for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { applicationId, rejectionNote: rejectionNote?.trim() || undefined },
+    });
 
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
