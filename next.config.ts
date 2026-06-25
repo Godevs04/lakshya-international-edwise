@@ -15,7 +15,7 @@ const cspValue = [
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data: blob:",
   "connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io",
-  "worker-src 'self'",
+  "worker-src 'self' blob:",
   "manifest-src 'self'",
   "frame-ancestors 'self'",
 ].join("; ");
