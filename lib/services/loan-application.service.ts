@@ -426,6 +426,65 @@ export async function sendLoanApplicationToBank(
   return { sentToBankAt, sentToBankByName, lenderName };
 }
 
+export async function updateLoanApplicationLan(
+  student: StudentDoc,
+  applicationId: string,
+  applicationNumber: string | undefined
+) {
+  const app = findLoanApplication(student, applicationId);
+  if (!app) {
+    throw new Error("Loan application not found");
+  }
+
+  const trimmed = applicationNumber?.trim() || undefined;
+  app.applicationNumber = trimmed;
+
+  if (app.isPrimary) {
+    if (!student.loan) {
+      student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+    }
+    student.loan.applicationNumber = trimmed;
+  }
+
+  await student.save();
+}
+
+export async function updateStudentLoanDetails(
+  student: StudentDoc,
+  data: {
+    requested?: number;
+    sanctioned?: number;
+    disbursed?: number;
+    currency?: "INR" | "USD";
+    roi?: number;
+    interest?: number;
+    processingFee?: number;
+    pfPaid?: boolean;
+  }
+) {
+  if (!student.loan) {
+    student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+  }
+
+  if (data.requested !== undefined) student.loan.requested = data.requested;
+  if (data.sanctioned !== undefined) student.loan.sanctioned = data.sanctioned;
+  if (data.disbursed !== undefined) {
+    student.loan.disbursed = data.disbursed;
+    if (data.disbursed > 0) {
+      student.loan.disbursedAt = student.loan.disbursedAt ?? new Date();
+    } else {
+      student.loan.disbursedAt = undefined;
+    }
+  }
+  if (data.currency !== undefined) student.loan.currency = data.currency;
+  if (data.roi !== undefined) student.loan.roi = data.roi;
+  if (data.interest !== undefined) student.loan.interest = data.interest;
+  if (data.processingFee !== undefined) student.loan.processingFee = data.processingFee;
+  if (data.pfPaid !== undefined) student.loan.pfPaid = data.pfPaid;
+
+  await student.save();
+}
+
 export async function updateLoanApplicationStatus(
   student: StudentDoc,
   applicationId: string,

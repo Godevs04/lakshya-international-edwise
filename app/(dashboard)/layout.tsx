@@ -39,7 +39,7 @@ export default async function DashboardLayout({
           logo={config.company.logo}
           modules={config.modules}
         />
-        <div className="flex min-h-screen min-w-0 flex-col lg:pl-[292px]">
+        <div className="flex min-h-screen min-w-0 flex-col lg:pl-[260px]">
           <div className="sticky top-0 z-30 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-4 lg:px-8 lg:pt-6">
             <Suspense fallback={<TopbarFallback />}>
               <Topbar

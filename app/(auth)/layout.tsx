@@ -11,10 +11,6 @@ export default function AuthLayout({
   return (
     <div className="relative flex min-h-screen items-center justify-center p-4">
       <PremiumBackground />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[#6D5EF7]/20 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[#06B6D4]/15 blur-[100px]" />
-      </div>
       <AuthLayoutInner>{children}</AuthLayoutInner>
     </div>
   );

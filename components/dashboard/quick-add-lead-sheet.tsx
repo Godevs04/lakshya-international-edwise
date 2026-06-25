@@ -138,11 +138,6 @@ export function QuickAddLeadSheet({ assignableUsers }: QuickAddLeadSheetProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lead-admissionRevenue">Admission Revenue</Label>
-            <Input id="lead-admissionRevenue" name="admissionRevenue" type="number" min={0} step="0.01" inputMode="decimal" />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="lead-assignedToId">Lead assigned to</Label>
             <AssigneeSelect
               id="lead-assignedToId"

@@ -167,6 +167,24 @@ export const studentSchema = z.object({
   }
 });
 
+export const loanApplicationLanSchema = z.object({
+  applicationNumber: z.string().max(50).optional().or(z.literal("")),
+});
+
+export const studentLoanDetailsSchema = z.object({
+  loanRequested: optionalMoney,
+  loanSanctioned: optionalMoney,
+  loanDisbursed: optionalMoney,
+  loanCurrency: z.enum(["INR", "USD"]).optional(),
+  roi: z.coerce.number().min(0).max(100).transform(roundMoney).optional(),
+  interest: z.coerce.number().min(0).max(100).transform(roundMoney).optional(),
+  processingFee: optionalMoney,
+  pfPaid: z
+    .union([z.literal("true"), z.literal("false"), z.boolean()])
+    .optional()
+    .transform((value) => value === true || value === "true"),
+});
+
 export const leadSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),

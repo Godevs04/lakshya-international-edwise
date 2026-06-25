@@ -145,19 +145,6 @@ export function AddAdmissionSheet({ assignableUsers }: AddAdmissionSheetProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="admission-admissionRevenue">Revenue</Label>
-            <Input
-              id="admission-admissionRevenue"
-              name="admissionRevenue"
-              type="number"
-              min={0}
-              step="0.01"
-              inputMode="decimal"
-              placeholder="0.00"
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="admission-assignedToId">Assigned to</Label>
             <AssigneeSelect
               id="admission-assignedToId"

@@ -26,6 +26,8 @@ import {
 } from "@/lib/validations/schemas";
 import { exportToCSV } from "@/lib/services/report.service";
 import { exportToPdf } from "@/lib/utils/report-export";
+import { getAppConfig } from "@/lib/config/app-config";
+import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encryptSensitiveField, maskBankAccount, safeDecrypt } from "@/lib/utils/pii";
 import {
@@ -671,10 +673,16 @@ export async function exportPartnerCommissionAction(
       };
     }
 
-    const pdf = exportToPdf(
-      exportRows,
-      `${partner.companyName} — Commission Statement${monthFilter ? ` (${monthFilter})` : ""}`
-    );
+    const config = await getAppConfig();
+    const pdf = await exportToPdf(exportRows, {
+      title: "Commission Statement",
+      subtitle: `${partner.companyName}${monthFilter ? ` — ${monthFilter}` : ""}`,
+      companyName: config.company.name,
+      tagline: APP_TAGLINE,
+      logoSrc: config.company.logo,
+      generatedBy: user?.name ?? user?.email ?? "System",
+      generatedAt: new Date(),
+    });
 
     return {
       success: true,

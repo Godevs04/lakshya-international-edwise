@@ -432,7 +432,6 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
               studentId={student._id}
               canWrite={canWrite}
               loanApplications={loanApplications}
-              loan={student.loan}
               onBankActivity={handleBankActivity}
             />
           </TabsContent>

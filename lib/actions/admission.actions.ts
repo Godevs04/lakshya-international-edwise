@@ -43,7 +43,7 @@ export async function getAdmissions(params: {
     const [data, total] = await Promise.all([
       Student.find(filter)
         .select(
-          "studentId firstName lastName phone targetCountry targetIntake targetUniversity admissionRevenue recordType createdAt"
+          "studentId firstName lastName phone targetCountry targetIntake targetUniversity recordType createdAt"
         )
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -62,7 +62,6 @@ export async function getAdmissions(params: {
         targetCountry: entry.targetCountry,
         targetIntake: entry.targetIntake,
         targetUniversity: entry.targetUniversity,
-        admissionRevenue: entry.admissionRevenue,
         recordType: entry.recordType,
         createdAt: entry.createdAt,
       })),

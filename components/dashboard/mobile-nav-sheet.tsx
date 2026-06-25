@@ -7,7 +7,6 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
@@ -15,7 +14,7 @@ import {
   isNavItemActive,
   type NavItem,
 } from "@/components/dashboard/nav-config";
-import { AppLogo } from "@/components/brand/app-logo";
+import { SidebarBrand } from "@/components/brand/sidebar-brand";
 import type { AppModules } from "@/types";
 
 interface MobileNavSheetProps {
@@ -41,12 +40,9 @@ export function MobileNavSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[min(100vw-2rem,320px)] glass-sidebar border-[#6D5EF7]/15 p-0">
-        <SheetHeader className="border-b border-[#6D5EF7]/10 px-5 py-4 text-left">
-          <div className="flex items-center gap-3">
-            <AppLogo src={logo} alt={companyName} variant="mobile" />
-            <SheetTitle className="text-base font-bold">{companyName}</SheetTitle>
-          </div>
+      <SheetContent side="right" className="sidebar-solid w-[min(100vw-2rem,320px)] border-white/10 p-0 text-white">
+        <SheetHeader className="border-b border-white/10 px-4 py-3.5 text-left">
+          <SidebarBrand companyName={companyName} logo={logo} linkToOverview={false} />
         </SheetHeader>
         <nav className="space-y-1 p-3">
           {filteredNav.map((item) => {
@@ -61,8 +57,8 @@ export function MobileNavSheet({
                   className={cn(
                     "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-gradient-to-r from-[#6D5EF7] to-[#8B5CF6] text-white shadow-md"
-                      : "text-muted-foreground hover:bg-[#6D5EF7]/8"
+                      ? "bg-gradient-to-r from-[#7C6CF8] to-[#9B8AFB] text-white shadow-md"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
                   )}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
