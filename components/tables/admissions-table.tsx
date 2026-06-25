@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { notify } from "@/lib/toast";
 import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AddAdmissionSheet } from "@/components/dashboard/add-admission-sheet";
+import { updateAdmissionRevenueAction } from "@/lib/actions/admission.actions";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
+import { formatCurrency } from "@/lib/utils/format";
 import type { AdmissionListItem } from "@/types";
 import { Search, X } from "lucide-react";
 
@@ -39,6 +41,7 @@ interface AdmissionsTableProps {
   page: number;
   totalPages: number;
   canWrite?: boolean;
+  canViewRevenue?: boolean;
   search?: string;
   targetCountry?: string;
   targetIntake?: string;
@@ -60,12 +63,84 @@ function buildAdmissionsUrl(params: {
   return text ? `/dashboard/admissions?${text}` : "/dashboard/admissions";
 }
 
+function AdmissionRevenueCell({
+  studentId,
+  value,
+  canEdit,
+}: {
+  studentId: string;
+  value?: number;
+  canEdit: boolean;
+}) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(String(value ?? ""));
+  const [saving, setSaving] = useState(false);
+
+  async function saveRevenue() {
+    setSaving(true);
+    const formData = new FormData();
+    formData.set("studentId", studentId);
+    formData.set("admissionRevenue", draft.trim() || "0");
+    const result = await updateAdmissionRevenueAction(formData);
+    if (result.success) {
+      notify.success("Admission revenue updated");
+      setEditing(false);
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to update admission revenue");
+    }
+    setSaving(false);
+  }
+
+  if (!canEdit) {
+    return (
+      <span className="font-medium">
+        {value != null && value > 0 ? formatCurrency(value) : "—"}
+      </span>
+    );
+  }
+
+  if (editing) {
+    return (
+      <div className="flex min-w-[140px] items-center gap-2">
+        <Input
+          type="number"
+          min={0}
+          step="0.01"
+          inputMode="decimal"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          className="h-8"
+        />
+        <Button type="button" size="sm" disabled={saving} onClick={saveRevenue}>
+          {saving ? "..." : "Save"}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        setDraft(String(value ?? ""));
+        setEditing(true);
+      }}
+      className="font-medium text-[#6D5EF7] hover:underline"
+    >
+      {value != null && value > 0 ? formatCurrency(value) : "Set revenue"}
+    </button>
+  );
+}
+
 export function AdmissionsTable({
   data,
   total,
   page,
   totalPages,
   canWrite = false,
+  canViewRevenue = false,
   search = "",
   targetCountry = "",
   targetIntake = "",
@@ -131,7 +206,9 @@ export function AdmissionsTable({
               Search
             </Button>
           </form>
-          {canWrite ? <AddAdmissionSheet assignableUsers={assignableUsers} /> : null}
+          {canWrite ? (
+            <AddAdmissionSheet assignableUsers={assignableUsers} canViewRevenue={canViewRevenue} />
+          ) : null}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
@@ -206,6 +283,7 @@ export function AdmissionsTable({
               <TableHead>Intake</TableHead>
               <TableHead>Country</TableHead>
               <TableHead>University</TableHead>
+              {canViewRevenue ? <TableHead>Revenue</TableHead> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -214,20 +292,10 @@ export function AdmissionsTable({
                 <TableRow key={row._id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <Link
-                        href={`/dashboard/students/${row._id}`}
-                        className="font-semibold text-[#6D5EF7] hover:underline"
-                      >
+                      <p className="font-semibold">
                         {row.firstName} {row.lastName}
-                      </Link>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs text-muted-foreground">{row.studentId}</p>
-                        {row.recordType === "lead" ? (
-                          <Badge variant="outline" className="text-[10px]">
-                            Lead
-                          </Badge>
-                        ) : null}
-                      </div>
+                      </p>
+                      <p className="text-xs text-muted-foreground">{row.studentId}</p>
                     </div>
                   </TableCell>
                   <TableCell>{row.phone?.trim() ? row.phone : "—"}</TableCell>
@@ -236,11 +304,20 @@ export function AdmissionsTable({
                   <TableCell className="max-w-[220px] truncate">
                     {row.targetUniversity?.trim() ? row.targetUniversity : "—"}
                   </TableCell>
+                  {canViewRevenue ? (
+                    <TableCell>
+                      <AdmissionRevenueCell
+                        studentId={row._id}
+                        value={row.admissionRevenue}
+                        canEdit={canWrite}
+                      />
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={canViewRevenue ? 6 : 5} className="h-24 text-center text-muted-foreground">
                   No admission records found.
                 </TableCell>
               </TableRow>

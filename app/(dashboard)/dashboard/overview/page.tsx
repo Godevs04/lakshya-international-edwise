@@ -77,6 +77,7 @@ export default async function OverviewPage() {
     latestStudents,
     latestPartners,
     followups,
+    commissionTotals,
   } = await getOverviewDashboardAction();
 
   const metricCards = [
@@ -89,6 +90,11 @@ export default async function OverviewPage() {
     withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected, "red", "/dashboard/students?status=rejected"),
     withTrend("Loan Amount", formatCurrency(metrics.totalLoanAmount), "indian-rupee", trends.totalLoanAmount, "indigo"),
     withTrend("Today's Collection", formatCurrency(metrics.todaysCollection), "wallet", trends.todaysCollection, "pink"),
+    withTrend("Commission Received", formatCurrency(commissionTotals.commissionReceived), "wallet", { trend: "", trendUp: true }, "green", "/dashboard/partners/commissions"),
+    withTrend("Commission Shared", formatCurrency(commissionTotals.commissionShared), "handshake", { trend: "", trendUp: true }, "cyan", "/dashboard/partners/commissions"),
+    withTrend("Net Commission Earned", formatCurrency(commissionTotals.commissionEarned), "indian-rupee", { trend: "", trendUp: true }, "purple", "/dashboard/partners/commissions"),
+    withTrend("Pending Received", formatCurrency(commissionTotals.pendingReceived), "clock", { trend: "", trendUp: false }, "amber", "/dashboard/partners/commissions?status=received_pending"),
+    withTrend("Pending Shared", formatCurrency(commissionTotals.pendingShared), "clock", { trend: "", trendUp: false }, "orange", "/dashboard/partners/commissions?status=shared_pending"),
   ];
 
   return (

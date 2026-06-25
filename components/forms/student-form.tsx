@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,13 @@ import { useLenderOptions } from "@/components/lenders/use-lender-options";
 import type { LenderOption } from "@/types";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
 import {
+  calculateExpectedCommission,
+  calculateNetEarned,
+  calculatePartnerShareExpected,
+  resolvePartnerSharePercent,
+} from "@/lib/utils/commission-calculations";
+import { formatCurrency, formatPercent } from "@/lib/utils/format";
+import {
   AssigneeSelect,
   mergeAssigneeOptions,
   type AssigneeOption,
@@ -39,6 +46,7 @@ import {
 interface PartnerOption {
   _id: string;
   companyName: string;
+  commissionPercent?: number;
 }
 
 interface StudentFormProps {
@@ -85,6 +93,15 @@ export function StudentForm({
   const [disbursementType, setDisbursementType] = useState(
     (initialData?.disbursementType as string) ?? ""
   );
+  const [loanDisbursed, setLoanDisbursed] = useState(
+    String((initialData?.loanDisbursed as number | undefined) ?? "")
+  );
+  const [ourCommissionPercent, setOurCommissionPercent] = useState(
+    String((initialData?.ourCommissionPercent as number | undefined) ?? "")
+  );
+  const [partnerShareOverride, setPartnerShareOverride] = useState(
+    String((initialData?.commissionPercentOverride as number | undefined) ?? "")
+  );
 
   const applicationStatusItems = APPLICATION_STATUS_OPTIONS.map((option) => ({
     value: option.value,
@@ -96,6 +113,19 @@ export function StudentForm({
   }));
 
   const selectedPartner = partners.find((p) => p._id === partnerId);
+
+  const commissionPreview = useMemo(() => {
+    const disbursed = Number(loanDisbursed) || 0;
+    const ourRate = Number(ourCommissionPercent) || 0;
+    const partnerRate = resolvePartnerSharePercent(
+      selectedPartner?.commissionPercent ?? 0,
+      partnerShareOverride.trim() ? Number(partnerShareOverride) : null
+    );
+    const expected = calculateExpectedCommission(disbursed, ourRate);
+    const partnerShare = calculatePartnerShareExpected(expected, partnerRate);
+    const net = calculateNetEarned(expected, partnerShare);
+    return { expected, partnerShare, net, partnerRate };
+  }, [loanDisbursed, ourCommissionPercent, partnerShareOverride, selectedPartner?.commissionPercent]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -424,7 +454,7 @@ export function StudentForm({
             <input type="hidden" name="lenderId" value={lenderId} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="roi">ROI %</Label>
+            <Label htmlFor="roi">ROI / Interest %</Label>
             <Input
               id="roi"
               name="roi"
@@ -432,7 +462,12 @@ export function StudentForm({
               min={0}
               max={100}
               step="0.01"
-              defaultValue={initialData?.roi as number}
+              inputMode="decimal"
+              placeholder="e.g. 12.25"
+              defaultValue={
+                (initialData?.roi as number | undefined) ??
+                (initialData?.interest as number | undefined)
+              }
             />
           </div>
           <div className="space-y-2">
@@ -445,18 +480,6 @@ export function StudentForm({
               step="0.01"
               inputMode="decimal"
               defaultValue={initialData?.processingFee as number}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="admissionRevenue">Admission Revenue</Label>
-            <Input
-              id="admissionRevenue"
-              name="admissionRevenue"
-              type="number"
-              min={0}
-              step="0.01"
-              inputMode="decimal"
-              defaultValue={initialData?.admissionRevenue as number}
             />
           </div>
           <div className="space-y-2">
@@ -480,7 +503,8 @@ export function StudentForm({
               min={0}
               step="0.01"
               inputMode="decimal"
-              defaultValue={initialData?.loanDisbursed as number}
+              value={loanDisbursed}
+              onChange={(e) => setLoanDisbursed(e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -505,20 +529,6 @@ export function StudentForm({
             <input type="hidden" name="disbursementType" value={disbursementType} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="interest">Interest %</Label>
-            <Input
-              id="interest"
-              name="interest"
-              type="number"
-              min={0}
-              max={100}
-              step="0.01"
-              inputMode="decimal"
-              placeholder="e.g. 7.8"
-              defaultValue={initialData?.interest as number}
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="applicationNumber">Bank LAN (Loan Application Number)</Label>
             <Input
               id="applicationNumber"
@@ -528,7 +538,25 @@ export function StudentForm({
             />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="commissionPercentOverride">Partner Commission Override (%)</Label>
+            <Label htmlFor="ourCommissionPercent">Our Commission % (of disbursement)</Label>
+            <Input
+              id="ourCommissionPercent"
+              name="ourCommissionPercent"
+              type="number"
+              step="0.01"
+              min={0}
+              max={100}
+              inputMode="decimal"
+              placeholder="e.g. 1.6"
+              value={ourCommissionPercent}
+              onChange={(e) => setOurCommissionPercent(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Your commission rate from the lender for this student. Amounts calculate automatically from disbursement.
+            </p>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="commissionPercentOverride">Partner Share Override % (of your commission)</Label>
             <Input
               id="commissionPercentOverride"
               name="commissionPercentOverride"
@@ -539,16 +567,27 @@ export function StudentForm({
               inputMode="decimal"
               placeholder={
                 partnerId
-                  ? `Leave blank to use partner default${selectedPartner ? ` (${selectedPartner.companyName})` : ""}`
+                  ? `Leave blank for partner default (${formatPercent(selectedPartner?.commissionPercent ?? 0)})`
                   : "Optional — set after selecting a partner"
               }
-              defaultValue={initialData?.commissionPercentOverride as number | undefined}
+              value={partnerShareOverride}
+              onChange={(e) => setPartnerShareOverride(e.target.value)}
               disabled={!partnerId}
             />
             <p className="text-xs text-muted-foreground">
-              Optional custom rate for this student. Overrides the partner&apos;s default commission.
+              Partner share is calculated from your commission, not disbursement.
             </p>
           </div>
+          {Number(loanDisbursed) > 0 && Number(ourCommissionPercent) > 0 ? (
+            <div className="rounded-xl border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 p-3 text-sm sm:col-span-2">
+              <p className="font-medium text-[#6D5EF7]">Commission preview</p>
+              <p className="mt-1 text-muted-foreground">
+                Auto-calculated: Expected {formatCurrency(commissionPreview.expected)} · Partner share{" "}
+                {formatCurrency(commissionPreview.partnerShare)} · Projected net{" "}
+                {formatCurrency(commissionPreview.net)}. Mark received/paid only when money moves.
+              </p>
+            </div>
+          ) : null}
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="applicationStatus">Application Status</Label>
             <Select

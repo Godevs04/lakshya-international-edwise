@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StudentDetailView } from "@/components/dashboard/student-detail";
-import { getStudentById } from "@/lib/actions/student.actions";
+import { getStudentById, getAssignableUsers } from "@/lib/actions/student.actions";
 import { deriveApplicationStatus } from "@/lib/constants/application-status";
 import { serializeLoanApplications } from "@/lib/services/loan-application.service";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
@@ -83,7 +83,7 @@ export default async function StudentDetailPage({
 
   const { id } = await params;
   const access = await getStudentPageAccess();
-  const student = await getStudentById(id);
+  const [student, teamUsers] = await Promise.all([getStudentById(id), getAssignableUsers()]);
   if (!student) notFound();
 
   const lender = resolveLender(student.loan?.lenderId);
@@ -94,6 +94,7 @@ export default async function StudentDetailPage({
       <PageHeader title="Student Details" />
       <StudentDetailView
         canWrite={access.canWrite}
+        teamUsers={teamUsers.map((user) => ({ _id: user._id, name: user.name }))}
         student={{
           _id: student._id.toString(),
           studentId: student.studentId,
@@ -111,7 +112,6 @@ export default async function StudentDetailPage({
           targetIntake: student.targetIntake,
           targetDegree: student.targetDegree,
           targetUniversity: student.targetUniversity,
-          admissionRevenue: student.admissionRevenue,
           applicationStatus: deriveApplicationStatus(student),
           sentToBank: student.sentToBank,
           sentToBankAt: student.sentToBankAt,

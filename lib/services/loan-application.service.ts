@@ -482,8 +482,16 @@ export async function updateStudentLoanDetails(
     student.loan.disbursementType = data.disbursementType;
   }
   if (data.currency !== undefined) student.loan.currency = data.currency;
-  if (data.roi !== undefined) student.loan.roi = data.roi;
-  if (data.interest !== undefined) student.loan.interest = data.interest;
+  if (data.roi !== undefined || data.interest !== undefined) {
+    const rate =
+      data.roi ??
+      data.interest ??
+      student.loan.roi ??
+      student.loan.interest ??
+      0;
+    student.loan.roi = rate;
+    student.loan.interest = rate;
+  }
   if (data.processingFee !== undefined) student.loan.processingFee = data.processingFee;
   if (data.pfPaid !== undefined) student.loan.pfPaid = data.pfPaid;
 

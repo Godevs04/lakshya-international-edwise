@@ -110,7 +110,7 @@ export function PartnerForm({ initialData, partnerId, mode }: PartnerFormProps) 
             <Input id="gst" name="gst" defaultValue={initialData?.gst as string} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="commissionPercent">Commission %</Label>
+            <Label htmlFor="commissionPercent">Partner Share % (of your commission)</Label>
             <Input
               id="commissionPercent"
               name="commissionPercent"

@@ -1,73 +1,125 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculateExpectedCommission,
+  calculatePartnerShareExpected,
+  calculatePendingReceived,
+  calculatePendingShared,
+  calculateNetEarned,
+  allocateSettledToStudents,
+  resolvePartnerSharePercent,
+  formatCommissionMonth,
+  matchesCommissionStatusFilter,
   calculateCommissionPayout,
   calculatePendingCommission,
-  allocateSettledToStudents,
   resolveCommissionPercent,
-  formatCommissionMonth,
 } from "@/lib/services/partner-commission.service";
 
-describe("calculateCommissionPayout", () => {
-  it("returns zero when disbursed or percent is zero", () => {
-    expect(calculateCommissionPayout(0, 10)).toBe(0);
-    expect(calculateCommissionPayout(100000, 0)).toBe(0);
-    expect(calculateCommissionPayout(0, 0)).toBe(0);
+describe("two-tier commission formulas", () => {
+  it("calculates expected commission from disbursement and our rate", () => {
+    expect(calculateExpectedCommission(100_000, 1.6)).toBe(1_600);
+    expect(calculateExpectedCommission(0, 1.6)).toBe(0);
+    expect(calculateExpectedCommission(100_000, 0)).toBe(0);
   });
 
-  it("calculates payout from disbursed amount and commission percent", () => {
-    expect(calculateCommissionPayout(1_000_000, 10)).toBe(100_000);
-    expect(calculateCommissionPayout(250_000, 2.5)).toBe(6_250);
-    expect(calculateCommissionPayout(2_280_000, 1)).toBe(22_800);
-    expect(calculateCommissionPayout(2_280_000, 1.5)).toBe(34_200);
+  it("calculates partner share from expected commission", () => {
+    expect(calculatePartnerShareExpected(1_600, 0.8)).toBe(12.8);
   });
 
-  it("rounds payout to two decimal places", () => {
-    expect(calculateCommissionPayout(100_001, 3)).toBe(3_000.03);
-    expect(calculateCommissionPayout(100_000, 2.555)).toBe(2_555);
-  });
-});
-
-describe("resolveCommissionPercent", () => {
-  it("uses student override when provided", () => {
-    expect(resolveCommissionPercent(2, 1.5)).toBe(1.5);
-    expect(resolveCommissionPercent(2, 0)).toBe(0);
+  it("calculates pending received and shared", () => {
+    expect(calculatePendingReceived(1_600, 1_000)).toBe(600);
+    expect(calculatePendingShared(12.8, 5)).toBe(7.8);
   });
 
-  it("falls back to partner default when override is missing", () => {
-    expect(resolveCommissionPercent(2.5, null)).toBe(2.5);
-    expect(resolveCommissionPercent(2.5, undefined)).toBe(2.5);
+  it("calculates net earned as received minus shared", () => {
+    expect(calculateNetEarned(1_600, 12.8)).toBe(1_587.2);
+  });
+
+  it("matches the user example end-to-end", () => {
+    const expected = calculateExpectedCommission(100_000, 1.6);
+    const share = calculatePartnerShareExpected(expected, 0.8);
+    expect(expected).toBe(1_600);
+    expect(share).toBe(12.8);
+    expect(calculateNetEarned(expected, share)).toBe(1_587.2);
   });
 });
 
-describe("calculatePendingCommission", () => {
-  it("returns earned minus settled, never below zero", () => {
-    expect(calculatePendingCommission(22_800, 10_000)).toBe(12_800);
-    expect(calculatePendingCommission(22_800, 22_800)).toBe(0);
-    expect(calculatePendingCommission(22_800, 30_000)).toBe(0);
+describe("legacy aliases", () => {
+  it("keeps calculateCommissionPayout as expected commission", () => {
+    expect(calculateCommissionPayout(100_000, 1.6)).toBe(1_600);
+  });
+
+  it("keeps resolveCommissionPercent as partner share resolver", () => {
+    expect(resolveCommissionPercent(0.8, 1)).toBe(1);
+    expect(resolvePartnerSharePercent(0.8, null)).toBe(0.8);
+  });
+
+  it("keeps calculatePendingCommission as pending shared", () => {
+    expect(calculatePendingCommission(12.8, 5)).toBe(7.8);
   });
 });
 
 describe("allocateSettledToStudents", () => {
-  it("allocates partner settlements proportionally across students", () => {
+  it("allocates partner settlements proportionally across partner share expected", () => {
     const rows = [
-      { id: "a", commissionEarned: 10_000 },
-      { id: "b", commissionEarned: 5_000 },
-      { id: "c", commissionEarned: 5_000 },
+      { id: "a", partnerShareExpected: 10 },
+      { id: "b", partnerShareExpected: 5 },
+      { id: "c", partnerShareExpected: 5 },
     ];
 
-    const allocation = allocateSettledToStudents(rows, 12_000);
+    const allocation = allocateSettledToStudents(rows, 12);
 
-    expect(allocation.get("a")).toEqual({ settled: 6_000, pending: 4_000 });
-    expect(allocation.get("b")).toEqual({ settled: 3_000, pending: 2_000 });
-    expect(allocation.get("c")).toEqual({ settled: 3_000, pending: 2_000 });
+    expect(allocation.get("a")).toEqual({ settled: 6, pending: 4 });
+    expect(allocation.get("b")).toEqual({ settled: 3, pending: 2 });
+    expect(allocation.get("c")).toEqual({ settled: 3, pending: 2 });
+  });
+});
+
+describe("matchesCommissionStatusFilter", () => {
+  const row = {
+    commissionExpected: 1_600,
+    commissionReceived: 0,
+    pendingReceived: 600,
+    commissionShared: 0,
+    pendingShared: 7.8,
+  };
+
+  it("filters received pending", () => {
+    expect(matchesCommissionStatusFilter(row, "received_pending")).toBe(true);
+    expect(matchesCommissionStatusFilter({ ...row, pendingReceived: 0 }, "received_pending")).toBe(false);
+    expect(
+      matchesCommissionStatusFilter(
+        { ...row, commissionReceived: 500, pendingReceived: 100 },
+        "received_pending"
+      )
+    ).toBe(false);
   });
 
-  it("returns zero allocation when no commission is earned", () => {
-    const allocation = allocateSettledToStudents(
-      [{ id: "a", commissionEarned: 0 }],
-      1_000
-    );
-    expect(allocation.get("a")).toEqual({ settled: 0, pending: 0 });
+  it("filters received partial", () => {
+    expect(
+      matchesCommissionStatusFilter(
+        { ...row, commissionReceived: 1_000, pendingReceived: 600 },
+        "received_partial"
+      )
+    ).toBe(true);
+    expect(matchesCommissionStatusFilter(row, "received_partial")).toBe(false);
+  });
+
+  it("filters shared partial", () => {
+    expect(
+      matchesCommissionStatusFilter(
+        { ...row, commissionShared: 3, pendingShared: 4.8 },
+        "shared_partial"
+      )
+    ).toBe(true);
+  });
+
+  it("filters fully complete", () => {
+    expect(
+      matchesCommissionStatusFilter(
+        { commissionExpected: 100, commissionReceived: 100, pendingReceived: 0, commissionShared: 50, pendingShared: 0 },
+        "fully_complete"
+      )
+    ).toBe(true);
   });
 });
 

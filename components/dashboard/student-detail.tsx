@@ -10,9 +10,11 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NoteMentionInput } from "@/components/forms/note-mention-input";
+import { NoteContent } from "@/components/dashboard/note-content";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDate, formatMoney, getInitials } from "@/lib/utils/format";
+import { formatDate, formatMoney, getInitials } from "@/lib/utils/format";
 import { addStudentNoteAction, removeStudentDocumentAction } from "@/lib/actions/student.actions";
 import { DocumentLinkForm } from "@/components/forms/document-link-form";
 import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
@@ -34,6 +36,7 @@ import { ExternalLink, GraduationCap, Pencil, Trash2, UserRound } from "lucide-r
 
 interface StudentDetailProps {
   canWrite?: boolean;
+  teamUsers?: Array<{ _id: string; name: string }>;
   student: {
     _id: string;
     studentId: string;
@@ -51,7 +54,6 @@ interface StudentDetailProps {
     targetIntake?: string;
     targetDegree?: string;
     targetUniversity?: string;
-    admissionRevenue?: number;
     applicationStatus?: ApplicationStatusId;
     sentToBank?: boolean;
     sentToBankAt?: Date;
@@ -100,9 +102,14 @@ function formatLoanAmount(amount: number, currency?: "INR" | "USD") {
   return formatMoney(amount, currency ?? "INR");
 }
 
-export function StudentDetailView({ student, canWrite = false }: StudentDetailProps) {
+export function StudentDetailView({
+  student,
+  canWrite = false,
+  teamUsers = [],
+}: StudentDetailProps) {
   const router = useRouter();
   const [noteLoading, setNoteLoading] = useState(false);
+  const [noteFormKey, setNoteFormKey] = useState(0);
   const [removingDocId, setRemovingDocId] = useState<string | null>(null);
   const loanApplications = useMemo(
     () => student.loanApplications ?? [],
@@ -179,7 +186,7 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
     const result = await addStudentNoteAction(student._id, formData);
     if (result.success) {
       notify.success("Note added");
-      (e.target as HTMLFormElement).reset();
+      setNoteFormKey((prev) => prev + 1);
       router.refresh();
     } else {
       notify.error(result.error ?? "Failed to add note");
@@ -263,16 +270,16 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
               value={formatLoanAmount(student.loan?.processingFee ?? 0, student.loan?.currency)}
             />
             <SummaryRow
-              label="ROI"
-              value={student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : undefined}
+              label="ROI / Interest"
+              value={
+                student.loan?.roi != null && student.loan.roi > 0
+                  ? `${student.loan.roi}%`
+                  : student.loan?.interest != null && student.loan.interest > 0
+                    ? `${student.loan.interest}%`
+                    : undefined
+              }
             />
             <SummaryRow label="LAN" value={student.loan?.applicationNumber} />
-            {student.admissionRevenue != null && student.admissionRevenue > 0 && (
-              <SummaryRow
-                label="Admission revenue"
-                value={formatCurrency(student.admissionRevenue)}
-              />
-            )}
           </div>
 
           {canWrite && (
@@ -503,10 +510,9 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
                 <div><p className="text-xs text-muted-foreground">Disbursement Type</p><p className="text-lg font-semibold">{getDisbursementTypeLabel(student.loan?.disbursementType)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Currency</p><p className="text-lg font-semibold">{student.loan?.currency ?? "INR"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Lender</p><p className="text-sm">{lenderName ?? "—"}</p></div>
-                <div><p className="text-xs text-muted-foreground">ROI</p><p className="text-lg font-semibold">{student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">ROI / Interest</p><p className="text-lg font-semibold">{student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : student.loan?.interest != null && student.loan.interest > 0 ? `${student.loan.interest}%` : "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Processing Fee</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.processingFee ?? 0, student.loan?.currency)}</p></div>
                 <div><p className="text-xs text-muted-foreground">PF Paid</p><p className="text-sm">{student.loan?.pfPaid ? "Yes" : "No"}</p></div>
-                <div><p className="text-xs text-muted-foreground">Interest</p><p className="text-lg font-semibold">{student.loan?.interest != null && student.loan.interest > 0 ? `${student.loan.interest}%` : "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Bank LAN</p><p className="text-sm font-mono">{student.loan?.applicationNumber ?? "—"}</p></div>
               </div>
             </GlassCard>
@@ -515,8 +521,8 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
           <TabsContent value="notes" className="mt-4 space-y-4">
             {canWrite && (
               <GlassCard className="p-5">
-                <form onSubmit={handleAddNote} className="flex flex-col gap-2 sm:flex-row">
-                  <Input name="content" placeholder="Add a note..." required className="flex-1" />
+                <form key={noteFormKey} onSubmit={handleAddNote} className="flex flex-col gap-2 sm:flex-row">
+                  <NoteMentionInput teamUsers={teamUsers} required className="flex-1" />
                   <Input name="dueDate" type="date" className="w-full sm:w-40" />
                   <Button type="submit" disabled={noteLoading}>Add</Button>
                 </form>
@@ -533,7 +539,7 @@ export function StudentDetailView({ student, canWrite = false }: StudentDetailPr
                     })
                     .map((note, i) => (
                       <div key={note._id?.toString() ?? i} className="rounded-lg border p-3">
-                        <p className="text-sm">{note.content}</p>
+                        <NoteContent content={note.content} />
                         <p className="mt-1 text-xs text-muted-foreground">
                           {note.createdByName} · {note.createdAt ? formatDate(note.createdAt) : ""}
                           {note.dueDate && ` · Due: ${formatDate(note.dueDate)}`}

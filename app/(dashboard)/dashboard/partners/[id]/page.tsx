@@ -11,20 +11,24 @@ import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import type { PartnerStatus } from "@/lib/constants/statuses";
-import { Pencil } from "lucide-react";
+import { Pencil, IndianRupee } from "lucide-react";
+import { Suspense } from "react";
+import { commissionStatusFilterSchema } from "@/lib/validations/schemas";
 
 export default async function PartnerDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; status?: string }>;
 }) {
   await requireModuleEnabled("partners");
   await requirePagePermission(PERMISSIONS.PARTNERS_READ);
 
   const { id } = await params;
-  const { tab } = await searchParams;
+  const { tab, status } = await searchParams;
+  const parsedStatus = commissionStatusFilterSchema.safeParse(status ?? "all");
+  const statusFilter = parsedStatus.success ? parsedStatus.data : "all";
   const access = await getPartnerPageAccess();
   const [partner, analytics, ledger] = await Promise.all([
     getPartnerById(id),
@@ -39,11 +43,18 @@ export default async function PartnerDetailPage({
         title={partner.companyName}
         description={`Owner: ${partner.owner ?? "N/A"}`}
         action={
-          access.canWrite ? (
-            <Link href={`/dashboard/partners/${id}/edit`}>
-              <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/dashboard/partners/${id}?tab=students`}>
+              <Button variant="default" size="sm">
+                <IndianRupee className="mr-1 h-4 w-4" /> Mark Received / Paid
+              </Button>
             </Link>
-          ) : undefined
+            {access.canWrite ? (
+              <Link href={`/dashboard/partners/${id}/edit`}>
+                <Button variant="outline" size="sm"><Pencil className="mr-1 h-4 w-4" /> Edit</Button>
+              </Link>
+            ) : null}
+          </div>
         }
       />
 
@@ -58,27 +69,46 @@ export default async function PartnerDetailPage({
         </GlassCard>
       </div>
 
-      <PartnerCommissionSection
-        partnerId={id}
-        canWrite={access.canWrite}
-        commissionPercent={partner.commissionPercent ?? 0}
-        totalDisbursed={analytics?.disbursementTotal ?? 0}
-        disbursedStudentCount={analytics?.disbursedStudentCount ?? 0}
-        commissionEarned={analytics?.commissionEarned ?? 0}
-        commissionSettled={analytics?.commissionSettled ?? 0}
-        commissionPending={analytics?.commissionPending ?? 0}
-        settlements={analytics?.settlements ?? []}
-        studentCommissions={analytics?.studentCommissions ?? []}
-        ledger={ledger ?? {
-          entries: [],
-          earnedInMonth: 0,
-          settledInMonth: 0,
-          commissionEarnedTotal: analytics?.commissionEarned ?? 0,
-          commissionSettledTotal: analytics?.commissionSettled ?? 0,
-          commissionPendingTotal: analytics?.commissionPending ?? 0,
-        }}
-        initialTab={tab === "students" ? "students" : tab === "ledger" ? "ledger" : "summary"}
-      />
+      <Suspense fallback={<div className="h-48 animate-pulse rounded-xl border border-border bg-card/50" />}>
+        <PartnerCommissionSection
+          partnerId={id}
+          canWrite={access.canWrite}
+          commissionPercent={partner.commissionPercent ?? 0}
+          totalDisbursed={analytics?.disbursementTotal ?? 0}
+          disbursedStudentCount={analytics?.disbursedStudentCount ?? 0}
+          commissionExpected={analytics?.commissionExpected ?? 0}
+          commissionReceived={analytics?.commissionReceived ?? 0}
+          pendingReceived={analytics?.pendingReceived ?? 0}
+          partnerShareExpected={analytics?.partnerShareExpected ?? 0}
+          commissionShared={analytics?.commissionShared ?? 0}
+          pendingShared={analytics?.pendingShared ?? 0}
+          projectedNetEarned={analytics?.projectedNetEarned ?? 0}
+          commissionEarned={analytics?.commissionEarned ?? 0}
+          commissionSettled={analytics?.commissionSettled ?? 0}
+          commissionPending={analytics?.commissionPending ?? 0}
+          settlements={analytics?.settlements ?? []}
+          studentCommissions={analytics?.studentCommissions ?? []}
+          ledger={ledger ?? {
+            entries: [],
+            expectedInMonth: 0,
+            receivedInMonth: 0,
+            sharedInMonth: 0,
+            earnedInMonth: 0,
+            settledInMonth: 0,
+            commissionExpectedTotal: analytics?.commissionExpected ?? 0,
+            commissionReceivedTotal: analytics?.commissionReceived ?? 0,
+            pendingReceivedTotal: analytics?.pendingReceived ?? 0,
+            partnerShareExpectedTotal: analytics?.partnerShareExpected ?? 0,
+            commissionSharedTotal: analytics?.commissionShared ?? 0,
+            pendingSharedTotal: analytics?.pendingShared ?? 0,
+            commissionEarnedTotal: analytics?.commissionEarned ?? 0,
+            commissionSettledTotal: analytics?.commissionShared ?? 0,
+            commissionPendingTotal: analytics?.pendingShared ?? 0,
+          }}
+          initialTab={tab === "students" ? "students" : tab === "ledger" ? "ledger" : "summary"}
+          statusFilter={statusFilter}
+        />
+      </Suspense>
 
       <GlassCard className="p-5">
         <div className="flex flex-wrap items-center gap-4">

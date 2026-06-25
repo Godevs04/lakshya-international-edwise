@@ -36,7 +36,6 @@ export const STUDENT_IMPORT_COLUMN_KEYS = [
   "applicationStatus",
   "partnerCompanyName",
   "assigneeEmail",
-  "admissionRevenue",
   "remarks",
 ] as const;
 
@@ -82,7 +81,6 @@ export const STUDENT_IMPORT_COLUMNS: StudentImportColumn[] = [
   { key: "applicationStatus", label: "Application Status", width: 18 },
   { key: "partnerCompanyName", label: "Consultancy (Partner)", required: true, width: 22 },
   { key: "assigneeEmail", label: "Assignee Email", width: 24 },
-  { key: "admissionRevenue", label: "Admission Revenue (INR)", width: 20 },
   { key: "remarks", label: "Remarks", width: 30 },
 ];
 
@@ -120,7 +118,6 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
     applicationStatus: "docs_pending",
     partnerCompanyName: "Godevs",
     assigneeEmail: "",
-    admissionRevenue: "15000",
     remarks: "Awaiting co-applicant KYC documents",
   },
   {
@@ -156,7 +153,6 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
     applicationStatus: "loggedin",
     partnerCompanyName: "Rooted",
     assigneeEmail: "",
-    admissionRevenue: "20000",
     remarks: "Logged in with bank — sanction in progress",
   },
   {
@@ -192,7 +188,6 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
     applicationStatus: "sanctioned",
     partnerCompanyName: "Godevs",
     assigneeEmail: "",
-    admissionRevenue: "28000",
     remarks: "Sanction letter received — PF collection pending",
   },
   {
@@ -228,7 +223,6 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
     applicationStatus: "disbursed",
     partnerCompanyName: "Rooted",
     assigneeEmail: "",
-    admissionRevenue: "24000",
     remarks: "Full disbursement completed to university account",
   },
   {
@@ -264,7 +258,6 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
     applicationStatus: "pf_paid",
     partnerCompanyName: "Godevs",
     assigneeEmail: "",
-    admissionRevenue: "19000",
     remarks: "PF paid — ready for disbursement request",
   },
 ];

@@ -34,7 +34,11 @@ export default async function EditStudentPage({
       <StudentForm
         mode="edit"
         studentId={id}
-        partners={partners.map((p) => ({ _id: p._id.toString(), companyName: p.companyName }))}
+        partners={partners.map((p) => ({
+          _id: p._id.toString(),
+          companyName: p.companyName,
+          commissionPercent: p.commissionPercent,
+        }))}
         assignableUsers={assignableUsers.map((u) => ({ _id: u._id, name: u.name }))}
         lenderOptions={lenderOptions}
         initialData={{
@@ -59,7 +63,6 @@ export default async function EditStudentPage({
           loanSanctioned: student.loan?.sanctioned,
           loanDisbursed: student.loan?.disbursed,
           disbursementType: student.loan?.disbursementType,
-          interest: student.loan?.interest,
           applicationNumber: student.loan?.applicationNumber,
           partnerId:
             student.partnerId && typeof student.partnerId === "object"
@@ -70,6 +73,7 @@ export default async function EditStudentPage({
                 ? String(student.partnerId)
                 : undefined,
           commissionPercentOverride: student.commissionPercentOverride,
+          ourCommissionPercent: student.ourCommissionPercent,
           assignedToId:
             student.assignedTo && typeof student.assignedTo === "object"
               ? "_id" in student.assignedTo
@@ -86,7 +90,6 @@ export default async function EditStudentPage({
           targetIntake: student.targetIntake,
           targetDegree: student.targetDegree,
           targetUniversity: student.targetUniversity,
-          admissionRevenue: student.admissionRevenue,
           applicationStatus: student.applicationStatus as string | undefined,
           loanCurrency: student.loanCurrency as string | undefined,
           lenderId: student.lenderId as string | undefined,

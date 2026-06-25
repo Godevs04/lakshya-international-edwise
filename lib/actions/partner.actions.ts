@@ -23,6 +23,8 @@ import {
   studentCommissionSettlementSchema,
   studentCommissionRateSchema,
   commissionLedgerFilterSchema,
+  commissionReceiptSchema,
+  commissionStatusFilterSchema,
 } from "@/lib/validations/schemas";
 import { exportToCsv, exportToPdf } from "@/lib/utils/report-export";
 import { getAppConfig } from "@/lib/config/app-config";
@@ -181,7 +183,10 @@ export async function getPartnersList() {
   requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
   await connectDB();
-  return Partner.find({ status: "active" }).select("companyName").sort({ companyName: 1 }).lean();
+  return Partner.find({ status: "active" })
+    .select("companyName commissionPercent")
+    .sort({ companyName: 1 })
+    .lean();
   }, []);
 }
 
@@ -377,10 +382,18 @@ export async function getPartnerAnalytics(partnerId: string) {
     monthlyLeads: partner.performance.monthlyLeads,
     sanctionRate: total > 0 ? Math.round((sanctioned / total) * 100) : 0,
     disbursementTotal: commission.totalDisbursed,
+    partnerSharePercent: commission.partnerSharePercent,
+    commissionExpected: commission.commissionExpected,
+    commissionReceived: commission.commissionReceived,
+    pendingReceived: commission.pendingReceived,
+    partnerShareExpected: commission.partnerShareExpected,
+    commissionShared: commission.commissionShared,
+    pendingShared: commission.pendingShared,
+    projectedNetEarned: commission.projectedNetEarned,
     commissionEarned: commission.commissionEarned,
+    commissionPercent: commission.commissionPercent,
     commissionSettled: commission.commissionSettled,
     commissionPending: commission.commissionPending,
-    commissionPercent: commission.commissionPercent,
     disbursedStudentCount: commission.disbursedStudentCount,
     statusCounts,
     disbursed,
@@ -401,11 +414,12 @@ export async function getPartnerAnalytics(partnerId: string) {
   }, null);
 }
 
-export async function getPartnersCommissionOverviewAction() {
+export async function getPartnersCommissionOverviewAction(status?: string) {
   return runLoggedQuery("getPartnersCommissionOverviewAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.PARTNERS_READ);
-    return getPartnersCommissionOverview();
+    const parsed = commissionStatusFilterSchema.safeParse(status ?? "all");
+    return getPartnersCommissionOverview(parsed.success ? parsed.data : "all");
   }, []);
 }
 
@@ -428,10 +442,10 @@ export async function recordPartnerCommissionSettlementAction(
 
     const summary = await getPartnerCommissionSummary(partnerId);
 
-    if (parsed.data.amount > summary.commissionPending) {
+    if (parsed.data.amount > summary.pendingShared) {
       return {
         success: false,
-        error: `Amount exceeds pending commission (${summary.commissionPending.toLocaleString("en-IN")})`,
+        error: `Amount exceeds pending partner share (${summary.pendingShared.toLocaleString("en-IN")})`,
       };
     }
 
@@ -518,10 +532,10 @@ export async function recordStudentCommissionSettlementAction(
     const row = rows.find((item) => item.studentDbId === studentId);
     if (!row) return { success: false, error: "Student commission row not found" };
 
-    if (parsed.data.amount > row.commissionPending) {
+    if (parsed.data.amount > row.pendingShared) {
       return {
         success: false,
-        error: `Amount exceeds pending commission (${row.commissionPending.toLocaleString("en-IN")})`,
+        error: `Amount exceeds pending partner share (${row.pendingShared.toLocaleString("en-IN")})`,
       };
     }
 
@@ -537,7 +551,7 @@ export async function recordStudentCommissionSettlementAction(
     await student.save();
 
     const updatedRows = await getPartnerStudentCommissions(partnerId);
-    const totalSettled = updatedRows.reduce((sum, item) => sum + item.commissionSettled, 0);
+    const totalSettled = updatedRows.reduce((sum, item) => sum + item.commissionShared, 0);
 
     partner.commissionSettlements ??= [];
     partner.commissionSettlements.push({
@@ -570,6 +584,127 @@ export async function recordStudentCommissionSettlementAction(
 
     revalidatePath(`/dashboard/partners/${partnerId}`);
     revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    return { success: true };
+  });
+}
+
+export async function markStudentCommissionReceivedAction(
+  partnerId: string,
+  studentId: string
+): Promise<ActionResult<{ amount: number }>> {
+  return runLoggedMutation("markStudentCommissionReceivedAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    await connectDB();
+    const rows = await getPartnerStudentCommissions(partnerId);
+    const row = rows.find((item) => item.studentDbId === studentId);
+    if (!row) return { success: false, error: "Student commission row not found" };
+    if (row.pendingReceived <= 0) {
+      return { success: false, error: "No pending commission to mark as received" };
+    }
+
+    const formData = new FormData();
+    formData.set("amount", String(row.pendingReceived));
+    formData.set("note", "Marked as received (auto-calculated amount)");
+
+    const result = await recordStudentCommissionReceivedAction(partnerId, studentId, formData);
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Failed to mark received" };
+    }
+
+    return { success: true, data: { amount: row.pendingReceived } };
+  });
+}
+
+export async function markStudentCommissionSharedAction(
+  partnerId: string,
+  studentId: string
+): Promise<ActionResult<{ amount: number }>> {
+  return runLoggedMutation("markStudentCommissionSharedAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    await connectDB();
+    const rows = await getPartnerStudentCommissions(partnerId);
+    const row = rows.find((item) => item.studentDbId === studentId);
+    if (!row) return { success: false, error: "Student commission row not found" };
+    if (row.pendingShared <= 0) {
+      return { success: false, error: "No pending partner share to mark as paid" };
+    }
+
+    const formData = new FormData();
+    formData.set("amount", String(row.pendingShared));
+    formData.set("note", "Marked as paid (auto-calculated amount)");
+
+    const result = await recordStudentCommissionSettlementAction(partnerId, studentId, formData);
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Failed to mark paid" };
+    }
+
+    return { success: true, data: { amount: row.pendingShared } };
+  });
+}
+
+export async function recordStudentCommissionReceivedAction(
+  partnerId: string,
+  studentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("recordStudentCommissionReceivedAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const parsed = commissionReceiptSchema.safeParse(
+      Object.fromEntries(formData.entries())
+    );
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const [partner, student] = await Promise.all([
+      Partner.findById(partnerId),
+      Student.findOne({ _id: studentId, partnerId }),
+    ]);
+
+    if (!partner) return { success: false, error: "Partner not found" };
+    if (!student) return { success: false, error: "Student not found for this partner" };
+
+    const rows = await getPartnerStudentCommissions(partnerId);
+    const row = rows.find((item) => item.studentDbId === studentId);
+    if (!row) return { success: false, error: "Student commission row not found" };
+
+    if (parsed.data.amount > row.pendingReceived) {
+      return {
+        success: false,
+        error: `Amount exceeds pending received (${row.pendingReceived.toLocaleString("en-IN")})`,
+      };
+    }
+
+    student.commissionReceived = (student.commissionReceived ?? 0) + parsed.data.amount;
+    student.commissionReceipts ??= [];
+    student.commissionReceipts.push({
+      amount: parsed.data.amount,
+      note: parsed.data.note?.trim() || undefined,
+      receivedAt: new Date(),
+      recordedBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+      recordedByName: user?.name,
+    });
+    await student.save();
+
+    await logActivity({
+      action: "partner.student_commission_received",
+      description: `Recorded INR ${parsed.data.amount.toLocaleString("en-IN")} commission received for ${student.studentId} (${partner.companyName})`,
+      resourceType: "partner",
+      resourceId: partnerId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath(`/dashboard/students/${studentId}`);
     revalidateInsightCaches();
     return { success: true };
   });

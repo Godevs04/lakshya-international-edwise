@@ -37,7 +37,7 @@ import {
   buildStudentListQuery,
   type StudentListFilters,
 } from "@/lib/utils/student-list-filters";
-import { QuickAddLeadSheet } from "@/components/dashboard/quick-add-lead-sheet";
+import { QuickAddStudentSheet } from "@/components/dashboard/quick-add-student-sheet";
 import { Trash2, Download } from "lucide-react";
 
 interface PartnerOption {
@@ -295,7 +295,7 @@ export function StudentsTable({
               </Button>
             )}
             {canWrite && (
-              <QuickAddLeadSheet assignableUsers={assignableUsers} />
+              <QuickAddStudentSheet assignableUsers={assignableUsers} />
             )}
             {canWrite && <StudentImportDialog canWrite={canWrite} />}
             {canExport && (

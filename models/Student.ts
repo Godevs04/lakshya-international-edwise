@@ -29,6 +29,7 @@ const NoteSchema = new Schema(
     content: { type: String, required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     createdByName: { type: String },
+    mentionedUserIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
     dueDate: { type: Date },
     reminderSentAt: { type: Date },
     createdAt: { type: Date, default: Date.now },
@@ -158,6 +159,16 @@ export interface IStudent extends Document {
     updatedAt?: Date;
   }>;
   commissionPercentOverride?: number;
+  ourCommissionPercent?: number;
+  commissionReceived: number;
+  commissionReceipts: Array<{
+    _id?: Types.ObjectId;
+    amount: number;
+    note?: string;
+    receivedAt?: Date;
+    recordedBy?: Types.ObjectId;
+    recordedByName?: string;
+  }>;
   commissionSettled: number;
   commissionSettlements: Array<{
     _id?: Types.ObjectId;
@@ -272,6 +283,17 @@ const StudentSchema = new Schema<IStudent>(
     sentToBankByName: { type: String, trim: true },
     loanApplications: [LoanApplicationSchema],
     commissionPercentOverride: { type: Number, min: 0, max: 100 },
+    ourCommissionPercent: { type: Number, min: 0, max: 100 },
+    commissionReceived: { type: Number, default: 0, min: 0 },
+    commissionReceipts: [
+      {
+        amount: { type: Number, required: true, min: 0 },
+        note: { type: String, trim: true },
+        receivedAt: { type: Date, default: Date.now },
+        recordedBy: { type: Schema.Types.ObjectId, ref: "User" },
+        recordedByName: { type: String, trim: true },
+      },
+    ],
     commissionSettled: { type: Number, default: 0, min: 0 },
     commissionSettlements: [
       {

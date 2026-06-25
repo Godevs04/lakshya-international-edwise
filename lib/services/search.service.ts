@@ -3,6 +3,7 @@ import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
 import { toSafeRegExp } from "@/lib/utils/sanitize";
+import { excludeAdmissionLeadsFilter } from "@/lib/constants/student-record-type";
 import type { SearchResult } from "@/types";
 
 export interface SearchScope {
@@ -29,6 +30,7 @@ export async function globalSearch(
   const [students, partners] = await Promise.all([
     scope.students
       ? Student.find({
+          ...excludeAdmissionLeadsFilter(),
           $or: [
             { firstName: regex },
             { lastName: regex },

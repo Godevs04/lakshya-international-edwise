@@ -34,9 +34,10 @@ interface AssigneeOption {
 
 interface AddAdmissionSheetProps {
   assignableUsers: AssigneeOption[];
+  canViewRevenue?: boolean;
 }
 
-export function AddAdmissionSheet({ assignableUsers }: AddAdmissionSheetProps) {
+export function AddAdmissionSheet({ assignableUsers, canViewRevenue = false }: AddAdmissionSheetProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,16 +47,17 @@ export function AddAdmissionSheet({ assignableUsers }: AddAdmissionSheetProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const result = await createLeadAction(formData);
     if (result.success) {
       notify.success("Admission lead added");
-      setOpen(false);
+      form.reset();
       setTargetCountry("");
       setTargetIntake("");
       setAssignedToId("");
-      (event.target as HTMLFormElement).reset();
+      setOpen(false);
       router.refresh();
     } else {
       notify.error(result.error ?? "Failed to add admission");
@@ -143,6 +145,22 @@ export function AddAdmissionSheet({ assignableUsers }: AddAdmissionSheetProps) {
             <Label htmlFor="admission-targetUniversity">University</Label>
             <Input id="admission-targetUniversity" name="targetUniversity" placeholder="e.g. University of Melbourne" />
           </div>
+
+          {canViewRevenue ? (
+            <div className="space-y-2">
+              <Label htmlFor="admission-admissionRevenue">Admission Revenue (INR) *</Label>
+              <Input
+                id="admission-admissionRevenue"
+                name="admissionRevenue"
+                type="number"
+                min={0}
+                step="0.01"
+                inputMode="decimal"
+                required
+                placeholder="e.g. 15000"
+              />
+            </div>
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="admission-assignedToId">Assigned to</Label>

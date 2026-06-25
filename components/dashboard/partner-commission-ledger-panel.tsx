@@ -111,27 +111,35 @@ export function PartnerCommissionLedgerPanel({
         </div>
       </GlassCard>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">
-            {month ? "Earned in month" : "Total earned"}
+            {month ? "Expected in month" : "Total expected"}
           </p>
-          <p className="text-2xl font-semibold text-[#6D5EF7]">
-            {formatCurrency(month ? ledger.earnedInMonth : ledger.commissionEarnedTotal)}
+          <p className="text-2xl font-semibold">
+            {formatCurrency(month ? ledger.expectedInMonth : ledger.commissionExpectedTotal)}
           </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">
-            {month ? "Settled in month" : "Total settled"}
+            {month ? "Received in month" : "Total received"}
           </p>
           <p className="text-2xl font-semibold text-[#22C55E]">
-            {formatCurrency(month ? ledger.settledInMonth : ledger.commissionSettledTotal)}
+            {formatCurrency(month ? ledger.receivedInMonth : ledger.commissionReceivedTotal)}
           </p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-xs text-muted-foreground">Pending payout</p>
+          <p className="text-xs text-muted-foreground">
+            {month ? "Shared in month" : "Total shared"}
+          </p>
+          <p className="text-2xl font-semibold text-[#22C55E]">
+            {formatCurrency(month ? ledger.sharedInMonth : ledger.commissionSharedTotal)}
+          </p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-xs text-muted-foreground">Pending shared</p>
           <p className="text-2xl font-semibold text-[#F59E0B]">
-            {formatCurrency(ledger.commissionPendingTotal)}
+            {formatCurrency(ledger.pendingSharedTotal || ledger.commissionPendingTotal)}
           </p>
         </GlassCard>
       </div>
@@ -172,7 +180,11 @@ export function PartnerCommissionLedgerPanel({
                     </TableCell>
                     <TableCell
                       className={
-                        entry.type === "settlement" ? "text-[#22C55E]" : "text-[#6D5EF7]"
+                        entry.type === "shared" || entry.type === "settlement"
+                          ? "text-[#22C55E]"
+                          : entry.type === "received"
+                            ? "text-[#22C55E]"
+                            : "text-[#6D5EF7]"
                       }
                     >
                       {formatCurrency(entry.amount)}

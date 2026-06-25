@@ -4,7 +4,7 @@ import { Partner } from "@/models/Partner";
 import type { DateRangePreset } from "@/lib/utils/format";
 import { getDateRange } from "@/lib/utils/format";
 import { formatReportRows, type ReportSourceRow } from "@/lib/utils/report-format";
-import { getPartnerCommissionPayouts } from "@/lib/services/partner-commission.service";
+import { getPartnerCommissionPayouts, type PartnerCommissionSummary } from "@/lib/services/partner-commission.service";
 
 export type ReportType = "partner" | "student" | "loan";
 
@@ -27,33 +27,32 @@ export async function getReportData(
             studentsCount: 1,
             totalLoanValue: 1,
             commissionPercent: 1,
-            commissionSettled: "$performance.commissionSettled",
             status: 1,
           },
         },
         { $sort: { totalLoanValue: -1 } },
       ]);
 
-      const commissionMap = new Map<string, number>();
+      const commissionMap = new Map<string, PartnerCommissionSummary>();
       if (partners.length > 0) {
-        const percentByPartner = new Map(
-          partners.map((partner) => [
-            String(partner._id),
-            Number(partner.commissionPercent ?? 0),
-          ])
-        );
         const payouts = await getPartnerCommissionPayouts(
-          partners.map((partner) => String(partner._id)),
-          percentByPartner
+          partners.map((partner) => String(partner._id))
         );
-        payouts.forEach((value, key) => commissionMap.set(key, value));
+        payouts.forEach((summary, key) => commissionMap.set(key, summary));
       }
 
-      const rows = partners.map((partner) => ({
-        ...partner,
-        commissionEarned: commissionMap.get(String(partner._id)) ?? 0,
-        commissionSettled: Number(partner.commissionSettled ?? 0),
-      }));
+      const rows = partners.map((partner) => {
+        const summary = commissionMap.get(String(partner._id));
+        return {
+          ...partner,
+          commissionExpected: summary?.commissionExpected ?? 0,
+          commissionReceived: summary?.commissionReceived ?? 0,
+          pendingReceived: summary?.pendingReceived ?? 0,
+          partnerShareExpected: summary?.partnerShareExpected ?? 0,
+          commissionShared: summary?.commissionShared ?? 0,
+          commissionEarned: summary?.commissionEarned ?? 0,
+        };
+      });
 
       return formatReportRows(reportType, rows);
     }
