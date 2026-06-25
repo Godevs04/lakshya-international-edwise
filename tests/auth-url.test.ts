@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { resolveAuthUrl } from "@/lib/config/env";
+import { getConfiguredAuthUrl, resolveAuthUrl } from "@/lib/config/env";
 
 describe("resolveAuthUrl", () => {
   afterEach(() => {
@@ -31,5 +31,23 @@ describe("resolveAuthUrl", () => {
     vi.stubEnv("NEXTAUTH_URL", "");
     vi.stubEnv("PORT", "4000");
     expect(resolveAuthUrl()).toBe("http://localhost:4000");
+  });
+});
+
+describe("getConfiguredAuthUrl", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("returns the explicit auth URL when configured", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
+    expect(getConfiguredAuthUrl()).toBe("https://lie.teamgodevs.in");
+  });
+
+  it("ignores localhost auth URLs in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "http://localhost:4000");
+    expect(getConfiguredAuthUrl()).toBeUndefined();
   });
 });

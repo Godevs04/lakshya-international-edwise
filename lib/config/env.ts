@@ -83,6 +83,25 @@ export function resolveAuthUrl(): string {
   );
 }
 
+/**
+ * Returns only an explicitly configured canonical auth URL.
+ * Auth.js route redirects should prefer the current request host when this is unset.
+ */
+export function getConfiguredAuthUrl(): string | undefined {
+  const explicit =
+    trimEnv(process.env.AUTH_URL) ?? trimEnv(process.env.NEXTAUTH_URL);
+
+  if (!explicit) {
+    return undefined;
+  }
+
+  if (process.env.NODE_ENV === "production" && isLocalhostUrl(explicit)) {
+    return undefined;
+  }
+
+  return normalizeBaseUrl(explicit);
+}
+
 export function getEnv(): Env {
   const parsed = envSchema.safeParse({
     ...process.env,
