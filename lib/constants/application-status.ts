@@ -7,6 +7,7 @@ export const APPLICATION_STATUS_VALUES = [
   "pf_paid",
   "pf_pending",
   "disbursed",
+  "not_interested",
   "rejected",
 ] as const;
 
@@ -19,6 +20,7 @@ export const APPLICATION_STATUS_OPTIONS: Array<{ value: ApplicationStatusId; lab
   { value: "pf_paid", label: "PF Paid" },
   { value: "pf_pending", label: "PF Pending" },
   { value: "disbursed", label: "Disbursed" },
+  { value: "not_interested", label: "Not Interested" },
   { value: "rejected", label: "Rejected" },
 ];
 
@@ -44,6 +46,7 @@ export function deriveApplicationStatus(student: StudentApplicationInput): Appli
   }
 
   if (student.status === "rejected") return "rejected";
+  if (student.status === "closed") return "not_interested";
   if (student.status === "disbursed") return "disbursed";
   if (student.status === "documents_pending") return "docs_pending";
   if (student.loan?.pfPaid) return "pf_paid";
@@ -73,6 +76,8 @@ export function applyApplicationStatus(applicationStatus: ApplicationStatusId): 
       return { applicationStatus, status: "sanctioned", loggedIn: true, pfPaid: false };
     case "disbursed":
       return { applicationStatus, status: "disbursed", loggedIn: true, pfPaid: true };
+    case "not_interested":
+      return { applicationStatus, status: "closed", loggedIn: false, pfPaid: false };
     case "rejected":
       return { applicationStatus, status: "rejected", loggedIn: false, pfPaid: false };
     default:

@@ -9,8 +9,8 @@ export const BRAND = {
   danger: "#EF4444",
   pink: "#EC4899",
   background: "#F8F9FF",
-  sidebarFrom: "#12082E",
-  sidebarTo: "#2D1B69",
+  sidebarFrom: "#1E0B4A",
+  sidebarTo: "#5B21B6",
 } as const;
 
 export const KPI_GRADIENTS = [
@@ -43,4 +43,4 @@ export const CARD_GRADIENT =
   "linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88))";
 
 export const SIDEBAR_GRADIENT =
-  "linear-gradient(180deg, #12082E 0%, #1A0F45 40%, #2D1B69 100%)";
+  "linear-gradient(180deg, #1E0B4A 0%, #3B1578 42%, #5B21B6 100%)";

@@ -52,7 +52,7 @@ function FloatingOrbs({ reducedMotion }: { reducedMotion: boolean | null }) {
       {orbs.map((orb, index) => (
         <motion.div
           key={index}
-          className="absolute rounded-full blur-3xl"
+          className="absolute rounded-full blur-3xl dark:opacity-70"
           style={{
             left: orb.cx,
             top: orb.cy,
@@ -104,7 +104,7 @@ function AnimatedDotField({ reducedMotion }: { reducedMotion: boolean | null }) 
       {dots.map((dot, index) => (
         <motion.span
           key={index}
-          className="absolute h-1 w-1 rounded-full bg-[#6D5EF7]"
+          className="absolute h-1 w-1 rounded-full bg-[#6D5EF7] dark:bg-[#A78BFA]"
           style={{ left: dot.left, top: dot.top }}
           animate={
             reducedMotion
@@ -142,7 +142,7 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
       )}
       aria-hidden
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-[#F3F0FF]/90 via-[#F8F7FF]/55 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#F3F0FF]/90 via-[#F8F7FF]/55 to-transparent dark:from-[#0f172a]/88 dark:via-[#1e1b4b]/38 dark:to-transparent" />
 
       <FloatingOrbs reducedMotion={reducedMotion} />
       <AnimatedDotField reducedMotion={reducedMotion} />
@@ -158,23 +158,23 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
         >
           <defs>
             <linearGradient id={`${uid}-waveA`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.35" />
-              <stop offset="45%" stopColor="#8B5CF6" stopOpacity="0.28" />
-              <stop offset="100%" stopColor="#6D5EF7" stopOpacity="0.22" />
+              <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.26" />
+              <stop offset="45%" stopColor="#8B5CF6" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#6D5EF7" stopOpacity="0.18" />
             </linearGradient>
             <linearGradient id={`${uid}-waveB`} x1="0" y1="0" x2="1" y2="0.8">
-              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.2" />
-              <stop offset="50%" stopColor="#7C6CF8" stopOpacity="0.26" />
-              <stop offset="100%" stopColor="#EC4899" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.16" />
+              <stop offset="50%" stopColor="#7C6CF8" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#EC4899" stopOpacity="0.14" />
             </linearGradient>
             <linearGradient id={`${uid}-waveC`} x1="0.2" y1="0" x2="0.9" y2="1">
-              <stop offset="0%" stopColor="#DDD6FE" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.14" />
+              <stop offset="0%" stopColor="#DDD6FE" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.12" />
             </linearGradient>
             <linearGradient id={`${uid}-stroke`} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#6D5EF7" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#EC4899" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#6D5EF7" stopOpacity="0.1" />
+              <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#EC4899" stopOpacity="0.12" />
             </linearGradient>
           </defs>
 
@@ -241,10 +241,10 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
         </svg>
       </div>
 
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#6D5EF7]/25 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#6D5EF7]/25 to-transparent dark:via-[#8B7CF8]/18" />
 
       <motion.div
-        className="absolute left-[12%] top-[22%] h-px w-[35%] bg-gradient-to-r from-transparent via-[#8B5CF6]/30 to-transparent"
+        className="absolute left-[12%] top-[22%] h-px w-[35%] bg-gradient-to-r from-transparent via-[#8B5CF6]/30 to-transparent dark:via-[#A78BFA]/18"
         animate={reducedMotion ? undefined : { opacity: [0.2, 0.55, 0.2], scaleX: [0.85, 1, 0.85] }}
         transition={
           reducedMotion
@@ -253,7 +253,7 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
         }
       />
       <motion.div
-        className="absolute right-[8%] top-[14%] h-px w-[28%] bg-gradient-to-r from-transparent via-[#EC4899]/25 to-transparent"
+        className="absolute right-[8%] top-[14%] h-px w-[28%] bg-gradient-to-r from-transparent via-[#EC4899]/25 to-transparent dark:via-[#EC4899]/16"
         animate={reducedMotion ? undefined : { opacity: [0.15, 0.45, 0.15], scaleX: [0.9, 1.05, 0.9] }}
         transition={
           reducedMotion

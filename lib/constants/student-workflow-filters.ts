@@ -11,6 +11,7 @@ export const STUDENT_WORKFLOW_FILTERS: StudentWorkflowFilter[] = [
   { id: "pf_paid", label: "PF Paid" },
   { id: "pf_pending", label: "PF Pending" },
   { id: "disbursed", label: "Disbursed" },
+  { id: "not_interested", label: "Not Interested" },
   { id: "rejected", label: "Rejected" },
 ];
 

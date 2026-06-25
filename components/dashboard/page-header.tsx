@@ -15,7 +15,7 @@ export function PageHeader({ title, description, action, badge }: PageHeaderProp
       <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           {badge && (
-            <span className="mb-2 inline-flex items-center rounded-full bg-[#6D5EF7]/10 px-3 py-1 text-xs font-semibold text-[#6D5EF7]">
+            <span className="mb-2 inline-flex items-center rounded-full bg-[#6D5EF7]/10 px-3 py-1 text-xs font-semibold text-[#6D5EF7] dark:bg-[#8B7CF8]/16 dark:text-[#C4B5FD]">
               {badge}
             </span>
           )}
