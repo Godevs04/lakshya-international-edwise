@@ -1,6 +1,6 @@
 /** Unique icon + sparkline colors for overview metric cards */
 export const METRIC_THEMES = {
-  purple: { gradient: "from-[#6D5EF7] to-[#8B5CF6]", spark: "#6D5EF7" },
+  purple: { gradient: "from-[#E8952E] to-[#F59E0B]", spark: "#E8952E" },
   blue: { gradient: "from-[#3B82F6] to-[#60A5FA]", spark: "#3B82F6" },
   cyan: { gradient: "from-[#06B6D4] to-[#22D3EE]", spark: "#06B6D4" },
   amber: { gradient: "from-[#EAB308] to-[#FACC15]", spark: "#EAB308" },

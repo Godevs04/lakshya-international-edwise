@@ -187,7 +187,7 @@ export function PartnerCommissionSection({
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Projected Net (auto)</p>
-            <p className="text-2xl font-semibold text-[#6D5EF7]">{formatCurrency(projectedNetEarned)}</p>
+            <p className="text-2xl font-semibold text-[#E8952E]">{formatCurrency(projectedNetEarned)}</p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Net Earned (after marks)</p>

@@ -7,19 +7,19 @@ import type { CompanySettings } from "@/types";
 /** Design 06 palette — deep indigo, violet accent, clean neutrals */
 const BRAND = {
   primary: "#2D1B69",
-  primaryMid: "#6D5EF7",
-  accent: "#8B5CF6",
-  accentLight: "#C4B5FD",
+  primaryMid: "#E8952E",
+  accent: "#F59E0B",
+  accentLight: "#FDE68A",
   text: "#1E293B",
   muted: "#64748B",
   border: "#E5E7EB",
   surface: "#F8F7FC",
   otpCell: "#EDEAFD",
   white: "#FFFFFF",
-  link: "#6D5EF7",
+  link: "#E8952E",
   success: "#166534",
   successBg: "#F0FDF4",
-  footerBg: "#1E0B4A",
+  footerBg: "#9A3412",
 };
 
 const FONT = "'SN Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -45,9 +45,16 @@ function emailFontStyles(): string {
     }`;
 }
 
+/** APP_EMAIL_BANNER_URL is the dedicated email logo asset (shown compact in the header, not full-width). */
 export function getEmailBannerUrl(): string | undefined {
   const url = process.env.APP_EMAIL_BANNER_URL?.trim();
   return url ? resolveEmailAssetUrl(url) : undefined;
+}
+
+export function getEmailLogoUrl(company: CompanySettings): string {
+  const bannerAsLogo = getEmailBannerUrl();
+  if (bannerAsLogo) return bannerAsLogo;
+  return resolveEmailAssetUrl(company.logo?.trim() || DEFAULT_APP_LOGO) ?? DEFAULT_APP_LOGO;
 }
 
 export async function getEmailBranding(): Promise<CompanySettings> {
@@ -78,23 +85,12 @@ function emailButton(href: string, label: string): string {
 
 function emailHeader(company: CompanySettings): string {
   const name = escapeHtml(company.name);
-  const logo = resolveEmailAssetUrl(company.logo?.trim() || DEFAULT_APP_LOGO);
+  const logo = getEmailLogoUrl(company);
   const tagline = escapeHtml(APP_TAGLINE);
-  const banner = getEmailBannerUrl();
-  const logoWidth = 72;
+  const logoWidth = 88;
   const logoHeight = Math.round(logoWidth / APP_LOGO_ASPECT_RATIO);
 
-  const logoBlock = logo
-    ? `<img src="${escapeHtml(logo)}" alt="${name}" width="${logoWidth}" height="${logoHeight}" style="display: block; border: 0; border-radius: 12px; object-fit: contain; background-color: ${BRAND.white}; box-shadow: 0 4px 14px rgba(109, 94, 247, 0.18);" />`
-    : `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td width="56" height="56" align="center" valign="middle" style="width: 56px; height: 56px; background: linear-gradient(135deg, ${BRAND.primaryMid}, ${BRAND.accent}); border-radius: 50%; font-family: ${FONT}; font-size: 22px; font-weight: 700; color: #ffffff;">${escapeHtml(company.name.charAt(0).toUpperCase())}</td></tr></table>`;
-
-  const bannerBlock = banner
-    ? `<tr>
-        <td style="padding: 0; line-height: 0; border-bottom: 1px solid ${BRAND.border};">
-          <img src="${escapeHtml(banner)}" alt="" width="600" style="display: block; width: 100%; max-width: 600px; height: auto; border: 0;" />
-        </td>
-      </tr>`
-    : "";
+  const logoBlock = `<img src="${escapeHtml(logo)}" alt="${name}" width="${logoWidth}" height="${logoHeight}" style="display: block; border: 0; border-radius: 12px; object-fit: contain; background-color: ${BRAND.white}; box-shadow: 0 4px 14px rgba(232, 149, 46, 0.18);" />`;
 
   return `
     <tr>
@@ -112,8 +108,7 @@ function emailHeader(company: CompanySettings): string {
           </tr>
         </table>
       </td>
-    </tr>
-    ${bannerBlock}`;
+    </tr>`;
 }
 
 function emailFooter(company: CompanySettings): string {

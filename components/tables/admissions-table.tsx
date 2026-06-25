@@ -127,7 +127,7 @@ function AdmissionRevenueCell({
         setDraft(String(value ?? ""));
         setEditing(true);
       }}
-      className="font-medium text-[#6D5EF7] hover:underline"
+      className="font-medium text-[#E8952E] hover:underline"
     >
       {value != null && value > 0 ? formatCurrency(value) : "Set revenue"}
     </button>

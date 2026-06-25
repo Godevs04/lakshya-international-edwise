@@ -16,7 +16,7 @@ const sizes = {
 
 export function GradientIcon({
   icon: Icon,
-  gradient = "from-[#6D5EF7] to-[#8B5CF6]",
+  gradient = "from-[#E8952E] to-[#F59E0B]",
   size = "md",
   className,
 }: GradientIconProps) {

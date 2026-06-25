@@ -1,7 +1,13 @@
-import { splitNoteContentWithMentions } from "@/lib/utils/note-mentions";
+import { splitNoteContentWithMentions, type MentionUser } from "@/lib/utils/note-mentions";
 
-export function NoteContent({ content }: { content: string }) {
-  const parts = splitNoteContentWithMentions(content);
+export function NoteContent({
+  content,
+  teamUsers = [],
+}: {
+  content: string;
+  teamUsers?: MentionUser[];
+}) {
+  const parts = splitNoteContentWithMentions(content, teamUsers);
 
   return (
     <p className="text-sm whitespace-pre-wrap">
@@ -9,7 +15,7 @@ export function NoteContent({ content }: { content: string }) {
         part.type === "mention" ? (
           <span
             key={`${part.value}-${index}`}
-            className="rounded-md bg-[#6D5EF7]/10 px-1 font-medium text-[#6D5EF7]"
+            className="rounded-md bg-[#E8952E]/10 px-1 font-medium text-[#E8952E]"
           >
             {part.value}
           </span>

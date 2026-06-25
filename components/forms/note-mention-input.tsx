@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { buildMentionToken, type MentionUser } from "@/lib/utils/note-mentions";
 
@@ -24,6 +25,97 @@ function parseMentionQuery(value: string, cursor: number): { query: string; star
   return { query: between, start: atIndex };
 }
 
+const MENU_GAP = 6;
+const MENU_MAX_HEIGHT = 220;
+
+interface MentionMenuPortalProps {
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  open: boolean;
+  suggestions: MentionUser[];
+  activeIndex: number;
+  onSelect: (user: MentionUser) => void;
+}
+
+function MentionMenuPortal({
+  inputRef,
+  open,
+  suggestions,
+  activeIndex,
+  onSelect,
+}: MentionMenuPortalProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    function updatePosition() {
+      const input = inputRef.current;
+      const menu = menuRef.current;
+      if (!input || !menu) return;
+
+      const rect = input.getBoundingClientRect();
+      const estimatedHeight = Math.min(suggestions.length * 40 + 8, MENU_MAX_HEIGHT);
+      const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP;
+      const spaceAbove = rect.top - MENU_GAP;
+      const openAbove = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+
+      menu.style.position = "fixed";
+      menu.style.left = `${rect.left}px`;
+      menu.style.width = `${Math.max(rect.width, 200)}px`;
+      menu.style.maxHeight = `${MENU_MAX_HEIGHT}px`;
+      menu.style.zIndex = "9999";
+      menu.style.visibility = "visible";
+      menu.style.top = "";
+      menu.style.bottom = "";
+
+      if (openAbove) {
+        menu.style.bottom = `${window.innerHeight - rect.top + MENU_GAP}px`;
+      } else {
+        menu.style.top = `${rect.bottom + MENU_GAP}px`;
+      }
+    }
+
+    updatePosition();
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [open, suggestions.length, inputRef]);
+
+  if (!open || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      ref={menuRef}
+      role="listbox"
+      aria-label="Mention teammates"
+      className="overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
+      style={{ visibility: "hidden" }}
+    >
+      {suggestions.map((user, index) => (
+        <button
+          key={user._id}
+          type="button"
+          role="option"
+          aria-selected={index === activeIndex}
+          className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
+            index === activeIndex ? "bg-primary/10 text-foreground" : "hover:bg-muted/60"
+          }`}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            onSelect(user);
+          }}
+        >
+          <span className="font-medium">{user.name}</span>
+        </button>
+      ))}
+    </div>,
+    document.body
+  );
+}
+
 export function NoteMentionInput({
   name = "content",
   placeholder = "Add a note... Use @ to tag a teammate",
@@ -45,6 +137,8 @@ export function NoteMentionInput({
       .filter((user) => !query || user.name.toLowerCase().includes(query))
       .slice(0, 6);
   }, [mentionQuery, teamUsers]);
+
+  const showMenu = Boolean(mentionQuery && suggestions.length > 0);
 
   function updateMentionedIds(nextValue: string, ids: string[]) {
     const resolved = new Set(ids);
@@ -119,7 +213,7 @@ export function NoteMentionInput({
   }
 
   return (
-    <div className={`relative flex-1 ${className ?? ""}`}>
+    <div className={`relative min-w-0 flex-1 ${className ?? ""}`}>
       <Input
         ref={inputRef}
         name={name}
@@ -133,25 +227,13 @@ export function NoteMentionInput({
         autoComplete="off"
       />
       <input type="hidden" name="mentionedUserIds" value={JSON.stringify(mentionedIds)} />
-      {mentionQuery && suggestions.length > 0 ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-50 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
-          {suggestions.map((user, index) => (
-            <button
-              key={user._id}
-              type="button"
-              className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors ${
-                index === activeIndex ? "bg-[#6D5EF7]/10 text-foreground" : "hover:bg-muted/60"
-              }`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                insertMention(user);
-              }}
-            >
-              <span className="font-medium">{user.name}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <MentionMenuPortal
+        inputRef={inputRef}
+        open={showMenu}
+        suggestions={suggestions}
+        activeIndex={activeIndex}
+        onSelect={insertMention}
+      />
     </div>
   );
 }

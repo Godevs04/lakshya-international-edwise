@@ -98,7 +98,7 @@ export function TaskFormSheet({
         }
       />
       <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md">
-        <SheetHeader className="border-b border-[#6D5EF7]/10">
+        <SheetHeader className="border-b border-[#E8952E]/10">
           <SheetTitle>New Task</SheetTitle>
           <SheetDescription>
             Assign to a team member — they will get an in-app notification and email when the
@@ -149,7 +149,7 @@ export function TaskFormSheet({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs text-[#6D5EF7]"
+                  className="h-7 text-xs text-[#E8952E]"
                   onClick={() => setAssignedToId(currentUserId)}
                 >
                   Assign to me

@@ -28,7 +28,7 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[#6D5EF7]/8 border border-[#6D5EF7]/15",
+        default: "bg-primary/8 border border-primary/15",
         line: "gap-1 bg-transparent border-0",
       },
     },
@@ -59,7 +59,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
       data-slot="tabs-trigger"
       className={cn(
         "relative inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-transparent px-4 py-1 text-sm font-semibold whitespace-nowrap text-muted-foreground transition-all hover:text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-        "data-active:bg-gradient-to-r data-active:from-[#6D5EF7] data-active:to-[#8B5CF6] data-active:text-white data-active:shadow-md data-active:shadow-[#6D5EF7]/25",
+        "data-active:bg-gradient-to-r data-active:from-primary data-active:to-secondary data-active:text-white data-active:shadow-md data-active:shadow-primary/25",
         className
       )}
       {...props}

@@ -579,8 +579,8 @@ export function StudentForm({
             </p>
           </div>
           {Number(loanDisbursed) > 0 && Number(ourCommissionPercent) > 0 ? (
-            <div className="rounded-xl border border-[#6D5EF7]/15 bg-[#6D5EF7]/5 p-3 text-sm sm:col-span-2">
-              <p className="font-medium text-[#6D5EF7]">Commission preview</p>
+            <div className="rounded-xl border border-[#E8952E]/15 bg-[#E8952E]/5 p-3 text-sm sm:col-span-2">
+              <p className="font-medium text-[#E8952E]">Commission preview</p>
               <p className="mt-1 text-muted-foreground">
                 Auto-calculated: Expected {formatCurrency(commissionPreview.expected)} · Partner share{" "}
                 {formatCurrency(commissionPreview.partnerShare)} · Projected net{" "}

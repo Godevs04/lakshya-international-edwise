@@ -81,7 +81,7 @@ export function EditTaskSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md">
-        <SheetHeader className="border-b border-[#6D5EF7]/10">
+        <SheetHeader className="border-b border-[#E8952E]/10">
           <SheetTitle>Edit Task</SheetTitle>
           <SheetDescription>
             Update assignee, due date, or reminder. Reassigning notifies the new team member.

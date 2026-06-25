@@ -3,7 +3,7 @@ import {
   escapeHtml,
   renderEmailLayout,
   renderOtpBlock,
-  getEmailBannerUrl,
+  getEmailLogoUrl,
 } from "@/lib/services/email-templates";
 import { resolveEmailAssetUrl } from "@/lib/utils/email-asset-url";
 
@@ -80,12 +80,39 @@ describe("email-templates", () => {
     expect(html).toContain("Verification Code");
   });
 
-  it("reads optional banner URL from env", () => {
+  it("uses APP_EMAIL_BANNER_URL as the compact header logo", () => {
     const original = process.env.APP_EMAIL_BANNER_URL;
     process.env.APP_EMAIL_BANNER_URL = "https://example.com/banner.jpg";
-    expect(getEmailBannerUrl()).toBe("https://example.com/banner.jpg");
+    const html = renderEmailLayout({
+      company: {
+        name: "Lakshya International Edwise",
+        logo: "/logo_model.jpeg",
+        email: "hello@example.com",
+        phone: "",
+        address: "",
+      },
+      title: "Team Mention",
+      bodyHtml: "<p>Hello</p>",
+    });
+    expect(html).toContain('src="https://example.com/banner.jpg"');
+    expect(html).not.toContain('src="https://lie.teamgodevs.in/logo_model.jpeg"');
+    expect(html.match(/banner\.jpg/g)?.length).toBe(1);
+    expect(getEmailLogoUrl({
+      name: "Lakshya International Edwise",
+      logo: "/logo_model.jpeg",
+    })).toBe("https://example.com/banner.jpg");
     if (original === undefined) delete process.env.APP_EMAIL_BANNER_URL;
     else process.env.APP_EMAIL_BANNER_URL = original;
+  });
+
+  it("falls back to company logo when APP_EMAIL_BANNER_URL is unset", () => {
+    const original = process.env.APP_EMAIL_BANNER_URL;
+    delete process.env.APP_EMAIL_BANNER_URL;
+    expect(getEmailLogoUrl({
+      name: "Lakshya International Edwise",
+      logo: "/logo_model.jpeg",
+    })).toBe("https://lie.teamgodevs.in/logo_model.jpeg");
+    if (original !== undefined) process.env.APP_EMAIL_BANNER_URL = original;
   });
 });
 

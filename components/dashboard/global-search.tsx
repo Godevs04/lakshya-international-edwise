@@ -87,7 +87,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   onSelect={() => handleSelect(item.href)}
                   className="rounded-xl"
                 >
-                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D5EF7] to-[#8B5CF6]">
+                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8952E] to-[#F59E0B]">
                     <Icon className="h-3.5 w-3.5 text-white" />
                   </div>
                   <div className="flex flex-col">

@@ -29,7 +29,7 @@ function SummaryCard({
       <GlassCard
         hover
         className={`p-4 transition-colors ${
-          active ? "ring-2 ring-[#6D5EF7]/40" : ""
+          active ? "ring-2 ring-[#E8952E]/40" : ""
         } ${tone === "warning" && value > 0 ? "border-[#F59E0B]/30 bg-[#F59E0B]/5" : ""}`}
       >
         <div className="flex items-center justify-between gap-3">
@@ -43,7 +43,7 @@ function SummaryCard({
             className={`flex h-10 w-10 items-center justify-center rounded-xl ${
               tone === "warning" && value > 0
                 ? "bg-[#F59E0B]/15 text-[#F59E0B]"
-                : "bg-[#6D5EF7]/10 text-[#6D5EF7]"
+                : "bg-[#E8952E]/10 text-[#E8952E]"
             }`}
           >
             <Icon className="h-5 w-5" />

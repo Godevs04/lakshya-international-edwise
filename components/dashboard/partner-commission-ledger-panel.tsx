@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { notify } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -184,7 +183,7 @@ export function PartnerCommissionLedgerPanel({
                           ? "text-[#22C55E]"
                           : entry.type === "received"
                             ? "text-[#22C55E]"
-                            : "text-[#6D5EF7]"
+                            : "text-[#E8952E]"
                       }
                     >
                       {formatCurrency(entry.amount)}

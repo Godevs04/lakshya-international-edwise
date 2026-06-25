@@ -520,8 +520,8 @@ export function StudentDetailView({
 
           <TabsContent value="notes" className="mt-4 space-y-4">
             {canWrite && (
-              <GlassCard className="p-5">
-                <form key={noteFormKey} onSubmit={handleAddNote} className="flex flex-col gap-2 sm:flex-row">
+              <GlassCard className="overflow-visible p-5">
+                <form key={noteFormKey} onSubmit={handleAddNote} className="flex flex-col gap-2 sm:flex-row sm:items-start">
                   <NoteMentionInput teamUsers={teamUsers} required className="flex-1" />
                   <Input name="dueDate" type="date" className="w-full sm:w-40" />
                   <Button type="submit" disabled={noteLoading}>Add</Button>
@@ -539,7 +539,7 @@ export function StudentDetailView({
                     })
                     .map((note, i) => (
                       <div key={note._id?.toString() ?? i} className="rounded-lg border p-3">
-                        <NoteContent content={note.content} />
+                        <NoteContent content={note.content} teamUsers={teamUsers} />
                         <p className="mt-1 text-xs text-muted-foreground">
                           {note.createdByName} · {note.createdAt ? formatDate(note.createdAt) : ""}
                           {note.dueDate && ` · Due: ${formatDate(note.dueDate)}`}

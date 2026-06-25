@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const dynamic = "force-dynamic";
 
 function TopbarFallback() {
-  return <Skeleton className="h-11 w-full rounded-full bg-[#6D5EF7]/10 sm:h-12" />;
+  return <Skeleton className="h-11 w-full rounded-full bg-primary/10 sm:h-12" />;
 }
 
 export default async function DashboardLayout({

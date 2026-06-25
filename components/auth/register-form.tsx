@@ -31,7 +31,7 @@ export function RegisterForm() {
   }
 
   return (
-    <GlassCard className="p-8 shadow-2xl shadow-[#6D5EF7]/10">
+    <GlassCard className="p-8 shadow-2xl shadow-[#E8952E]/10">
       <div className="mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Request access</h2>
         <p className="mt-1.5 text-sm text-muted-foreground">
