@@ -147,4 +147,18 @@ describe("student-import-parse", () => {
     expect(input.loanCurrency).toBe("INR");
     expect(input.processingFee).toBe(10000);
   });
+
+  it("maps disbursement type from import row", () => {
+    const input = mapRowToStudentInput({
+      firstName: "Arun",
+      lastName: "Sharma",
+      phone: "9876543210",
+      partnerId: "507f1f77bcf86cd799439011",
+      targetCountry: "United Kingdom",
+      targetIntake: "Fall 2026 (Aug - Sep)",
+      disbursementType: "tranche",
+    });
+
+    expect(input.disbursementType).toBe("tranche");
+  });
 });

@@ -58,6 +58,7 @@ export default async function EditStudentPage({
           loanRequested: student.loan?.requested,
           loanSanctioned: student.loan?.sanctioned,
           loanDisbursed: student.loan?.disbursed,
+          disbursementType: student.loan?.disbursementType,
           interest: student.loan?.interest,
           applicationNumber: student.loan?.applicationNumber,
           partnerId:

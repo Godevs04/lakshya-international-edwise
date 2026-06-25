@@ -4,6 +4,9 @@ import {
   APPLICATION_STATUS_VALUES,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
+import {
+  normalizeDisbursementType,
+} from "@/lib/constants/disbursement";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import {
   buildImportTemplateLabelAliases,
@@ -44,6 +47,8 @@ const HEADER_ALIASES: Record<string, string> = {
   loandisbursed: "loanDisbursed",
   "loan disbursed": "loanDisbursed",
   "loan disbursed (inr)": "loanDisbursed",
+  disbursementtype: "disbursementType",
+  "disbursement type": "disbursementType",
   "interest rate (%)": "interest",
   processingfee: "processingFee",
   "processing fee": "processingFee",
@@ -266,6 +271,7 @@ export function mapRowToStudentInput(row: Record<string, string>): StudentInput 
     loanRequested: parseImportMoney(row.loanRequested),
     loanSanctioned: parseImportMoney(row.loanSanctioned),
     loanDisbursed: parseImportMoney(row.loanDisbursed),
+    disbursementType: normalizeDisbursementType(row.disbursementType),
     interest: row.interest ? roundMoney(Number(row.interest)) : undefined,
     processingFee: parseImportMoney(row.processingFee),
     lenderId: lenderValue,
