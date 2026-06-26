@@ -82,6 +82,9 @@ export async function getOverviewDashboardAction() {
   return runLogged("getOverviewDashboardAction", async () => {
     const user = await getSessionUser();
     requireAnyPermission(user, OVERVIEW_PERMISSIONS);
+    if (!user) {
+      throw new Error("Unauthorized: insufficient permissions");
+    }
 
     const [
       { metrics, trends },
