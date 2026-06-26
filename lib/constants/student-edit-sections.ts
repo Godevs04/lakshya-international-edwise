@@ -1,4 +1,4 @@
-export type StudentEditSectionKey = "profile" | "education" | "identity" | "loan";
+export type StudentEditSectionKey = "profile" | "loan";
 
 export const STUDENT_EDIT_SECTIONS: Record<
   StudentEditSectionKey,
@@ -8,16 +8,6 @@ export const STUDENT_EDIT_SECTIONS: Record<
     label: "Student profile",
     formSections: ["onboarding", "personal", "study-abroad"],
     scrollTarget: "section-onboarding",
-  },
-  education: {
-    label: "Education & address",
-    formSections: ["education", "address"],
-    scrollTarget: "section-education",
-  },
-  identity: {
-    label: "Identity",
-    formSections: ["identity"],
-    scrollTarget: "section-identity",
   },
   loan: {
     label: "Loan & application",

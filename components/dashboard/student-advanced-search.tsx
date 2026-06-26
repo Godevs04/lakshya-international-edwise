@@ -45,9 +45,6 @@ interface AdvancedSearchDraft {
   targetCountry: string;
   targetIntake: string;
   status: string;
-  state: string;
-  college: string;
-  course: string;
   lenderId: string;
   dateFrom: string;
   dateTo: string;
@@ -78,9 +75,6 @@ function createDraftFromFilters(filters: StudentListFilters): AdvancedSearchDraf
     targetCountry: filters.targetCountry ?? "",
     targetIntake: filters.targetIntake ?? "",
     status: filters.status ?? "",
-    state: filters.state ?? "",
-    college: filters.college ?? "",
-    course: filters.course ?? "",
     lenderId: filters.lenderId ?? "",
     dateFrom: filters.dateFrom ?? "",
     dateTo: filters.dateTo ?? "",
@@ -153,9 +147,6 @@ export function StudentAdvancedSearch({
       targetCountry: draft.targetCountry || undefined,
       targetIntake: draft.targetIntake || undefined,
       status: draft.status || undefined,
-      state: draft.state || undefined,
-      college: draft.college || undefined,
-      course: draft.course || undefined,
       lenderId: draft.lenderId || undefined,
       dateFrom: draft.dateFrom || undefined,
       dateTo: draft.dateTo || undefined,
@@ -352,54 +343,25 @@ export function StudentAdvancedSearch({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                value={draft.state}
-                onChange={(e) => updateDraft("state", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lenderId">Lender</Label>
-              <Select
-                value={toSelectValue(draft.lenderId)}
-                onValueChange={(value) => updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))}
-                items={lenderItems}
-              >
-                <SelectTrigger id="lenderId" className="w-full">
-                  <SelectValue placeholder="Any lender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ANY_OPTION}>Any lender</SelectItem>
-                  {lenderOptions.map((lender) => (
-                    <SelectItem key={lender.slug} value={lender.slug}>
-                      {lender.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="college">College</Label>
-              <Input
-                id="college"
-                value={draft.college}
-                onChange={(e) => updateDraft("college", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="course">Course</Label>
-              <Input
-                id="course"
-                value={draft.course}
-                onChange={(e) => updateDraft("course", e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="lenderId">Lender</Label>
+            <Select
+              value={toSelectValue(draft.lenderId)}
+              onValueChange={(value) => updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))}
+              items={lenderItems}
+            >
+              <SelectTrigger id="lenderId" className="w-full">
+                <SelectValue placeholder="Any lender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANY_OPTION}>Any lender</SelectItem>
+                {lenderOptions.map((lender) => (
+                  <SelectItem key={lender.slug} value={lender.slug}>
+                    {lender.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

@@ -32,7 +32,7 @@ import {
   isStudentProfileVerified,
 } from "@/lib/utils/student-profile";
 import type { StudentStatus } from "@/lib/constants/statuses";
-import { ExternalLink, GraduationCap, Pencil, Trash2, UserRound } from "lucide-react";
+import { ExternalLink, Pencil, Trash2, UserRound } from "lucide-react";
 import {
   getStudentEditHref,
   type StudentEditSectionKey,
@@ -64,10 +64,6 @@ interface StudentDetailProps {
     sentToBankByName?: string;
     loggedIn?: boolean;
     assignedAt?: Date;
-    address?: { line?: string; city?: string; state?: string; pincode?: string };
-    aadhaar?: string;
-    pan?: string;
-    education?: { college?: string; course?: string; year?: string };
     loan?: {
       requested?: number;
       sanctioned?: number;
@@ -178,8 +174,6 @@ export function StudentDetailView({
       targetIntake: student.targetIntake,
       targetDegree: student.targetDegree,
       targetUniversity: student.targetUniversity,
-      address: student.address,
-      education: student.education,
       loan: {
         requested: student.loan?.requested,
         lenderId: student.loan?.lenderId,
@@ -430,29 +424,9 @@ export function StudentDetailView({
                     <p className="text-xs text-muted-foreground">Target Degree</p>
                     <p className="text-sm">{student.targetDegree ?? "—"}</p>
                   </div>
-                </div>
-              </div>
-
-              <div>
-                <SectionHeader
-                  title="Education & Address"
-                  icon={GraduationCap}
-                  studentId={student._id}
-                  section="education"
-                  canWrite={canWrite}
-                />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div><p className="text-xs text-muted-foreground">College</p><p className="text-sm">{student.education?.college ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Course</p><p className="text-sm">{student.education?.course ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Year</p><p className="text-sm">{student.education?.year ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">Created</p><p className="text-sm">{formatDate(student.createdAt)}</p></div>
-                  <div className="sm:col-span-2">
-                    <p className="text-xs text-muted-foreground">Address</p>
-                    <p className="text-sm">
-                      {[student.address?.line, student.address?.city, student.address?.state, student.address?.pincode]
-                        .filter(Boolean)
-                        .join(", ") || "—"}
-                    </p>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Created</p>
+                    <p className="text-sm">{formatDate(student.createdAt)}</p>
                   </div>
                 </div>
               </div>
@@ -474,20 +448,6 @@ export function StudentDetailView({
                 </div>
               )}
 
-              <details className="rounded-lg border p-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-muted-foreground [&::-webkit-details-marker]:hidden">
-                  <span>Identity (optional)</span>
-                  {canWrite ? (
-                    <span onClick={(e) => e.preventDefault()} onKeyDown={(e) => e.stopPropagation()}>
-                      <SectionEditButton studentId={student._id} section="identity" />
-                    </span>
-                  ) : null}
-                </summary>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div><p className="text-xs text-muted-foreground">Aadhaar</p><p className="text-sm font-mono">{student.aadhaar ?? "—"}</p></div>
-                  <div><p className="text-xs text-muted-foreground">PAN</p><p className="text-sm font-mono">{student.pan ?? "—"}</p></div>
-                </div>
-              </details>
             </GlassCard>
           </TabsContent>
 

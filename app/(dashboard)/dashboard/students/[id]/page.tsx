@@ -118,10 +118,6 @@ export default async function StudentDetailPage({
           sentToBankByName: student.sentToBankByName,
           loggedIn: student.loggedIn,
           assignedAt: student.assignedAt,
-          address: student.address,
-          aadhaar: student.aadhaar,
-          pan: student.pan,
-          education: student.education,
           loan: student.loan
             ? {
                 ...student.loan,
