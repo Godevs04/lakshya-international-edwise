@@ -17,6 +17,10 @@ import { normalizeIndianPhone } from "@/lib/validations/indian-fields";
 import { runLoggedQuery, runLoggedMutation, emptyPaginated } from "@/lib/action-utils";
 import { admissionRevenueSchema, leadSchema } from "@/lib/validations/schemas";
 import { logActivity } from "@/lib/services/activity.service";
+import {
+  findStudentWithPhone,
+  formatDuplicateStudentPhoneError,
+} from "@/lib/services/student-phone.service";
 import type { ActionResult, AdmissionListItem, PaginatedResult } from "@/types";
 
 function resolveAssignedTo(
@@ -45,7 +49,7 @@ export async function getAdmissions(params: {
 }): Promise<PaginatedResult<AdmissionListItem>> {
   return runLoggedQuery("getAdmissions", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_READ);
+    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
 
     await connectDB();
     const page = params.page ?? 1;
@@ -108,7 +112,7 @@ export async function updateAdmissionRevenueAction(
 ): Promise<ActionResult> {
   return runLoggedMutation("updateAdmissionRevenueAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
     if (!canViewAdmissionRevenue(user?.role)) {
       return { success: false, error: "You do not have permission to update admission revenue" };
     }
@@ -162,7 +166,7 @@ export async function updateAdmissionRevenueAction(
 export async function getAdmissionById(id: string) {
   return runLoggedQuery("getAdmissionById", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_READ);
+    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
 
     await connectDB();
     const admission = await Student.findOne({ _id: id, ...admissionLeadsFilter() })
@@ -192,7 +196,7 @@ export async function getAdmissionById(id: string) {
 export async function getAdmissionForEdit(id: string) {
   return runLoggedQuery("getAdmissionForEdit", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
 
     await connectDB();
     const admission = await Student.findOne({ _id: id, ...admissionLeadsFilter() })
@@ -232,7 +236,7 @@ export async function updateAdmissionAction(
 ): Promise<ActionResult> {
   return runLoggedMutation("updateAdmissionAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
 
     const parsed = leadSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!parsed.success) {
@@ -243,6 +247,13 @@ export async function updateAdmissionAction(
     const existing = await Student.findOne({ _id: id, ...admissionLeadsFilter() });
     if (!existing) {
       return { success: false, error: "Admission record not found" };
+    }
+
+    if (parsed.data.phone?.trim()) {
+      const phoneDuplicate = await findStudentWithPhone(parsed.data.phone, id);
+      if (phoneDuplicate) {
+        return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+      }
     }
 
     const assignment = resolveAssignedTo(

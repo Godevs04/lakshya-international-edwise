@@ -15,7 +15,7 @@ export default async function AdmissionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   await requireModuleEnabled("students");
-  await requirePagePermission(PERMISSIONS.STUDENTS_READ);
+  await requirePagePermission(PERMISSIONS.ADMISSIONS_READ);
 
   const { id } = await params;
   const access = await getAdmissionsPageAccess();

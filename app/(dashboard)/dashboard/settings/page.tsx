@@ -16,6 +16,7 @@ export default async function SettingsPage() {
   }
 
   const canManageUsers = hasPermission(user, PERMISSIONS.USERS_READ);
+  const canWriteUsers = hasPermission(user, PERMISSIONS.USERS_WRITE);
   const canWriteSettings = hasPermission(user, PERMISSIONS.SETTINGS_WRITE);
 
   const settings = await getSettings();
@@ -29,6 +30,7 @@ export default async function SettingsPage() {
       <SettingsView
         settings={settings}
         canManageUsers={canManageUsers}
+        canWriteUsers={canWriteUsers}
         canWriteSettings={canWriteSettings}
         currentUserRole={user?.role}
         users={users.map((u) => ({
@@ -37,6 +39,8 @@ export default async function SettingsPage() {
           email: u.email,
           role: u.role as UserRole,
           status: u.status,
+          useCustomPermissions: u.useCustomPermissions,
+          customPermissions: u.customPermissions,
         }))}
         pendingUsers={pendingUsers.map((u) => ({
           _id: u._id.toString(),

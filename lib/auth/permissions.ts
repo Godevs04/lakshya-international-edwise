@@ -1,10 +1,23 @@
 import type { SessionUser, UserRole } from "@/types";
 import { ROLE_PERMISSIONS } from "@/lib/constants/permissions";
+import { inheritLegacyAdmissionsPermissions } from "@/lib/constants/menu-permissions";
 
 export function getPermissionsForRole(role: UserRole): string[] {
   const perms = ROLE_PERMISSIONS[role];
   if (perms[0] === "*") return ["*"];
   return [...perms];
+}
+
+export function resolveUserPermissions(
+  role: UserRole,
+  useCustomPermissions?: boolean,
+  customPermissions?: string[]
+): string[] {
+  if (role === "super_admin") return ["*"];
+  if (useCustomPermissions && customPermissions?.length) {
+    return inheritLegacyAdmissionsPermissions([...customPermissions]);
+  }
+  return getPermissionsForRole(role);
 }
 
 export function hasPermission(
@@ -27,6 +40,7 @@ export function hasAnyPermission(
 
 const ROUTE_PERMISSIONS: { prefix: string; permission: string }[] = [
   { prefix: "/dashboard/students", permission: "students:read" },
+  { prefix: "/dashboard/admissions", permission: "admissions:read" },
   { prefix: "/dashboard/partners", permission: "partners:read" },
   { prefix: "/dashboard/applications", permission: "applications:read" },
   { prefix: "/dashboard/lenders", permission: "students:read" },

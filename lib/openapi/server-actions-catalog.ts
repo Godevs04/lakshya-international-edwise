@@ -241,6 +241,7 @@ export const SERVER_ACTION_GROUPS: ServerActionGroup[] = [
       { name: "rejectUserAction", summary: "Reject pending user", requestProperties: { userId: { type: "string" } }, required: ["userId"] },
       { name: "createUserAction", summary: "Create user from admin panel", requestProperties: { formData: { type: "object" } } },
       { name: "updateUserRoleAction", summary: "Change user role", requestProperties: { userId: { type: "string" }, role: { type: "string" } }, required: ["userId", "role"] },
+      { name: "updateUserMenuPermissionsAction", summary: "Set per-user menu read/write access", requestProperties: { userId: { type: "string" }, useCustomPermissions: { type: "boolean" }, menuAccess: { type: "object" } }, required: ["userId"] },
       { name: "deleteUserAction", summary: "Delete user", requestProperties: { userId: { type: "string" } }, required: ["userId"] },
       { name: "getRoles", summary: "List available roles" },
       { name: "updateProfileAction", summary: "Update current user profile", requestProperties: { formData: { type: "object" } } },

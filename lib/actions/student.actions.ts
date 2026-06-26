@@ -34,6 +34,10 @@ import {
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField, maskAadhaar, maskPan, safeDecrypt } from "@/lib/utils/pii";
 import { allocateStudentId } from "@/lib/services/student-id.service";
+import {
+  findStudentWithPhone,
+  formatDuplicateStudentPhoneError,
+} from "@/lib/services/student-phone.service";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { Types } from "mongoose";
@@ -412,6 +416,11 @@ export async function createStudentAction(
     return { success: false, error: `Photo link: ${photoError}` };
   }
 
+  const phoneDuplicate = await findStudentWithPhone(data.phone);
+  if (phoneDuplicate) {
+    return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+  }
+
   const studentId = await allocateStudentId();
   const applicationStatus = (data.applicationStatus ?? "docs_pending") as ApplicationStatusId;
   const appFields = applyApplicationStatus(applicationStatus);
@@ -514,6 +523,14 @@ export async function createQuickStudentAction(
 
     await connectDB();
     const data = parsed.data;
+
+    if (data.phone?.trim()) {
+      const phoneDuplicate = await findStudentWithPhone(data.phone);
+      if (phoneDuplicate) {
+        return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+      }
+    }
+
     const studentId = await allocateStudentId();
     const lenderObjectId = await resolveLenderIdBySlug(data.lenderId);
     const lenderName = await resolveLenderNameBySlug(data.lenderId);
@@ -582,7 +599,7 @@ export async function createLeadAction(
 ): Promise<ActionResult<{ id: string }>> {
   return runLoggedMutation("createLeadAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
 
     const raw = Object.fromEntries(formData.entries());
     const parsed = leadSchema.safeParse(raw);
@@ -592,6 +609,14 @@ export async function createLeadAction(
 
     await connectDB();
     const data = parsed.data;
+
+    if (data.phone?.trim()) {
+      const phoneDuplicate = await findStudentWithPhone(data.phone);
+      if (phoneDuplicate) {
+        return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+      }
+    }
+
     const studentId = await allocateStudentId();
     const lenderObjectId = await resolveLenderIdBySlug(data.lenderId);
     const lenderName = await resolveLenderNameBySlug(data.lenderId);
@@ -676,6 +701,13 @@ export async function updateStudentAction(
   const photoError = getOptionalLinkUrlError(data.photo);
   if (photoError) {
     return { success: false, error: `Photo link: ${photoError}` };
+  }
+
+  if (data.phone?.trim()) {
+    const phoneDuplicate = await findStudentWithPhone(data.phone, id);
+    if (phoneDuplicate) {
+      return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+    }
   }
 
   const oldStatus = existing.status;

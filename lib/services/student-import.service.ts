@@ -13,6 +13,12 @@ import {
 } from "@/lib/validations/indian-fields";
 import { encryptSensitiveField } from "@/lib/utils/pii";
 import { allocateStudentId } from "@/lib/services/student-id.service";
+import {
+  findStudentWithPhone,
+  formatDuplicateImportBatchPhoneError,
+  formatDuplicateStudentPhoneError,
+  getStudentPhoneBatchKey,
+} from "@/lib/services/student-phone.service";
 import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
 import {
   resolveLenderIdBySlug,
@@ -100,6 +106,7 @@ export async function importStudentsFromRows(
   const result: ImportStudentsResult = { imported: 0, failed: 0, errors: [] };
   const partnerCache = new Map<string, string | undefined>();
   const assigneeCache = new Map<string, string | undefined>();
+  const batchPhoneRows = new Map<string, number>();
 
   for (let index = 0; index < rows.length; index++) {
     const rowNumber = index + 2;
@@ -157,6 +164,34 @@ export async function importStudentsFromRows(
     }
 
     const data = parsed.data;
+
+    if (data.phone?.trim()) {
+      const batchKey = getStudentPhoneBatchKey(data.phone);
+      if (batchKey) {
+        const firstRow = batchPhoneRows.get(batchKey);
+        if (firstRow != null) {
+          result.failed++;
+          result.errors.push({
+            row: rowNumber,
+            message: formatDuplicateImportBatchPhoneError(firstRow),
+          });
+          continue;
+        }
+
+        const phoneDuplicate = await findStudentWithPhone(data.phone);
+        if (phoneDuplicate) {
+          result.failed++;
+          result.errors.push({
+            row: rowNumber,
+            message: formatDuplicateStudentPhoneError(phoneDuplicate),
+          });
+          continue;
+        }
+
+        batchPhoneRows.set(batchKey, rowNumber);
+      }
+    }
+
     const studentId = await allocateStudentId();
     const lenderSlug =
       findLenderSlugByName(data.lenderId) ?? data.lenderId?.trim().toLowerCase();

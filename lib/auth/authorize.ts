@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/models/User";
-import { getPermissionsForRole } from "@/lib/auth/permissions";
+import { resolveUserPermissions } from "@/lib/auth/permissions";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { UserRole } from "@/types";
 
@@ -42,7 +42,11 @@ export async function authorizeCredentials(credentials: Record<string, unknown>)
     email: user.email,
     name: user.name,
     role,
-    permissions: getPermissionsForRole(role),
+    permissions: resolveUserPermissions(
+      role,
+      user.useCustomPermissions,
+      user.customPermissions
+    ),
     avatar: user.avatar,
     rememberMe: credentials.rememberMe === "true",
   };

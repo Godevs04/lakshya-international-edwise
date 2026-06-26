@@ -5,11 +5,12 @@ import {
   getAssignableUsers,
   getStudents,
 } from "@/lib/actions/student.actions";
-import { getPartnersList } from "@/lib/actions/partner.actions";
+import { getPartnersList, getPartnerById } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getStudentPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import type { StudentListFilters } from "@/lib/utils/student-list-filters";
+import { mergePartnerOptions } from "@/lib/utils/partner-options";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -75,6 +76,22 @@ export default async function StudentsPage({
     getAssignableUsers(),
   ]);
 
+  let partnerOptions = partners.map((partner) => ({
+    _id: partner._id.toString(),
+    companyName: partner.companyName,
+  }));
+
+  if (params.partnerId && !partnerOptions.some((partner) => partner._id === params.partnerId)) {
+    const filteredPartner = await getPartnerById(params.partnerId);
+    if (filteredPartner) {
+      partnerOptions = mergePartnerOptions(
+        partnerOptions,
+        filteredPartner._id.toString(),
+        filteredPartner.companyName
+      );
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -94,10 +111,7 @@ export default async function StudentsPage({
         {...access}
         canWrite={access.canWrite}
         filters={filters}
-        partners={partners.map((partner) => ({
-          _id: partner._id.toString(),
-          companyName: partner.companyName,
-        }))}
+        partners={partnerOptions}
         assignableUsers={assignableUsers.map((user) => ({
           _id: user._id,
           name: user.name,

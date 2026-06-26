@@ -102,9 +102,37 @@ export function StudentAdvancedSearch({
 
   const activeCount = countActiveAdvancedFilters(filters);
 
+  const partnerItems = [
+    { value: ANY_OPTION, label: "Any partner" },
+    ...partners.map((partner) => ({ value: partner._id, label: partner.companyName })),
+  ];
+
   const assigneeItems = [
     { value: ANY_OPTION, label: "Any counsellor" },
     ...assignableUsers.map((user) => ({ value: user._id, label: user.name })),
+  ];
+
+  const statusItems = [
+    { value: ANY_OPTION, label: "Any status" },
+    ...STUDENT_STATUSES.map((entry) => ({
+      value: entry,
+      label: entry.replace(/_/g, " "),
+    })),
+  ];
+
+  const targetCountryItems = [
+    { value: ANY_OPTION, label: "Any country" },
+    ...TARGET_COUNTRIES.map((country) => ({ value: country, label: country })),
+  ];
+
+  const targetIntakeItems = [
+    { value: ANY_OPTION, label: "Any intake" },
+    ...TARGET_INTAKES.map((intake) => ({ value: intake, label: intake })),
+  ];
+
+  const lenderItems = [
+    { value: ANY_OPTION, label: "Any lender" },
+    ...lenderOptions.map((lender) => ({ value: lender.slug, label: lender.name })),
   ];
 
   function updateDraft<K extends keyof AdvancedSearchDraft>(key: K, value: AdvancedSearchDraft[K]) {
@@ -173,6 +201,7 @@ export function StudentAdvancedSearch({
             <Select
               value={toSelectValue(draft.partnerId)}
               onValueChange={(value) => updateDraft("partnerId", fromSelectValue(value ?? ANY_OPTION))}
+              items={partnerItems}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Any partner" />
@@ -214,6 +243,7 @@ export function StudentAdvancedSearch({
             <Select
               value={toSelectValue(draft.status)}
               onValueChange={(value) => updateDraft("status", fromSelectValue(value ?? ANY_OPTION))}
+              items={statusItems}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Any status" />
@@ -235,6 +265,7 @@ export function StudentAdvancedSearch({
               <Select
                 value={toSelectValue(draft.targetCountry)}
                 onValueChange={(value) => updateDraft("targetCountry", fromSelectValue(value ?? ANY_OPTION))}
+                items={targetCountryItems}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Any country" />
@@ -254,6 +285,7 @@ export function StudentAdvancedSearch({
               <Select
                 value={toSelectValue(draft.targetIntake)}
                 onValueChange={(value) => updateDraft("targetIntake", fromSelectValue(value ?? ANY_OPTION))}
+                items={targetIntakeItems}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Any intake" />
@@ -334,10 +366,7 @@ export function StudentAdvancedSearch({
               <Select
                 value={toSelectValue(draft.lenderId)}
                 onValueChange={(value) => updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))}
-                items={[
-                  { value: ANY_OPTION, label: "Any lender" },
-                  ...lenderOptions.map((lender) => ({ value: lender.slug, label: lender.name })),
-                ]}
+                items={lenderItems}
               >
                 <SelectTrigger id="lenderId" className="w-full">
                   <SelectValue placeholder="Any lender" />
