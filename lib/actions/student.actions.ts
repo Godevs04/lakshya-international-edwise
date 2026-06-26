@@ -72,6 +72,12 @@ import {
   toSessionUser,
 } from "@/lib/services/loan-application.service";
 import { endOfDay, startOfDay } from "date-fns";
+import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
+import {
+  buildStudentVisibilityFilter,
+  canAccessStudent,
+  canBypassStudentVisibility,
+} from "@/lib/services/student-visibility.service";
 
 function resolveAssignedTo(
   assignedToId: string | undefined,
@@ -88,6 +94,23 @@ function resolveAssignedTo(
     assignedTo: existingAssignedTo,
     assignedAt: existingAssignedAt,
   };
+}
+
+function inaccessibleStudentResult(): ActionResult {
+  return { success: false, error: "Student not found" };
+}
+
+function getStudentAccessBlock(
+  user: Awaited<ReturnType<typeof getSessionUser>>,
+  student: Parameters<typeof canAccessStudent>[1]
+): ActionResult | null {
+  if (!student) {
+    return { success: false, error: "Student not found" };
+  }
+  if (!canAccessStudent(user, student)) {
+    return inaccessibleStudentResult();
+  }
+  return null;
 }
 
 async function buildLoanFields(
@@ -198,15 +221,19 @@ export async function getStudents(params: {
     ...excludeAdmissionLeadsFilter(),
   };
 
+  const andClauses: Record<string, unknown>[] = [];
+
   if (params.search) {
     const regex = toSafeRegExp(params.search);
-    filter.$or = [
-      { firstName: regex },
-      { lastName: regex },
-      { phone: regex },
-      { email: regex },
-      { studentId: regex },
-    ];
+    andClauses.push({
+      $or: [
+        { firstName: regex },
+        { lastName: regex },
+        { phone: regex },
+        { email: regex },
+        { studentId: regex },
+      ],
+    });
   }
   if (params.status) {
     filter.status = params.status;
@@ -258,18 +285,25 @@ export async function getStudents(params: {
     if (Object.keys(loanRequested).length) filter["loan.requested"] = loanRequested;
   }
   if (params.mine && user?.id) {
-    filter.assignedTo = new Types.ObjectId(user.id);
+    andClauses.push({ assignedTo: new Types.ObjectId(user.id) });
   }
 
+  const visibilityFilter = buildStudentVisibilityFilter(user);
+  if (visibilityFilter) {
+    andClauses.push(visibilityFilter);
+  }
+
+  const mongoFilter = mergeMongoFilter(filter, ...andClauses);
+
   const [data, total] = await Promise.all([
-    Student.find(filter)
+    Student.find(mongoFilter)
       .populate("partnerId", "companyName")
       .populate("assignedTo", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize)
       .lean(),
-    Student.countDocuments(filter),
+    Student.countDocuments(mongoFilter),
   ]);
 
   return {
@@ -332,6 +366,7 @@ export async function getStudentById(id: string) {
 
   if (!studentDoc) return null;
   if (isAdmissionLead(studentDoc.recordType)) return null;
+  if (!canAccessStudent(user, studentDoc)) return null;
 
   const { ensureStudentLoanApplications } = await import("@/lib/services/loan-application.service");
   await ensureStudentLoanApplications(studentDoc);
@@ -344,6 +379,7 @@ export async function getStudentById(id: string) {
     .lean();
   if (!student) return null;
   if (isAdmissionLead(student.recordType)) return null;
+  if (!canAccessStudent(user, student)) return null;
 
   return {
     ...student,
@@ -366,6 +402,7 @@ export async function getStudentForEdit(id: string) {
     .lean();
   if (!student) return null;
   if (isAdmissionLead(student.recordType)) return null;
+  if (!canAccessStudent(user, student)) return null;
 
   const lenderSlug = await getLenderSlugById(student.loan?.lenderId as Types.ObjectId | undefined);
   const partnerId =
@@ -691,6 +728,7 @@ export async function updateStudentAction(
   const data = parsed.data;
   const existing = await Student.findById(id);
   if (!existing) return { success: false, error: "Student not found" };
+  if (!canAccessStudent(user, existing)) return inaccessibleStudentResult();
 
   await ensureStudentLoanApplications(existing);
 
@@ -818,8 +856,11 @@ export async function deleteStudentAction(id: string): Promise<ActionResult> {
   requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
 
   await connectDB();
-  const student = await Student.findByIdAndDelete(id);
+  const student = await Student.findById(id);
   if (!student) return { success: false, error: "Student not found" };
+  if (!canAccessStudent(user, student)) return inaccessibleStudentResult();
+
+  await Student.findByIdAndDelete(id);
 
   await Application.deleteMany({ studentId: id });
 
@@ -848,45 +889,63 @@ export async function bulkUpdateStudentsAction(
 
   await connectDB();
 
+  const accessibleIds =
+    user && !canBypassStudentVisibility(user.role)
+      ? (
+          await Student.find({ _id: { $in: ids } })
+            .select("metadata assignedTo recordType")
+            .lean()
+        )
+          .filter(
+            (student) =>
+              !isAdmissionLead(student.recordType) && canAccessStudent(user, student)
+          )
+          .map((student) => student._id.toString())
+      : ids;
+
+  if (accessibleIds.length === 0) {
+    return inaccessibleStudentResult();
+  }
+
   if (action === "delete") {
     requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
-    await Student.deleteMany({ _id: { $in: ids } });
-    await Application.deleteMany({ studentId: { $in: ids } });
+    await Student.deleteMany({ _id: { $in: accessibleIds } });
+    await Application.deleteMany({ studentId: { $in: accessibleIds } });
     await logActivity({
       action: "students.bulk_deleted",
-      description: `Deleted ${ids.length} student record(s)`,
+      description: `Deleted ${accessibleIds.length} student record(s)`,
       resourceType: "student",
       userId: user?.id,
       userName: user?.name,
-      metadata: { count: ids.length, studentIds: ids },
+      metadata: { count: accessibleIds.length, studentIds: accessibleIds },
     });
   } else if (action === "assign_partner" && value) {
     await Student.updateMany(
-      { _id: { $in: ids } },
+      { _id: { $in: accessibleIds } },
       { partnerId: new Types.ObjectId(value) }
     );
     await logActivity({
       action: "students.bulk_partner_assigned",
-      description: `Assigned ${ids.length} student(s) to partner ${value}`,
+      description: `Assigned ${accessibleIds.length} student(s) to partner ${value}`,
       resourceType: "partner",
       resourceId: value,
       userId: user?.id,
       userName: user?.name,
-      metadata: { count: ids.length, studentIds: ids },
+      metadata: { count: accessibleIds.length, studentIds: accessibleIds },
     });
   } else if (action === "change_status" && value) {
-    await Student.updateMany({ _id: { $in: ids } }, { status: value });
+    await Student.updateMany({ _id: { $in: accessibleIds } }, { status: value });
     await Application.updateMany(
-      { studentId: { $in: ids } },
+      { studentId: { $in: accessibleIds } },
       { status: value, pipelineStage: value }
     );
     await logActivity({
       action: "students.bulk_status_changed",
-      description: `Changed status to ${value} for ${ids.length} student(s)`,
+      description: `Changed status to ${value} for ${accessibleIds.length} student(s)`,
       resourceType: "student",
       userId: user?.id,
       userName: user?.name,
-      metadata: { count: ids.length, status: value, studentIds: ids },
+      metadata: { count: accessibleIds.length, status: value, studentIds: accessibleIds },
     });
   }
 
@@ -927,13 +986,16 @@ export async function addStudentNoteAction(
 
   await connectDB();
   const student = await Student.findById(studentId)
-    .select("firstName lastName studentId recordType")
+    .select("firstName lastName studentId recordType metadata assignedTo")
     .lean();
   if (!student) {
     return { success: false, error: "Student not found" };
   }
   if (isAdmissionLead(student.recordType)) {
     return { success: false, error: "Student not found" };
+  }
+  if (!canAccessStudent(user, student)) {
+    return inaccessibleStudentResult();
   }
 
   const teamUsers = await User.find({ status: "active" })
@@ -1043,10 +1105,11 @@ export async function addStudentDocumentAction(
   }
 
   await connectDB();
-  const student = await Student.findById(studentId).select("studentId firstName lastName").lean();
-  if (!student) {
-    return { success: false, error: "Student not found" };
-  }
+  const student = await Student.findById(studentId)
+    .select("studentId firstName lastName metadata assignedTo")
+    .lean();
+  const accessBlock = getStudentAccessBlock(user, student);
+  if (accessBlock) return accessBlock;
 
   await Student.findByIdAndUpdate(studentId, {
     $push: {
@@ -1083,6 +1146,10 @@ export async function removeStudentDocumentAction(
   requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
   await connectDB();
+  const student = await Student.findById(studentId).select("metadata assignedTo studentId").lean();
+  const accessBlock = getStudentAccessBlock(user, student);
+  if (accessBlock) return accessBlock;
+
   const result = await Student.findByIdAndUpdate(
     studentId,
     { $pull: { documents: { _id: new Types.ObjectId(documentId) } } },
@@ -1119,6 +1186,8 @@ export async function updateStudentApplicationStatusAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     const oldStatus = student.status;
     const oldApplicationStatus = deriveApplicationStatus(student);
@@ -1171,6 +1240,8 @@ export async function markStudentSentToBankAction(
     await connectDB();
     const student = await Student.findById(studentId).populate("loanApplications.lenderId", "name slug");
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
 
@@ -1215,6 +1286,8 @@ export async function setStudentPrimaryLenderAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
     await setStudentPrimaryLender(student, lenderSlug, toSessionUser(user));
@@ -1246,6 +1319,8 @@ export async function addStudentLoanApplicationAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
     try {
@@ -1284,6 +1359,8 @@ export async function sendLoanApplicationToBankAction(
     await connectDB();
     const student = await Student.findById(studentId).populate("loanApplications.lenderId", "name slug");
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
 
@@ -1329,6 +1406,8 @@ export async function updateLoanApplicationStatusAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
 
@@ -1374,6 +1453,8 @@ export async function updateLoanApplicationLanAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
 
@@ -1426,6 +1507,8 @@ export async function updateStudentLoanDetailsAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await updateStudentLoanDetails(student, {
       requested: parsed.data.loanRequested,
@@ -1474,6 +1557,8 @@ export async function rejectLoanApplicationAction(
     await connectDB();
     const student = await Student.findById(studentId);
     if (!student) return { success: false, error: "Student not found" };
+    const accessBlock = getStudentAccessBlock(user, student);
+    if (accessBlock) return accessBlock;
 
     await ensureStudentLoanApplications(student);
 

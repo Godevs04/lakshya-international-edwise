@@ -101,9 +101,9 @@ export async function getOverviewDashboardAction() {
       cachedLoanAmountChart(),
       cachedTopPartnersChart(),
       cachedRecentActivities(),
-      cachedLatestStudents(),
+      user.role === "super_admin" ? cachedLatestStudents() : getLatestStudents(5, user),
       cachedLatestPartners(),
-      cachedFollowups(),
+      user.role === "super_admin" ? cachedFollowups() : getUpcomingFollowups(5, user),
       getGlobalCommissionTotals(),
     ]);
 

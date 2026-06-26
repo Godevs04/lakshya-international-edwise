@@ -21,6 +21,11 @@ import {
   findStudentWithPhone,
   formatDuplicateStudentPhoneError,
 } from "@/lib/services/student-phone.service";
+import {
+  buildStudentVisibilityFilter,
+  canAccessStudent,
+} from "@/lib/services/student-visibility.service";
+import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
 import type { ActionResult, AdmissionListItem, PaginatedResult } from "@/types";
 
 function resolveAssignedTo(
@@ -73,8 +78,14 @@ export async function getAdmissions(params: {
     if (params.targetCountry) filter.targetCountry = params.targetCountry;
     if (params.targetIntake) filter.targetIntake = params.targetIntake;
 
+    const visibilityFilter = buildStudentVisibilityFilter(user);
+    const mongoFilter = mergeMongoFilter(
+      filter,
+      visibilityFilter
+    );
+
     const [data, total] = await Promise.all([
-      Student.find(filter)
+      Student.find(mongoFilter)
         .select(
           "studentId firstName lastName phone targetCountry targetIntake targetUniversity admissionRevenue recordType createdAt"
         )
@@ -82,7 +93,7 @@ export async function getAdmissions(params: {
         .skip(skip)
         .limit(pageSize)
         .lean(),
-      Student.countDocuments(filter),
+      Student.countDocuments(mongoFilter),
     ]);
 
     return {
@@ -173,6 +184,7 @@ export async function getAdmissionById(id: string) {
       .populate("assignedTo", "name")
       .lean();
     if (!admission) return null;
+    if (!canAccessStudent(user, admission)) return null;
 
     return {
       _id: admission._id.toString(),
@@ -203,6 +215,7 @@ export async function getAdmissionForEdit(id: string) {
       .populate("assignedTo", "name")
       .lean();
     if (!admission) return null;
+    if (!canAccessStudent(user, admission)) return null;
 
     const assignedToId =
       admission.assignedTo && typeof admission.assignedTo === "object" && "_id" in admission.assignedTo
@@ -246,6 +259,9 @@ export async function updateAdmissionAction(
     await connectDB();
     const existing = await Student.findOne({ _id: id, ...admissionLeadsFilter() });
     if (!existing) {
+      return { success: false, error: "Admission record not found" };
+    }
+    if (!canAccessStudent(user, existing)) {
       return { success: false, error: "Admission record not found" };
     }
 

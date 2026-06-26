@@ -7,6 +7,9 @@ import type { DashboardMetrics, ChartDataPoint } from "@/types";
 import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 import { formatMetricTrend } from "@/lib/utils/metrics-trend";
 import { excludeAdmissionLeadsFilter } from "@/lib/constants/student-record-type";
+import { buildStudentVisibilityFilter } from "@/lib/services/student-visibility.service";
+import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
+import type { SessionUser } from "@/types";
 import { startOfDay, subMonths, format, startOfMonth, endOfMonth, subDays } from "date-fns";
 
 interface DashboardDateBounds {
@@ -488,9 +491,13 @@ export async function getTopPartnersChart(): Promise<ChartDataPoint[]> {
   }));
 }
 
-export async function getLatestStudents(limit = 5) {
+export async function getLatestStudents(limit = 5, user?: SessionUser | null) {
   await connectDB();
-  return Student.find(excludeAdmissionLeadsFilter())
+  const filter = mergeMongoFilter(
+    excludeAdmissionLeadsFilter(),
+    buildStudentVisibilityFilter(user)
+  );
+  return Student.find(filter)
     .sort({ createdAt: -1 })
     .limit(limit)
     .populate("partnerId", "companyName")
@@ -505,11 +512,14 @@ export async function getLatestPartners(limit = 5) {
     .lean();
 }
 
-export async function getUpcomingFollowups(limit = 5) {
+export async function getUpcomingFollowups(limit = 5, user?: SessionUser | null) {
   await connectDB();
   const now = new Date();
+  const visibilityMatch = buildStudentVisibilityFilter(user);
   return Student.aggregate([
-    { $match: excludeAdmissionLeadsFilter() },
+    {
+      $match: mergeMongoFilter(excludeAdmissionLeadsFilter(), visibilityMatch),
+    },
     { $unwind: "$notes" },
     {
       $match: {
