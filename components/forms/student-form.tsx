@@ -64,8 +64,6 @@ interface StudentFormProps {
 }
 
 const PHONE_HINT = "10-digit Indian mobile (starts with 6–9). +91 prefix optional.";
-const AADHAAR_HINT = "Exactly 12 digits, numbers only.";
-const PAN_HINT = "Format: ABCDE1234F (5 letters, 4 digits, 1 letter).";
 
 export function StudentForm({
   partners,
@@ -208,7 +206,7 @@ export function StudentForm({
         id="section-onboarding"
         highlighted={isFormSectionHighlighted("onboarding")}
         title="Required for onboarding"
-        description="Name, phone, consultancy, country, and intake are required. All other sections are optional."
+        description="Name, phone, consultancy, country, and intake are required. Other sections are optional."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -339,66 +337,6 @@ export function StudentForm({
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" defaultValue={initialData?.email as string} />
-          </div>
-        </div>
-      </FormSection>
-      ) : null}
-
-      {isFormSectionVisible("address") ? (
-      <FormSection
-        id="section-address"
-        highlighted={isFormSectionHighlighted("address")}
-        title="Optional — Address"
-        description="Residential address details."
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="addressLine">Address</Label>
-            <Input id="addressLine" name="addressLine" defaultValue={initialData?.addressLine as string} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input id="city" name="city" defaultValue={initialData?.city as string} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="state">State</Label>
-            <Input id="state" name="state" defaultValue={initialData?.state as string} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pincode">Pincode</Label>
-            <Input
-              id="pincode"
-              name="pincode"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="600001"
-              defaultValue={initialData?.pincode as string}
-            />
-            <p className="text-xs text-muted-foreground">6-digit Indian postal code.</p>
-          </div>
-        </div>
-      </FormSection>
-      ) : null}
-
-      {isFormSectionVisible("education") ? (
-      <FormSection
-        id="section-education"
-        highlighted={isFormSectionHighlighted("education")}
-        title="Optional — Education"
-        description="Academic information."
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="college">College</Label>
-            <Input id="college" name="college" defaultValue={initialData?.college as string} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="course">Course</Label>
-            <Input id="course" name="course" defaultValue={initialData?.course as string} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="year">Year</Label>
-            <Input id="year" name="year" defaultValue={initialData?.year as string} />
           </div>
         </div>
       </FormSection>
@@ -673,48 +611,6 @@ export function StudentForm({
             <Textarea id="remarks" name="remarks" defaultValue={initialData?.remarks as string} />
           </div>
         </div>
-      </FormSection>
-      ) : null}
-
-      {isFormSectionVisible("identity") ? (
-      <FormSection
-        id="section-identity"
-        highlighted={isFormSectionHighlighted("identity")}
-        title="Identity (optional)"
-        description="Government ID details. Optional and stored securely."
-      >
-        <details className="rounded-lg border p-4">
-          <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
-            Show identity fields
-          </summary>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="aadhaar">Aadhaar</Label>
-              <Input
-                id="aadhaar"
-                name="aadhaar"
-                inputMode="numeric"
-                maxLength={14}
-                placeholder="1234 5678 9012"
-                defaultValue={initialData?.aadhaar as string}
-                className="font-mono"
-              />
-              <p className="text-xs text-muted-foreground">{AADHAAR_HINT}</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pan">PAN</Label>
-              <Input
-                id="pan"
-                name="pan"
-                maxLength={10}
-                placeholder="ABCDE1234F"
-                defaultValue={initialData?.pan as string}
-                className="font-mono uppercase"
-              />
-              <p className="text-xs text-muted-foreground">{PAN_HINT}</p>
-            </div>
-          </div>
-        </details>
       </FormSection>
       ) : null}
 

@@ -13,9 +13,6 @@ export interface StudentListFilters {
   dateTo?: string;
   loanMin?: string;
   loanMax?: string;
-  state?: string;
-  college?: string;
-  course?: string;
   gender?: string;
 }
 
@@ -34,9 +31,6 @@ const FILTER_KEYS: (keyof StudentListFilters)[] = [
   "dateTo",
   "loanMin",
   "loanMax",
-  "state",
-  "college",
-  "course",
   "gender",
 ];
 
@@ -65,9 +59,6 @@ export function countActiveAdvancedFilters(filters: StudentListFilters): number 
     "dateTo",
     "loanMin",
     "loanMax",
-    "state",
-    "college",
-    "course",
     "gender",
     "status",
     "lenderId",

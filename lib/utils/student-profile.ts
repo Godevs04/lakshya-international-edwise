@@ -8,8 +8,6 @@ export interface StudentProfileInput {
   targetIntake?: string;
   targetDegree?: string;
   targetUniversity?: string;
-  address?: { city?: string; state?: string; pincode?: string };
-  education?: { college?: string; course?: string; year?: string };
   loan?: { requested?: number; lenderId?: unknown; roi?: number };
   partnerId?: unknown;
   partnerName?: string;
@@ -29,8 +27,6 @@ const PROFILE_FIELD_CHECKS: Array<{ label: string; check: (student: StudentProfi
   { label: "Target country", check: (s) => Boolean(s.targetCountry?.trim()) },
   { label: "Target intake", check: (s) => Boolean(s.targetIntake?.trim()) },
   { label: "University", check: (s) => Boolean(s.targetUniversity?.trim()) },
-  { label: "City", check: (s) => Boolean(s.address?.city?.trim()) },
-  { label: "State", check: (s) => Boolean(s.address?.state?.trim()) },
   { label: "Loan amount", check: (s) => (s.loan?.requested ?? 0) > 0 },
   { label: "Lender", check: (s) => Boolean(s.loan?.lenderId) },
   { label: "Partner", check: (s) => Boolean(s.partnerId || s.partnerName?.trim()) },

@@ -32,9 +32,6 @@ function parseFilters(
     dateTo: params.dateTo,
     loanMin: params.loanMin,
     loanMax: params.loanMax,
-    state: params.state,
-    college: params.college,
-    course: params.course,
     gender: params.gender,
   };
 }
@@ -66,9 +63,6 @@ export default async function StudentsPage({
       dateTo: params.dateTo,
       loanMin: params.loanMin ? Number(params.loanMin) : undefined,
       loanMax: params.loanMax ? Number(params.loanMax) : undefined,
-      state: params.state,
-      college: params.college,
-      course: params.course,
       gender: params.gender,
       mine: params.mine === "1",
     }),
