@@ -256,6 +256,37 @@ export function StudentsTable({
     });
   }
 
+  function goToPage(nextPage: number) {
+    navigate({ page: nextPage > 1 ? String(nextPage) : undefined });
+  }
+
+  const paginationBar = (
+    <div className="flex flex-col gap-3 rounded-2xl bg-white/50 px-3 py-3 text-sm text-muted-foreground backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/5">
+      <span>{total} total students</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => goToPage(page - 1)}
+        >
+          Previous
+        </Button>
+        <span className="flex items-center px-2">
+          Page {page} of {totalPages || 1}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages}
+          onClick={() => goToPage(page + 1)}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <GlassCard className="space-y-4 p-4">
@@ -303,6 +334,8 @@ export function StudentsTable({
           </div>
         </div>
       </GlassCard>
+
+      {paginationBar}
 
       <div className="space-y-3 md:hidden">
         {data.length ? (
@@ -412,28 +445,7 @@ export function StudentsTable({
         </Table>
       </GlassCard>
 
-      <div className="flex flex-col gap-3 rounded-2xl bg-white/50 px-3 py-3 text-sm text-muted-foreground backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/5">
-        <span>{total} total students</span>
-        <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => navigate({ page: page > 1 ? String(page - 1) : undefined })}
-          >
-            Previous
-          </Button>
-          <span className="flex items-center px-2">Page {page} of {totalPages || 1}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => navigate({ page: String(page + 1) })}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      {paginationBar}
     </div>
   );
 }
