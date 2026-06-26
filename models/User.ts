@@ -18,6 +18,8 @@ export interface IUser extends Document {
   verifyTokenExpiry?: Date;
   emailOtpHash?: string;
   emailOtpExpiry?: Date;
+  useCustomPermissions?: boolean;
+  customPermissions?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +45,8 @@ const UserSchema = new Schema<IUser>(
     verifyTokenExpiry: { type: Date },
     emailOtpHash: { type: String },
     emailOtpExpiry: { type: Date },
+    useCustomPermissions: { type: Boolean, default: false },
+    customPermissions: { type: [String], default: undefined },
   },
   { timestamps: true }
 );

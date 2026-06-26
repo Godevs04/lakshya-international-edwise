@@ -337,6 +337,7 @@ const StudentSchema = new Schema<IStudent>(
 StudentSchema.index({ status: 1, partnerId: 1, createdAt: -1 });
 StudentSchema.index({ partnerId: 1, status: 1 });
 StudentSchema.index({ assignedTo: 1, createdAt: -1 });
+StudentSchema.index({ "metadata.createdBy": 1, createdAt: -1 });
 StudentSchema.index({ "loan.lenderId": 1, status: 1 });
 StudentSchema.index({ applicationStatus: 1 });
 StudentSchema.index({ sentToBank: 1 });

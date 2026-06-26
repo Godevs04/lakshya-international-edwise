@@ -12,7 +12,7 @@ export default async function AdmissionsPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   await requireModuleEnabled("students");
-  await requirePagePermission(PERMISSIONS.STUDENTS_READ);
+  await requirePagePermission(PERMISSIONS.ADMISSIONS_READ);
 
   const params = await searchParams;
   const access = await getAdmissionsPageAccess();

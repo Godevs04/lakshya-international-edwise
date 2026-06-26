@@ -22,6 +22,7 @@ describe("canAccessRoute", () => {
   it("blocks viewer from settings", () => {
     const user = mockUser("viewer", [
       "students:read",
+      "admissions:read",
       "partners:read",
       "applications:read",
       "reports:read",
@@ -29,6 +30,19 @@ describe("canAccessRoute", () => {
     ]);
     expect(canAccessRoute(user, "/dashboard/settings")).toBe(false);
     expect(canAccessRoute(user, "/dashboard/students")).toBe(true);
+    expect(canAccessRoute(user, "/dashboard/admissions")).toBe(true);
+  });
+
+  it("blocks viewer without admissions read from admissions route", () => {
+    const user = mockUser("viewer", [
+      "students:read",
+      "partners:read",
+      "applications:read",
+      "reports:read",
+      "analytics:read",
+    ]);
+    expect(canAccessRoute(user, "/dashboard/students")).toBe(true);
+    expect(canAccessRoute(user, "/dashboard/admissions")).toBe(false);
   });
 
   it("blocks unauthenticated access", () => {

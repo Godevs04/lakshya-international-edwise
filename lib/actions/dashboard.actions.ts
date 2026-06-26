@@ -82,6 +82,9 @@ export async function getOverviewDashboardAction() {
   return runLogged("getOverviewDashboardAction", async () => {
     const user = await getSessionUser();
     requireAnyPermission(user, OVERVIEW_PERMISSIONS);
+    if (!user) {
+      throw new Error("Unauthorized: insufficient permissions");
+    }
 
     const [
       { metrics, trends },
@@ -101,9 +104,9 @@ export async function getOverviewDashboardAction() {
       cachedLoanAmountChart(),
       cachedTopPartnersChart(),
       cachedRecentActivities(),
-      cachedLatestStudents(),
+      user.role === "super_admin" ? cachedLatestStudents() : getLatestStudents(5, user),
       cachedLatestPartners(),
-      cachedFollowups(),
+      user.role === "super_admin" ? cachedFollowups() : getUpcomingFollowups(5, user),
       getGlobalCommissionTotals(),
     ]);
 

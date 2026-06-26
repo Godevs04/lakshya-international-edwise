@@ -65,7 +65,7 @@ export async function getAdmissionsPageAccess() {
   const user = session?.user;
 
   return {
-    canWrite: hasPermission(user, PERMISSIONS.STUDENTS_WRITE),
+    canWrite: hasPermission(user, PERMISSIONS.ADMISSIONS_WRITE),
     canViewRevenue: canViewAdmissionRevenue(user?.role),
   };
 }

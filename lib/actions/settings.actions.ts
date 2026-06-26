@@ -18,6 +18,11 @@ import { runLoggedMutation, runLoggedQuery } from "@/lib/action-utils";
 import { validateOptionalCloudinaryUrl } from "@/lib/services/upload.service";
 import { logActivity } from "@/lib/services/activity.service";
 import { createNotification } from "@/lib/services/notification.service";
+import {
+  buildUserPermissionFields,
+  parseMenuAccessJson,
+  type MenuAccessMap,
+} from "@/lib/constants/menu-permissions";
 
 async function logSettingsActivity(
   user: { id: string; name: string },
@@ -51,6 +56,22 @@ async function logUserActivity(
     userId: user.id,
     userName: user.name,
     metadata,
+  });
+}
+
+function parsePermissionFieldsFromForm(formData: FormData) {
+  const useCustomPermissions = formData.get("useCustomPermissions") === "true";
+  const menuAccess = parseMenuAccessJson(formData.get("menuAccess"));
+  return buildUserPermissionFields(useCustomPermissions, menuAccess);
+}
+
+async function notifyPermissionRefresh(targetUserId: string, title: string, body: string) {
+  await createNotification({
+    userId: targetUserId,
+    type: "system",
+    title,
+    body: `${body} Sign in again for permissions to take full effect.`,
+    link: "/dashboard/profile",
   });
 }
 
@@ -315,6 +336,7 @@ export async function createUserAction(formData: FormData): Promise<ActionResult
   if (existing) return { success: false, error: "Email already exists" };
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const permissionFields = parsePermissionFieldsFromForm(formData);
   await User.create({
     email: email.toLowerCase(),
     name,
@@ -322,6 +344,8 @@ export async function createUserAction(formData: FormData): Promise<ActionResult
     role: role ?? "staff",
     isVerified: true,
     status: "active",
+    useCustomPermissions: permissionFields.useCustomPermissions,
+    customPermissions: permissionFields.customPermissions,
   });
 
   await logUserActivity(
@@ -403,6 +427,57 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
   );
   revalidatePath("/dashboard/settings");
   return { success: true };
+  });
+}
+
+export async function updateUserMenuPermissionsAction(
+  userId: string,
+  useCustomPermissions: boolean,
+  menuAccess: MenuAccessMap
+): Promise<ActionResult> {
+  return runLoggedMutation("updateUserMenuPermissionsAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.USERS_WRITE);
+
+    if (user?.id === userId) {
+      return { success: false, error: "Cannot change your own menu access here" };
+    }
+
+    await connectDB();
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      return { success: false, error: "User not found" };
+    }
+
+    if (targetUser.role === "super_admin") {
+      return { success: false, error: "Super admin access cannot be customized" };
+    }
+
+    const permissionFields = buildUserPermissionFields(useCustomPermissions, menuAccess);
+    targetUser.useCustomPermissions = permissionFields.useCustomPermissions;
+    targetUser.customPermissions = permissionFields.customPermissions;
+    await targetUser.save();
+
+    await notifyPermissionRefresh(
+      targetUser._id.toString(),
+      "Menu access updated",
+      "Your dashboard menu permissions were updated."
+    );
+
+    await logUserActivity(
+      user!,
+      "user.permissions_updated",
+      `Updated menu access for ${targetUser.email}`,
+      userId,
+      {
+        email: targetUser.email,
+        useCustomPermissions: permissionFields.useCustomPermissions,
+        permissions: permissionFields.customPermissions ?? [],
+      }
+    );
+
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
 }
 

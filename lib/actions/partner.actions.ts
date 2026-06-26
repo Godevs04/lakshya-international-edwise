@@ -9,6 +9,8 @@ import { Student } from "@/models/Student";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
+import { buildStudentVisibilityFilter } from "@/lib/services/student-visibility.service";
+import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
 import { logActivity } from "@/lib/services/activity.service";
 import {
   buildCommissionStatementRows,
@@ -173,7 +175,11 @@ export async function getPartnerStudents(partnerId: string) {
   requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
   await connectDB();
-  return Student.find({ partnerId }).sort({ createdAt: -1 }).limit(20).lean();
+  const filter = mergeMongoFilter(
+    { partnerId },
+    buildStudentVisibilityFilter(user)
+  );
+  return Student.find(filter).sort({ createdAt: -1 }).limit(20).lean();
   }, []);
 }
 

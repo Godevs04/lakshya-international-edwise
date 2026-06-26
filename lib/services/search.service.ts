@@ -5,6 +5,9 @@ import { Application } from "@/models/Application";
 import { toSafeRegExp } from "@/lib/utils/sanitize";
 import { excludeAdmissionLeadsFilter } from "@/lib/constants/student-record-type";
 import type { SearchResult } from "@/types";
+import type { SessionUser } from "@/types";
+import { buildStudentVisibilityFilter } from "@/lib/services/student-visibility.service";
+import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
 
 export interface SearchScope {
   students: boolean;
@@ -15,7 +18,8 @@ export interface SearchScope {
 export async function globalSearch(
   query: string,
   scope: SearchScope,
-  limit = 10
+  limit = 10,
+  user?: SessionUser | null
 ): Promise<SearchResult[]> {
   if (!query || query.trim().length < 2) return [];
 
@@ -26,20 +30,20 @@ export async function globalSearch(
   await connectDB();
   const trimmed = query.trim();
   const regex = toSafeRegExp(trimmed);
+  const studentFilter = mergeMongoFilter(excludeAdmissionLeadsFilter(), buildStudentVisibilityFilter(user), {
+    $or: [
+      { firstName: regex },
+      { lastName: regex },
+      { phone: regex },
+      { email: regex },
+      { studentId: regex },
+      { "loan.applicationNumber": regex },
+    ],
+  });
 
   const [students, partners] = await Promise.all([
     scope.students
-      ? Student.find({
-          ...excludeAdmissionLeadsFilter(),
-          $or: [
-            { firstName: regex },
-            { lastName: regex },
-            { phone: regex },
-            { email: regex },
-            { studentId: regex },
-            { "loan.applicationNumber": regex },
-          ],
-        })
+      ? Student.find(studentFilter)
           .limit(limit)
           .select("_id studentId firstName lastName phone email status")
           .lean()

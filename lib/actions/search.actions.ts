@@ -21,6 +21,6 @@ export async function globalSearchAction(query: string): Promise<SearchResult[]>
       students: hasPermission(user, PERMISSIONS.STUDENTS_READ),
       partners: hasPermission(user, PERMISSIONS.PARTNERS_READ),
       applications: hasPermission(user, PERMISSIONS.APPLICATIONS_READ),
-    });
+    }, 10, user);
   }, []);
 }

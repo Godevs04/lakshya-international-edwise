@@ -32,12 +32,23 @@ import {
   deleteUserAction,
   approveUserAction,
   rejectUserAction,
+  updateUserRoleAction,
 } from "@/lib/actions/settings.actions";
 import { ROLE_LABELS } from "@/lib/constants/permissions";
 import type { AppModules, AppSettings, UserRole } from "@/types";
 import { formatDate } from "@/lib/utils/format";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Clock, UserCheck, UserX } from "lucide-react";
+import {
+  UserMenuPermissions,
+  buildDefaultMenuPermissions,
+  type UserMenuPermissionsValue,
+} from "@/components/dashboard/user-menu-permissions";
+import {
+  UserPermissionsSheet,
+  serializeMenuPermissions,
+} from "@/components/dashboard/user-permissions-sheet";
+import { countMenuAccessLevels, deriveMenuAccessFromRole, applyLegacyMenuAccessFallback, permissionsToMenuAccess } from "@/lib/constants/menu-permissions";
+import { Clock, KeyRound, UserCheck, UserX } from "lucide-react";
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -47,8 +58,11 @@ interface SettingsViewProps {
     email: string;
     role: UserRole;
     status: string;
+    useCustomPermissions?: boolean;
+    customPermissions?: string[];
   }>;
   canManageUsers?: boolean;
+  canWriteUsers?: boolean;
   canWriteSettings?: boolean;
   currentUserRole?: UserRole;
   pendingUsers?: Array<{
@@ -69,10 +83,21 @@ function getCreatableRoles(currentUserRole?: UserRole): UserRole[] {
   });
 }
 
+function getAccessSummary(user: SettingsViewProps["users"][number]): string {
+  if (user.role === "super_admin") return "Full access";
+  const access = user.useCustomPermissions
+    ? applyLegacyMenuAccessFallback(permissionsToMenuAccess(user.customPermissions ?? []))
+    : deriveMenuAccessFromRole(user.role);
+  const summary = countMenuAccessLevels(access);
+  const label = `${summary.write} write · ${summary.read} read`;
+  return user.useCustomPermissions ? label : `${label} via role`;
+}
+
 export function SettingsView({
   settings,
   users,
   canManageUsers = false,
+  canWriteUsers = false,
   canWriteSettings = true,
   currentUserRole,
   pendingUsers = [],
@@ -81,7 +106,15 @@ export function SettingsView({
   const [loading, setLoading] = useState(false);
   const [modules, setModules] = useState<AppModules>(settings.modules);
   const [createUserRole, setCreateUserRole] = useState<UserRole>("staff");
+  const [createUserPermissions, setCreateUserPermissions] = useState<UserMenuPermissionsValue>(
+    buildDefaultMenuPermissions("staff")
+  );
+  const [showCreatePermissions, setShowCreatePermissions] = useState(false);
   const [approvalRoles, setApprovalRoles] = useState<Record<string, UserRole>>({});
+  const [permissionsUserId, setPermissionsUserId] = useState<string | null>(null);
+
+  const permissionsUser = users.find((user) => user._id === permissionsUserId) ?? null;
+  const serializedCreatePermissions = serializeMenuPermissions(createUserPermissions);
 
   async function handleSettingsSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -101,11 +134,15 @@ export function SettingsView({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set("role", createUserRole);
+    formData.set("useCustomPermissions", serializedCreatePermissions.useCustomPermissions);
+    formData.set("menuAccess", serializedCreatePermissions.menuAccess);
     const result = await createUserAction(formData);
     if (result.success) {
       notify.success("User created");
       (e.target as HTMLFormElement).reset();
       setCreateUserRole("staff");
+      setCreateUserPermissions(buildDefaultMenuPermissions("staff"));
+      setShowCreatePermissions(false);
       router.refresh();
     } else {
       notify.error(result.error ?? "Something went wrong");
@@ -294,15 +331,14 @@ export function SettingsView({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {(Object.keys(ROLE_LABELS) as UserRole[])
-                            .filter((r) => r !== "super_admin")
-                            .map((r) => (
-                              <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
-                            ))}
+                          {getCreatableRoles(currentUserRole).map((r) => (
+                            <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <Button
                         size="sm"
+                        disabled={!canWriteUsers}
                         onClick={async () => {
                           const result = await approveUserAction(u._id, role);
                           if (result.success) {
@@ -316,6 +352,7 @@ export function SettingsView({
                       <Button
                         size="sm"
                         variant="destructive"
+                        disabled={!canWriteUsers}
                         onClick={async () => {
                           const result = await rejectUserAction(u._id);
                           if (result.success) {
@@ -335,22 +372,70 @@ export function SettingsView({
         )}
 
         <GlassCard className="p-6">
-          <h3 className="mb-4 text-sm font-semibold">Add User</h3>
-          <form onSubmit={handleCreateUser} className="grid gap-4 sm:grid-cols-2">
-            <Input name="name" placeholder="Full Name" required />
-            <Input name="email" type="email" placeholder="Email" required />
-            <Input name="password" type="password" placeholder="Password" required />
-            <Select value={createUserRole} onValueChange={(value) => setCreateUserRole(value as UserRole)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {getCreatableRoles(currentUserRole).map((role) => (
-                  <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button type="submit" className="sm:col-span-2">Create User</Button>
+          <h3 className="mb-1 text-sm font-semibold">Add User</h3>
+          <p className="mb-4 text-xs text-muted-foreground">
+            Create a team member, then optionally tailor menu access with read or write levels.
+          </p>
+          <form onSubmit={handleCreateUser} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input name="name" placeholder="Full Name" required disabled={!canWriteUsers} />
+              <Input name="email" type="email" placeholder="Email" required disabled={!canWriteUsers} />
+              <Input name="password" type="password" placeholder="Password" required disabled={!canWriteUsers} />
+              <Select
+                value={createUserRole}
+                onValueChange={(value) => {
+                  const nextRole = value as UserRole;
+                  setCreateUserRole(nextRole);
+                  setCreateUserPermissions(buildDefaultMenuPermissions(nextRole));
+                }}
+                disabled={!canWriteUsers}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {getCreatableRoles(currentUserRole).map((role) => (
+                    <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Menu permissions</p>
+                  <p className="text-xs text-slate-600">
+                    Tap any menu to set None, Read, or Write before the first login.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!canWriteUsers}
+                  onClick={() => setShowCreatePermissions((open) => !open)}
+                  className="border-[#E8952E]/40 bg-white font-semibold text-[#B45309] hover:bg-[#FFF7ED]"
+                >
+                  {showCreatePermissions ? "Hide matrix" : "Configure access"}
+                </Button>
+              </div>
+              {showCreatePermissions ? (
+                <div className="mt-4">
+                  <UserMenuPermissions
+                    role={createUserRole}
+                    value={createUserPermissions}
+                    onChange={setCreateUserPermissions}
+                    disabled={!canWriteUsers}
+                    compact
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            <Button type="submit" className="sm:col-span-2" disabled={!canWriteUsers}>
+              Create User
+            </Button>
           </form>
         </GlassCard>
 
@@ -361,6 +446,7 @@ export function SettingsView({
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Menu Access</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -370,28 +456,94 @@ export function SettingsView({
                 <TableRow key={u._id}>
                   <TableCell>{u.name}</TableCell>
                   <TableCell>{u.email}</TableCell>
-                  <TableCell>{ROLE_LABELS[u.role]}</TableCell>
+                  <TableCell>
+                    {canWriteUsers && u.role !== "super_admin" ? (
+                      <Select
+                        value={u.role}
+                        onValueChange={async (value) => {
+                          const result = await updateUserRoleAction(u._id, value as UserRole);
+                          if (result.success) {
+                            notify.success(`Role updated to ${ROLE_LABELS[value as UserRole]}`);
+                            router.refresh();
+                          } else {
+                            notify.error(result.error ?? "Something went wrong");
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getCreatableRoles(currentUserRole).map((role) => (
+                            <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      ROLE_LABELS[u.role]
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                          u.useCustomPermissions
+                            ? "bg-[#E8952E]/12 text-[#B45309]"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {u.useCustomPermissions ? "Custom" : "Role default"}
+                      </span>
+                      <p className="text-xs text-muted-foreground">{getAccessSummary(u)}</p>
+                    </div>
+                  </TableCell>
                   <TableCell className="capitalize">
                     <StatusBadge status={u.status} type="user" />
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={async () => {
-                        const result = await deleteUserAction(u._id);
-                        if (result.success) { notify.success("User deleted"); router.refresh(); }
-                        else notify.error(result.error ?? "Something went wrong");
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    <div className="flex flex-wrap gap-1">
+                      {canWriteUsers && u.role !== "super_admin" ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPermissionsUserId(u._id)}
+                        >
+                          <KeyRound className="mr-1 h-4 w-4" />
+                          Access
+                        </Button>
+                      ) : null}
+                      {canWriteUsers ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            const result = await deleteUserAction(u._id);
+                            if (result.success) {
+                              notify.success("User deleted");
+                              router.refresh();
+                            } else {
+                              notify.error(result.error ?? "Something went wrong");
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      ) : null}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </GlassCard>
+
+        <UserPermissionsSheet
+          user={permissionsUser}
+          open={permissionsUserId !== null}
+          onOpenChange={(open) => {
+            if (!open) setPermissionsUserId(null);
+          }}
+        />
       </TabsContent>
       )}
     </Tabs>
