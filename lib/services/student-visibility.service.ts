@@ -4,12 +4,25 @@ import type { SessionUser } from "@/types";
 export type StudentAccessRecord = {
   metadata?: {
     createdBy?: Types.ObjectId | string | { _id?: Types.ObjectId; toString(): string } | null;
+    createdByName?: string;
+    leadSource?: string;
+    enquiryType?: string;
+    formPage?: string;
   } | null;
   assignedTo?: Types.ObjectId | string | { _id?: Types.ObjectId; toString(): string } | null;
 };
 
 export function canBypassStudentVisibility(role: SessionUser["role"]): boolean {
   return role === "super_admin";
+}
+
+export function isWebsiteInboundLead(student: StudentAccessRecord | null | undefined): boolean {
+  if (!student?.metadata) return false;
+  if (student.metadata.leadSource === "website") return true;
+  return (
+    student.metadata.createdByName === "Website" &&
+    !resolveObjectId(student.metadata.createdBy)
+  );
 }
 
 export function resolveObjectId(value: unknown): string | undefined {
@@ -35,6 +48,7 @@ export function canAccessStudent(
 ): boolean {
   if (!user || !student) return false;
   if (canBypassStudentVisibility(user.role)) return true;
+  if (isWebsiteInboundLead(student)) return true;
 
   const userId = user.id;
   const createdBy = resolveObjectId(student.metadata?.createdBy);
@@ -56,5 +70,25 @@ export function buildStudentVisibilityFilter(
   const userObjectId = new Types.ObjectId(user.id);
   return {
     $or: [{ "metadata.createdBy": userObjectId }, { assignedTo: userObjectId }],
+  };
+}
+
+/** Admissions list/detail: include public website enquiries for all admissions users. */
+export function buildAdmissionVisibilityFilter(
+  user: SessionUser | null | undefined
+): Record<string, unknown> | null {
+  const base = buildStudentVisibilityFilter(user);
+  if (!user || canBypassStudentVisibility(user.role)) {
+    return base;
+  }
+
+  const websiteClause = { "metadata.leadSource": "website" };
+  if (!base) {
+    return null;
+  }
+
+  const baseOr = Array.isArray(base.$or) ? base.$or : [];
+  return {
+    $or: [...baseOr, websiteClause],
   };
 }

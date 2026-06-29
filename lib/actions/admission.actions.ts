@@ -22,7 +22,7 @@ import {
   formatDuplicateStudentPhoneError,
 } from "@/lib/services/student-phone.service";
 import {
-  buildStudentVisibilityFilter,
+  buildAdmissionVisibilityFilter,
   canAccessStudent,
 } from "@/lib/services/student-visibility.service";
 import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
@@ -78,7 +78,7 @@ export async function getAdmissions(params: {
     if (params.targetCountry) filter.targetCountry = params.targetCountry;
     if (params.targetIntake) filter.targetIntake = params.targetIntake;
 
-    const visibilityFilter = buildStudentVisibilityFilter(user);
+    const visibilityFilter = buildAdmissionVisibilityFilter(user);
     const mongoFilter = mergeMongoFilter(
       filter,
       visibilityFilter
@@ -87,7 +87,7 @@ export async function getAdmissions(params: {
     const [data, total] = await Promise.all([
       Student.find(mongoFilter)
         .select(
-          "studentId firstName lastName phone targetCountry targetIntake targetUniversity admissionRevenue recordType createdAt"
+          "studentId firstName lastName phone targetCountry targetIntake targetUniversity admissionRevenue recordType createdAt metadata.leadSource metadata.formPage metadata.enquiryType"
         )
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -108,6 +108,9 @@ export async function getAdmissions(params: {
         targetUniversity: entry.targetUniversity,
         admissionRevenue: entry.admissionRevenue,
         recordType: entry.recordType,
+        leadSource: entry.metadata?.leadSource,
+        enquiryType: entry.metadata?.enquiryType,
+        formPage: entry.metadata?.formPage,
         createdAt: entry.createdAt,
       })),
       total,
@@ -192,10 +195,18 @@ export async function getAdmissionById(id: string) {
       firstName: admission.firstName,
       lastName: admission.lastName,
       phone: admission.phone,
+      email: admission.email,
       targetCountry: admission.targetCountry,
       targetIntake: admission.targetIntake,
       targetUniversity: admission.targetUniversity,
+      course: admission.education?.course,
       admissionRevenue: admission.admissionRevenue,
+      leadSource: admission.metadata?.leadSource,
+      enquiryType: admission.metadata?.enquiryType,
+      formPage: admission.metadata?.formPage,
+      createdByName: admission.metadata?.createdByName,
+      initialNote: admission.notes?.[0]?.content,
+      loanRequired: Boolean(admission.loan?.requested && admission.loan.requested > 0),
       assignedTo:
         admission.assignedTo && typeof admission.assignedTo === "object" && "name" in admission.assignedTo
           ? { _id: String(admission.assignedTo._id), name: String(admission.assignedTo.name) }

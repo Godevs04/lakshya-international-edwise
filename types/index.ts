@@ -177,6 +177,9 @@ export interface AdmissionListItem {
   targetUniversity?: string;
   admissionRevenue?: number;
   recordType?: "lead" | "student";
+  leadSource?: string;
+  enquiryType?: string;
+  formPage?: string;
   createdAt: Date;
 }
 

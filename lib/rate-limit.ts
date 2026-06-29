@@ -69,6 +69,7 @@ const limiterConfigs: Record<RateLimitAction, LimiterConfig> = {
   search: { points: 60, duration: 900, blockDuration: 120 },
   upload: { points: 40, duration: 900, blockDuration: 120 },
   import: { points: 5, duration: 3600, blockDuration: 3600 },
+  "website-enquiry": { points: 5, duration: 900, blockDuration: 900 },
 };
 
 const memoryLimiters: Partial<Record<RateLimitAction, RateLimiterMemory>> = {};
@@ -82,7 +83,8 @@ export type RateLimitAction =
   | "forgot-password"
   | "search"
   | "upload"
-  | "import";
+  | "import"
+  | "website-enquiry";
 
 async function getLimiter(action: RateLimitAction): Promise<RateLimiterAbstract> {
   const client = await getRedisClient();

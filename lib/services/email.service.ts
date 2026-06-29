@@ -371,3 +371,57 @@ export async function sendNoteMentionEmail(params: {
     }),
   });
 }
+
+export async function sendWebsiteEnquiryNotification(params: {
+  name: string;
+  phone: string;
+  email?: string;
+  targetCountry?: string;
+  course?: string;
+  loanRequired?: boolean;
+  message?: string;
+  enquiryType: string;
+  formPage?: string;
+  studentCode: string;
+}): Promise<boolean> {
+  const { getMarketingContact } = await import("@/lib/config/marketing");
+  const contact = getMarketingContact();
+  const notifyEmail = contact.enquiryNotifyEmail?.trim();
+  if (!notifyEmail) {
+    return false;
+  }
+
+  const company = await getEmailBranding();
+  const lines = [
+    `<strong>Name:</strong> ${escapeHtml(params.name)}`,
+    `<strong>Phone:</strong> ${escapeHtml(params.phone)}`,
+    params.email ? `<strong>Email:</strong> ${escapeHtml(params.email)}` : null,
+    params.targetCountry ? `<strong>Country:</strong> ${escapeHtml(params.targetCountry)}` : null,
+    params.course ? `<strong>Course:</strong> ${escapeHtml(params.course)}` : null,
+    params.loanRequired ? "<strong>Loan required:</strong> Yes" : null,
+    `<strong>Enquiry type:</strong> ${escapeHtml(params.enquiryType)}`,
+    params.formPage ? `<strong>Form page:</strong> ${escapeHtml(params.formPage)}` : null,
+    `<strong>Student ID:</strong> ${escapeHtml(params.studentCode)}`,
+    params.message ? `<strong>Message:</strong><br/>${escapeHtml(params.message)}` : null,
+  ].filter(Boolean);
+
+  const bodyHtml = `
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      A new website enquiry has been captured in the CRM admissions pipeline.
+    </p>
+    ${renderInfoBox(lines.join("<br/>"))}
+    ${emailButton(`${getPublicAuthUrl()}/dashboard/admissions`, "Open Admissions")}
+    ${renderMutedNote("This lead was created automatically from the public marketing website.")}`;
+
+  return sendEmail({
+    to: notifyEmail,
+    subject: `New Website Enquiry — ${params.name}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `New enquiry from ${params.name}`,
+      title: "Website Enquiry",
+      subtitle: params.studentCode,
+      bodyHtml,
+    }),
+  });
+}
