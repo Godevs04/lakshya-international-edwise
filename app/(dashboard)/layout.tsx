@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { getAppConfig } from "@/lib/config/app-config";
 import { getUnreadNotificationCount } from "@/lib/actions/settings.actions";
+import { getTaskSummary } from "@/lib/actions/task.actions";
 import { Sidebar, MobileNav } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { PremiumBackground } from "@/components/layout/premium-background";
@@ -26,10 +27,12 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const [config, unreadCount] = await Promise.all([
-    getAppConfig(),
+  const config = await getAppConfig();
+  const [unreadCount, taskSummary] = await Promise.all([
     getUnreadNotificationCount(),
+    config.modules?.tasks !== false ? getTaskSummary() : Promise.resolve({ overdue: 0 }),
   ]);
+  const overdueTaskCount = taskSummary.overdue;
 
   return (
     <DashboardSessionBridge session={session}>
@@ -39,6 +42,7 @@ export default async function DashboardLayout({
           companyName={config.company.name}
           logo={config.company.logo}
           modules={config.modules}
+          overdueTaskCount={overdueTaskCount}
         />
         <div className="relative flex min-h-screen min-w-0 flex-col lg:pl-[260px]">
           <Design06TopWaves />
@@ -63,6 +67,7 @@ export default async function DashboardLayout({
           modules={config.modules}
           companyName={config.company.name}
           logo={config.company.logo}
+          overdueTaskCount={overdueTaskCount}
         />
       </div>
     </DashboardSessionBridge>

@@ -21,15 +21,19 @@ import {
 } from "@/components/dashboard/nav-config";
 import { MobileNavSheet } from "@/components/dashboard/mobile-nav-sheet";
 import { SidebarBrand } from "@/components/brand/sidebar-brand";
+import { NavBadge } from "@/components/dashboard/nav-badge";
 import type { AppModules } from "@/types";
+
+const TASKS_HREF = "/dashboard/tasks";
 
 interface SidebarProps {
   companyName: string;
   logo?: string;
   modules?: AppModules;
+  overdueTaskCount?: number;
 }
 
-export function Sidebar({ companyName, logo, modules }: SidebarProps) {
+export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -52,8 +56,12 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
         <nav className="space-y-1 py-2">
           {filteredNav.map((item) => {
             const isActive = isNavItemActive(pathname, item.href);
+            const href =
+              item.href === TASKS_HREF && overdueTaskCount > 0
+                ? `${TASKS_HREF}?overdue=1`
+                : item.href;
             return (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={href}>
                 <div
                   className={cn(
                     "group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
@@ -69,9 +77,19 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
                     )}
                   >
                     <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-primary")} />
+                    {item.href === TASKS_HREF && (
+                      <NavBadge count={overdueTaskCount} collapsed={collapsed} />
+                    )}
                   </div>
                   {!collapsed && (
-                    <span className="relative z-10 truncate">{item.label}</span>
+                    <span className="relative z-10 flex min-w-0 flex-1 items-center gap-2 truncate">
+                      <span className="truncate">{item.label}</span>
+                      {item.href === TASKS_HREF && overdueTaskCount > 0 && (
+                        <span className="shrink-0 rounded-full bg-[#EF4444]/12 px-2 py-0.5 text-[10px] font-semibold text-[#EF4444]">
+                          {overdueTaskCount > 9 ? "9+" : overdueTaskCount}
+                        </span>
+                      )}
+                    </span>
                   )}
                 </div>
               </Link>
@@ -117,9 +135,11 @@ export function Sidebar({ companyName, logo, modules }: SidebarProps) {
 function NavLinkItem({
   item,
   isActive,
+  badgeCount = 0,
 }: {
   item: NavItem;
   isActive: boolean;
+  badgeCount?: number;
 }) {
   return (
     <Link
@@ -128,13 +148,14 @@ function NavLinkItem({
     >
       <div
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
+          "relative flex h-9 w-9 items-center justify-center rounded-xl transition-all",
           isActive
             ? "bg-gradient-to-br from-primary to-secondary text-white shadow-lg shadow-primary/20"
             : "bg-primary/10 text-sidebar-foreground"
         )}
       >
         <item.icon className="h-4 w-4" />
+        <NavBadge count={badgeCount} />
       </div>
       <span
         className={cn(
@@ -152,10 +173,12 @@ export function MobileNav({
   modules,
   companyName = "CRM",
   logo,
+  overdueTaskCount = 0,
 }: {
   modules?: AppModules;
   companyName?: string;
   logo?: string;
+  overdueTaskCount?: number;
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -169,6 +192,8 @@ export function MobileNav({
       !MOBILE_PRIMARY_HREFS.includes(item.href as (typeof MOBILE_PRIMARY_HREFS)[number])
   );
   const moreActive = secondaryNav.some((item) => isNavItemActive(pathname, item.href));
+  const tasksInSecondary = secondaryNav.some((item) => item.href === TASKS_HREF);
+  const showMoreBadge = tasksInSecondary && overdueTaskCount > 0;
 
   return (
     <>
@@ -189,13 +214,14 @@ export function MobileNav({
             >
               <div
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
+                  "relative flex h-9 w-9 items-center justify-center rounded-xl transition-all",
                   moreActive
                     ? "bg-gradient-to-br from-primary to-secondary text-white shadow-lg shadow-primary/20"
                     : "bg-primary/10 text-muted-foreground"
                 )}
               >
                 <MoreHorizontal className="h-4 w-4" />
+                {showMoreBadge && <NavBadge count={overdueTaskCount} />}
               </div>
               <span
                 className={cn(
@@ -217,6 +243,7 @@ export function MobileNav({
         logo={logo}
         modules={modules}
         items={secondaryNav}
+        overdueTaskCount={overdueTaskCount}
       />
     </>
   );

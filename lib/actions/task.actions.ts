@@ -14,6 +14,7 @@ import { createNotification } from "@/lib/services/notification.service";
 import { sendTaskAssignedEmail } from "@/lib/services/email.service";
 import { getPublicAuthUrl } from "@/lib/config/env";
 import { User } from "@/models/User";
+import { canViewAllOverdueTasks, resolveOverdueTaskCount } from "@/lib/utils/task-overdue";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 import type { ActionResult, PaginatedResult, TaskListItem } from "@/types";
 
@@ -107,17 +108,27 @@ export async function getTaskSummary(): Promise<{
 
       const userId = user?.id && isObjectId(user.id) ? toObjectId(user.id) : null;
       const openFilter = { status: "open" as const };
+      const overdueFilter = { ...openFilter, dueAt: { $lt: now } };
 
-      const [myOpen, overdue, dueToday] = await Promise.all([
+      const [myOpen, myOverdue, allOverdue, dueToday] = await Promise.all([
         userId
           ? Task.countDocuments({ ...openFilter, assignedTo: userId })
           : Promise.resolve(0),
-        Task.countDocuments({ ...openFilter, dueAt: { $lt: now } }),
+        userId
+          ? Task.countDocuments({ ...overdueFilter, assignedTo: userId })
+          : Promise.resolve(0),
+        Task.countDocuments(overdueFilter),
         Task.countDocuments({
           ...openFilter,
           dueAt: { $gte: startOfDay, $lte: endOfDay },
         }),
       ]);
+
+      const overdue = resolveOverdueTaskCount({
+        role: user?.role,
+        myOverdue,
+        allOverdue,
+      });
 
       return { myOpen, overdue, dueToday };
     },
@@ -156,6 +167,9 @@ export async function getTasks(params: {
     if (params.overdue) {
       filter.status = "open";
       filter.dueAt = { $lt: now };
+      if (user?.id && isObjectId(user.id) && !canViewAllOverdueTasks(user.role)) {
+        filter.assignedTo = toObjectId(user.id);
+      }
     }
     if (params.dueToday) {
       const startOfDay = new Date(now);
