@@ -1,3 +1,20 @@
+import { STUDENT_STATUSES } from "@/lib/constants/statuses";
+
+const VALID_STATUSES = new Set<string>(STUDENT_STATUSES);
+
+export function parseStatusFilter(value?: string): string[] {
+  if (!value?.trim()) return [];
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => VALID_STATUSES.has(entry));
+}
+
+export function serializeStatusFilter(statuses: string[]): string | undefined {
+  const valid = statuses.filter((entry) => VALID_STATUSES.has(entry));
+  return valid.length > 0 ? valid.join(",") : undefined;
+}
+
 export interface StudentListFilters {
   page?: string;
   search?: string;
@@ -64,7 +81,10 @@ export function countActiveAdvancedFilters(filters: StudentListFilters): number 
     "lenderId",
   ];
 
-  return advancedKeys.filter((key) => Boolean(filters[key]?.trim())).length;
+  return advancedKeys.filter((key) => {
+    if (key === "status") return parseStatusFilter(filters.status).length > 0;
+    return Boolean(filters[key]?.trim());
+  }).length;
 }
 
 export function hasActiveListFilters(filters: StudentListFilters): boolean {

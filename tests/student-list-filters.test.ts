@@ -6,6 +6,8 @@ import {
 import {
   buildStudentListQuery,
   countActiveAdvancedFilters,
+  parseStatusFilter,
+  serializeStatusFilter,
 } from "@/lib/utils/student-list-filters";
 
 describe("student workflow filters", () => {
@@ -74,5 +76,21 @@ describe("student list filters", () => {
         loanMax: "500000",
       })
     ).toBe(2);
+  });
+
+  it("parses and serializes multi-status filter", () => {
+    expect(parseStatusFilter("submitted,approved,invalid")).toEqual(["submitted", "approved"]);
+    expect(serializeStatusFilter(["disbursed", "submitted"])).toBe("disbursed,submitted");
+    expect(serializeStatusFilter([])).toBeUndefined();
+    expect(
+      buildStudentListQuery({
+        status: "submitted,approved",
+      })
+    ).toBe("status=submitted%2Capproved");
+    expect(
+      countActiveAdvancedFilters({
+        status: "submitted,approved",
+      })
+    ).toBe(1);
   });
 });

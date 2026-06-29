@@ -6,6 +6,8 @@ const envSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(32).optional(),
   AUTH_URL: z.string().url().optional(),
   NEXTAUTH_URL: z.string().url().optional(),
+  APP_URL: z.string().url().optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
@@ -102,13 +104,40 @@ export function getConfiguredAuthUrl(): string | undefined {
   return normalizeBaseUrl(explicit);
 }
 
+function resolveExplicitPublicUrl(): string | undefined {
+  const authUrl = getConfiguredAuthUrl();
+  if (authUrl) {
+    return authUrl;
+  }
+
+  const appUrl =
+    trimEnv(process.env.APP_URL) ?? trimEnv(process.env.NEXT_PUBLIC_APP_URL);
+  if (
+    appUrl &&
+    !(process.env.NODE_ENV === "production" && isLocalhostUrl(appUrl))
+  ) {
+    return normalizeBaseUrl(appUrl);
+  }
+
+  const vercelProduction = trimEnv(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  if (vercelProduction && process.env.NODE_ENV === "production") {
+    return normalizeBaseUrl(
+      vercelProduction.startsWith("http")
+        ? vercelProduction
+        : `https://${vercelProduction}`
+    );
+  }
+
+  return undefined;
+}
+
 /**
  * Public app URL for links shown to users in emails and notifications.
  * This intentionally avoids platform fallback hosts like `*.vercel.app`.
  */
 export function getPublicAuthUrl(): string {
   return (
-    getConfiguredAuthUrl() ??
+    resolveExplicitPublicUrl() ??
     normalizeBaseUrl(`http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`)
   );
 }
@@ -141,6 +170,11 @@ export function getAuthSecret(): string {
 }
 
 export function getAuthUrl(): string {
+  // Prefer the canonical public URL when configured so emails and auth share the same host.
+  const publicUrl = resolveExplicitPublicUrl();
+  if (publicUrl) {
+    return publicUrl;
+  }
   return resolveAuthUrl();
 }
 

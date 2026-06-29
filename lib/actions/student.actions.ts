@@ -49,6 +49,7 @@ import {
 } from "@/lib/utils/document-url";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 import { buildWorkflowMongoFilter } from "@/lib/constants/student-workflow-filters";
+import { parseStatusFilter } from "@/lib/utils/student-list-filters";
 import {
   applyApplicationStatus,
   deriveApplicationStatus,
@@ -240,8 +241,11 @@ export async function getStudents(params: {
       ],
     });
   }
-  if (params.status) {
-    filter.status = params.status;
+  const statusFilter = parseStatusFilter(params.status);
+  if (statusFilter.length === 1) {
+    filter.status = statusFilter[0];
+  } else if (statusFilter.length > 1) {
+    filter.status = { $in: statusFilter };
   } else {
     const workflowFilter = buildWorkflowMongoFilter(params.workflow);
     if (workflowFilter) {
@@ -1035,10 +1039,10 @@ export async function addStudentNoteAction(
   if (mentionObjectIds.length > 0) {
     const { createNotification } = await import("@/lib/services/notification.service");
     const { sendNoteMentionEmail } = await import("@/lib/services/email.service");
-    const { getAuthUrl } = await import("@/lib/config/env");
+    const { getPublicAuthUrl } = await import("@/lib/config/env");
 
     const link = `/dashboard/students/${studentId}`;
-    const studentUrl = `${getAuthUrl()}${link}`;
+    const studentUrl = `${getPublicAuthUrl()}${link}`;
 
     const mentionedUsers = await User.find({
       _id: { $in: mentionObjectIds },

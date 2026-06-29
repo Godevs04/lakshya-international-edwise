@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -24,8 +30,13 @@ import { STUDENT_STATUSES } from "@/lib/constants/statuses";
 import { useLenderOptions } from "@/components/lenders/use-lender-options";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import type { StudentListFilters } from "@/lib/utils/student-list-filters";
-import { countActiveAdvancedFilters } from "@/lib/utils/student-list-filters";
-import { SlidersHorizontal } from "lucide-react";
+import {
+  countActiveAdvancedFilters,
+  parseStatusFilter,
+  serializeStatusFilter,
+} from "@/lib/utils/student-list-filters";
+import { SlidersHorizontal, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const ANY_OPTION = "__any__";
 
@@ -44,7 +55,7 @@ interface AdvancedSearchDraft {
   assignedToId: string;
   targetCountry: string;
   targetIntake: string;
-  status: string;
+  statuses: string[];
   lenderId: string;
   dateFrom: string;
   dateTo: string;
@@ -74,13 +85,97 @@ function createDraftFromFilters(filters: StudentListFilters): AdvancedSearchDraf
     assignedToId: filters.assignedToId ?? "",
     targetCountry: filters.targetCountry ?? "",
     targetIntake: filters.targetIntake ?? "",
-    status: filters.status ?? "",
+    statuses: parseStatusFilter(filters.status),
     lenderId: filters.lenderId ?? "",
     dateFrom: filters.dateFrom ?? "",
     dateTo: filters.dateTo ?? "",
     loanMin: filters.loanMin ?? "",
     loanMax: filters.loanMax ?? "",
   };
+}
+
+function formatStatusLabel(status: string) {
+  return status.replace(/_/g, " ");
+}
+
+function StatusMultiSelect({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const selected = new Set(value);
+  const label =
+    value.length === 0
+      ? "Any status"
+      : value.length === 1
+        ? formatStatusLabel(value[0]!)
+        : `${value.length} statuses selected`;
+
+  function toggleStatus(status: string) {
+    const next = new Set(selected);
+    if (next.has(status)) {
+      next.delete(status);
+    } else {
+      next.add(status);
+    }
+    onChange(STUDENT_STATUSES.filter((entry) => next.has(entry)));
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            className={cn(
+              "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50",
+              value.length === 0 && "text-muted-foreground"
+            )}
+          >
+            <span className="truncate text-left">{label}</span>
+            <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+          </button>
+        }
+      />
+      <PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
+        <div className="max-h-64 overflow-y-auto p-1">
+          {STUDENT_STATUSES.map((status) => {
+            const checked = selected.has(status);
+            return (
+              <label
+                key={status}
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent",
+                  checked && "bg-[#E8952E]/12"
+                )}
+              >
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={() => toggleStatus(status)}
+                />
+                <span className="capitalize">{formatStatusLabel(status)}</span>
+              </label>
+            );
+          })}
+        </div>
+        {value.length > 0 && (
+          <div className="border-t border-border p-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-full justify-center text-muted-foreground"
+              onClick={() => onChange([])}
+            >
+              Clear selection
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export function StudentAdvancedSearch({
@@ -104,14 +199,6 @@ export function StudentAdvancedSearch({
   const assigneeItems = [
     { value: ANY_OPTION, label: "Any counsellor" },
     ...assignableUsers.map((user) => ({ value: user._id, label: user.name })),
-  ];
-
-  const statusItems = [
-    { value: ANY_OPTION, label: "Any status" },
-    ...STUDENT_STATUSES.map((entry) => ({
-      value: entry,
-      label: entry.replace(/_/g, " "),
-    })),
   ];
 
   const targetCountryItems = [
@@ -141,18 +228,19 @@ export function StudentAdvancedSearch({
   }
 
   function handleApply() {
+    const status = serializeStatusFilter(draft.statuses);
     onApply({
       partnerId: draft.partnerId || undefined,
       assignedToId: draft.assignedToId || undefined,
       targetCountry: draft.targetCountry || undefined,
       targetIntake: draft.targetIntake || undefined,
-      status: draft.status || undefined,
+      status,
       lenderId: draft.lenderId || undefined,
       dateFrom: draft.dateFrom || undefined,
       dateTo: draft.dateTo || undefined,
       loanMin: draft.loanMin || undefined,
       loanMax: draft.loanMax || undefined,
-      workflow: draft.status ? undefined : filters.workflow,
+      workflow: status ? undefined : filters.workflow,
       page: undefined,
     });
     setOpen(false);
@@ -231,23 +319,10 @@ export function StudentAdvancedSearch({
 
           <div className="space-y-2">
             <Label>Status</Label>
-            <Select
-              value={toSelectValue(draft.status)}
-              onValueChange={(value) => updateDraft("status", fromSelectValue(value ?? ANY_OPTION))}
-              items={statusItems}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Any status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ANY_OPTION}>Any status</SelectItem>
-                {STUDENT_STATUSES.map((entry) => (
-                  <SelectItem key={entry} value={entry}>
-                    {entry.replace(/_/g, " ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <StatusMultiSelect
+              value={draft.statuses}
+              onChange={(statuses) => updateDraft("statuses", statuses)}
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
