@@ -12,7 +12,7 @@ import { taskSchema, updateTaskSchema } from "@/lib/validations/schemas";
 import { logActivity } from "@/lib/services/activity.service";
 import { createNotification } from "@/lib/services/notification.service";
 import { sendTaskAssignedEmail } from "@/lib/services/email.service";
-import { getAuthUrl } from "@/lib/config/env";
+import { getPublicAuthUrl } from "@/lib/config/env";
 import { User } from "@/models/User";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
 import type { ActionResult, PaginatedResult, TaskListItem } from "@/types";
@@ -75,7 +75,7 @@ async function notifyTaskAssignee(params: {
   });
 
   if (assignee.email) {
-    const authUrl = getAuthUrl();
+    const authUrl = getPublicAuthUrl();
     await sendTaskAssignedEmail({
       email: assignee.email,
       name: assignee.name,

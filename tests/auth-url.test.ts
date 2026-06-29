@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getConfiguredAuthUrl, getPublicAuthUrl, resolveAuthUrl } from "@/lib/config/env";
+import { getAuthUrl, getConfiguredAuthUrl, getPublicAuthUrl, resolveAuthUrl } from "@/lib/config/env";
 
 describe("resolveAuthUrl", () => {
   afterEach(() => {
@@ -70,5 +70,41 @@ describe("getPublicAuthUrl", () => {
     vi.stubEnv("NEXTAUTH_URL", "");
     vi.stubEnv("PORT", "4000");
     expect(getPublicAuthUrl()).toBe("http://localhost:4000");
+  });
+
+  it("uses APP_URL when AUTH_URL is unset", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "");
+    vi.stubEnv("APP_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
+    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+  });
+
+  it("uses VERCEL_PROJECT_PRODUCTION_URL in production when explicit URL is unset", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "");
+    vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "lie.teamgodevs.in");
+    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+  });
+
+  it("prefers AUTH_URL over Vercel production domain", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "other.example.com");
+    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+  });
+});
+
+describe("getAuthUrl", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("uses public URL instead of preview Vercel host for user-facing links", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
+    expect(getAuthUrl()).toBe("https://lie.teamgodevs.in");
   });
 });
