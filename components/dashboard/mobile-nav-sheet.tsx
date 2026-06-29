@@ -15,7 +15,10 @@ import {
   type NavItem,
 } from "@/components/dashboard/nav-config";
 import { SidebarBrand } from "@/components/brand/sidebar-brand";
+import { NavBadge } from "@/components/dashboard/nav-badge";
 import type { AppModules } from "@/types";
+
+const TASKS_HREF = "/dashboard/tasks";
 
 interface MobileNavSheetProps {
   open: boolean;
@@ -24,6 +27,7 @@ interface MobileNavSheetProps {
   logo?: string;
   modules?: AppModules;
   items?: NavItem[];
+  overdueTaskCount?: number;
 }
 
 export function MobileNavSheet({
@@ -33,6 +37,7 @@ export function MobileNavSheet({
   logo,
   modules,
   items,
+  overdueTaskCount = 0,
 }: MobileNavSheetProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -47,10 +52,14 @@ export function MobileNavSheet({
         <nav className="space-y-1 p-3">
           {filteredNav.map((item) => {
             const isActive = isNavItemActive(pathname, item.href);
+            const href =
+              item.href === TASKS_HREF && overdueTaskCount > 0
+                ? `${TASKS_HREF}?overdue=1`
+                : item.href;
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={href}
                 onClick={() => onOpenChange(false)}
               >
                 <div
@@ -61,8 +70,20 @@ export function MobileNavSheet({
                       : "text-sidebar-foreground/75 hover:bg-primary/10 hover:text-sidebar-foreground"
                   )}
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  {item.label}
+                  <div className="relative shrink-0">
+                    <item.icon className="h-4 w-4" />
+                    {item.href === TASKS_HREF && (
+                      <NavBadge count={overdueTaskCount} className="-right-1 -top-1" />
+                    )}
+                  </div>
+                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                    <span className="truncate">{item.label}</span>
+                    {item.href === TASKS_HREF && overdueTaskCount > 0 && (
+                      <span className="shrink-0 rounded-full bg-[#EF4444]/12 px-2 py-0.5 text-[10px] font-semibold text-[#EF4444]">
+                        {overdueTaskCount > 9 ? "9+" : overdueTaskCount}
+                      </span>
+                    )}
+                  </span>
                 </div>
               </Link>
             );
