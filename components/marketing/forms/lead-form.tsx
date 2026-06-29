@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitWebsiteEnquiryAction } from "@/lib/actions/enquiry.actions";
 import type { LeadFormVariant } from "@/types/marketing";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, User, Phone, Mail, Globe, BookOpen, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConsultationTrust } from "@/components/marketing/forms/consultation-trust";
 
 const leadFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -32,6 +33,13 @@ interface LeadFormProps {
   defaultCountry?: string;
   className?: string;
   compact?: boolean;
+  premium?: boolean;
+}
+
+const CONSULTATION_STEPS = ["Consult", "Plan", "Apply"] as const;
+
+function FieldIcon({ icon: Icon }: { icon: typeof User }) {
+  return <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />;
 }
 
 export function LeadForm({
@@ -40,6 +48,7 @@ export function LeadForm({
   defaultCountry,
   className,
   compact = false,
+  premium = false,
 }: LeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,12 +98,14 @@ export function LeadForm({
   const showLoan = variant === "loan" || variant === "consultation";
   const showMessage = variant === "contact" || variant === "consultation";
 
+  const shellClass = premium ? "consultation-card" : "glass-card";
+
   if (submitted) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className={cn("glass-card rounded-2xl p-6 text-center", className)}
+        className={cn(shellClass, "rounded-2xl p-6 text-center", className)}
       >
         <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-primary" />
         <h3 className="text-lg font-semibold text-secondary">Thank you!</h3>
@@ -108,37 +119,107 @@ export function LeadForm({
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("glass-card rounded-2xl p-5 md:p-6", className)}
+      className={cn(shellClass, "rounded-2xl p-5 md:p-6", className)}
     >
+      {premium && (
+        <div className="mb-5">
+          <div className="mb-3 flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold text-secondary">Book your FREE Consultation</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            {CONSULTATION_STEPS.map((step, index) => (
+              <div key={step} className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "step-indicator",
+                    index === 0 && "step-indicator-active"
+                  )}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                    {index + 1}
+                  </span>
+                  {step}
+                </span>
+                {index < CONSULTATION_STEPS.length - 1 && (
+                  <span className="text-muted-foreground/40">-</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className={cn("grid gap-4", compact ? "grid-cols-1" : "md:grid-cols-2")}>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="lead-name">Full name</Label>
-          <Input id="lead-name" {...form.register("name")} placeholder="Your name" />
+          <div className="relative">
+            {premium && <FieldIcon icon={User} />}
+            <Input
+              id="lead-name"
+              {...form.register("name")}
+              placeholder="Your name"
+              className={premium ? "pl-10" : undefined}
+            />
+          </div>
           {form.formState.errors.name && (
             <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="lead-phone">Phone</Label>
-          <Input id="lead-phone" {...form.register("phone")} placeholder="10-digit mobile" />
+          <div className="relative">
+            {premium && <FieldIcon icon={Phone} />}
+            <Input
+              id="lead-phone"
+              {...form.register("phone")}
+              placeholder="10-digit mobile"
+              className={premium ? "pl-10" : undefined}
+            />
+          </div>
           {form.formState.errors.phone && (
             <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
           )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="lead-email">Email (optional)</Label>
-          <Input id="lead-email" type="email" {...form.register("email")} placeholder="you@email.com" />
+          <div className="relative">
+            {premium && <FieldIcon icon={Mail} />}
+            <Input
+              id="lead-email"
+              type="email"
+              {...form.register("email")}
+              placeholder="you@email.com"
+              className={premium ? "pl-10" : undefined}
+            />
+          </div>
         </div>
         {showCountry && (
           <div className="space-y-2">
             <Label htmlFor="lead-country">Target country</Label>
-            <Input id="lead-country" {...form.register("targetCountry")} placeholder="e.g. Canada" />
+            <div className="relative">
+              {premium && <FieldIcon icon={Globe} />}
+              <Input
+                id="lead-country"
+                {...form.register("targetCountry")}
+                placeholder="e.g. Canada"
+                className={premium ? "pl-10" : undefined}
+              />
+            </div>
           </div>
         )}
         {showCourse && (
           <div className="space-y-2">
             <Label htmlFor="lead-course">Course (optional)</Label>
-            <Input id="lead-course" {...form.register("course")} placeholder="e.g. MBA" />
+            <div className="relative">
+              {premium && <FieldIcon icon={BookOpen} />}
+              <Input
+                id="lead-course"
+                {...form.register("course")}
+                placeholder="e.g. MBA"
+                className={premium ? "pl-10" : undefined}
+              />
+            </div>
           </div>
         )}
         {showLoan && (
@@ -185,6 +266,8 @@ export function LeadForm({
           "Book Free Consultation"
         )}
       </Button>
+
+      {premium && <ConsultationTrust />}
     </form>
   );
 }

@@ -83,11 +83,11 @@ The app ships with **Docker** and supports multiple hosting platforms (not only 
 
 | Platform | How to deploy |
 |----------|----------------|
-| **Docker / VPS** | `docker compose up -d` or `bash scripts/docker-run.sh` |
+| **Docker / VPS** | `docker compose -f deploy/docker-compose.yml up -d` or `bash scripts/docker-run.sh` |
 | **GitHub Container Registry** | **Actions → Deploy Application → Run workflow** → platform `docker` |
-| **Fly.io** | `fly launch`, then run Deploy Application with platform `fly` + `FLY_API_TOKEN` secret |
-| **Render** | Connect repo and use `render.yaml` blueprint |
-| **Railway** | Connect repo — uses `Dockerfile` automatically |
+| **Fly.io** | `fly deploy` (root `fly.toml` → `deploy/Dockerfile`) |
+| **Render** | Connect repo and use `deploy/render.yaml` blueprint |
+| **Railway** | Connect repo — set Dockerfile to `deploy/Dockerfile`, build context = repo root |
 | **VPS (SSH)** | Run Deploy Application with platform `vps` + SSH/GHCR secrets (see below) |
 | **Vercel** | Run Deploy Application with platform `vercel` + Vercel secrets |
 
@@ -96,7 +96,7 @@ The app ships with **Docker** and supports multiple hosting platforms (not only 
 ```bash
 cp .env.example .env.local
 # fill in secrets, then:
-docker compose up -d --build
+docker compose -f deploy/docker-compose.yml up -d --build
 # or
 bash scripts/docker-run.sh
 ```

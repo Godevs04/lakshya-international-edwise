@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { SectionHeading } from "@/components/marketing/sections/section-heading";
+import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { LeadForm } from "@/components/marketing/forms/lead-form";
 import { FaqSection } from "@/components/marketing/sections/faq";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
-import { MARKETING_LENDERS } from "@/lib/constants/marketing/lenders";
+import { BankingPartnersSection } from "@/components/marketing/sections/banking-partners";
 import { MARKETING_LOAN_FAQS } from "@/lib/constants/marketing/faqs";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 
@@ -28,41 +27,34 @@ export default function EducationLoansPage() {
   return (
     <>
       <section className="hero-gradient section-padding">
-        <div className="container mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-2">
-          <SectionHeading
-            eyebrow="Education Loans"
-            title="Secure funding for your international degree"
-            description="We partner with trusted lenders to help you compare rates, prepare documents, and track loan status end to end."
-          />
-          <LeadForm variant="loan" formPage="/education-loans" />
-        </div>
-      </section>
-
-      <section className="section-padding">
-        <div className="container mx-auto max-w-6xl px-4">
-          <h2 className="mb-6 text-2xl font-bold text-secondary">Partner lenders</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            {MARKETING_LENDERS.map((lender) => (
-              <div key={lender.slug} className="glass-card flex items-center justify-center rounded-2xl p-4">
-                <Image src={lender.logo} alt={lender.name} width={120} height={32} className="h-8 w-auto object-contain" />
-              </div>
-            ))}
+        <div className="container mx-auto grid max-w-6xl items-start gap-8 px-4 lg:grid-cols-2">
+          <div>
+            <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-primary">
+              Education Loans
+            </p>
+            <h1 className="heading-display text-secondary">Secure funding for your international degree</h1>
+            <p className="prose-marketing mt-5 text-lg text-muted-foreground">
+              We partner with trusted lenders to help you compare rates, prepare documents, and track loan status end to end.
+            </p>
           </div>
+          <LeadForm variant="loan" formPage="/education-loans" premium />
         </div>
       </section>
 
-      <section className="section-padding bg-muted/20">
-        <div className="container mx-auto max-w-4xl px-4">
-          <h2 className="mb-4 text-2xl font-bold text-secondary">Our loan process</h2>
-          <ol className="space-y-3">
-            {processSteps.map((step, index) => (
-              <li key={step} className="glass-card rounded-xl px-4 py-3 text-sm text-secondary/90">
-                {index + 1}. {step}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      <BankingPartnersSection />
+
+      <SectionShell variant="white" title="Our loan process" eyebrow="Process">
+        <ol className="mx-auto max-w-2xl space-y-3">
+          {processSteps.map((step, index) => (
+            <li key={step} className="card-premium flex items-center gap-4 px-5 py-4 text-sm text-secondary/90">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                {index + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </SectionShell>
 
       <FaqSection items={MARKETING_LOAN_FAQS} title="Education loan FAQs" />
       <CtaBanner title="Apply for education loan guidance" />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { SectionHeading } from "@/components/marketing/sections/section-heading";
+import { PageHero } from "@/components/marketing/sections/page-hero";
+import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { GalleryGrid } from "@/components/marketing/gallery/gallery-grid";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 
@@ -14,16 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function GalleryPage() {
   return (
-    <section className="section-padding">
-      <div className="container mx-auto max-w-6xl px-4">
-        <SectionHeading
-          eyebrow="Gallery"
-          title="Life at Lakshya International Edwise"
-          description="Workshops, counselling sessions, and celebrations with our student community."
-          className="mb-8"
-        />
+    <>
+      <PageHero
+        eyebrow="Gallery"
+        title="Life at our consultancy"
+        description="Workshops, counselling sessions, and celebrations with our student community."
+      />
+      <SectionShell variant="muted" padding>
         <GalleryGrid />
-      </div>
-    </section>
+      </SectionShell>
+    </>
   );
 }

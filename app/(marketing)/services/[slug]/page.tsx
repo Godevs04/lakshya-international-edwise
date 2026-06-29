@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SectionHeading } from "@/components/marketing/sections/section-heading";
+import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { LeadForm } from "@/components/marketing/forms/lead-form";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { getMarketingService, MARKETING_SERVICES } from "@/lib/constants/marketing/services";
+import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 
 export function generateStaticParams() {
@@ -38,23 +39,28 @@ export default async function ServiceDetailPage({
   return (
     <>
       <section className="hero-gradient section-padding">
-        <div className="container mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-2">
-          <SectionHeading title={service.title} description={service.description} />
-          <LeadForm variant="consultation" formPage={`/services/${slug}`} />
+        <div className="container mx-auto grid max-w-6xl items-start gap-8 px-4 lg:grid-cols-2">
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <MarketingIcon name={service.icon} className="h-6 w-6" />
+            </div>
+            <h1 className="heading-display text-secondary">{service.title}</h1>
+            <p className="prose-marketing mt-5 text-lg text-muted-foreground">{service.description}</p>
+          </div>
+          <LeadForm variant="consultation" formPage={`/services/${slug}`} premium />
         </div>
       </section>
-      <section className="section-padding">
-        <div className="container mx-auto max-w-4xl px-4">
-          <h2 className="text-2xl font-bold text-secondary">What we cover</h2>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            {service.highlights.map((item) => (
-              <li key={item} className="glass-card rounded-xl px-4 py-3 text-sm text-secondary/90">
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+
+      <SectionShell variant="white" title="What we cover" eyebrow="Highlights">
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {service.highlights.map((item) => (
+            <li key={item} className="card-premium px-4 py-3 text-sm text-secondary/90">
+              {item}
+            </li>
+          ))}
+        </ul>
+      </SectionShell>
+
       <CtaBanner />
     </>
   );

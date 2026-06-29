@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { SectionHeading } from "@/components/marketing/sections/section-heading";
+import { PageHero } from "@/components/marketing/sections/page-hero";
+import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
+import { MARKETING_AWARDS } from "@/lib/constants/marketing/awards";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
   return {
     title: `About Us | ${contact.companyName}`,
-    description: "Learn about Lakshya International Edwise mission, vision, and student-first approach.",
+    description: "Learn about our mission, vision, and student-first approach to study abroad counselling.",
     alternates: { canonical: `${getSiteUrl()}/about` },
   };
 }
@@ -20,48 +22,57 @@ const milestones = [
 ];
 
 export default function AboutPage() {
+  const contact = getMarketingContact();
+
   return (
     <>
-      <section className="hero-gradient section-padding">
-        <div className="container mx-auto max-w-4xl px-4">
-          <SectionHeading
-            eyebrow="About"
-            title="Guiding students with clarity, care, and global expertise"
-            description="Lakshya International Edwise is a premium study abroad consultancy helping students choose the right destination, secure funding, and navigate visas with confidence."
-          />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="About"
+        title="Guiding students with clarity, care, and global expertise"
+        description={`${contact.companyName} is a premium study abroad consultancy helping students choose the right destination, secure funding, and navigate visas with confidence.`}
+      />
 
-      <section className="section-padding">
-        <div className="container mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2">
-          <div className="glass-card rounded-2xl p-6">
+      <SectionShell variant="white" padding>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="card-premium p-6">
             <h2 className="text-xl font-semibold text-secondary">Our Mission</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            <p className="prose-marketing mt-3 text-sm text-muted-foreground">
               To make global education accessible through transparent counselling, ethical loan guidance, and end-to-end support.
             </p>
           </div>
-          <div className="glass-card rounded-2xl p-6">
+          <div className="card-premium p-6">
             <h2 className="text-xl font-semibold text-secondary">Our Vision</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              To be India most trusted partner for students pursuing international degrees and careers.
+            <p className="prose-marketing mt-3 text-sm text-muted-foreground">
+              To be India&apos;s most trusted partner for students pursuing international degrees and careers.
             </p>
           </div>
         </div>
-      </section>
+      </SectionShell>
 
-      <section className="section-padding bg-muted/20">
-        <div className="container mx-auto max-w-3xl px-4">
-          <h2 className="mb-6 text-2xl font-bold text-secondary">Our Journey</h2>
-          <div className="space-y-4">
-            {milestones.map((item) => (
-              <div key={item.year} className="glass-card rounded-2xl p-4">
-                <p className="text-sm font-semibold text-primary">{item.year}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{item.text}</p>
-              </div>
-            ))}
-          </div>
+      <SectionShell variant="muted" title="Our Journey" eyebrow="Timeline">
+        <div className="mx-auto max-w-3xl space-y-4">
+          {milestones.map((item) => (
+            <div key={item.year} className="card-premium p-5">
+              <p className="text-sm font-semibold text-primary">{item.year}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{item.text}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </SectionShell>
+
+      <SectionShell variant="tint" title="Awards & recognitions" eyebrow="Trust" align="center">
+        <div className="grid gap-4 md:grid-cols-3">
+          {MARKETING_AWARDS.map((award) => (
+            <div key={award.title} className="card-premium p-5 text-center">
+              <p className="text-sm font-semibold text-secondary">{award.title}</p>
+              {award.year && <p className="mt-1 text-xs text-primary">{award.year}</p>}
+              {award.description && (
+                <p className="mt-2 text-sm text-muted-foreground">{award.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </SectionShell>
 
       <CtaBanner />
     </>

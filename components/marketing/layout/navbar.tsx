@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Search, LogIn } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn } from "lucide-react";
 import { MARKETING_NAV } from "@/lib/constants/marketing/navigation";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
+import { MegaMenu } from "@/components/marketing/layout/mega-menu";
+import type { MegaMenuType } from "@/types/marketing";
 
 interface MarketingNavbarProps {
   companyName: string;
@@ -16,7 +18,8 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [openMega, setOpenMega] = useState<MegaMenuType | null>(null);
+  const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -25,14 +28,22 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const filteredNav = MARKETING_NAV.filter((item) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      item.label.toLowerCase().includes(q) ||
-      item.children?.some((child) => child.label.toLowerCase().includes(q))
-    );
-  });
+  const closeMega = useCallback(() => setOpenMega(null), []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenMega(null);
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  function isActive(href: string) {
+    return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  }
 
   return (
     <header
@@ -43,64 +54,65 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
           : "border-transparent bg-white/70 backdrop-blur-sm"
       )}
     >
-      <div className="container mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div className="container mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
         <Link href="/" className="flex shrink-0 items-center gap-2">
           <AppLogo alt={companyName} variant="mobile" />
-          <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-secondary sm:inline">
+          <span className="hidden max-w-[11rem] truncate text-sm font-semibold text-secondary sm:inline">
             {companyName}
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex">
-          {MARKETING_NAV.map((item) => (
-            <div key={item.href} className="group relative">
-              <Link
-                href={item.href}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    ? "bg-primary/10 text-primary"
-                    : "text-secondary/80 hover:bg-muted hover:text-secondary"
-                )}
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main navigation">
+          {MARKETING_NAV.map((item) => {
+            const hasMega = item.megaMenu && item.megaMenu !== "none";
+            return (
+              <div
+                key={item.href}
+                className="relative"
+                onMouseEnter={() => hasMega && setOpenMega(item.megaMenu!)}
+                onMouseLeave={() => hasMega && setOpenMega(null)}
               >
-                {item.label}
-                {item.children && <ChevronDown className="h-3.5 w-3.5 opacity-60" />}
-              </Link>
-              {item.children && (
-                <div className="invisible absolute left-0 top-full z-50 min-w-[220px] rounded-xl border border-border bg-white p-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      className="block rounded-lg px-3 py-2 text-sm text-secondary/80 hover:bg-muted hover:text-secondary"
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                <Link
+                  href={item.href}
+                  aria-expanded={hasMega ? openMega === item.megaMenu : undefined}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-3.5 py-2.5 text-sm font-medium transition-colors",
+                    isActive(item.href)
+                      ? "bg-primary/10 text-primary"
+                      : "text-secondary/80 hover:bg-muted hover:text-secondary"
+                  )}
+                >
+                  {item.label}
+                  {hasMega && (
+                    <ChevronDown
+                      className={cn(
+                        "h-3.5 w-3.5 opacity-60 transition-transform",
+                        openMega === item.megaMenu && "rotate-180"
+                      )}
+                    />
+                  )}
+                </Link>
+                {hasMega && item.megaMenu && item.megaMenu !== "none" && (
+                  <MegaMenu
+                    type={item.megaMenu}
+                    isOpen={openMega === item.megaMenu}
+                    onClose={closeMega}
+                  />
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search menu"
-              className="h-9 w-40 rounded-full border border-input bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring lg:w-48"
-            />
-          </div>
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-secondary/80 hover:bg-muted"
+            className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2.5 text-sm font-medium text-secondary/80 transition-colors hover:bg-muted"
           >
             <LogIn className="h-4 w-4" />
             Staff Login
           </Link>
-          <Link href="/contact" className="btn-marketing rounded-full px-4 py-2 text-sm font-semibold">
+          <Link href="/contact" className="btn-marketing rounded-full px-5 py-2.5 text-sm font-semibold">
             Book Consultation
           </Link>
         </div>
@@ -109,6 +121,7 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border lg:hidden"
           onClick={() => setMobileOpen((open) => !open)}
+          aria-expanded={mobileOpen}
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -117,30 +130,46 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
 
       {mobileOpen && (
         <div className="border-t border-border bg-white px-4 py-4 lg:hidden">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search menu"
-            className="mb-3 h-10 w-full rounded-full border border-input px-4 text-sm"
-          />
           <div className="space-y-1">
-            {filteredNav.map((item) => (
+            {MARKETING_NAV.map((item) => (
               <div key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-sm font-medium text-secondary hover:bg-muted"
-                >
-                  {item.label}
-                </Link>
-                {item.children && (
+                <div className="flex items-center">
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium text-secondary hover:bg-muted"
+                  >
+                    {item.label}
+                  </Link>
+                  {item.children && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedMobile((current) =>
+                          current === item.href ? null : item.href
+                        )
+                      }
+                      className="rounded-lg p-2 text-muted-foreground"
+                      aria-expanded={expandedMobile === item.href}
+                      aria-label={`Expand ${item.label} menu`}
+                    >
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          expandedMobile === item.href && "rotate-180"
+                        )}
+                      />
+                    </button>
+                  )}
+                </div>
+                {item.children && expandedMobile === item.href && (
                   <div className="ml-3 border-l border-border pl-3">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
-                        className="block rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-secondary"
+                        className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-secondary"
                       >
                         {child.label}
                       </Link>
@@ -151,10 +180,10 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
             ))}
           </div>
           <div className="mt-4 flex flex-col gap-2">
-            <Link href="/login" className="rounded-full border border-border px-4 py-2 text-center text-sm font-medium">
+            <Link href="/login" className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium">
               Staff Login
             </Link>
-            <Link href="/contact" className="btn-marketing rounded-full px-4 py-2 text-center text-sm font-semibold">
+            <Link href="/contact" className="btn-marketing rounded-full px-4 py-2.5 text-center text-sm font-semibold">
               Book Consultation
             </Link>
           </div>

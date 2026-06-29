@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" fill="none">
+  <rect width="800" height="450" fill="#F0FDF4"/>
+  <rect x="40" y="40" width="720" height="370" rx="16" fill="#DCFCE7"/>
+  <text x="400" y="235" text-anchor="middle" fill="#047857" font-family="system-ui,sans-serif" font-size="20">Blog Cover Image</text>
+</svg>

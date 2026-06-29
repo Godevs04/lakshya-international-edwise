@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500" fill="none">
+  <rect width="400" height="500" rx="24" fill="#F0FDFA"/>
+  <circle cx="200" cy="180" r="70" fill="#99F6E4"/>
+  <rect x="110" y="270" width="180" height="140" rx="20" fill="#5EEAD4"/>
+  <text x="200" y="460" text-anchor="middle" fill="#0F766E" font-family="system-ui,sans-serif" font-size="14">Student Photo</text>
+</svg>

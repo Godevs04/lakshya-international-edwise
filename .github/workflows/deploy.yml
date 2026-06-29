@@ -157,6 +157,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: deploy/Dockerfile
           push: true
           tags: |
             ${{ needs.resolve-platform.outputs.image }}:latest
@@ -202,8 +203,8 @@ jobs:
             cd "${DEPLOY_PATH:-/opt/lakshya-international-edwise}"
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             export IMAGE
-            docker compose -f docker-compose.prod.yml pull app || docker pull "$IMAGE"
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose -f deploy/docker-compose.prod.yml pull app || docker pull "$IMAGE"
+            docker compose -f deploy/docker-compose.prod.yml up -d --remove-orphans
             docker image prune -f
 
   deploy-fly:

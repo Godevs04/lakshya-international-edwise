@@ -1,45 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MARKETING_STATS } from "@/lib/constants/marketing/stats";
-import { fadeInUp } from "@/lib/motion/marketing";
-
-function AnimatedStat({ value, suffix }: { value: number; suffix: string }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let frame = 0;
-    const totalFrames = 30;
-    const timer = window.setInterval(() => {
-      frame += 1;
-      setCount(Math.round((value * frame) / totalFrames));
-      if (frame >= totalFrames) window.clearInterval(timer);
-    }, 20);
-    return () => window.clearInterval(timer);
-  }, [value]);
-
-  return (
-    <span>
-      {count.toLocaleString("en-IN")}
-      {suffix}
-    </span>
-  );
-}
+import { MarketingIcon } from "@/lib/constants/marketing/icons";
+import { AnimatedCounter } from "@/components/marketing/motion/counter";
+import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
+import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 
 export function StatsBar() {
+  const motionProps = useMarketingMotion();
+
   return (
-    <section className="border-y border-border bg-muted/40 py-10">
-      <div className="container mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 md:grid-cols-5">
-        {MARKETING_STATS.map((stat) => (
-          <motion.div key={stat.label} {...fadeInUp} className="text-center">
-            <p className="text-2xl font-bold text-primary md:text-3xl">
-              <AnimatedStat value={stat.value} suffix={stat.suffix} />
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground md:text-sm">{stat.label}</p>
-          </motion.div>
-        ))}
-      </div>
+    <section className="section-muted border-y border-border py-12 md:py-14">
+      <MarketingContainer>
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-5 md:gap-8">
+          {MARKETING_STATS.map((stat) => (
+              <motion.div
+                key={stat.label}
+                {...motionProps.fadeInUp}
+                className="text-center"
+              >
+                {stat.icon && (
+                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <MarketingIcon name={stat.icon} className="h-5 w-5" />
+                  </div>
+                )}
+                <p className="text-2xl font-bold text-primary md:text-3xl">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </p>
+                <p className="mt-1 text-sm font-medium text-secondary">{stat.label}</p>
+                {stat.description && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">{stat.description}</p>
+                )}
+              </motion.div>
+          ))}
+        </div>
+      </MarketingContainer>
     </section>
   );
 }

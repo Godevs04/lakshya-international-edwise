@@ -10,10 +10,10 @@ if [ ! -f .env.local ]; then
 fi
 
 echo "Building Docker image..."
-docker compose build app
+docker compose -f deploy/docker-compose.yml build app
 
 echo "Starting app + Redis..."
-docker compose up -d
+docker compose -f deploy/docker-compose.yml up -d
 
 echo "Waiting for health check..."
 for i in $(seq 1 30); do
@@ -24,5 +24,5 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-echo "Health check timed out. Run: docker compose logs -f app"
+echo "Health check timed out. Run: docker compose -f deploy/docker-compose.yml logs -f app"
 exit 1
