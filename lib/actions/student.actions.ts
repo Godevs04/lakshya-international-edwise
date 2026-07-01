@@ -25,6 +25,7 @@ import {
   studentLoanDetailsSchema,
 } from "@/lib/validations/schemas";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
+import { normalizeLastName } from "@/lib/utils/person-name";
 import {
   formatAadhaarForEdit,
   normalizeAadhaar,
@@ -670,7 +671,7 @@ export async function createLeadAction(
     const student = await Student.create({
       studentId,
       firstName: sanitizeText(data.firstName),
-      lastName: sanitizeText(data.lastName),
+      lastName: sanitizeText(normalizeLastName(data.lastName)),
       phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
       targetCountry: data.targetCountry?.trim() || undefined,
       targetIntake: data.targetIntake?.trim() || undefined,
