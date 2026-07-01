@@ -44,16 +44,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.lakshyainternationaledwise.com" }],
-        destination: "https://lakshyainternationaledwise.com/:path*",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [
       {
