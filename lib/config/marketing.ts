@@ -2,9 +2,12 @@ import { getPublicAuthUrl } from "@/lib/config/env";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
 import {
   isProductionRuntime,
+  normalizeSupportEmail,
   PRODUCTION_SITE_URL,
   PRODUCTION_SUPPORT_EMAIL,
 } from "@/lib/config/site";
+import { MARKETING_OFFICES } from "@/lib/constants/marketing/offices";
+import { parseGoogleMapsEmbedCenter, parseGoogleMapsEmbedUrl } from "@/lib/utils/google-maps-embed";
 
 function trim(value: string | undefined): string {
   return value?.trim() ?? "";
@@ -24,18 +27,25 @@ export function getSiteUrl(): string {
 
 export function getMarketingContact() {
   const company = getDefaultCompanySettings();
-  const defaultEmail =
+  const defaultEmail = normalizeSupportEmail(
     trim(process.env.NEXT_PUBLIC_CONTACT_EMAIL) ||
-    company.email ||
-    (isProductionRuntime() ? PRODUCTION_SUPPORT_EMAIL : "");
+      company.email ||
+      (isProductionRuntime() ? PRODUCTION_SUPPORT_EMAIL : "")
+  );
+  const office = MARKETING_OFFICES[0];
   return {
     siteUrl: getSiteUrl(),
-    phone: trim(process.env.NEXT_PUBLIC_CONTACT_PHONE) || company.phone,
+    phone: trim(process.env.NEXT_PUBLIC_CONTACT_PHONE) || company.phone || office?.phone,
     email: defaultEmail,
     whatsapp: trim(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER),
-    mapsEmbed: trim(process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL),
-    enquiryNotifyEmail:
-      trim(process.env.WEBSITE_ENQUIRY_NOTIFY_EMAIL) || defaultEmail,
+    mapsEmbed: parseGoogleMapsEmbedUrl(process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL),
+    mapCenter: parseGoogleMapsEmbedCenter(process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL),
+    address: trim(process.env.APP_COMPANY_ADDRESS) || office?.address,
+    officeName: office?.name ?? company.name,
+    officeHours: office?.hours,
+    enquiryNotifyEmail: normalizeSupportEmail(
+      trim(process.env.WEBSITE_ENQUIRY_NOTIFY_EMAIL) || defaultEmail
+    ),
     companyName: company.name,
     social: {
       facebook: trim(process.env.NEXT_PUBLIC_FACEBOOK_URL),

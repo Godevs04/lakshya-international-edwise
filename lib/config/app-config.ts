@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
 import { getDefaultSettings, resolveCompanySettings } from "@/lib/config/app-defaults";
+import { isLegacySupportEmail } from "@/lib/config/site";
 import { isNextBuildPhase } from "@/lib/config/build-phase";
 import { logger } from "@/lib/logger";
 import type { AppSettings } from "@/types";
@@ -30,8 +31,16 @@ async function loadAppConfigFromDatabase(): Promise<AppSettings> {
     const modules = settings.modules ?? envDefaults.modules;
     const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
 
+    const company = resolveCompanySettings(settings.company);
+    const storedEmail = settings.company?.email?.trim() ?? "";
+    if (storedEmail && isLegacySupportEmail(storedEmail) && company.email !== storedEmail) {
+      void Settings.updateOne({}, { $set: { "company.email": company.email } }).catch((error) => {
+        logger.error("Failed to migrate legacy company email in settings", error);
+      });
+    }
+
     return {
-      company: resolveCompanySettings(settings.company),
+      company,
       theme: {
         ...envDefaults.theme,
         ...settings.theme,

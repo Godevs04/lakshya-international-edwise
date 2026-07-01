@@ -1,9 +1,44 @@
 export const LENDER_SEEDS = [
-  { name: "Credila", slug: "credila", logo: "/lenders/credila.svg", accent: "#004B8D" },
-  { name: "Avanse", slug: "avanse", logo: "/lenders/avanse.svg", accent: "#00A651" },
-  { name: "Auxilo", slug: "auxilo", logo: "/lenders/auxilo.svg", accent: "#1E3A8A" },
-  { name: "InCred", slug: "incred", logo: "/lenders/incred.svg", accent: "#F26A21" },
-  { name: "Prodigy Finance", slug: "prodigy-finance", logo: "/lenders/prodigy-finance.svg", accent: "#5B2C86" },
+  {
+    name: "Credila",
+    slug: "credila",
+    logo: "/lenders/images/Credila.png",
+    logoWidth: 1800,
+    logoHeight: 600,
+    accent: "#004B8D",
+  },
+  {
+    name: "Avanse",
+    slug: "avanse",
+    logo: "/lenders/images/Avanse.png",
+    logoWidth: 600,
+    logoHeight: 400,
+    accent: "#00A651",
+  },
+  {
+    name: "Auxilo",
+    slug: "auxilo",
+    logo: "/lenders/images/Auxilo.png",
+    logoWidth: 640,
+    logoHeight: 227,
+    accent: "#1E3A8A",
+  },
+  {
+    name: "InCred",
+    slug: "incred",
+    logo: "/lenders/images/Incred.png",
+    logoWidth: 300,
+    logoHeight: 200,
+    accent: "#F26A21",
+  },
+  {
+    name: "Prodigy Finance",
+    slug: "prodigy-finance",
+    logo: "/lenders/images/Prodigy.png",
+    logoWidth: 300,
+    logoHeight: 200,
+    accent: "#5B2C86",
+  },
 ] as const;
 
 /** Legacy slug — HDFC Credila is the same as Credila */

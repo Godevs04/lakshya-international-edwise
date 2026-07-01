@@ -209,7 +209,7 @@ export const quickStudentSchema = z.object({
 
 export const leadSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  lastName: z.string().max(100).optional().or(z.literal("")),
   phone: z.string().optional(),
   targetIntake: z.string().max(100).optional(),
   targetCountry: z.string().max(100).optional(),
@@ -373,12 +373,28 @@ export const settingsSchema = z.object({
   sessionExpiryHours: z.coerce.number().min(1).max(720).optional(),
 });
 
+function optionalProfilePassword() {
+  return z
+    .string()
+    .nullish()
+    .transform((value): string | undefined => {
+      if (value == null || isBlank(value)) return undefined;
+      return value.trim();
+    });
+}
+
+function optionalProfileNewPassword() {
+  return optionalProfilePassword().pipe(
+    z.union([z.undefined(), z.string().min(8, "Password must be at least 8 characters")])
+  );
+}
+
 export const profileSchema = z.object({
-  name: z.string().min(2),
+  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email(),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().min(8).optional(),
-  confirmPassword: z.string().optional(),
+  currentPassword: optionalProfilePassword(),
+  newPassword: optionalProfileNewPassword(),
+  confirmPassword: optionalProfilePassword(),
 });
 
 export const websiteEnquirySchema = z

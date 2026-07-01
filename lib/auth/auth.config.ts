@@ -76,7 +76,7 @@ export const authConfig = {
 
       return `${canonicalBase}/login`;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id ?? "";
         token.role = user.role;
@@ -86,11 +86,18 @@ export const authConfig = {
         const maxAge = await getSessionMaxAgeSeconds(!!token.rememberMe);
         token.exp = Math.floor(Date.now() / 1000) + maxAge;
       }
+      if (trigger === "update" && session?.user) {
+        if (session.user.name) token.name = session.user.name;
+        if (session.user.email) token.email = session.user.email;
+        if (session.user.avatar !== undefined) token.avatar = session.user.avatar;
+      }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
         session.user.role = token.role as UserRole;
         session.user.permissions = token.permissions as string[];
         session.user.avatar = token.avatar as string | undefined;

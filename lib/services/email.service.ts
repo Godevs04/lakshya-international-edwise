@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { getDefaultCompanySettings } from "@/lib/config/app-defaults";
+import { normalizeSmtpFromAddress } from "@/lib/config/site";
 import { getPublicAuthUrl } from "@/lib/config/env";
 import { logger } from "@/lib/logger";
 import {
@@ -48,7 +49,12 @@ function createTransporter() {
 }
 
 function getFromAddress(): string {
-  return trim(process.env.SMTP_FROM) ?? trim(process.env.SMTP_USER) ?? getDefaultCompanySettings().email ?? "";
+  const from =
+    trim(process.env.SMTP_FROM) ??
+    trim(process.env.SMTP_USER) ??
+    getDefaultCompanySettings().email ??
+    "";
+  return normalizeSmtpFromAddress(from);
 }
 
 export async function sendEmail(params: SendEmailParams): Promise<boolean> {
