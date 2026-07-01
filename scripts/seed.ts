@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { getMongoUri } from "@/lib/config/env";
 import { getDefaultSettings, getSeedAdminName } from "@/lib/config/app-defaults";
+import { normalizeSupportEmail } from "@/lib/config/site";
 import { User } from "@/models/User";
 import { Role } from "@/models/Role";
 import { Settings } from "@/models/Settings";
@@ -43,6 +44,7 @@ async function seed() {
   }
 
   const defaults = getDefaultSettings();
+  defaults.company.email = normalizeSupportEmail(defaults.company.email);
   const settingsCount = await Settings.countDocuments();
   if (settingsCount === 0) {
     await Settings.create(defaults);

@@ -3,6 +3,7 @@ import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { LeadForm } from "@/components/marketing/forms/lead-form";
+import { OfficeLocationShowcase } from "@/components/marketing/maps/office-location-showcase";
 import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_OFFICE_HOURS } from "@/lib/constants/marketing/offices";
 import { getMarketingContact, getSiteUrl, getWhatsAppLink } from "@/lib/config/marketing";
@@ -78,17 +79,16 @@ export default function ContactPage() {
                 </a>
               )}
             </div>
-            {contact.mapsEmbed && (
-              <div className="card-premium overflow-hidden">
-                <iframe
-                  title="Office location"
-                  src={contact.mapsEmbed}
-                  className="h-64 w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-            )}
+            {contact.mapCenter ? (
+              <OfficeLocationShowcase
+                center={contact.mapCenter}
+                title={contact.officeName}
+                address={contact.address}
+                phone={contact.phone}
+                hours={contact.officeHours}
+                compact
+              />
+            ) : null}
           </div>
         </div>
       </SectionShell>

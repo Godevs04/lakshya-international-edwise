@@ -13,6 +13,7 @@ import {
   STUDENT_RECORD_TYPE,
 } from "@/lib/constants/student-record-type";
 import { toSafeRegExp, sanitizeText } from "@/lib/utils/sanitize";
+import { normalizeLastName, formatPersonName } from "@/lib/utils/person-name";
 import { normalizeIndianPhone } from "@/lib/validations/indian-fields";
 import { runLoggedQuery, runLoggedMutation, emptyPaginated } from "@/lib/action-utils";
 import { admissionRevenueSchema, leadSchema } from "@/lib/validations/schemas";
@@ -23,7 +24,6 @@ import {
 } from "@/lib/services/student-phone.service";
 import {
   buildAdmissionVisibilityFilter,
-  canAccessStudent,
 } from "@/lib/services/student-visibility.service";
 import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
 import type { ActionResult, AdmissionListItem, PaginatedResult } from "@/types";
@@ -137,12 +137,11 @@ export async function updateAdmissionRevenueAction(
     }
 
     await connectDB();
-    const existing = await Student.findOne({
-      _id: parsed.data.studentId,
-      ...admissionLeadsFilter(),
-    })
-      .select("_id")
-      .lean();
+    const mongoFilter = mergeMongoFilter(
+      { _id: parsed.data.studentId, ...admissionLeadsFilter() },
+      buildAdmissionVisibilityFilter(user)
+    );
+    const existing = await Student.findOne(mongoFilter).select("_id").lean();
     if (!existing) {
       return { success: false, error: "Admission record not found" };
     }
@@ -166,7 +165,7 @@ export async function updateAdmissionRevenueAction(
       metadata: {
         studentId: admission?.studentId,
         studentName: admission
-          ? `${admission.firstName} ${admission.lastName}`.trim()
+          ? formatPersonName(admission.firstName, admission.lastName)
           : undefined,
         admissionRevenue: parsed.data.admissionRevenue ?? 0,
       },
@@ -183,17 +182,20 @@ export async function getAdmissionById(id: string) {
     requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
 
     await connectDB();
-    const admission = await Student.findOne({ _id: id, ...admissionLeadsFilter() })
+    const mongoFilter = mergeMongoFilter(
+      { _id: id, ...admissionLeadsFilter() },
+      buildAdmissionVisibilityFilter(user)
+    );
+    const admission = await Student.findOne(mongoFilter)
       .populate("assignedTo", "name")
       .lean();
     if (!admission) return null;
-    if (!canAccessStudent(user, admission)) return null;
 
     return {
       _id: admission._id.toString(),
       studentId: admission.studentId,
       firstName: admission.firstName,
-      lastName: admission.lastName,
+      lastName: normalizeLastName(admission.lastName),
       phone: admission.phone,
       email: admission.email,
       targetCountry: admission.targetCountry,
@@ -222,11 +224,14 @@ export async function getAdmissionForEdit(id: string) {
     requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
 
     await connectDB();
-    const admission = await Student.findOne({ _id: id, ...admissionLeadsFilter() })
+    const mongoFilter = mergeMongoFilter(
+      { _id: id, ...admissionLeadsFilter() },
+      buildAdmissionVisibilityFilter(user)
+    );
+    const admission = await Student.findOne(mongoFilter)
       .populate("assignedTo", "name")
       .lean();
     if (!admission) return null;
-    if (!canAccessStudent(user, admission)) return null;
 
     const assignedToId =
       admission.assignedTo && typeof admission.assignedTo === "object" && "_id" in admission.assignedTo
@@ -239,7 +244,7 @@ export async function getAdmissionForEdit(id: string) {
       _id: admission._id.toString(),
       studentId: admission.studentId,
       firstName: admission.firstName,
-      lastName: admission.lastName,
+      lastName: normalizeLastName(admission.lastName),
       phone: admission.phone,
       targetCountry: admission.targetCountry ?? "",
       targetIntake: admission.targetIntake ?? "",
@@ -268,11 +273,12 @@ export async function updateAdmissionAction(
     }
 
     await connectDB();
-    const existing = await Student.findOne({ _id: id, ...admissionLeadsFilter() });
+    const mongoFilter = mergeMongoFilter(
+      { _id: id, ...admissionLeadsFilter() },
+      buildAdmissionVisibilityFilter(user)
+    );
+    const existing = await Student.findOne(mongoFilter);
     if (!existing) {
-      return { success: false, error: "Admission record not found" };
-    }
-    if (!canAccessStudent(user, existing)) {
       return { success: false, error: "Admission record not found" };
     }
 
@@ -295,7 +301,7 @@ export async function updateAdmissionAction(
     } = {
       $set: {
         firstName: sanitizeText(parsed.data.firstName),
-        lastName: sanitizeText(parsed.data.lastName),
+        lastName: normalizeLastName(sanitizeText(parsed.data.lastName ?? "")),
         phone: parsed.data.phone?.trim()
           ? normalizeIndianPhone(parsed.data.phone)
           : undefined,
@@ -317,7 +323,7 @@ export async function updateAdmissionAction(
 
     await logActivity({
       action: "admission.updated",
-      description: `Admission lead ${existing.studentId} (${parsed.data.firstName} ${parsed.data.lastName}) was updated`,
+      description: `Admission lead ${existing.studentId} (${formatPersonName(parsed.data.firstName, parsed.data.lastName)}) was updated`,
       resourceType: "admission",
       resourceId: id,
       userId: user?.id,

@@ -12,21 +12,11 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { websiteEnquirySchema } from "@/lib/validations/schemas";
 import { normalizeIndianPhone } from "@/lib/validations/indian-fields";
 import { findStudentWithPhone } from "@/lib/services/student-phone.service";
+import { splitFullName } from "@/lib/utils/person-name";
 import { sanitizeText } from "@/lib/utils/sanitize";
 import { revalidateInsightCaches } from "@/lib/cache/revalidate";
 import { logger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
-
-function splitFullName(name: string): { firstName: string; lastName: string } {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) {
-    return { firstName: "Website", lastName: "Lead" };
-  }
-  if (parts.length === 1) {
-    return { firstName: parts[0]!, lastName: "." };
-  }
-  return { firstName: parts[0]!, lastName: parts.slice(1).join(" ") };
-}
 
 export async function submitWebsiteEnquiryAction(
   formData: FormData

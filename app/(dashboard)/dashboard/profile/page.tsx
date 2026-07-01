@@ -16,7 +16,7 @@ import { ROLE_LABELS } from "@/lib/constants/permissions";
 import type { UserRole } from "@/types";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +26,9 @@ export default function ProfilePage() {
     const formData = new FormData(e.currentTarget);
     const result = await updateProfileAction(formData);
     if (result.success) {
+      const name = String(formData.get("name") ?? "");
+      const email = String(formData.get("email") ?? "");
+      await updateSession({ user: { name, email } });
       notify.success("Profile updated");
       router.refresh();
     } else {

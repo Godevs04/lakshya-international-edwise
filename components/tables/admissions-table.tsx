@@ -31,6 +31,7 @@ import { formatCurrency } from "@/lib/utils/format";
 import type { AdmissionListItem } from "@/types";
 import { Search, X, Pencil } from "lucide-react";
 import { getAdmissionDetailHref } from "@/lib/constants/admission-edit-sections";
+import { formatPersonName } from "@/lib/utils/person-name";
 
 interface AssigneeOption {
   _id: string;
@@ -300,7 +301,7 @@ export function AdmissionsTable({
                         href={getAdmissionDetailHref(row._id)}
                         className="font-semibold text-primary hover:underline"
                       >
-                        {row.firstName} {row.lastName}
+                        {formatPersonName(row.firstName, row.lastName)}
                       </Link>
                       <p className="text-xs text-muted-foreground">{row.studentId}</p>
                     </div>

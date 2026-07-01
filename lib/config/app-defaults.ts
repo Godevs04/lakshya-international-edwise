@@ -2,6 +2,7 @@ import type { AppModules, AppTheme, CompanySettings } from "@/types";
 import { DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
 import {
   isProductionRuntime,
+  normalizeSupportEmail,
   PRODUCTION_COMPANY_NAME,
   PRODUCTION_SUPPORT_EMAIL,
 } from "@/lib/config/site";
@@ -12,7 +13,7 @@ function parseSmtpFrom(from: string | undefined): { name?: string; email?: strin
   if (match) {
     return { name: match[1]?.trim().replace(/^"|"$/g, ""), email: match[2]?.trim() };
   }
-  return { email: from.trim() };
+  return { email: normalizeSupportEmail(from.trim()) };
 }
 
 export function getDefaultCompanySettings(): CompanySettings {
@@ -21,11 +22,12 @@ export function getDefaultCompanySettings(): CompanySettings {
   return {
     name: process.env.APP_COMPANY_NAME ?? fromSmtp.name ?? PRODUCTION_COMPANY_NAME,
     logo: process.env.APP_COMPANY_LOGO ?? DEFAULT_APP_LOGO,
-    email:
+    email: normalizeSupportEmail(
       process.env.APP_COMPANY_EMAIL ??
-      fromSmtp.email ??
-      process.env.SMTP_USER ??
-      productionEmailFallback,
+        fromSmtp.email ??
+        process.env.SMTP_USER ??
+        productionEmailFallback
+    ),
     phone: process.env.APP_COMPANY_PHONE ?? "",
     address: process.env.APP_COMPANY_ADDRESS ?? "",
   };
@@ -39,7 +41,9 @@ export function resolveCompanySettings(stored?: Partial<CompanySettings>): Compa
   return {
     name: process.env.APP_COMPANY_NAME?.trim() || merged.name?.trim() || defaults.name,
     logo: process.env.APP_COMPANY_LOGO?.trim() || merged.logo?.trim() || defaults.logo,
-    email: process.env.APP_COMPANY_EMAIL?.trim() || merged.email?.trim() || defaults.email,
+    email: normalizeSupportEmail(
+      process.env.APP_COMPANY_EMAIL?.trim() || merged.email?.trim() || defaults.email
+    ),
     phone: process.env.APP_COMPANY_PHONE?.trim() || merged.phone?.trim() || defaults.phone,
     address: process.env.APP_COMPANY_ADDRESS?.trim() || merged.address?.trim() || defaults.address,
   };

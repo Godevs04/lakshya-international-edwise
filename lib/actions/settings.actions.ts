@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
 import { getDefaultSettings, resolveCompanySettings } from "@/lib/config/app-defaults";
 import { APP_CONFIG_CACHE_TAG } from "@/lib/config/app-config";
+import { normalizeSupportEmail } from "@/lib/config/site";
 import { User } from "@/models/User";
 import { Role } from "@/models/Role";
 import { getSessionUser } from "@/lib/auth/auth";
@@ -147,7 +148,7 @@ export async function updateSettingsAction(
         $set: {
           company: {
             name: data.companyName,
-            email: data.companyEmail ?? "",
+            email: normalizeSupportEmail(data.companyEmail ?? ""),
             phone: data.companyPhone ?? "",
             address: data.companyAddress ?? "",
             logo: data.companyLogo ?? "",

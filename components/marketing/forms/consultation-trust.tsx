@@ -5,13 +5,13 @@ export function ConsultationTrust() {
   return (
     <div className="mt-4 space-y-3 border-t border-border/60 pt-4">
       <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1">
-          <Shield className="h-3.5 w-3.5 text-primary" />
+        <span className="inline-flex items-center gap-1.5">
+          <Shield className="h-3.5 w-3.5 text-emerald-600" />
           No spam
         </span>
         <span className="text-border">|</span>
-        <span className="inline-flex items-center gap-1">
-          <Clock className="h-3.5 w-3.5 text-primary" />
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 text-emerald-600" />
           Response within {MARKETING_TRUST.responseTimeMinutes} minutes
         </span>
       </div>

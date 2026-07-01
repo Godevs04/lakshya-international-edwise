@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitWebsiteEnquiryAction } from "@/lib/actions/enquiry.actions";
 import type { LeadFormVariant } from "@/types/marketing";
-import { CheckCircle2, Loader2, User, Phone, Mail, Globe, BookOpen, Shield } from "lucide-react";
+import { CheckCircle2, Loader2, User, Phone, Mail, Globe, BookOpen, Shield, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConsultationTrust } from "@/components/marketing/forms/consultation-trust";
 
@@ -39,8 +40,16 @@ interface LeadFormProps {
 const CONSULTATION_STEPS = ["Consult", "Plan", "Apply"] as const;
 
 function FieldIcon({ icon: Icon }: { icon: typeof User }) {
-  return <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />;
+  return <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />;
 }
+
+const fieldClass =
+  "lead-form-field h-11 rounded-xl border-border/80 bg-white text-secondary shadow-sm transition-colors placeholder:text-muted-foreground caret-primary focus-visible:border-primary/40 focus-visible:ring-primary/15";
+
+const fieldClassWithIcon = `${fieldClass} pl-10`;
+
+const textareaClass =
+  "lead-form-textarea w-full rounded-xl border border-border/80 bg-white px-4 py-3 text-sm text-secondary shadow-sm outline-none transition-colors placeholder:text-muted-foreground caret-primary focus-visible:border-primary/40 focus-visible:ring-3 focus-visible:ring-primary/15";
 
 export function LeadForm({
   variant = "consultation",
@@ -122,12 +131,14 @@ export function LeadForm({
       className={cn(shellClass, "rounded-2xl p-5 md:p-6", className)}
     >
       {premium && (
-        <div className="mb-5">
-          <div className="mb-3 flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
+        <div className="mb-5 border-b border-border/60 pb-5">
+          <div className="mb-4 flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <Shield className="h-4 w-4 text-primary" />
+            </div>
             <h3 className="text-lg font-semibold text-secondary">Book your FREE Consultation</h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {CONSULTATION_STEPS.map((step, index) => (
               <div key={step} className="flex items-center gap-2">
                 <span
@@ -152,14 +163,16 @@ export function LeadForm({
 
       <div className={cn("grid gap-4", compact ? "grid-cols-1" : "md:grid-cols-2")}>
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="lead-name">Full name</Label>
+          <Label htmlFor="lead-name" className="text-secondary">
+            Full name
+          </Label>
           <div className="relative">
             {premium && <FieldIcon icon={User} />}
             <Input
               id="lead-name"
               {...form.register("name")}
               placeholder="Your name"
-              className={premium ? "pl-10" : undefined}
+              className={premium ? fieldClassWithIcon : fieldClass}
             />
           </div>
           {form.formState.errors.name && (
@@ -167,14 +180,16 @@ export function LeadForm({
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lead-phone">Phone</Label>
+          <Label htmlFor="lead-phone" className="text-secondary">
+            Phone
+          </Label>
           <div className="relative">
             {premium && <FieldIcon icon={Phone} />}
             <Input
               id="lead-phone"
               {...form.register("phone")}
               placeholder="10-digit mobile"
-              className={premium ? "pl-10" : undefined}
+              className={premium ? fieldClassWithIcon : fieldClass}
             />
           </div>
           {form.formState.errors.phone && (
@@ -182,7 +197,9 @@ export function LeadForm({
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lead-email">Email (optional)</Label>
+          <Label htmlFor="lead-email" className="text-secondary">
+            Email <span className="font-normal text-muted-foreground">(optional)</span>
+          </Label>
           <div className="relative">
             {premium && <FieldIcon icon={Mail} />}
             <Input
@@ -190,52 +207,103 @@ export function LeadForm({
               type="email"
               {...form.register("email")}
               placeholder="you@email.com"
-              className={premium ? "pl-10" : undefined}
+              className={premium ? fieldClassWithIcon : fieldClass}
             />
           </div>
         </div>
         {showCountry && (
           <div className="space-y-2">
-            <Label htmlFor="lead-country">Target country</Label>
+            <Label htmlFor="lead-country" className="text-secondary">
+              Target country
+            </Label>
             <div className="relative">
               {premium && <FieldIcon icon={Globe} />}
               <Input
                 id="lead-country"
                 {...form.register("targetCountry")}
                 placeholder="e.g. Canada"
-                className={premium ? "pl-10" : undefined}
+                className={premium ? fieldClassWithIcon : fieldClass}
               />
             </div>
           </div>
         )}
         {showCourse && (
           <div className="space-y-2">
-            <Label htmlFor="lead-course">Course (optional)</Label>
+            <Label htmlFor="lead-course" className="text-secondary">
+              Course <span className="font-normal text-muted-foreground">(optional)</span>
+            </Label>
             <div className="relative">
               {premium && <FieldIcon icon={BookOpen} />}
               <Input
                 id="lead-course"
                 {...form.register("course")}
                 placeholder="e.g. MBA"
-                className={premium ? "pl-10" : undefined}
+                className={premium ? fieldClassWithIcon : fieldClass}
               />
             </div>
           </div>
         )}
         {showLoan && (
-          <label className="flex items-center gap-2 text-sm text-muted-foreground md:col-span-2">
-            <input type="checkbox" {...form.register("loanRequired")} className="rounded border-border" />
-            I need education loan assistance
-          </label>
+          <Controller
+            name="loanRequired"
+            control={form.control}
+            render={({ field }) => {
+              const checked = Boolean(field.value);
+              return (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => field.onChange(!checked)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      field.onChange(!checked);
+                    }
+                  }}
+                  className={cn(
+                    "md:col-span-2 flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition-all",
+                    checked
+                      ? "border-primary/35 bg-primary/[0.06] shadow-sm"
+                      : "border-border/80 bg-white/80 hover:border-primary/20 hover:bg-primary/[0.03]"
+                  )}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(value) => field.onChange(value === true)}
+                    onClick={(event) => event.stopPropagation()}
+                    className={cn(
+                      "mt-0.5 size-5 rounded-md border-2 bg-white shadow-sm",
+                      checked
+                        ? "border-primary bg-primary text-white"
+                        : "border-primary/60 hover:border-primary"
+                    )}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2 text-sm font-medium text-secondary">
+                      <Banknote className="h-4 w-4 text-primary" />
+                      I need education loan assistance
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                      {checked
+                        ? "We will flag this enquiry for loan support and compare lender options with you."
+                        : "Leave unchecked if you only need admissions or visa counselling for now."}
+                    </span>
+                  </span>
+                </div>
+              );
+            }}
+          />
         )}
         {showMessage && (
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="lead-message">Message (optional)</Label>
+            <Label htmlFor="lead-message" className="text-secondary">
+              Message <span className="font-normal text-muted-foreground">(optional)</span>
+            </Label>
             <textarea
               id="lead-message"
               {...form.register("message")}
               rows={3}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={textareaClass}
               placeholder="Tell us about your study plans"
             />
           </div>

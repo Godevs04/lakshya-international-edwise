@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
+import { formatPersonName } from "@/lib/utils/person-name";
 import {
   getAdmissionEditHref,
   type AdmissionEditSectionKey,
@@ -85,13 +86,13 @@ export function AdmissionDetailView({
   canWrite = false,
   canViewRevenue = false,
 }: AdmissionDetailViewProps) {
+  const displayName = formatPersonName(admission.firstName, admission.lastName);
+
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <GlassCard className="p-5">
-          <h2 className="text-lg font-semibold">
-            {admission.firstName} {admission.lastName}
-          </h2>
+          <h2 className="text-lg font-semibold">{displayName}</h2>
           <p className="text-sm text-muted-foreground">{admission.studentId}</p>
           <p className="mt-3 text-sm">
             <span className="text-muted-foreground">Created:</span>{" "}
@@ -121,9 +122,7 @@ export function AdmissionDetailView({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-xs text-muted-foreground">Name</p>
-              <p className="text-sm font-medium">
-                {admission.firstName} {admission.lastName}
-              </p>
+              <p className="text-sm font-medium">{displayName}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Number</p>
