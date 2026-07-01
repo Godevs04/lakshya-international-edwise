@@ -401,11 +401,11 @@ export function SettingsView({
               </Select>
             </div>
 
-            <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm">
+            <div className="rounded-2xl border border-border bg-muted/30 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-bold text-slate-900">Menu permissions</p>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-sm font-bold text-foreground">Menu permissions</p>
+                  <p className="text-xs text-muted-foreground">
                     Tap any menu to set None, Read, or Write before the first login.
                   </p>
                 </div>
@@ -415,7 +415,7 @@ export function SettingsView({
                   size="sm"
                   disabled={!canWriteUsers}
                   onClick={() => setShowCreatePermissions((open) => !open)}
-                  className="border-[#E8952E]/40 bg-white font-semibold text-[#B45309] hover:bg-[#FFF7ED]"
+                  className="border-primary/40 font-semibold text-primary hover:bg-primary/10"
                 >
                   {showCreatePermissions ? "Hide matrix" : "Configure access"}
                 </Button>

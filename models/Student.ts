@@ -211,6 +211,9 @@ export interface IStudent extends Document {
     createdByName?: string;
     updatedBy?: Types.ObjectId;
     ip?: string;
+    leadSource?: string;
+    enquiryType?: string;
+    formPage?: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -329,6 +332,9 @@ const StudentSchema = new Schema<IStudent>(
       createdByName: { type: String },
       updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
       ip: { type: String },
+      leadSource: { type: String, trim: true },
+      enquiryType: { type: String, trim: true },
+      formPage: { type: String, trim: true },
     },
   },
   { timestamps: true }

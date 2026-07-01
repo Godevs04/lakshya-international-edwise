@@ -101,7 +101,7 @@ describe("student-import-parse", () => {
   });
 
   it("keeps compatibility with the checked-in sample CSV when present", () => {
-    const filePath = path.join(process.cwd(), "Banners/test/student-import-template.csv");
+    const filePath = path.join(process.cwd(), "assets/banners/test/student-import-template.csv");
     if (!fs.existsSync(filePath)) return;
 
     const fileBuffer = fs.readFileSync(filePath);

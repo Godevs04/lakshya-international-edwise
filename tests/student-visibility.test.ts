@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildAdmissionVisibilityFilter,
   buildStudentVisibilityFilter,
   canAccessStudent,
   canBypassStudentVisibility,
@@ -67,6 +68,25 @@ describe("student-visibility", () => {
       $or: [
         { "metadata.createdBy": expect.anything() },
         { assignedTo: expect.anything() },
+      ],
+    });
+  });
+
+  it("lets admissions users access website inbound leads", () => {
+    const staff = user("staff", STAFF_B_ID);
+    const websiteLead = { metadata: { leadSource: "website", createdByName: "Website" } };
+
+    expect(canAccessStudent(staff, websiteLead)).toBe(true);
+  });
+
+  it("includes website leads in admission visibility filter", () => {
+    const filter = buildAdmissionVisibilityFilter(user("staff", STAFF_B_ID));
+
+    expect(filter).toEqual({
+      $or: [
+        { "metadata.createdBy": expect.anything() },
+        { assignedTo: expect.anything() },
+        { "metadata.leadSource": "website" },
       ],
     });
   });

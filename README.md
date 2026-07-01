@@ -20,7 +20,9 @@ Production-grade, white-label-ready education/loan consultancy CRM built with Ne
 cp .env.example .env.local
 ```
 
-2. Fill in your MongoDB Atlas URI, Auth secret, Cloudinary, and SMTP credentials in `.env.local`.
+2. Fill in your MongoDB Atlas URI, Auth secret, Cloudinary, and SMTP credentials in `.env.local`. For local dev, override `AUTH_URL` and `NEXT_PUBLIC_SITE_URL` with `http://localhost:4000`.
+
+**Production domain:** `https://lakshyainternationaledwise.com` — see [`.env.example`](.env.example) and [`deploy/README.md`](deploy/README.md) for required production env vars and support email (`support@lakshyainternationaledwise.com`).
 
 3. Install dependencies and seed the database:
 
@@ -83,11 +85,11 @@ The app ships with **Docker** and supports multiple hosting platforms (not only 
 
 | Platform | How to deploy |
 |----------|----------------|
-| **Docker / VPS** | `docker compose up -d` or `bash scripts/docker-run.sh` |
+| **Docker / VPS** | `docker compose -f deploy/docker-compose.yml up -d` or `bash scripts/docker-run.sh` |
 | **GitHub Container Registry** | **Actions → Deploy Application → Run workflow** → platform `docker` |
-| **Fly.io** | `fly launch`, then run Deploy Application with platform `fly` + `FLY_API_TOKEN` secret |
-| **Render** | Connect repo and use `render.yaml` blueprint |
-| **Railway** | Connect repo — uses `Dockerfile` automatically |
+| **Fly.io** | `fly deploy` (root `fly.toml` → `deploy/Dockerfile`) |
+| **Render** | Connect repo and use `deploy/render.yaml` blueprint |
+| **Railway** | Connect repo — set Dockerfile to `deploy/Dockerfile`, build context = repo root |
 | **VPS (SSH)** | Run Deploy Application with platform `vps` + SSH/GHCR secrets (see below) |
 | **Vercel** | Run Deploy Application with platform `vercel` + Vercel secrets |
 
@@ -96,7 +98,7 @@ The app ships with **Docker** and supports multiple hosting platforms (not only 
 ```bash
 cp .env.example .env.local
 # fill in secrets, then:
-docker compose up -d --build
+docker compose -f deploy/docker-compose.yml up -d --build
 # or
 bash scripts/docker-run.sh
 ```

@@ -11,7 +11,7 @@ describe("email-templates", () => {
   const originalAuthUrl = process.env.AUTH_URL;
 
   beforeEach(() => {
-    process.env.AUTH_URL = "https://lie.teamgodevs.in";
+    process.env.AUTH_URL = "https://lakshyainternationaledwise.com";
   });
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe("email-templates", () => {
       title: "Email Verification",
       bodyHtml: "<p>Hello</p>",
     });
-    expect(html).toContain('src="https://lie.teamgodevs.in/logo_model.jpeg"');
+    expect(html).toContain('src="https://lakshyainternationaledwise.com/logo_model.jpeg"');
   });
 
   it("falls back to public/logo_model.jpeg when company logo is empty", () => {
@@ -70,7 +70,7 @@ describe("email-templates", () => {
       title: "Email Verification",
       bodyHtml: "<p>Hello</p>",
     });
-    expect(html).toContain('src="https://lie.teamgodevs.in/logo_model.jpeg"');
+    expect(html).toContain('src="https://lakshyainternationaledwise.com/logo_model.jpeg"');
   });
 
   it("includes OTP block with digit cells", () => {
@@ -95,7 +95,7 @@ describe("email-templates", () => {
       bodyHtml: "<p>Hello</p>",
     });
     expect(html).toContain('src="https://example.com/banner.jpg"');
-    expect(html).not.toContain('src="https://lie.teamgodevs.in/logo_model.jpeg"');
+    expect(html).not.toContain('src="https://lakshyainternationaledwise.com/logo_model.jpeg"');
     expect(html.match(/banner\.jpg/g)?.length).toBe(1);
     expect(getEmailLogoUrl({
       name: "Lakshya International Edwise",
@@ -111,7 +111,7 @@ describe("email-templates", () => {
     expect(getEmailLogoUrl({
       name: "Lakshya International Edwise",
       logo: "/logo_model.jpeg",
-    })).toBe("https://lie.teamgodevs.in/logo_model.jpeg");
+    })).toBe("https://lakshyainternationaledwise.com/logo_model.jpeg");
     if (original !== undefined) process.env.APP_EMAIL_BANNER_URL = original;
   });
 });
@@ -125,9 +125,9 @@ describe("resolveEmailAssetUrl", () => {
   });
 
   it("prefixes relative paths with the app URL", () => {
-    process.env.AUTH_URL = "https://lie.teamgodevs.in";
+    process.env.AUTH_URL = "https://lakshyainternationaledwise.com";
     expect(resolveEmailAssetUrl("/logo_model.jpeg")).toBe(
-      "https://lie.teamgodevs.in/logo_model.jpeg"
+      "https://lakshyainternationaledwise.com/logo_model.jpeg"
     );
   });
 

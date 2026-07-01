@@ -6,7 +6,12 @@ import {
   getAdmissionEditHref,
   type AdmissionEditSectionKey,
 } from "@/lib/constants/admission-edit-sections";
-import { GraduationCap, Pencil, UserRound, Wallet } from "lucide-react";
+import { GraduationCap, Globe, Pencil, UserRound, Wallet } from "lucide-react";
+
+function formatEnquiryType(value?: string) {
+  if (!value) return "-";
+  return value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 interface AdmissionDetailViewProps {
   admission: {
@@ -15,10 +20,18 @@ interface AdmissionDetailViewProps {
     firstName: string;
     lastName: string;
     phone?: string;
+    email?: string;
     targetCountry?: string;
     targetIntake?: string;
     targetUniversity?: string;
+    course?: string;
     admissionRevenue?: number;
+    leadSource?: string;
+    enquiryType?: string;
+    formPage?: string;
+    createdByName?: string;
+    initialNote?: string;
+    loanRequired?: boolean;
     assignedTo?: { _id: string; name: string } | null;
     createdAt: Date;
   };
@@ -116,8 +129,60 @@ export function AdmissionDetailView({
               <p className="text-xs text-muted-foreground">Number</p>
               <p className="text-sm">{admission.phone?.trim() ? admission.phone : "-"}</p>
             </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="text-sm">{admission.email?.trim() ? admission.email : "-"}</p>
+            </div>
           </div>
         </div>
+
+        {admission.leadSource === "website" ? (
+          <div>
+            <SectionHeader
+              title="Lead source"
+              icon={Globe}
+              admissionId={admission._id}
+              section="profile"
+              canWrite={false}
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Source</p>
+                <p className="text-sm font-medium capitalize">
+                  {admission.leadSource ?? "website"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Enquiry type</p>
+                <p className="text-sm">{formatEnquiryType(admission.enquiryType)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Submitted from</p>
+                <p className="text-sm">{admission.formPage?.trim() ? admission.formPage : "-"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Captured by</p>
+                <p className="text-sm">{admission.createdByName?.trim() ? admission.createdByName : "Website"}</p>
+              </div>
+              {admission.course ? (
+                <div>
+                  <p className="text-xs text-muted-foreground">Course interest</p>
+                  <p className="text-sm">{admission.course}</p>
+                </div>
+              ) : null}
+              <div>
+                <p className="text-xs text-muted-foreground">Loan required</p>
+                <p className="text-sm">{admission.loanRequired ? "Yes" : "No"}</p>
+              </div>
+              {admission.initialNote ? (
+                <div className="sm:col-span-2">
+                  <p className="text-xs text-muted-foreground">Message</p>
+                  <p className="whitespace-pre-wrap text-sm">{admission.initialNote}</p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
         <div>
           <SectionHeader

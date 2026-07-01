@@ -59,19 +59,19 @@ const ACCESS_OPTIONS: Array<{ value: MenuAccessLevel; label: string }> = [
 
 const ACCESS_STYLES: Record<MenuAccessLevel, { active: string; idle: string; meta: string }> = {
   none: {
-    active: "bg-slate-700 text-white shadow-md shadow-slate-900/15 ring-2 ring-slate-700/20",
-    idle: "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:text-slate-900",
-    meta: "text-slate-700",
+    active: "bg-slate-600 text-white shadow-md ring-2 ring-slate-500/30 dark:bg-slate-500",
+    idle: "bg-card text-muted-foreground ring-1 ring-border hover:bg-muted hover:text-foreground",
+    meta: "text-muted-foreground",
   },
   read: {
     active: "bg-[#2563EB] text-white shadow-md shadow-blue-900/20 ring-2 ring-blue-500/30",
-    idle: "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-blue-50 hover:text-blue-700",
-    meta: "text-[#1D4ED8]",
+    idle: "bg-card text-muted-foreground ring-1 ring-border hover:bg-blue-500/10 hover:text-blue-400",
+    meta: "text-blue-500 dark:text-blue-400",
   },
   write: {
     active: "bg-[#16A34A] text-white shadow-md shadow-green-900/20 ring-2 ring-green-500/30",
-    idle: "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-green-50 hover:text-green-700",
-    meta: "text-[#15803D]",
+    idle: "bg-card text-muted-foreground ring-1 ring-border hover:bg-green-500/10 hover:text-green-400",
+    meta: "text-green-600 dark:text-green-400",
   },
 };
 
@@ -132,12 +132,12 @@ export function UserMenuPermissions({
 
   if (isSuperAdmin) {
     return (
-      <div className="rounded-2xl border-2 border-[#E8952E]/30 bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5] p-5 shadow-sm">
+      <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-[#EA580C]" />
-          <p className="text-sm font-bold text-[#9A3412]">Super Admin</p>
+          <Sparkles className="h-5 w-5 text-primary" />
+          <p className="text-sm font-bold text-foreground">Super Admin</p>
         </div>
-        <p className="mt-2 text-sm text-[#9A3412]/80">
+        <p className="mt-2 text-sm text-muted-foreground">
           Full access to every menu and action. Menu permissions cannot be restricted.
         </p>
       </div>
@@ -146,11 +146,11 @@ export function UserMenuPermissions({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border-2 border-[#E8952E]/20 bg-gradient-to-r from-[#FFF7ED] via-white to-[#EFF6FF] p-4 shadow-sm">
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-muted/40 p-4">
         <div className="space-y-3">
           <div>
             <p className="text-sm font-bold text-foreground">Menu access control</p>
-            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               {usingRoleTemplate
                 ? `Starting from the ${ROLE_LABELS[role]} template. Tap any menu to customize.`
                 : "Custom access active. You can still reset back to the role template anytime."}
@@ -161,8 +161,8 @@ export function UserMenuPermissions({
               className={cn(
                 "inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide",
                 usingRoleTemplate
-                  ? "bg-slate-200 text-slate-700"
-                  : "bg-[#E8952E] text-white"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary text-primary-foreground"
               )}
             >
               {usingRoleTemplate ? "Role template" : "Custom"}
@@ -174,7 +174,7 @@ export function UserMenuPermissions({
                 size="sm"
                 disabled={disabled}
                 onClick={resetToRoleDefaults}
-                className="h-8 border-slate-300 bg-white px-3 text-slate-700 hover:bg-slate-50"
+                className="h-8"
               >
                 <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
                 Reset to role
@@ -255,10 +255,10 @@ function ModulePermissionCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-2xl border-2 bg-white p-4 shadow-sm",
+        "flex flex-col rounded-2xl border bg-card p-4 shadow-sm",
         differsFromRole && !usingRoleTemplate
-          ? "border-[#E8952E]/40 ring-1 ring-[#E8952E]/10"
-          : "border-slate-200"
+          ? "border-primary/40 ring-1 ring-primary/10"
+          : "border-border"
       )}
     >
       <div className="flex gap-3">
@@ -272,26 +272,26 @@ function ModulePermissionCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-bold leading-snug text-slate-900">{label}</p>
+            <p className="text-sm font-bold leading-snug text-foreground">{label}</p>
             <div className="flex shrink-0 flex-col items-end gap-1">
               {differsFromRole ? (
-                <span className="whitespace-nowrap rounded-full bg-[#E8952E]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#B45309]">
+                <span className="whitespace-nowrap rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                   Changed
                 </span>
               ) : null}
               {readOnlyModule ? (
-                <span className="whitespace-nowrap rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">
+                <span className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   Read only
                 </span>
               ) : null}
             </div>
           </div>
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{description}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
         </div>
       </div>
 
       <div className="mt-4 space-y-3">
-        <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-slate-100 p-1.5">
+        <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-muted/60 p-1.5">
           {ACCESS_OPTIONS.map((option) => {
             const isActive = level === option.value;
             const styles = ACCESS_STYLES[option.value];
@@ -316,15 +316,15 @@ function ModulePermissionCard({
           })}
         </div>
 
-        <div className="grid grid-cols-2 divide-x divide-slate-200 rounded-lg bg-slate-50 py-2.5">
+        <div className="grid grid-cols-2 divide-x divide-border rounded-lg bg-muted/40 py-2.5">
           <div className="flex flex-col items-center justify-center gap-0.5 px-2 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Role default
             </p>
-            <p className="text-sm font-bold text-slate-800">{capitalize(inheritedLevel)}</p>
+            <p className="text-sm font-bold text-foreground">{capitalize(inheritedLevel)}</p>
           </div>
           <div className="flex flex-col items-center justify-center gap-0.5 px-2 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Selected
             </p>
             <p className={cn("text-sm font-bold", ACCESS_STYLES[level].meta)}>

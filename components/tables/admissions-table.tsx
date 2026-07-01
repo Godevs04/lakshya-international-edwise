@@ -281,6 +281,7 @@ export function AdmissionsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Student name</TableHead>
+              <TableHead>Source</TableHead>
               <TableHead>Number</TableHead>
               <TableHead>Intake</TableHead>
               <TableHead>Country</TableHead>
@@ -303,6 +304,20 @@ export function AdmissionsTable({
                       </Link>
                       <p className="text-xs text-muted-foreground">{row.studentId}</p>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {row.leadSource === "website" ? (
+                      <div className="space-y-0.5">
+                        <Badge variant="outline" className="border-primary/30 text-primary">
+                          Website
+                        </Badge>
+                        {row.formPage ? (
+                          <p className="text-xs text-muted-foreground">{row.formPage}</p>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Manual</span>
+                    )}
                   </TableCell>
                   <TableCell>{row.phone?.trim() ? row.phone : "—"}</TableCell>
                   <TableCell>{row.targetIntake?.trim() ? row.targetIntake : "—"}</TableCell>

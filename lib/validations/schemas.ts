@@ -381,6 +381,34 @@ export const profileSchema = z.object({
   confirmPassword: z.string().optional(),
 });
 
+export const websiteEnquirySchema = z
+  .object({
+    name: z.string().min(2, "Name is required").max(120),
+    phone: z.string().min(1, "Phone is required"),
+    email: z.string().email("Enter a valid email").optional().or(z.literal("")),
+    targetCountry: z.string().max(100).optional(),
+    course: z.string().max(200).optional(),
+    loanRequired: z
+      .union([z.literal("true"), z.literal("false"), z.boolean()])
+      .optional()
+      .transform((value) => value === true || value === "true"),
+    message: z.string().max(2000).optional(),
+    enquiryType: z
+      .enum(["consultation", "quick", "contact", "loan", "country"])
+      .default("consultation"),
+    formPage: z.string().max(200).optional(),
+    website: z.string().max(0).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!isBlank(data.phone) && !isValidIndianPhone(data.phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone must be a valid 10-digit Indian mobile number",
+        path: ["phone"],
+      });
+    }
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type StudentInput = z.infer<typeof studentSchema>;
 export type PartnerInput = z.infer<typeof partnerSchema>;

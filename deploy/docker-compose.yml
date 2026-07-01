@@ -1,14 +1,14 @@
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: deploy/Dockerfile
     image: lakshya-international-edwise:latest
     restart: unless-stopped
     ports:
       - "${PORT:-4000}:4000"
     env_file:
-      - .env.local
+      - ../.env.local
     environment:
       NODE_ENV: production
       PORT: 4000

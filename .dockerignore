@@ -8,7 +8,7 @@ node_modules
 coverage
 *.md
 scripts/Notes
-Banners
+assets/banners
 .vercel
 npm-debug.log*
 .DS_Store

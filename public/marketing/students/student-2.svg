@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500" fill="none">
+  <rect width="400" height="500" rx="24" fill="#EFF6FF"/>
+  <circle cx="200" cy="180" r="70" fill="#BFDBFE"/>
+  <rect x="110" y="270" width="180" height="140" rx="20" fill="#93C5FD"/>
+  <text x="200" y="460" text-anchor="middle" fill="#1D4ED8" font-family="system-ui,sans-serif" font-size="14">Graduate Photo</text>
+</svg>

@@ -39,9 +39,20 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
+    qualities: [100, 75],
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.lakshyainternationaledwise.com" }],
+        destination: "https://lakshyainternationaledwise.com/:path*",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [
@@ -62,7 +73,8 @@ const config = isSentryBuildConfigured()
       project: sentryProject!,
       silent: !process.env.CI,
       widenClientFileUpload: true,
-      tunnelRoute: "/monitoring",
+      // Tunnel avoids ad-blockers in production; direct DSN in dev avoids local proxy noise.
+      ...(isProduction ? { tunnelRoute: "/monitoring" } : {}),
       authToken: process.env.SENTRY_AUTH_TOKEN,
       webpack: {
         automaticVercelMonitors: true,

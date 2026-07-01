@@ -72,12 +72,12 @@ function UserPermissionsEditor({
   }
 
   return (
-            <UserMenuPermissions
-              role={user.role}
-              value={permissions}
-              onChange={handleChange}
-              compact
-            />
+    <UserMenuPermissions
+      role={user.role}
+      value={permissions}
+      onChange={handleChange}
+      compact
+    />
   );
 }
 
@@ -116,16 +116,16 @@ export function UserPermissionsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex h-full w-full max-w-none flex-col gap-0 overflow-hidden border-l-2 border-slate-200 bg-white p-0 sm:max-w-2xl"
+        className="flex h-full w-full max-w-none flex-col gap-0 overflow-hidden border-l border-border bg-popover p-0 sm:max-w-2xl"
       >
-        <SheetHeader className="shrink-0 border-b border-slate-200 px-6 py-5 pr-14">
-          <SheetTitle className="flex items-center gap-3 text-left text-lg font-bold text-slate-900">
+        <SheetHeader className="shrink-0 border-b border-border px-6 py-5 pr-14">
+          <SheetTitle className="flex items-center gap-3 text-left text-lg font-bold">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8952E] to-[#F59E0B] text-white shadow-sm">
               <KeyRound className="h-4 w-4" />
             </span>
             <span>Menu Access</span>
           </SheetTitle>
-          <SheetDescription className="text-left text-sm leading-relaxed text-slate-600">
+          <SheetDescription className="text-left text-sm leading-relaxed">
             {user
               ? `Choose read or write access for each menu. Changes apply after ${user.name} signs in again.`
               : "Configure menu-level read and write access."}
@@ -134,13 +134,13 @@ export function UserPermissionsSheet({
 
         {user ? (
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            <div className="mb-5 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4">
+            <div className="mb-5 rounded-2xl border border-border bg-muted/40 p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <p className="truncate text-base font-bold text-slate-900">{user.name}</p>
-                  <p className="truncate text-sm text-slate-600">{user.email}</p>
+                  <p className="truncate text-base font-bold text-foreground">{user.name}</p>
+                  <p className="truncate text-sm text-muted-foreground">{user.email}</p>
                 </div>
-                <span className="inline-flex w-fit shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-700 ring-1 ring-slate-200">
+                <span className="inline-flex w-fit shrink-0 rounded-full bg-card px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground ring-1 ring-border">
                   {ROLE_LABELS[user.role]}
                 </span>
               </div>
@@ -159,11 +159,11 @@ export function UserPermissionsSheet({
           </div>
         ) : null}
 
-        <SheetFooter className="shrink-0 flex-row items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+        <SheetFooter className="shrink-0 flex-row items-center justify-end gap-3 border-t border-border bg-card px-6 py-4">
           <Button
             type="button"
             variant="outline"
-            className="min-w-[96px] border-slate-300"
+            className="min-w-[96px]"
             onClick={() => onOpenChange(false)}
           >
             Cancel
