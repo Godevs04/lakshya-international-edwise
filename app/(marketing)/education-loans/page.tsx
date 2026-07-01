@@ -5,15 +5,17 @@ import { FaqSection } from "@/components/marketing/sections/faq";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { BankingPartnersSection } from "@/components/marketing/sections/banking-partners";
 import { MARKETING_LOAN_FAQS } from "@/lib/constants/marketing/faqs";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Education Loans | ${contact.companyName}`,
-    description: "Compare education loan lenders, eligibility, documents, and disbursement support.",
-    alternates: { canonical: `${getSiteUrl()}/education-loans` },
-  };
+    description:
+      "Compare education loan lenders, eligibility, documents, and disbursement support for study abroad students in India.",
+    path: "/education-loans",
+  });
 }
 
 const processSteps = [

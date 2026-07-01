@@ -3,7 +3,8 @@ import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { BlogListing } from "@/components/marketing/blog/blog-listing";
 import { getBlogPostMeta } from "@/lib/blog";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 const POPULAR_SLUGS = [
   "education-loan-checklist",
@@ -13,11 +14,12 @@ const POPULAR_SLUGS = [
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Blog | ${contact.companyName}`,
-    description: "Study abroad tips, visa guidance, and education loan insights.",
-    alternates: { canonical: `${getSiteUrl()}/blog` },
-  };
+    description:
+      "Study abroad tips, visa guidance, education loan insights, and admissions advice from Lakshya International Edwise.",
+    path: "/blog",
+  });
 }
 
 export default function BlogPage() {

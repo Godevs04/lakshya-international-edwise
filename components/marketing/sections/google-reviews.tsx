@@ -26,9 +26,6 @@ export function GoogleReviewsSection() {
             </p>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Google Reviews integration placeholder - connect your Google Business profile
-        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

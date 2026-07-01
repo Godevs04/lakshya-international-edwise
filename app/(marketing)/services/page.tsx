@@ -4,15 +4,17 @@ import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { ServiceCard } from "@/components/marketing/cards/marketing-cards";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Services | ${contact.companyName}`,
-    description: "Study abroad counselling, education loans, visa assistance, scholarships, and more.",
-    alternates: { canonical: `${getSiteUrl()}/services` },
-  };
+    description:
+      "Study abroad counselling, education loans, visa assistance, scholarships, SOP review, and university admissions support in India.",
+    path: "/services",
+  });
 }
 
 export default function ServicesPage() {

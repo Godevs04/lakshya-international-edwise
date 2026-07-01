@@ -2,15 +2,17 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { TestimonialsSection } from "@/components/marketing/sections/testimonials";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Success Stories | ${contact.companyName}`,
-    description: "Visa successes, university admits, and student placements supported by our team.",
-    alternates: { canonical: `${getSiteUrl()}/success-stories` },
-  };
+    description:
+      "Visa successes, university admits, and student placements supported by Lakshya International Edwise.",
+    path: "/success-stories",
+  });
 }
 
 export default function SuccessStoriesPage() {

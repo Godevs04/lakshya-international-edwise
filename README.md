@@ -20,7 +20,9 @@ Production-grade, white-label-ready education/loan consultancy CRM built with Ne
 cp .env.example .env.local
 ```
 
-2. Fill in your MongoDB Atlas URI, Auth secret, Cloudinary, and SMTP credentials in `.env.local`.
+2. Fill in your MongoDB Atlas URI, Auth secret, Cloudinary, and SMTP credentials in `.env.local`. For local dev, override `AUTH_URL` and `NEXT_PUBLIC_SITE_URL` with `http://localhost:4000`.
+
+**Production domain:** `https://lakshyainternationaledwise.com` — see [`.env.example`](.env.example) and [`deploy/README.md`](deploy/README.md) for required production env vars and support email (`support@lakshyainternationaledwise.com`).
 
 3. Install dependencies and seed the database:
 

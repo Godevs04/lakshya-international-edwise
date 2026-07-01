@@ -14,50 +14,41 @@ import { PartnerUniversitiesSection } from "@/components/marketing/sections/part
 import { BankingPartnersSection } from "@/components/marketing/sections/banking-partners";
 import { GoogleReviewsSection } from "@/components/marketing/sections/google-reviews";
 import { OfficeHighlightsSection } from "@/components/marketing/sections/office-highlights";
-import { JsonLd } from "@/components/marketing/seo/json-ld";
+import { JsonLd, faqPageJsonLd, websiteJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 import { MARKETING_FAQS } from "@/lib/constants/marketing/faqs";
 import { getAllBlogPosts } from "@/lib/blog";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
-    title: `${contact.companyName} | Study Abroad & Education Loans`,
+  return buildMarketingMetadata({
+    title: `${contact.companyName} | Study Abroad Consultancy India & Education Loans`,
     description:
-      "Premium study abroad counselling, visa assistance, scholarships, and education loan support for students in India.",
-    alternates: { canonical: getSiteUrl() },
-    openGraph: {
-      title: `${contact.companyName} | Study Abroad & Education Loans`,
-      description: "Your trusted partner for global education and loan facilitation.",
-      url: getSiteUrl(),
-      type: "website",
-    },
-  };
-}
-
-function faqJsonLd() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: MARKETING_FAQS.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
-  };
+      "Premium study abroad counselling, visa assistance, scholarships, and education loan support for students in India. Trusted guidance for Canada, UK, Australia, and more.",
+    path: "/",
+  });
 }
 
 export default function MarketingHomePage() {
   const latestPosts = getAllBlogPosts().slice(0, 3);
+  const contact = getMarketingContact();
+  const siteUrl = getSiteUrl();
 
   return (
     <>
-      <JsonLd data={faqJsonLd()} />
+      <JsonLd
+        data={[
+          websiteJsonLd({
+            name: contact.companyName,
+            url: siteUrl,
+            searchUrl: `${siteUrl}/blog`,
+          }),
+          faqPageJsonLd(MARKETING_FAQS),
+        ]}
+      />
       <MarketingHero />
       <PartnerUniversitiesSection />
       <StatsBar />

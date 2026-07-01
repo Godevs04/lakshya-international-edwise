@@ -3,15 +3,17 @@ import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { MARKETING_AWARDS } from "@/lib/constants/marketing/awards";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `About Us | ${contact.companyName}`,
-    description: "Learn about our mission, vision, and student-first approach to study abroad counselling.",
-    alternates: { canonical: `${getSiteUrl()}/about` },
-  };
+    description:
+      "Learn about Lakshya International Edwise — our mission, vision, and student-first approach to study abroad counselling and education loans in India.",
+    path: "/about",
+  });
 }
 
 const milestones = [

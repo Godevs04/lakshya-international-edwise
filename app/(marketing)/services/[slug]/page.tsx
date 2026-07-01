@@ -5,7 +5,9 @@ import { LeadForm } from "@/components/marketing/forms/lead-form";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { getMarketingService, MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
+import { JsonLd, breadcrumbJsonLd, serviceJsonLd } from "@/components/marketing/seo/json-ld";
 
 export function generateStaticParams() {
   return MARKETING_SERVICES.map((service) => ({ slug: service.slug }));
@@ -20,11 +22,11 @@ export async function generateMetadata({
   const service = getMarketingService(slug);
   const contact = getMarketingContact();
   if (!service) return { title: contact.companyName };
-  return {
+  return buildMarketingMetadata({
     title: `${service.title} | ${contact.companyName}`,
     description: service.shortDescription,
-    alternates: { canonical: `${getSiteUrl()}/services/${slug}` },
-  };
+    path: `/services/${slug}`,
+  });
 }
 
 export default async function ServiceDetailPage({
@@ -36,8 +38,26 @@ export default async function ServiceDetailPage({
   const service = getMarketingService(slug);
   if (!service) notFound();
 
+  const contact = getMarketingContact();
+  const serviceUrl = getAbsoluteUrl(`/services/${slug}`);
+
   return (
     <>
+      <JsonLd
+        data={[
+          serviceJsonLd({
+            name: service.title,
+            description: service.description,
+            url: serviceUrl,
+            provider: contact.companyName,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", url: getAbsoluteUrl("/") },
+            { name: "Services", url: getAbsoluteUrl("/services") },
+            { name: service.title, url: serviceUrl },
+          ]),
+        ]}
+      />
       <section className="hero-gradient section-padding">
         <div className="container mx-auto grid max-w-6xl items-start gap-8 px-4 lg:grid-cols-2">
           <div>

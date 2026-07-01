@@ -3,16 +3,19 @@ import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { LeadForm } from "@/components/marketing/forms/lead-form";
+import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_OFFICE_HOURS } from "@/lib/constants/marketing/offices";
 import { getMarketingContact, getSiteUrl, getWhatsAppLink } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Contact Us | ${contact.companyName}`,
-    description: "Reach us for study abroad counselling and education loan support.",
-    alternates: { canonical: `${getSiteUrl()}/contact` },
-  };
+    description:
+      "Reach Lakshya International Edwise for study abroad counselling, visa support, and education loan guidance. We respond within one business day.",
+    path: "/contact",
+  });
 }
 
 export default function ContactPage() {
@@ -21,6 +24,15 @@ export default function ContactPage() {
 
   return (
     <>
+      <JsonLd
+        data={localBusinessJsonLd({
+          name: contact.companyName,
+          url: getSiteUrl(),
+          email: contact.email,
+          phone: contact.phone,
+          address: "India",
+        })}
+      />
       <PageHero
         eyebrow="Contact"
         title="Speak with our counsellors"

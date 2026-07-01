@@ -7,8 +7,14 @@ import { getAllBlogPosts, getBlogPost, getRelatedPosts } from "@/lib/blog";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { BlogCard } from "@/components/marketing/cards/blog-card";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
 import { Clock } from "lucide-react";
+import {
+  buildMarketingMetadata,
+  getAbsoluteUrl,
+  DEFAULT_OG_IMAGE_PATH,
+} from "@/lib/seo/marketing-metadata";
+import { JsonLd, articleJsonLd, breadcrumbJsonLd } from "@/components/marketing/seo/json-ld";
 
 export function generateStaticParams() {
   return getAllBlogPosts().map((post) => ({ slug: post.slug }));
@@ -23,11 +29,13 @@ export async function generateMetadata({
   const post = getBlogPost(slug);
   const contact = getMarketingContact();
   if (!post) return { title: contact.companyName };
-  return {
+  return buildMarketingMetadata({
     title: `${post.title} | ${contact.companyName}`,
     description: post.description,
-    alternates: { canonical: `${getSiteUrl()}/blog/${slug}` },
-  };
+    path: `/blog/${slug}`,
+    image: post.coverImage ?? DEFAULT_OG_IMAGE_PATH,
+    openGraphType: "article",
+  });
 }
 
 export default async function BlogArticlePage({
@@ -40,9 +48,27 @@ export default async function BlogArticlePage({
   if (!post) notFound();
 
   const related = getRelatedPosts(slug);
+  const articleUrl = getAbsoluteUrl(`/blog/${slug}`);
 
   return (
     <>
+      <JsonLd
+        data={[
+          articleJsonLd({
+            title: post.title,
+            description: post.description,
+            url: articleUrl,
+            datePublished: post.date,
+            author: post.author,
+            image: post.coverImage ? getAbsoluteUrl(post.coverImage) : undefined,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", url: getAbsoluteUrl("/") },
+            { name: "Blog", url: getAbsoluteUrl("/blog") },
+            { name: post.title, url: articleUrl },
+          ]),
+        ]}
+      />
       <article className="section-padding section-white">
         <div className="container mx-auto max-w-3xl px-4">
           <Link href="/blog" className="text-sm font-medium text-primary hover:underline">

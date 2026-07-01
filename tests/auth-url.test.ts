@@ -41,8 +41,8 @@ describe("getConfiguredAuthUrl", () => {
 
   it("returns the explicit auth URL when configured", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
-    expect(getConfiguredAuthUrl()).toBe("https://lie.teamgodevs.in");
+    vi.stubEnv("AUTH_URL", "https://lakshyainternationaledwise.com");
+    expect(getConfiguredAuthUrl()).toBe("https://lakshyainternationaledwise.com");
   });
 
   it("ignores localhost auth URLs in production", () => {
@@ -59,9 +59,9 @@ describe("getPublicAuthUrl", () => {
 
   it("uses AUTH_URL instead of Vercel fallback for user-facing links", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("AUTH_URL", "https://lakshyainternationaledwise.com");
     vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
-    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+    expect(getPublicAuthUrl()).toBe("https://lakshyainternationaledwise.com");
   });
 
   it("falls back to localhost when no explicit auth URL is set", () => {
@@ -75,24 +75,26 @@ describe("getPublicAuthUrl", () => {
   it("uses APP_URL when AUTH_URL is unset", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("AUTH_URL", "");
-    vi.stubEnv("APP_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("APP_URL", "https://lakshyainternationaledwise.com");
     vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
-    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+    expect(getPublicAuthUrl()).toBe("https://lakshyainternationaledwise.com");
   });
 
   it("uses VERCEL_PROJECT_PRODUCTION_URL in production when explicit URL is unset", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("AUTH_URL", "");
     vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
-    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "lie.teamgodevs.in");
-    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "lakshyainternationaledwise.com");
+    expect(getPublicAuthUrl()).toBe("https://lakshyainternationaledwise.com");
   });
 
-  it("prefers AUTH_URL over Vercel production domain", () => {
+  it("falls back to production site URL when no explicit auth URL is set in production", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
-    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "other.example.com");
-    expect(getPublicAuthUrl()).toBe("https://lie.teamgodevs.in");
+    vi.stubEnv("AUTH_URL", "");
+    vi.stubEnv("NEXTAUTH_URL", "");
+    vi.stubEnv("APP_URL", "");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "");
+    expect(getPublicAuthUrl()).toBe("https://lakshyainternationaledwise.com");
   });
 });
 
@@ -103,8 +105,8 @@ describe("getAuthUrl", () => {
 
   it("uses public URL instead of preview Vercel host for user-facing links", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("AUTH_URL", "https://lie.teamgodevs.in");
+    vi.stubEnv("AUTH_URL", "https://lakshyainternationaledwise.com");
     vi.stubEnv("VERCEL_URL", "preview-project.vercel.app");
-    expect(getAuthUrl()).toBe("https://lie.teamgodevs.in");
+    expect(getAuthUrl()).toBe("https://lakshyainternationaledwise.com");
   });
 });

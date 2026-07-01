@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isProductionRuntime, PRODUCTION_SITE_URL } from "@/lib/config/site";
 
 const envSchema = z.object({
   MONGODB_URI: z.string().min(1).optional(),
@@ -136,10 +137,25 @@ function resolveExplicitPublicUrl(): string | undefined {
  * This intentionally avoids platform fallback hosts like `*.vercel.app`.
  */
 export function getPublicAuthUrl(): string {
-  return (
-    resolveExplicitPublicUrl() ??
-    normalizeBaseUrl(`http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`)
-  );
+  const explicit = resolveExplicitPublicUrl();
+  if (explicit) {
+    return explicit;
+  }
+  if (isProductionRuntime()) {
+    return PRODUCTION_SITE_URL;
+  }
+  return normalizeBaseUrl(`http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`);
+}
+
+export function getAuthUrl(): string {
+  const publicUrl = resolveExplicitPublicUrl();
+  if (publicUrl) {
+    return publicUrl;
+  }
+  if (isProductionRuntime()) {
+    return PRODUCTION_SITE_URL;
+  }
+  return resolveAuthUrl();
 }
 
 export function getEnv(): Env {
@@ -167,15 +183,6 @@ export function getAuthSecret(): string {
     throw new Error("AUTH_SECRET or NEXTAUTH_SECRET must be set in .env.local");
   }
   return secret;
-}
-
-export function getAuthUrl(): string {
-  // Prefer the canonical public URL when configured so emails and auth share the same host.
-  const publicUrl = resolveExplicitPublicUrl();
-  if (publicUrl) {
-    return publicUrl;
-  }
-  return resolveAuthUrl();
 }
 
 export function getMongoUri(): string {

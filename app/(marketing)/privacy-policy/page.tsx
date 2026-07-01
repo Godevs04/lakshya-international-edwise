@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Privacy Policy | ${contact.companyName}`,
-    alternates: { canonical: `${getSiteUrl()}/privacy-policy` },
-  };
+    description: `Privacy policy for ${contact.companyName} — how we handle your personal data.`,
+    path: "/privacy-policy",
+  });
 }
 
 export default function PrivacyPolicyPage() {

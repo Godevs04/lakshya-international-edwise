@@ -4,15 +4,17 @@ import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { CountryCard } from "@/components/marketing/cards/marketing-cards";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Study Destinations | ${contact.companyName}`,
-    description: "Explore top study abroad destinations including USA, Canada, UK, Australia, and Europe.",
-    alternates: { canonical: `${getSiteUrl()}/countries` },
-  };
+    description:
+      "Explore top study abroad destinations — USA, Canada, UK, Australia, Europe, and more — with expert counselling from Lakshya International Edwise.",
+    path: "/countries",
+  });
 }
 
 export default function CountriesPage() {

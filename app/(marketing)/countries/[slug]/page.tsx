@@ -4,7 +4,9 @@ import { LeadForm } from "@/components/marketing/forms/lead-form";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { getMarketingCountry, getCountryFlagLabel, MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
+import { JsonLd, breadcrumbJsonLd } from "@/components/marketing/seo/json-ld";
 import { cn } from "@/lib/utils";
 
 export function generateStaticParams() {
@@ -20,11 +22,11 @@ export async function generateMetadata({
   const country = getMarketingCountry(slug);
   const contact = getMarketingContact();
   if (!country) return { title: contact.companyName };
-  return {
+  return buildMarketingMetadata({
     title: `Study in ${country.name} | ${contact.companyName}`,
     description: country.shortDescription,
-    alternates: { canonical: `${getSiteUrl()}/countries/${slug}` },
-  };
+    path: `/countries/${slug}`,
+  });
 }
 
 function InfoBlock({
@@ -57,8 +59,17 @@ export default async function CountryDetailPage({
   const country = getMarketingCountry(slug);
   if (!country) notFound();
 
+  const countryUrl = getAbsoluteUrl(`/countries/${slug}`);
+
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: getAbsoluteUrl("/") },
+          { name: "Countries", url: getAbsoluteUrl("/countries") },
+          { name: country.name, url: countryUrl },
+        ])}
+      />
       <section className="hero-gradient section-padding">
         <div className="container mx-auto grid max-w-6xl items-start gap-8 px-4 lg:grid-cols-2">
           <div>

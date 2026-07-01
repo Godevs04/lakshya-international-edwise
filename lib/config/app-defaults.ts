@@ -1,5 +1,10 @@
 import type { AppModules, AppTheme, CompanySettings } from "@/types";
 import { DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
+import {
+  isProductionRuntime,
+  PRODUCTION_COMPANY_NAME,
+  PRODUCTION_SUPPORT_EMAIL,
+} from "@/lib/config/site";
 
 function parseSmtpFrom(from: string | undefined): { name?: string; email?: string } {
   if (!from) return {};
@@ -12,10 +17,15 @@ function parseSmtpFrom(from: string | undefined): { name?: string; email?: strin
 
 export function getDefaultCompanySettings(): CompanySettings {
   const fromSmtp = parseSmtpFrom(process.env.SMTP_FROM);
+  const productionEmailFallback = isProductionRuntime() ? PRODUCTION_SUPPORT_EMAIL : "";
   return {
-    name: process.env.APP_COMPANY_NAME ?? fromSmtp.name ?? "Lakshya International Edwise",
+    name: process.env.APP_COMPANY_NAME ?? fromSmtp.name ?? PRODUCTION_COMPANY_NAME,
     logo: process.env.APP_COMPANY_LOGO ?? DEFAULT_APP_LOGO,
-    email: process.env.APP_COMPANY_EMAIL ?? fromSmtp.email ?? process.env.SMTP_USER ?? "",
+    email:
+      process.env.APP_COMPANY_EMAIL ??
+      fromSmtp.email ??
+      process.env.SMTP_USER ??
+      productionEmailFallback,
     phone: process.env.APP_COMPANY_PHONE ?? "",
     address: process.env.APP_COMPANY_ADDRESS ?? "",
   };

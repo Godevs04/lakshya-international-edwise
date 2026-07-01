@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
+import { getMarketingContact } from "@/lib/config/marketing";
+import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
-  return {
+  return buildMarketingMetadata({
     title: `Terms of Service | ${contact.companyName}`,
-    alternates: { canonical: `${getSiteUrl()}/terms-of-service` },
-  };
+    description: `Terms of service for using the ${contact.companyName} website and counselling services.`,
+    path: "/terms-of-service",
+  });
 }
 
 export default function TermsPage() {
