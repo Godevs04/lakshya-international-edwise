@@ -40,4 +40,7 @@ Set these in production secrets / `.env.local` on the server:
 
 After deploy, run `npm run seed` or update **Settings → Company** in the CRM if the stored email still shows an old value.
 
-`www.lakshyainternationaledwise.com` redirects to the apex domain automatically (see `next.config.ts`).
+**www redirect:** Do **not** set www ↔ apex redirects in both DNS/hosting **and** `next.config.ts` — that causes `ERR_TOO_MANY_REDIRECTS`. Pick **one** place:
+
+- **Vercel:** Project → Settings → Domains → set `lakshyainternationaledwise.com` as primary, add `www` and choose “Redirect to primary”.
+- **Hostinger / other DNS:** If the panel has “redirect to www”, turn it **off** when apex is your canonical host.
