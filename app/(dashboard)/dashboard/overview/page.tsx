@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { auth } from "@/lib/auth/auth";
-import { getGreeting, formatCurrency, formatDate } from "@/lib/utils/format";
+import { formatCurrency } from "@/lib/utils/format";
 import { getOverviewDashboardAction } from "@/lib/actions/dashboard.actions";
 import { requireAnyPagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -99,11 +99,7 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-8">
-      <DashboardHero
-        greeting={getGreeting()}
-        userName={session?.user?.name ?? "User"}
-        displayDate={formatDate(new Date())}
-      />
+      <DashboardHero userName={session?.user?.name ?? "User"} />
 
       <MetricCardsGrid cards={metricCards} />
 
