@@ -47,11 +47,14 @@ export function toDatetimeLocalValue(date?: Date | string | null): string {
   return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
 }
 
-export function getGreeting(): string {
-  const hour = new Date().getHours();
+export function getGreetingForHour(hour: number): string {
   if (hour < 12) return "Good Morning";
   if (hour < 17) return "Good Afternoon";
   return "Good Evening";
+}
+
+export function getGreeting(date: Date = new Date()): string {
+  return getGreetingForHour(date.getHours());
 }
 
 export type DateRangePreset = "daily" | "weekly" | "monthly" | "yearly";

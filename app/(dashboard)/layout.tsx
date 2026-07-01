@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { getAppConfig } from "@/lib/config/app-config";
-import { getUnreadNotificationCount } from "@/lib/actions/settings.actions";
+import { getUnreadNotificationCount, getCurrentUserProfile } from "@/lib/actions/settings.actions";
 import { getTaskSummary } from "@/lib/actions/task.actions";
 import { Sidebar, MobileNav } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
@@ -28,9 +28,10 @@ export default async function DashboardLayout({
   }
 
   const config = await getAppConfig();
-  const [unreadCount, taskSummary] = await Promise.all([
+  const [unreadCount, taskSummary, profile] = await Promise.all([
     getUnreadNotificationCount(),
     config.modules?.tasks !== false ? getTaskSummary() : Promise.resolve({ overdue: 0 }),
+    getCurrentUserProfile(),
   ]);
   const overdueTaskCount = taskSummary.overdue;
 
@@ -54,7 +55,7 @@ export default async function DashboardLayout({
                   companyName={config.company.name}
                   logo={config.company.logo}
                   modules={config.modules}
-                  user={session.user}
+                  user={profile ?? session.user}
                 />
               </Suspense>
             </div>

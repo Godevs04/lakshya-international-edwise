@@ -4,11 +4,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { UserPlus, Handshake, FileText, BarChart3 } from "lucide-react";
 import { Design06RibbonWaves } from "@/components/layout/design06-ribbon-waves";
+import { useLocalDateTime } from "@/hooks/use-local-datetime";
 
 interface DashboardHeroProps {
-  greeting: string;
   userName: string;
-  displayDate: string;
 }
 
 const quickActions = [
@@ -38,7 +37,8 @@ const quickActions = [
   },
 ];
 
-export function DashboardHero({ greeting, userName, displayDate }: DashboardHeroProps) {
+export function DashboardHero({ userName }: DashboardHeroProps) {
+  const { greeting, displayDate } = useLocalDateTime();
   const firstName = userName.split(" ")[0] ?? userName;
 
   return (

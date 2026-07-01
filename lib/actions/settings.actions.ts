@@ -492,7 +492,34 @@ export async function getRoles() {
   }, []);
 }
 
-export async function updateProfileAction(formData: FormData): Promise<ActionResult> {
+export async function getCurrentUserProfile(): Promise<{
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: UserRole;
+} | null> {
+  return runLoggedQuery("getCurrentUserProfile", async () => {
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) return null;
+
+    await connectDB();
+    const user = await User.findById(sessionUser.id).select("name email avatar role").lean();
+    if (!user) return null;
+
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role as UserRole,
+    };
+  }, null);
+}
+
+export async function updateProfileAction(
+  formData: FormData
+): Promise<ActionResult<{ name: string; email: string; avatar?: string }>> {
   return runLoggedMutation("updateProfileAction", async () => {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return { success: false, error: "Not authenticated" };
@@ -513,8 +540,15 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
   const user = await User.findById(sessionUser.id);
   if (!user) return { success: false, error: "User not found" };
 
-  user.name = parsed.data.name;
-  user.email = parsed.data.email.toLowerCase();
+  user.name = parsed.data.name.trim();
+  const nextEmail = parsed.data.email.toLowerCase();
+  if (nextEmail !== user.email) {
+    const emailTaken = await User.findOne({ email: nextEmail, _id: { $ne: user._id } }).lean();
+    if (emailTaken) {
+      return { success: false, error: "Email is already in use" };
+    }
+  }
+  user.email = nextEmail;
 
   if (parsed.data.newPassword) {
     if (!parsed.data.currentPassword) {
@@ -539,7 +573,14 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
   );
 
   revalidatePath("/dashboard/profile");
-  return { success: true };
+  return {
+    success: true,
+    data: {
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+    },
+  };
   });
 }
 

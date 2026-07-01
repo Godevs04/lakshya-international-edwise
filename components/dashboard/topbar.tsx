@@ -67,7 +67,7 @@ export function Topbar({
   user: serverUser,
 }: TopbarProps) {
   const { data: session } = useSession();
-  const user = session?.user ?? serverUser;
+  const user = serverUser ?? session?.user;
   const { setTheme } = useTheme();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
