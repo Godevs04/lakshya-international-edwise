@@ -29,7 +29,7 @@ export function EnquiryDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="marketing-site max-w-lg border-border bg-card text-foreground">
         <DialogHeader>
           <DialogTitle>Plan your study abroad journey</DialogTitle>
           <DialogDescription>

@@ -256,7 +256,12 @@ export function LeadForm({
         )}
       </AnimatePresence>
 
-      <Button type="submit" disabled={isPending} className="btn-marketing mt-4 w-full rounded-full">
+      <Button
+        type="submit"
+        variant="ghost"
+        disabled={isPending}
+        className="btn-marketing mt-4 w-full rounded-full hover:bg-transparent"
+      >
         {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
