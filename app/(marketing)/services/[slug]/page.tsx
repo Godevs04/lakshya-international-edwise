@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { LeadForm } from "@/components/marketing/forms/lead-form";
+import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { getMarketingService, MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
@@ -59,29 +60,32 @@ export default async function ServiceDetailPage({
         ]}
       />
       <section className="hero-gradient section-padding">
-        <div className="container mx-auto grid max-w-6xl items-start gap-8 px-4 lg:grid-cols-2">
-          <div>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <MarketingIcon name={service.icon} className="h-6 w-6" />
-            </div>
-            <h1 className="heading-display text-secondary">{service.title}</h1>
-            <p className="prose-marketing mt-5 text-lg text-muted-foreground">{service.description}</p>
+        <div className="container mx-auto max-w-3xl px-4 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <MarketingIcon name={service.icon} className="h-7 w-7" />
           </div>
-          <LeadForm variant="consultation" formPage={`/services/${slug}`} premium />
+          <h1 className="heading-display text-foreground">{service.title}</h1>
+          <p className="prose-marketing mx-auto mt-5 text-lg text-muted-foreground">
+            {service.description}
+          </p>
+          <div className="mt-8">
+            <EligibilityCta source={`service-${slug}`} className="px-7 py-3.5 text-base" />
+          </div>
         </div>
       </section>
 
-      <SectionShell variant="white" title="What we cover" eyebrow="Highlights">
-        <ul className="grid gap-3 sm:grid-cols-2">
+      <SectionShell variant="white" title="What you get" eyebrow="Highlights" align="center">
+        <ul className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2">
           {service.highlights.map((item) => (
-            <li key={item} className="card-premium px-4 py-3 text-sm text-secondary/90">
+            <li key={item} className="card-premium flex items-center gap-3 px-4 py-3 text-sm text-foreground">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
               {item}
             </li>
           ))}
         </ul>
       </SectionShell>
 
-      <CtaBanner />
+      <CtaBanner source={`service-${slug}-banner`} />
     </>
   );
 }

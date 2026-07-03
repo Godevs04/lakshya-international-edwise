@@ -1,43 +1,49 @@
 .marketing-site {
   --background: #ffffff;
-  --foreground: #1e293b;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #1e293b;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #1e293b;
-  --primary: #059669;
+  --popover-foreground: #0f172a;
+  --primary: #0b8fd8;
+  --primary-hover: #097bb8;
   --primary-foreground: #ffffff;
   --secondary: #0f172a;
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #0ea5e9;
-  --accent-foreground: #ffffff;
+  --accent: #4fc3f7;
+  --accent-soft: #e6f7ff;
+  --accent-foreground: #0f172a;
+  --success: #10b981;
+  --warning: #f59e0b;
   --border: #e2e8f0;
   --input: #f8fafc;
-  --ring: #059669;
-  --color-brand-primary: #059669;
-  --color-brand-secondary: #0f172a;
-  --color-brand-accent: #0ea5e9;
-  --section-tint: #f0fdf4;
+  --ring: #0b8fd8;
+  --color-brand-primary: #0b8fd8;
+  --color-brand-secondary: #4fc3f7;
+  --color-brand-accent: #e6f7ff;
+  --section-tint: #f4fbff;
   --section-muted: #f8fafc;
   background-color: var(--background);
   color: var(--foreground);
+  font-family: var(--font-marketing), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
 }
 
 .marketing-site .btn-marketing,
 .btn-marketing {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 100%);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+  box-shadow: 0 4px 14px rgba(11, 143, 216, 0.22);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .marketing-site .btn-marketing:hover,
 .btn-marketing:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 100%);
   color: #ffffff;
-  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+  box-shadow: 0 6px 20px rgba(11, 143, 216, 0.32);
   transform: translateY(-1px);
 }
 
@@ -45,15 +51,15 @@
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 24px rgba(11, 143, 216, 0.06);
 }
 
 .marketing-site .card-premium {
   position: relative;
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 1rem;
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.05);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(11, 143, 216, 0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
@@ -63,7 +69,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.15), rgba(14, 165, 233, 0.1));
+  background: linear-gradient(135deg, rgba(11, 143, 216, 0.18), rgba(79, 195, 247, 0.12));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -73,9 +79,9 @@
 }
 
 .marketing-site .card-premium:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
-  border-color: rgba(5, 150, 105, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 44px rgba(11, 143, 216, 0.12);
+  border-color: rgba(11, 143, 216, 0.22);
 }
 
 .marketing-site .card-premium:hover::before {
@@ -134,9 +140,9 @@
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(5, 150, 105, 0.12), transparent),
-    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(14, 165, 233, 0.08), transparent),
-    linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(11, 143, 216, 0.1), transparent),
+    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(79, 195, 247, 0.08), transparent),
+    linear-gradient(180deg, #f4fbff 0%, #ffffff 100%);
 }
 
 .marketing-site .hero-mesh {
@@ -157,7 +163,7 @@
 .marketing-site .hero-mesh-blob-1 {
   width: 400px;
   height: 400px;
-  background: rgba(5, 150, 105, 0.15);
+  background: rgba(11, 143, 216, 0.14);
   top: -10%;
   right: 10%;
   animation-delay: 0s;
@@ -166,7 +172,7 @@
 .marketing-site .hero-mesh-blob-2 {
   width: 300px;
   height: 300px;
-  background: rgba(14, 165, 233, 0.12);
+  background: rgba(79, 195, 247, 0.14);
   bottom: 10%;
   left: 5%;
   animation-delay: -7s;
@@ -202,7 +208,7 @@
   border-radius: 1.25rem;
   box-shadow:
     0 4px 6px rgba(15, 23, 42, 0.04),
-    0 20px 50px rgba(15, 23, 42, 0.08);
+    0 20px 50px rgba(11, 143, 216, 0.1);
 }
 
 .marketing-site .trust-pill {
@@ -210,12 +216,12 @@
   align-items: center;
   gap: 0.375rem;
   border-radius: 9999px;
-  border: 1px solid rgba(5, 150, 105, 0.2);
-  background: rgba(5, 150, 105, 0.06);
+  border: 1px solid rgba(11, 143, 216, 0.22);
+  background: rgba(11, 143, 216, 0.06);
   padding: 0.375rem 0.875rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #047857;
+  color: #097bb8;
 }
 
 .marketing-site .step-indicator {
@@ -236,7 +242,7 @@
 .marketing-site .lead-form-textarea {
   background-color: #ffffff;
   color: #0f172a;
-  caret-color: #059669;
+  caret-color: #0b8fd8;
   backdrop-filter: none;
 }
 
@@ -251,17 +257,17 @@
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
   box-shadow: 0 0 0 1000px #ffffff inset;
   -webkit-text-fill-color: #0f172a;
-  caret-color: #059669;
+  caret-color: #0b8fd8;
   transition: background-color 99999s ease-out 0s;
 }
 
 /* Office map — mapcn showcase */
 .marketing-site .office-showcase {
-  border: 1px solid rgba(5, 150, 105, 0.14);
+  border: 1px solid rgba(11, 143, 216, 0.14);
   background: #ffffff;
   box-shadow:
     0 4px 6px rgba(15, 23, 42, 0.04),
-    0 24px 60px rgba(15, 23, 42, 0.08);
+    0 24px 60px rgba(11, 143, 216, 0.1);
 }
 
 .marketing-site .office-map-canvas .maplibregl-ctrl-attrib {
@@ -282,8 +288,8 @@
   justify-content: center;
   border-radius: 9999px;
   border: 3px solid #ffffff;
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  box-shadow: 0 10px 24px rgba(5, 150, 105, 0.35);
+  background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 100%);
+  box-shadow: 0 10px 24px rgba(11, 143, 216, 0.35);
 }
 
 .marketing-site .office-map-marker-pulse {
@@ -292,7 +298,7 @@
   height: 2.75rem;
   width: 2.75rem;
   border-radius: 9999px;
-  background: rgba(5, 150, 105, 0.18);
+  background: rgba(11, 143, 216, 0.18);
   animation: office-map-pulse 2.4s ease-out infinite;
 }
 
@@ -315,5 +321,55 @@
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 20px 60px rgba(11, 143, 216, 0.12);
+}
+
+/* Lender logo carousel — hover pauses the auto-scroll */
+.marketing-site .lender-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 3rem;
+  animation: marketing-marquee 42s linear infinite;
+}
+
+.marketing-site .lender-carousel:hover .lender-track {
+  animation-play-state: paused;
+}
+
+.marketing-site .lender-logo {
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition: filter 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+}
+
+.marketing-site .lender-logo:hover {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-site .lender-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Sea-blue soft accent surfaces */
+.marketing-site .section-accent {
+  background-color: var(--accent-soft);
+}
+
+.marketing-site .accent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  background: var(--accent-soft);
+  color: var(--primary-hover);
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }

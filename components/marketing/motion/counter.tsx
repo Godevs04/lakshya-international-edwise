@@ -7,6 +7,7 @@ interface AnimatedCounterProps {
   value: number;
   suffix?: string;
   duration?: number;
+  decimals?: number;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export function AnimatedCounter({
   value,
   suffix = "",
   duration = 1200,
+  decimals = 0,
   className,
 }: AnimatedCounterProps) {
   const { prefersReducedMotion } = useMarketingMotion();
@@ -48,8 +50,11 @@ export function AnimatedCounter({
     const totalFrames = Math.max(20, Math.round(duration / 16));
     const timer = window.setInterval(() => {
       frame += 1;
-      setCount(Math.round((value * frame) / totalFrames));
-      if (frame >= totalFrames) window.clearInterval(timer);
+      setCount((value * frame) / totalFrames);
+      if (frame >= totalFrames) {
+        setCount(value);
+        window.clearInterval(timer);
+      }
     }, duration / totalFrames);
 
     return () => window.clearInterval(timer);
@@ -57,7 +62,10 @@ export function AnimatedCounter({
 
   return (
     <span ref={ref} className={className}>
-      {count.toLocaleString("en-IN")}
+      {count.toLocaleString("en-IN", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
       {suffix}
     </span>
   );

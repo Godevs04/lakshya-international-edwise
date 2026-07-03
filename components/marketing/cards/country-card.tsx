@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { MarketingCountry } from "@/types/marketing";
 import { getCountryFlagLabel } from "@/lib/constants/marketing/countries";
-import { ArrowRight, GraduationCap, Wallet, Clock, Home } from "lucide-react";
+import { ArrowRight, Wallet, Clock, Home } from "lucide-react";
 
 export function CountryCard({ country }: { country: MarketingCountry }) {
   return (
@@ -54,15 +54,8 @@ export function CountryCard({ country }: { country: MarketingCountry }) {
         </div>
       )}
 
-      {country.universities.length > 0 && (
-        <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-          <GraduationCap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-          {country.universities.slice(0, 2).join(", ")}
-        </p>
-      )}
-
       <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-        View Details
+        Loan details
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
       </span>
     </Link>

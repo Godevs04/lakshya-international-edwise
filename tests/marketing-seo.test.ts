@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildMarketingMetadata,
+  DEFAULT_MARKETING_KEYWORDS,
   getAbsoluteUrl,
   getDefaultOgImageUrl,
 } from "@/lib/seo/marketing-metadata";
@@ -13,8 +14,8 @@ describe("marketing SEO metadata", () => {
   it("builds canonical and open graph URLs from NEXT_PUBLIC_SITE_URL", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://lakshyainternationaledwise.com");
     const metadata = buildMarketingMetadata({
-      title: "Study Abroad | Lakshya International Edwise",
-      description: "Premium study abroad counselling in India.",
+      title: "Education Loans | Lakshya International Edwise",
+      description: "Overseas education loan experts in India.",
       path: "/services",
     });
 
@@ -39,9 +40,21 @@ describe("marketing SEO metadata", () => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION", "abc123");
     const metadata = buildMarketingMetadata({
       title: "Home",
-      description: "Study abroad consultancy.",
+      description: "Overseas education loan experts.",
       path: "/",
     });
     expect(metadata.verification?.google).toBe("abc123");
+  });
+
+  it("defaults to finance-focused keywords", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://lakshyainternationaledwise.com");
+    const metadata = buildMarketingMetadata({
+      title: "Home",
+      description: "Education loan experts.",
+      path: "/",
+    });
+    expect(metadata.keywords).toEqual([...DEFAULT_MARKETING_KEYWORDS]);
+    expect(metadata.keywords).toContain("education loan India");
+    expect(metadata.keywords).not.toContain("study abroad consultancy India");
   });
 });

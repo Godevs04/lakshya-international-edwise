@@ -64,6 +64,9 @@ export async function submitWebsiteEnquiryAction(
       `Enquiry type: ${data.enquiryType}`,
       data.formPage ? `Submitted from: ${data.formPage}` : null,
       data.loanRequired ? "Education loan required: Yes" : null,
+      data.loanAmount?.trim() ? `Loan amount: ${data.loanAmount.trim()}` : null,
+      data.currentStatus?.trim() ? `Current status: ${data.currentStatus.trim()}` : null,
+      data.preferredLender?.trim() ? `Preferred lender: ${data.preferredLender.trim()}` : null,
       data.message?.trim() ? `Message: ${data.message.trim()}` : null,
     ].filter(Boolean);
 
@@ -97,6 +100,9 @@ export async function submitWebsiteEnquiryAction(
         leadSource: "website",
         enquiryType: data.enquiryType,
         formPage: data.formPage,
+        loanAmount: data.loanAmount?.trim() || undefined,
+        currentStatus: data.currentStatus?.trim() || undefined,
+        preferredLender: data.preferredLender?.trim() || undefined,
         ip,
       },
     });

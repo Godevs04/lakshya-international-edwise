@@ -2,17 +2,10 @@ import type { MarketingNavItem } from "@/types/marketing";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 
-export const MARKETING_RESOURCES: MarketingNavItem[] = [
-  { label: "Blog", href: "/blog" },
-  { label: "Success Stories", href: "/success-stories" },
-  { label: "Gallery", href: "/gallery" },
-];
-
 export const MARKETING_NAV: MarketingNavItem[] = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
   {
-    label: "Services",
+    label: "Our Services",
     href: "/services",
     megaMenu: "services",
     children: MARKETING_SERVICES.map((service) => ({
@@ -20,6 +13,7 @@ export const MARKETING_NAV: MarketingNavItem[] = [
       href: `/services/${service.slug}`,
     })),
   },
+  { label: "Lending Partners", href: "/lending-partners" },
   {
     label: "Countries",
     href: "/countries",
@@ -29,25 +23,20 @@ export const MARKETING_NAV: MarketingNavItem[] = [
       href: `/countries/${country.slug}`,
     })),
   },
-  { label: "Education Loans", href: "/education-loans" },
-  {
-    label: "Resources",
-    href: "/blog",
-    megaMenu: "resources",
-    children: MARKETING_RESOURCES,
-  },
+  { label: "About Us", href: "/#about" },
+  { label: "Become a Partner", href: "/become-a-partner" },
+  { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];
 
 export const MARKETING_FOOTER_LINKS = {
   company: [
-    { label: "About Us", href: "/about" },
-    { label: "Success Stories", href: "/success-stories" },
-    { label: "Gallery", href: "/gallery" },
-    { label: "Blog", href: "/blog" },
+    { label: "About Us", href: "/#about" },
+    { label: "Lending Partners", href: "/lending-partners" },
+    { label: "Become a Partner", href: "/become-a-partner" },
+    { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/contact" },
   ],
-  resources: MARKETING_RESOURCES,
   services: MARKETING_SERVICES.map((service) => ({
     label: service.title,
     href: `/services/${service.slug}`,

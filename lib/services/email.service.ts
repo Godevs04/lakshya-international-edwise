@@ -431,3 +431,50 @@ export async function sendWebsiteEnquiryNotification(params: {
     }),
   });
 }
+
+export async function sendPartnerEnquiryNotification(params: {
+  name: string;
+  email: string;
+  phone: string;
+  companyName: string;
+  city: string;
+  isOwner: boolean;
+  whatsapp?: string;
+}): Promise<boolean> {
+  const { getMarketingContact } = await import("@/lib/config/marketing");
+  const contact = getMarketingContact();
+  const notifyEmail = contact.enquiryNotifyEmail?.trim();
+  if (!notifyEmail) {
+    return false;
+  }
+
+  const company = await getEmailBranding();
+  const lines = [
+    `<strong>Name:</strong> ${escapeHtml(params.name)}`,
+    `<strong>Email:</strong> ${escapeHtml(params.email)}`,
+    `<strong>Phone:</strong> ${escapeHtml(params.phone)}`,
+    `<strong>Company:</strong> ${escapeHtml(params.companyName)}`,
+    `<strong>City:</strong> ${escapeHtml(params.city)}`,
+    `<strong>Owner / Director:</strong> ${params.isOwner ? "Yes" : "No"}`,
+    params.whatsapp ? `<strong>WhatsApp:</strong> ${escapeHtml(params.whatsapp)}` : null,
+  ].filter(Boolean);
+
+  const bodyHtml = `
+    <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
+      A new partnership enquiry has been submitted from the marketing website.
+    </p>
+    ${renderInfoBox(lines.join("<br/>"))}
+    ${renderMutedNote("This partner lead was created from the public Become a Partner page.")}`;
+
+  return sendEmail({
+    to: notifyEmail,
+    subject: `New Partner Enquiry — ${params.companyName}`,
+    html: renderEmailLayout({
+      company,
+      preheader: `New partner enquiry from ${params.name}`,
+      title: "Partner Enquiry",
+      subtitle: params.companyName,
+      bodyHtml,
+    }),
+  });
+}

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { SectionHeading } from "@/components/marketing/sections/section-heading";
 
-type SectionVariant = "white" | "muted" | "tint" | "dark" | "none";
+type SectionVariant = "white" | "muted" | "tint" | "accent" | "dark" | "none";
 
 interface SectionShellProps {
   id?: string;
@@ -22,6 +22,7 @@ const variantClasses: Record<SectionVariant, string> = {
   white: "section-white",
   muted: "section-muted",
   tint: "section-tint",
+  accent: "section-accent",
   dark: "section-dark",
   none: "",
 };

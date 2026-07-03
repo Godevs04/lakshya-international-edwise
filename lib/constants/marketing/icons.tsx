@@ -21,6 +21,8 @@ import {
   HeartHandshake,
   MapPin,
   Briefcase,
+  CreditCard,
+  CircleDollarSign,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -45,6 +47,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   HeartHandshake,
   MapPin,
   Briefcase,
+  CreditCard,
+  CircleDollarSign,
 };
 
 export function getMarketingIcon(name: string): LucideIcon {

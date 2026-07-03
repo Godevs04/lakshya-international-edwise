@@ -52,6 +52,22 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: "/about", destination: "/#about", permanent: true },
+      { source: "/education-loans", destination: "/services/education-loan", permanent: true },
+      { source: "/blog", destination: "/", permanent: true },
+      { source: "/blog/:slug*", destination: "/", permanent: true },
+      { source: "/success-stories", destination: "/#testimonials", permanent: true },
+      { source: "/gallery", destination: "/", permanent: true },
+      { source: "/services/study-abroad", destination: "/services/education-loan", permanent: true },
+      { source: "/services/visa-assistance", destination: "/services/education-loan", permanent: true },
+      { source: "/services/scholarships", destination: "/services/education-loan", permanent: true },
+      { source: "/services/documentation", destination: "/services/education-loan", permanent: true },
+      { source: "/services/travel-insurance", destination: "/services/education-loan", permanent: true },
+      { source: "/services/forex", destination: "/services/forex-transfers", permanent: true },
+    ];
+  },
 };
 
 const sentryOrg = getSentryOrg();

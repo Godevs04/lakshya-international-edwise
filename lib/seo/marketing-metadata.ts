@@ -4,16 +4,21 @@ import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 export const DEFAULT_OG_IMAGE_PATH = "/logo_model.jpeg";
 
 export const DEFAULT_MARKETING_KEYWORDS = [
-  "study abroad consultancy India",
-  "education loan",
-  "visa assistance",
+  "education loan India",
+  "overseas education loan",
+  "study abroad education loan",
+  "non collateral education loan",
+  "education loan without cosigner",
+  "fast education loan approval",
+  "lowest education loan interest rate",
+  "education loan for USA",
+  "education loan for UK",
+  "education loan for Canada",
+  "education loan for Germany",
   "Lakshya International Edwise",
-  "overseas education counselling",
-  "study in Canada",
-  "study in UK",
-  "study in Australia",
-  "student visa",
-  "scholarship guidance",
+  "education loan NBFC",
+  "100 percent education loan",
+  "zero processing fee education loan",
 ] as const;
 
 function trim(value: string | undefined): string {
@@ -97,9 +102,9 @@ export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata 
 export function buildMarketingLayoutMetadata(): Metadata {
   const contact = getMarketingContact();
   return buildMarketingMetadata({
-    title: `${contact.companyName} | Study Abroad & Education Loans`,
+    title: `${contact.companyName} | Overseas Education Loan Experts`,
     description:
-      "Premium study abroad counselling, visa assistance, scholarships, and education loan support for students in India.",
+      "Fund your global education with the lowest-interest education loan from 20+ trusted lenders. Non-collateral options, 73-hour approvals, up to ₹2 Cr, 100% cost coverage.",
     path: "/",
   });
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { LeadForm } from "@/components/marketing/forms/lead-form";
+import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { OfficeLocationShowcase } from "@/components/marketing/maps/office-location-showcase";
 import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_OFFICE_HOURS } from "@/lib/constants/marketing/offices";
@@ -14,14 +14,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMarketingMetadata({
     title: `Contact Us | ${contact.companyName}`,
     description:
-      "Reach Lakshya International Edwise for study abroad counselling, visa support, and education loan guidance. We respond within one business day.",
+      "Reach Lakshya International Edwise for education loan guidance, forex, and study-abroad financing. We respond within one business day.",
     path: "/contact",
   });
 }
 
 export default function ContactPage() {
   const contact = getMarketingContact();
-  const whatsapp = getWhatsAppLink("Hello, I would like to book a consultation.");
+  const whatsapp = getWhatsAppLink("Hello, I would like to check my education loan eligibility.");
 
   return (
     <>
@@ -36,16 +36,23 @@ export default function ContactPage() {
       />
       <PageHero
         eyebrow="Contact"
-        title="Speak with our counsellors"
-        description="Share your profile and goals. We respond within one business day."
+        title="Talk to our loan experts"
+        description="Reach out for education loan guidance. We respond within one business day."
       />
 
       <SectionShell variant="white" padding>
         <div className="grid gap-8 lg:grid-cols-2">
-          <LeadForm variant="contact" formPage="/contact" premium />
+          <div className="consultation-card rounded-2xl p-6 md:p-8">
+            <h2 className="text-lg font-semibold text-foreground">Check your loan eligibility</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Share a few details and our team will compare offers across 20+ lenders and call
+              you back with the best fit.
+            </p>
+            <EligibilityCta source="contact-page" className="mt-5 px-6 py-3 text-base" />
+          </div>
           <div className="space-y-4">
             <div className="card-premium p-6">
-              <h2 className="text-lg font-semibold text-secondary">Office contact</h2>
+              <h2 className="text-lg font-semibold text-foreground">Office contact</h2>
               <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
                 {contact.phone && (
                   <li className="flex items-center gap-2">

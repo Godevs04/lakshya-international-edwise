@@ -8,6 +8,7 @@ import { MARKETING_NAV } from "@/lib/constants/marketing/navigation";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
 import { MegaMenu } from "@/components/marketing/layout/mega-menu";
+import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import type { MegaMenuType } from "@/types/marketing";
 
 interface MarketingNavbarProps {
@@ -50,8 +51,8 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
       className={cn(
         "sticky top-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "border-border/80 bg-white/95 shadow-sm backdrop-blur-md"
-          : "border-transparent bg-white/70 backdrop-blur-sm"
+          ? "border-white/40 bg-white/80 shadow-sm backdrop-blur-xl"
+          : "border-transparent bg-white/60 backdrop-blur-md"
       )}
     >
       <div className="container mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
@@ -112,9 +113,7 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
             <LogIn className="h-4 w-4" />
             Staff Login
           </Link>
-          <Link href="/contact" className="btn-marketing rounded-full px-5 py-2.5 text-sm font-semibold">
-            Book Consultation
-          </Link>
+          <EligibilityCta source="navbar" className="px-5 py-2.5 text-sm" />
         </div>
 
         <button
@@ -183,9 +182,11 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
             <Link href="/login" className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium">
               Staff Login
             </Link>
-            <Link href="/contact" className="btn-marketing rounded-full px-4 py-2.5 text-center text-sm font-semibold">
-              Book Consultation
-            </Link>
+            <EligibilityCta
+              source="navbar-mobile"
+              onClick={() => setMobileOpen(false)}
+              className="w-full px-4 py-2.5 text-sm"
+            />
           </div>
         </div>
       )}

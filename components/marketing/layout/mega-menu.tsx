@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import type { MarketingNavItem } from "@/types/marketing";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
-import { MARKETING_RESOURCES } from "@/lib/constants/marketing/navigation";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { getCountryFlagLabel } from "@/lib/constants/marketing/countries";
 import { ArrowRight } from "lucide-react";
@@ -31,7 +29,6 @@ export function MegaMenu({ type, isOpen, onClose }: MegaMenuProps) {
         >
           {type === "services" && <ServicesMegaMenu onClose={onClose} />}
           {type === "countries" && <CountriesMegaMenu onClose={onClose} />}
-          {type === "resources" && <ResourcesMegaMenu onClose={onClose} />}
         </motion.div>
       )}
     </AnimatePresence>
@@ -84,7 +81,7 @@ function CountriesMegaMenu({ onClose }: { onClose: () => void }) {
     <div className="w-[min(90vw,560px)]">
       <div className="mb-3 flex items-center justify-between px-1">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Study Destinations
+          Loan Destinations
         </p>
         <Link
           href="/countries"
@@ -116,27 +113,6 @@ function CountriesMegaMenu({ onClose }: { onClose: () => void }) {
           </Link>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ResourcesMegaMenu({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="w-56">
-      <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Resources
-      </p>
-      {MARKETING_RESOURCES.map((item: MarketingNavItem) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          onClick={onClose}
-          role="menuitem"
-          className="block rounded-lg px-3 py-2 text-sm text-secondary/80 transition-colors hover:bg-muted hover:text-secondary"
-        >
-          {item.label}
-        </Link>
-      ))}
     </div>
   );
 }

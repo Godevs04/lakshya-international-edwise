@@ -3,7 +3,8 @@ export type EnquiryType =
   | "quick"
   | "contact"
   | "loan"
-  | "country";
+  | "country"
+  | "eligibility";
 
 export type LeadFormVariant = EnquiryType;
 
@@ -14,6 +15,27 @@ export interface MarketingNavItem {
   href: string;
   megaMenu?: MegaMenuType;
   children?: MarketingNavItem[];
+}
+
+export type LenderCategory =
+  | "government"
+  | "private"
+  | "nbfc"
+  | "international";
+
+export interface MarketingLender {
+  name: string;
+  slug: string;
+  logo?: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  accent?: string;
+  category: LenderCategory;
+  roiFrom: number;
+  maxLoanLabel: string;
+  processingLabel: string;
+  unsecured?: boolean;
+  featured?: boolean;
 }
 
 export interface MarketingService {
@@ -62,27 +84,6 @@ export interface MarketingFaq {
   question: string;
   answer: string;
   category?: string;
-}
-
-export interface BlogPostMeta {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  coverImage?: string;
-  author: string;
-  readingTimeMinutes?: number;
-}
-
-export interface BlogPost extends BlogPostMeta {
-  content: string;
-}
-
-export interface MarketingPartnerUniversity {
-  name: string;
-  country: string;
-  logo?: string;
 }
 
 export interface MarketingAward {

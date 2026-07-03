@@ -22,14 +22,25 @@ export function organizationJsonLd(params: {
 }) {
   return {
     "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
+    "@type": ["Organization", "FinancialService"],
     name: params.name,
     url: params.url,
     email: params.email,
     telephone: params.phone,
     ...(params.logo ? { logo: params.logo } : {}),
-    ...(params.address ? { address: { "@type": "PostalAddress", addressLocality: params.address } } : {}),
+    ...(params.address
+      ? { address: { "@type": "PostalAddress", addressLocality: params.address } }
+      : {}),
     ...(params.sameAs?.length ? { sameAs: params.sameAs } : {}),
+    makesOffer: {
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: "Overseas Education Loan Assistance",
+        description:
+          "Education loan comparison and assistance for students studying abroad in India.",
+      },
+    },
   };
 }
 
@@ -99,7 +110,7 @@ export function serviceJsonLd(params: {
     description: params.description,
     url: params.url,
     provider: {
-      "@type": "EducationalOrganization",
+      "@type": "FinancialService",
       name: params.provider,
     },
     areaServed: "IN",

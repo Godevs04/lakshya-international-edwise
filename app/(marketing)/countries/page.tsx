@@ -10,9 +10,9 @@ import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
   return buildMarketingMetadata({
-    title: `Study Destinations | ${contact.companyName}`,
+    title: `Education Loans by Country | ${contact.companyName}`,
     description:
-      "Explore top study abroad destinations — USA, Canada, UK, Australia, Europe, and more — with expert counselling from Lakshya International Edwise.",
+      "Country-specific education loan guidance for the USA, Canada, UK, Germany, Australia, and more — with visa financial requirements and lender options.",
     path: "/countries",
   });
 }
@@ -22,8 +22,8 @@ export default function CountriesPage() {
     <>
       <PageHero
         eyebrow="Countries"
-        title="Choose the right country for your goals"
-        description="Compare destinations, costs, visa pathways, and career outcomes with expert guidance."
+        title="Fund your education in every top destination"
+        description="Compare loan options, visa financial requirements, and typical costs for each country."
       />
       <SectionShell variant="muted" padding>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

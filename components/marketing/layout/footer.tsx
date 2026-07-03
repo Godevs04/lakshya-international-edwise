@@ -2,12 +2,13 @@ import Link from "next/link";
 import { MARKETING_FOOTER_LINKS } from "@/lib/constants/marketing/navigation";
 import { getMarketingContact, getWhatsAppLink } from "@/lib/config/marketing";
 import { AppLogo } from "@/components/brand/app-logo";
+import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { Mail, Phone, MapPin, Clock, Share2, ExternalLink } from "lucide-react";
 import { MARKETING_OFFICE_HOURS } from "@/lib/constants/marketing/offices";
 
 export function MarketingFooter() {
   const contact = getMarketingContact();
-  const whatsapp = getWhatsAppLink("Hello, I would like to enquire about study abroad counselling.");
+  const whatsapp = getWhatsAppLink("Hello, I would like to check my education loan eligibility.");
 
   const socialLinks = [
     { href: contact.social.facebook, label: "Facebook" },
@@ -23,7 +24,8 @@ export function MarketingFooter() {
           <div className="space-y-4 lg:col-span-2">
             <AppLogo alt={contact.companyName} variant="mobile" surface="dark" />
             <p className="max-w-sm text-sm leading-relaxed text-white/70">
-              Premium study abroad counselling and education loan assistance for ambitious students and families.
+              Your trusted overseas education financial partner — the lowest-interest education
+              loans from 20+ lenders, with fast approvals and zero service charges.
             </p>
             {socialLinks.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -43,13 +45,11 @@ export function MarketingFooter() {
                 ))}
               </div>
             )}
-            <Link href="/contact" className="btn-marketing inline-block rounded-full px-5 py-2.5 text-sm font-semibold">
-              Book Free Consultation
-            </Link>
+            <EligibilityCta source="footer" className="px-5 py-2.5 text-sm" />
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-300">Company</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Company</h3>
             <ul className="space-y-2.5 text-sm text-white/75">
               {MARKETING_FOOTER_LINKS.company.map((link) => (
                 <li key={link.href}>
@@ -62,7 +62,7 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-300">Services</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Services</h3>
             <ul className="space-y-2.5 text-sm text-white/75">
               {MARKETING_FOOTER_LINKS.services.slice(0, 6).map((link) => (
                 <li key={link.href}>
@@ -75,7 +75,7 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-300">Countries</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Countries</h3>
             <ul className="space-y-2.5 text-sm text-white/75">
               {MARKETING_FOOTER_LINKS.countries.slice(0, 6).map((link) => (
                 <li key={link.href}>
@@ -88,11 +88,11 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-300">Contact</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Contact</h3>
             <ul className="space-y-3 text-sm text-white/75">
               {contact.phone && (
                 <li className="flex items-start gap-2">
-                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
                   <a href={`tel:${contact.phone}`} className="hover:text-white">
                     {contact.phone}
                   </a>
@@ -100,25 +100,25 @@ export function MarketingFooter() {
               )}
               {contact.email && (
                 <li className="flex items-start gap-2">
-                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
                   <a href={`mailto:${contact.email}`} className="hover:text-white">
                     {contact.email}
                   </a>
                 </li>
               )}
               <li className="flex items-start gap-2">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
                 <span>{MARKETING_OFFICE_HOURS}</span>
               </li>
               {whatsapp && (
                 <li>
-                  <a href={whatsapp} target="_blank" rel="noreferrer" className="font-medium text-emerald-300 hover:text-white">
+                  <a href={whatsapp} target="_blank" rel="noreferrer" className="font-medium text-sky-300 hover:text-white">
                     WhatsApp Chat
                   </a>
                 </li>
               )}
               <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
                 <span>India</span>
               </li>
             </ul>
@@ -127,13 +127,13 @@ export function MarketingFooter() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6 border-t border-white/10 pt-8">
           <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-white/50">
-            ISO Certified
+            20+ Lending Partners
           </span>
           <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-white/50">
-            12+ Years Experience
+            20,000+ Students Funded
           </span>
           <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-white/50">
-            320+ University Partners
+            ROI From 8.25%
           </span>
         </div>
       </div>
