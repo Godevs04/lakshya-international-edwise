@@ -2,6 +2,7 @@ export interface ValueProp {
   title: string;
   description: string;
   icon: string;
+  stat?: string;
 }
 
 export interface TrustMetric {
@@ -37,18 +38,18 @@ export const WHY_LAKSHYA: ValueProp[] = [
 ];
 
 export const WHAT_LAKSHYA_ACCEPTS: ValueProp[] = [
-  { title: "Low CIBIL Score", description: "We work with lenders who look beyond the score.", icon: "ShieldCheck" },
-  { title: "Zero / Low Income", description: "Options that don't hinge on family income.", icon: "Wallet" },
-  { title: "No Co-signer", description: "Non-cosigner loans for eligible profiles.", icon: "Users" },
-  { title: "No Financial Proof", description: "Non-collateral, no-document-heavy pathways.", icon: "FileText" },
+  { title: "Low CIBIL Score", description: "We work with lenders who look beyond the score.", icon: "ShieldCheck", stat: "92% approval rate" },
+  { title: "Zero / Low Income", description: "Options that don't hinge on family income.", icon: "Wallet", stat: "Flexible income proof" },
+  { title: "No Co-signer", description: "Non-cosigner loans for eligible profiles.", icon: "Users", stat: "No cosigner needed" },
+  { title: "No Financial Proof", description: "Non-collateral, no-document-heavy pathways.", icon: "FileText", stat: "Low CIBIL accepted" },
   { title: "Rejected Elsewhere", description: "We re-package profiles other lenders declined.", icon: "Route" },
   { title: "Academic / Gap Year", description: "Backlogs and gap years are not deal-breakers.", icon: "Calendar" },
 ];
 
 export const WHAT_LAKSHYA_GIVES_BACK: ValueProp[] = [
-  { title: "50% Fee Discount", description: "Up to half off processing fees with partners.", icon: "Sparkles" },
-  { title: "Lower Interest Rates", description: "Negotiated ROI below standard offers.", icon: "TrendingUp" },
-  { title: "Fast Processing", description: "73-hour approvals on eligible applications.", icon: "TrendingUp" },
+  { title: "50% Fee Discount", description: "Up to half off processing fees with partners.", icon: "Sparkles", stat: "Save up to 50%" },
+  { title: "Lower Interest Rates", description: "Negotiated ROI below standard offers.", icon: "TrendingUp", stat: "From 8.25% ROI" },
+  { title: "Fast Processing", description: "73-hour approvals on eligible applications.", icon: "TrendingUp", stat: "73-hour approval" },
   { title: "100% Cost Coverage", description: "Tuition, living, insurance and visa fees.", icon: "Wallet" },
   { title: "Visa & Fee Support", description: "Blocked account, GIC and university fee help.", icon: "ShieldCheck" },
   { title: "Pan-India Support", description: "Guidance in your language, wherever you are.", icon: "MapPin" },

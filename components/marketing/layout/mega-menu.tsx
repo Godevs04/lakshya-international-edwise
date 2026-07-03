@@ -23,10 +23,10 @@ export function MegaMenu({ type, isOpen, onClose }: MegaMenuProps) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 8 }}
-          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           className="mega-menu-panel absolute left-0 top-full z-50 mt-2 p-0"
           role="menu"
           onMouseLeave={onClose}

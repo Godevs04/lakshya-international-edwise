@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
+import { ContactForm } from "@/components/marketing/forms/contact-form";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { OfficeLocationShowcase } from "@/components/marketing/maps/office-location-showcase";
 import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
@@ -42,13 +43,17 @@ export default function ContactPage() {
 
       <SectionShell variant="white" padding>
         <div className="grid gap-8 lg:grid-cols-2">
-          <div className="consultation-card rounded-2xl p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground">Check your loan eligibility</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Share a few details and our team will compare offers across 20+ lenders and call
-              you back with the best fit.
-            </p>
-            <EligibilityCta source="contact-page" className="mt-5 px-6 py-3 text-base" />
+          <div className="space-y-6">
+            <ContactForm />
+            <div className="rounded-2xl border border-border/60 bg-accent/30 p-5">
+              <h3 className="text-sm font-semibold text-foreground">
+                Prefer a faster loan check?
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Compare offers across 20+ lenders in under 7 minutes.
+              </p>
+              <EligibilityCta source="contact-page" className="mt-4 px-6 py-2.5 text-sm" />
+            </div>
           </div>
           <div className="space-y-4">
             <div className="card-premium p-6">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
+import { cn } from "@/lib/utils";
 
 interface AnimatedCounterProps {
   value: number;
@@ -9,6 +10,7 @@ interface AnimatedCounterProps {
   duration?: number;
   decimals?: number;
   className?: string;
+  pulseOnComplete?: boolean;
 }
 
 export function AnimatedCounter({
@@ -17,10 +19,12 @@ export function AnimatedCounter({
   duration = 1200,
   decimals = 0,
   className,
+  pulseOnComplete = false,
 }: AnimatedCounterProps) {
   const { prefersReducedMotion } = useMarketingMotion();
   const [count, setCount] = useState(prefersReducedMotion ? value : 0);
   const [started, setStarted] = useState(prefersReducedMotion);
+  const [pulsed, setPulsed] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -53,15 +57,19 @@ export function AnimatedCounter({
       setCount((value * frame) / totalFrames);
       if (frame >= totalFrames) {
         setCount(value);
+        if (pulseOnComplete) setPulsed(true);
         window.clearInterval(timer);
       }
     }, duration / totalFrames);
 
     return () => window.clearInterval(timer);
-  }, [started, value, duration, prefersReducedMotion]);
+  }, [started, value, duration, prefersReducedMotion, pulseOnComplete]);
 
   return (
-    <span ref={ref} className={className}>
+    <span
+      ref={ref}
+      className={cn(className, pulsed && pulseOnComplete && "counter-pulse inline-block")}
+    >
       {count.toLocaleString("en-IN", {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,

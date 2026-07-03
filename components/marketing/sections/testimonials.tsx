@@ -27,6 +27,8 @@ export function TestimonialsSection({ showHeading = true }: TestimonialsSectionP
     <SectionShell
       id="testimonials"
       variant="muted"
+      background="radial"
+      journeyNode="success"
       eyebrow="Student Stories"
       title="Students trust Lakshya to fund their global future"
       description="Real loan approvals for students headed to top universities worldwide."

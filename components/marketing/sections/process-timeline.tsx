@@ -1,4 +1,5 @@
 import { SectionShell } from "@/components/marketing/sections/section-shell";
+import { ProcessTimelineLine } from "@/components/marketing/sections/process-timeline-line";
 import { MARKETING_PROCESS_STEPS } from "@/lib/constants/marketing/process";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 
@@ -19,10 +20,8 @@ export function ProcessTimelineSection() {
       description="A clear, step-by-step process that keeps you informed at every stage."
     >
       <div className="relative">
-        <div
-          className="absolute left-5 top-0 hidden h-full w-px bg-border md:left-1/2 md:block"
-          aria-hidden
-        />
+        <ProcessTimelineLine />
+        <div className="absolute left-5 top-0 h-full w-px bg-border md:left-1/2 md:-translate-x-1/2" aria-hidden />
         <div className="space-y-5 md:space-y-8">
           {MARKETING_PROCESS_STEPS.map((step, index) => {
             const isEven = index % 2 === 0;

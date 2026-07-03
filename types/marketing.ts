@@ -12,6 +12,10 @@ export type MegaMenuType = "services" | "countries" | "resources" | "none";
 
 export interface MarketingNavItem {
   label: string;
+  /** Shorter label for compact desktop nav (lg–xl breakpoints) */
+  shortLabel?: string;
+  /** Visually prominent nav item (e.g. partner programme CTA) */
+  featured?: boolean;
   href: string;
   megaMenu?: MegaMenuType;
   children?: MarketingNavItem[];
@@ -90,6 +94,8 @@ export interface MarketingTestimonial {
   photo?: string;
   visaStatus?: string;
   videoUrl?: string;
+  loanAmount?: string;
+  approvalDate?: string;
 }
 
 export interface MarketingFaq {

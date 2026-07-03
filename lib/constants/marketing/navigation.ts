@@ -31,7 +31,11 @@ export const MARKETING_NAV: MarketingNavItem[] = [
     megaMenu: "services",
     children: buildServiceNavChildren(),
   },
-  { label: "Lending Partners", href: "/lending-partners" },
+  {
+    label: "Lending Partners",
+    shortLabel: "Lenders",
+    href: "/lending-partners",
+  },
   {
     label: "Countries",
     href: "/countries",
@@ -42,7 +46,12 @@ export const MARKETING_NAV: MarketingNavItem[] = [
     })),
   },
   { label: "About Us", href: "/#about" },
-  { label: "Become a Partner", href: "/become-a-partner" },
+  {
+    label: "Become a Partner",
+    shortLabel: "Partner",
+    href: "/become-a-partner",
+    featured: true,
+  },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];

@@ -3,33 +3,230 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, LogIn } from "lucide-react";
+import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from "framer-motion";
+import { Menu, X, ChevronDown, LogIn, ArrowRight } from "lucide-react";
 import { MARKETING_NAV } from "@/lib/constants/marketing/navigation";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/brand/app-logo";
 import { MegaMenu } from "@/components/marketing/layout/mega-menu";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
-import type { MegaMenuType } from "@/types/marketing";
+import { useNavbarScroll } from "@/hooks/use-navbar-scroll";
+import type { MarketingNavItem, MegaMenuType } from "@/types/marketing";
 
 interface MarketingNavbarProps {
   companyName: string;
 }
 
-export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
+const EASE = [0.22, 1, 0.36, 1] as const;
+const NAV_SPRING = { type: "spring" as const, stiffness: 420, damping: 34 };
+
+const REGULAR_NAV = MARKETING_NAV.filter((item) => !item.featured);
+const FEATURED_NAV = MARKETING_NAV.filter((item) => item.featured);
+
+function NavLabel({ item }: { item: MarketingNavItem }) {
+  if (!item.shortLabel) {
+    return <>{item.label}</>;
+  }
+
+  return (
+    <>
+      <span className="xl:hidden">{item.shortLabel}</span>
+      <span className="hidden xl:inline">{item.label}</span>
+    </>
+  );
+}
+
+function useNavActive() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
+
+  return useCallback(
+    (href: string) => {
+      if (href.includes("#")) return false;
+      return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+    },
+    [pathname]
+  );
+}
+
+interface NavItemLinkProps {
+  item: MarketingNavItem;
+  active: boolean;
+  prefersReducedMotion: boolean | null;
+  showJoinBadge?: boolean;
+  className?: string;
+}
+
+function NavItemLink({
+  item,
+  active,
+  prefersReducedMotion,
+  showJoinBadge = false,
+  className,
+}: NavItemLinkProps) {
+  return (
+    <motion.div
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      transition={{ duration: 0.25, ease: EASE }}
+      className="relative"
+    >
+      <Link
+        href={item.href}
+        className={cn(
+          "nav-item group relative inline-flex h-11 items-center gap-1 rounded-full px-3 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms] xl:px-3.5",
+          "hover:text-secondary hover:shadow-[0_0_0_4px_rgba(11,143,216,0.08)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          active && "nav-item-active text-primary",
+          showJoinBadge && "pr-4",
+          className
+        )}
+      >
+        <NavLabel item={item} />
+        {showJoinBadge && (
+          <span className="nav-partner-badge" aria-hidden>
+            Join
+          </span>
+        )}
+        {active && (
+          <motion.span
+            layoutId="nav-active-indicator"
+            className="absolute inset-x-3 bottom-1 h-0.5 rounded-full bg-primary"
+            transition={prefersReducedMotion ? { duration: 0 } : NAV_SPRING}
+          />
+        )}
+      </Link>
+    </motion.div>
+  );
+}
+
+interface DesktopNavItemProps {
+  item: MarketingNavItem;
+  active: boolean;
+  openMega: MegaMenuType | null;
+  onMegaOpen: (type: MegaMenuType) => void;
+  onMegaClose: () => void;
+  prefersReducedMotion: boolean | null;
+}
+
+function DesktopNavItem({
+  item,
+  active,
+  openMega,
+  onMegaOpen,
+  onMegaClose,
+  prefersReducedMotion,
+}: DesktopNavItemProps) {
+  const hasMega = item.megaMenu && item.megaMenu !== "none";
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => hasMega && onMegaOpen(item.megaMenu!)}
+      onMouseLeave={() => hasMega && onMegaClose()}
+    >
+      <motion.div
+        whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+        transition={{ duration: 0.25, ease: EASE }}
+      >
+        <Link
+          href={item.href}
+          aria-expanded={hasMega ? openMega === item.megaMenu : undefined}
+          className={cn(
+            "nav-item group relative inline-flex h-11 items-center gap-1 rounded-full px-3 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms] xl:px-3.5",
+            "hover:text-secondary hover:shadow-[0_0_0_4px_rgba(11,143,216,0.08)]",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+            active && "nav-item-active text-primary"
+          )}
+        >
+          <NavLabel item={item} />
+          {hasMega && (
+            <ChevronDown
+              className={cn(
+                "h-3.5 w-3.5 opacity-50 transition-transform duration-[250ms]",
+                openMega === item.megaMenu && "rotate-180 opacity-80"
+              )}
+            />
+          )}
+          {active && (
+            <motion.span
+              layoutId="nav-active-indicator"
+              className="absolute inset-x-3 bottom-1 h-0.5 rounded-full bg-primary"
+              transition={prefersReducedMotion ? { duration: 0 } : NAV_SPRING}
+            />
+          )}
+        </Link>
+      </motion.div>
+
+      {hasMega && item.megaMenu && item.megaMenu !== "none" && (
+        <MegaMenu
+          type={item.megaMenu}
+          isOpen={openMega === item.megaMenu}
+          onClose={onMegaClose}
+        />
+      )}
+    </div>
+  );
+}
+
+interface MobileNavLinkProps {
+  item: MarketingNavItem;
+  active: boolean;
+  prefersReducedMotion: boolean | null;
+  onNavigate: () => void;
+}
+
+function MobileNavLink({
+  item,
+  active,
+  prefersReducedMotion,
+  onNavigate,
+}: MobileNavLinkProps) {
+  return (
+    <motion.div
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      transition={{ duration: 0.25, ease: EASE }}
+      className="flex-1"
+    >
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className={cn(
+          "nav-item group relative flex h-11 w-full items-center rounded-xl px-3 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms]",
+          "active:shadow-[0_0_0_4px_rgba(11,143,216,0.08)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+          active && "nav-item-active text-primary",
+          item.featured && "pr-6"
+        )}
+      >
+        {item.label}
+        {item.featured && (
+          <span className="nav-partner-badge" aria-hidden>
+            Join
+          </span>
+        )}
+        {active && (
+          <motion.span
+            layoutId="nav-active-indicator"
+            className="absolute inset-x-3 bottom-1.5 h-0.5 rounded-full bg-primary"
+            transition={prefersReducedMotion ? { duration: 0 } : NAV_SPRING}
+          />
+        )}
+      </Link>
+    </motion.div>
+  );
+}
+
+export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
+  const isActive = useNavActive();
+  const { compact, progress } = useNavbarScroll();
+  const prefersReducedMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<MegaMenuType | null>(null);
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const closeMega = useCallback(() => setOpenMega(null), []);
+  const openMegaMenu = useCallback((type: MegaMenuType) => setOpenMega(type), []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -42,157 +239,228 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  function isActive(href: string) {
-    return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
-  }
-
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b transition-all duration-300",
-        scrolled
-          ? "border-white/40 bg-white/80 shadow-sm backdrop-blur-xl"
-          : "border-transparent bg-white/60 backdrop-blur-md"
+        "marketing-navbar sticky top-0 z-50 transition-[background,box-shadow,height] duration-[250ms] ease-out",
+        compact
+          ? "is-compact bg-white/95 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+          : "bg-white/80 backdrop-blur-lg"
       )}
     >
-      <div className="container mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <AppLogo alt={companyName} variant="mobile" />
-          <span className="hidden max-w-[11rem] truncate text-sm font-semibold text-secondary sm:inline">
+      <motion.div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] origin-left bg-gradient-to-r from-primary/60 to-primary"
+        style={{ scaleX: progress }}
+        aria-hidden
+      />
+
+      <div
+        className={cn(
+          "container mx-auto flex max-w-[88rem] items-center px-5 transition-[height] duration-[250ms] lg:px-8",
+          compact ? "h-[68px]" : "h-20"
+        )}
+      >
+        {/* LEFT — Logo + company name */}
+        <Link
+          href="/"
+          className="group flex shrink-0 items-center gap-3"
+          aria-label={`${companyName} home`}
+        >
+          <motion.div
+            className="flex items-center origin-left"
+            animate={{ scale: compact ? 0.9 : 1 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: EASE }}
+          >
+            <AppLogo
+              alt={companyName}
+              variant="mobile"
+              className="!h-9 !max-w-[3rem] !rounded-xl !px-2 !py-1 !shadow-sm !ring-1 !ring-black/[0.04] transition-shadow duration-[250ms] group-hover:!shadow-md"
+            />
+          </motion.div>
+          <span className="hidden max-w-[10rem] truncate text-sm font-semibold tracking-tight text-secondary transition-colors duration-[250ms] group-hover:text-primary sm:inline xl:max-w-[14rem]">
             {companyName}
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main navigation">
-          {MARKETING_NAV.map((item) => {
-            const hasMega = item.megaMenu && item.megaMenu !== "none";
-            return (
-              <div
-                key={item.href}
-                className="relative"
-                onMouseEnter={() => hasMega && setOpenMega(item.megaMenu!)}
-                onMouseLeave={() => hasMega && setOpenMega(null)}
-              >
-                <Link
-                  href={item.href}
-                  aria-expanded={hasMega ? openMega === item.megaMenu : undefined}
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-3.5 py-2.5 text-sm font-medium transition-colors",
-                    isActive(item.href)
-                      ? "bg-primary/10 text-primary"
-                      : "text-secondary/80 hover:bg-muted hover:text-secondary"
-                  )}
-                >
-                  {item.label}
-                  {hasMega && (
-                    <ChevronDown
-                      className={cn(
-                        "h-3.5 w-3.5 opacity-60 transition-transform",
-                        openMega === item.megaMenu && "rotate-180"
-                      )}
-                    />
-                  )}
-                </Link>
-                {hasMega && item.megaMenu && item.megaMenu !== "none" && (
-                  <MegaMenu
-                    type={item.megaMenu}
-                    isOpen={openMega === item.megaMenu}
-                    onClose={closeMega}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </nav>
-
-        <div className="hidden items-center gap-2 md:flex">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2.5 text-sm font-medium text-secondary/80 transition-colors hover:bg-muted"
-          >
-            <LogIn className="h-4 w-4" />
-            Staff Login
-          </Link>
-          <EligibilityCta source="navbar" className="px-5 py-2.5 text-sm" />
+        {/* CENTER — Single glass navigation container */}
+        <div className="ml-8 hidden min-w-0 flex-1 justify-center lg:flex">
+          <LayoutGroup id="marketing-nav">
+            <nav
+              className="nav-glass flex items-center gap-0.5 xl:gap-1"
+              aria-label="Main navigation"
+            >
+              {REGULAR_NAV.map((item) => (
+                <DesktopNavItem
+                  key={item.href}
+                  item={item}
+                  active={isActive(item.href)}
+                  openMega={openMega}
+                  onMegaOpen={openMegaMenu}
+                  onMegaClose={closeMega}
+                  prefersReducedMotion={prefersReducedMotion}
+                />
+              ))}
+            </nav>
+          </LayoutGroup>
         </div>
 
+        {/* RIGHT — Partner, Staff Login, CTA */}
+        <div className="ml-6 hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
+          {FEATURED_NAV.map((item) => (
+            <NavItemLink
+              key={item.href}
+              item={item}
+              active={isActive(item.href)}
+              prefersReducedMotion={prefersReducedMotion}
+              showJoinBadge
+            />
+          ))}
+
+          <Link
+            href="/login"
+            className="group inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-secondary opacity-70 transition-[opacity,color] duration-[250ms] hover:text-secondary hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <LogIn className="h-4 w-4" aria-hidden />
+            <span className="hidden xl:inline">Staff Login</span>
+          </Link>
+
+          <EligibilityCta
+            source="navbar"
+            className="nav-eligibility-cta group"
+          >
+            Check Eligibility
+            <ArrowRight
+              className="h-4 w-4 transition-transform duration-[250ms] ease-out group-hover:translate-x-1"
+              aria-hidden
+            />
+          </EligibilityCta>
+        </div>
+
+        {/* Mobile hamburger */}
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border lg:hidden"
+          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white/90 text-secondary transition-colors duration-[250ms] hover:border-primary/25 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:hidden"
           onClick={() => setMobileOpen((open) => !open)}
           aria-expanded={mobileOpen}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <motion.span
+            key={mobileOpen ? "close" : "menu"}
+            initial={prefersReducedMotion ? false : { opacity: 0, rotate: -90 }}
+            animate={{ opacity: 1, rotate: 0 }}
+            transition={{ duration: 0.2, ease: EASE }}
+            className="inline-flex"
+          >
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </motion.span>
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="border-t border-border bg-white px-4 py-4 lg:hidden">
-          <div className="space-y-1">
-            {MARKETING_NAV.map((item) => (
-              <div key={item.href}>
-                <div className="flex items-center">
-                  <Link
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium text-secondary hover:bg-muted"
-                  >
-                    {item.label}
-                  </Link>
-                  {item.children && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setExpandedMobile((current) =>
-                          current === item.href ? null : item.href
-                        )
-                      }
-                      className="rounded-lg p-2 text-muted-foreground"
-                      aria-expanded={expandedMobile === item.href}
-                      aria-label={`Expand ${item.label} menu`}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="overflow-hidden border-t border-slate-200/60 bg-white/95 backdrop-blur-xl lg:hidden"
+          >
+            <div className="px-5 py-4">
+              <LayoutGroup id="marketing-nav-mobile">
+                <nav className="nav-glass-mobile space-y-0.5 rounded-2xl p-2" aria-label="Mobile navigation">
+                  {MARKETING_NAV.map((item, index) => (
+                    <motion.div
+                      key={item.href}
+                      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04, duration: 0.25, ease: EASE }}
                     >
-                      <ChevronDown
-                        className={cn(
-                          "h-4 w-4 transition-transform",
-                          expandedMobile === item.href && "rotate-180"
+                      <div className="flex items-center">
+                        <MobileNavLink
+                          item={item}
+                          active={isActive(item.href)}
+                          prefersReducedMotion={prefersReducedMotion}
+                          onNavigate={() => setMobileOpen(false)}
+                        />
+                        {item.children && (
+                          <motion.button
+                            type="button"
+                            whileTap={prefersReducedMotion ? undefined : { scale: 0.94 }}
+                            onClick={() =>
+                              setExpandedMobile((current) =>
+                                current === item.href ? null : item.href
+                              )
+                            }
+                            className="rounded-lg p-2 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            aria-expanded={expandedMobile === item.href}
+                            aria-label={`Expand ${item.label} menu`}
+                          >
+                            <ChevronDown
+                              className={cn(
+                                "h-4 w-4 transition-transform duration-[250ms]",
+                                expandedMobile === item.href && "rotate-180"
+                              )}
+                            />
+                          </motion.button>
                         )}
-                      />
-                    </button>
-                  )}
-                </div>
-                {item.children && expandedMobile === item.href && (
-                  <div className="ml-3 border-l border-border pl-3">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={cn(
-                          "block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-secondary",
-                          child.href.includes("#") && "pl-6 text-xs"
+                      </div>
+                      <AnimatePresence>
+                        {item.children && expandedMobile === item.href && (
+                          <motion.div
+                            initial={prefersReducedMotion ? false : { opacity: 0, height: 0, filter: "blur(4px)" }}
+                            animate={{ opacity: 1, height: "auto", filter: "blur(0px)" }}
+                            exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0, filter: "blur(4px)" }}
+                            transition={{ duration: 0.25, ease: EASE }}
+                            className="ml-3 overflow-hidden border-l border-slate-200 pl-3"
+                          >
+                            {item.children.map((child, childIndex) => (
+                              <motion.div
+                                key={child.href}
+                                initial={prefersReducedMotion ? false : { opacity: 0, x: -6 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: childIndex * 0.03, duration: 0.2, ease: EASE }}
+                              >
+                                <Link
+                                  href={child.href}
+                                  onClick={() => setMobileOpen(false)}
+                                  className={cn(
+                                    "block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                                    child.href.includes("#") && "pl-6 text-xs"
+                                  )}
+                                >
+                                  {child.label}
+                                </Link>
+                              </motion.div>
+                            ))}
+                          </motion.div>
                         )}
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                      </AnimatePresence>
+                    </motion.div>
+                  ))}
+                </nav>
+              </LayoutGroup>
+
+              <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-secondary/70 transition-colors hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Staff Login
+                </Link>
+                <EligibilityCta
+                  source="navbar-mobile"
+                  onClick={() => setMobileOpen(false)}
+                  className="nav-eligibility-cta group w-full"
+                >
+                  Check Eligibility
+                  <ArrowRight className="h-4 w-4 transition-transform duration-[250ms] group-hover:translate-x-1" />
+                </EligibilityCta>
               </div>
-            ))}
-          </div>
-          <div className="mt-4 flex flex-col gap-2">
-            <Link href="/login" className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium">
-              Staff Login
-            </Link>
-            <EligibilityCta
-              source="navbar-mobile"
-              onClick={() => setMobileOpen(false)}
-              className="w-full px-4 py-2.5 text-sm"
-            />
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

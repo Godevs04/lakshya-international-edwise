@@ -14,7 +14,7 @@ export function useMarketingMotion() {
       : {
           initial: { opacity: 0, y: 24 },
           whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, margin: "-60px" },
+          viewport: { once: true, margin: "-24px", amount: 0.15 },
           transition: { duration: 0.5, ease: EASE },
         },
     fadeIn: prefersReducedMotion
@@ -30,7 +30,7 @@ export function useMarketingMotion() {
       : {
           initial: { opacity: 0, scale: 0.96 },
           whileInView: { opacity: 1, scale: 1 },
-          viewport: { once: true },
+          viewport: { once: true, amount: 0.15 },
           transition: { duration: 0.45, ease: EASE },
         },
     staggerContainer: prefersReducedMotion
@@ -38,7 +38,7 @@ export function useMarketingMotion() {
       : {
           initial: {},
           whileInView: { transition: { staggerChildren: 0.08 } },
-          viewport: { once: true },
+          viewport: { once: true, amount: 0.1 },
         },
     item: prefersReducedMotion
       ? {}
@@ -46,6 +46,28 @@ export function useMarketingMotion() {
           initial: { opacity: 0, y: 16 },
           whileInView: { opacity: 1, y: 0 },
           transition: { duration: 0.4, ease: EASE },
+        },
+    blurIn: prefersReducedMotion
+      ? { initial: {}, whileInView: {}, viewport: { once: true } }
+      : {
+          initial: { opacity: 0, filter: "blur(8px)" },
+          whileInView: { opacity: 1, filter: "blur(0px)" },
+          viewport: { once: true, margin: "-40px" },
+          transition: { duration: 0.55, ease: EASE },
+        },
+    slideLeft: prefersReducedMotion
+      ? { initial: {}, whileInView: {}, viewport: { once: true } }
+      : {
+          initial: { opacity: 0, x: 24 },
+          whileInView: { opacity: 1, x: 0 },
+          viewport: { once: true },
+          transition: { duration: 0.5, ease: EASE },
+        },
+    floatSlow: prefersReducedMotion
+      ? { animate: {}, transition: {} }
+      : {
+          animate: { y: [0, -4, 0] },
+          transition: { duration: 6, repeat: Infinity, ease: "easeInOut" as const },
         },
   };
 }

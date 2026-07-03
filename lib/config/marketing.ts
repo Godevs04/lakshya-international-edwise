@@ -7,6 +7,11 @@ import {
   PRODUCTION_SUPPORT_EMAIL,
 } from "@/lib/config/site";
 import { MARKETING_OFFICES } from "@/lib/constants/marketing/offices";
+import {
+  MARKETING_DEFAULT_PHONE_DISPLAY,
+  MARKETING_DEFAULT_PHONE_E164,
+  formatMarketingPhoneDisplay,
+} from "@/lib/constants/marketing/contact";
 import { parseGoogleMapsEmbedCenter, parseGoogleMapsEmbedUrl } from "@/lib/utils/google-maps-embed";
 
 function trim(value: string | undefined): string {
@@ -33,11 +38,19 @@ export function getMarketingContact() {
       (isProductionRuntime() ? PRODUCTION_SUPPORT_EMAIL : "")
   );
   const office = MARKETING_OFFICES[0];
+  const rawPhone =
+    trim(process.env.NEXT_PUBLIC_CONTACT_PHONE) ||
+    company.phone ||
+    office?.phone ||
+    MARKETING_DEFAULT_PHONE_DISPLAY;
+  const rawWhatsapp =
+    trim(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER) || MARKETING_DEFAULT_PHONE_E164;
+
   return {
     siteUrl: getSiteUrl(),
-    phone: trim(process.env.NEXT_PUBLIC_CONTACT_PHONE) || company.phone || office?.phone,
+    phone: formatMarketingPhoneDisplay(rawPhone),
     email: defaultEmail,
-    whatsapp: trim(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER),
+    whatsapp: rawWhatsapp,
     mapsEmbed: parseGoogleMapsEmbedUrl(process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL),
     mapCenter: parseGoogleMapsEmbedCenter(process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_URL),
     address: trim(process.env.APP_COMPANY_ADDRESS) || office?.address,

@@ -14,6 +14,7 @@ import { CountryCard } from "@/components/marketing/cards/country-card";
 import { TestimonialsSection } from "@/components/marketing/sections/testimonials";
 import { FaqSection } from "@/components/marketing/sections/faq";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
+import { HomepageJourneyPath } from "@/components/marketing/motion/homepage-journey-path";
 import { JsonLd, faqPageJsonLd, websiteJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 import { MARKETING_FAQS } from "@/lib/constants/marketing/faqs";
@@ -51,6 +52,7 @@ export default function MarketingHomePage() {
         ]}
       />
 
+      <HomepageJourneyPath />
       <FinanceHero />
       <TrustMetricsBar />
       <LenderLogoCarousel />
@@ -78,6 +80,8 @@ export default function MarketingHomePage() {
 
       <SectionShell
         variant="muted"
+        background="map"
+        journeyNode="countries"
         eyebrow="Countries"
         title="Education loans for every top destination"
         description="Country-specific loan guidance, visa financials, and lender options."
