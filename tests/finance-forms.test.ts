@@ -33,7 +33,7 @@ describe("websiteEnquirySchema eligibility fields", () => {
 });
 
 describe("partnerEnquirySchema", () => {
-  it("accepts partner enquiry without whatsapp when not owner", () => {
+  it("accepts partner enquiry when mobile is WhatsApp", () => {
     const result = partnerEnquirySchema.safeParse({
       name: "Raj Kumar",
       email: "raj@agency.com",
@@ -41,11 +41,15 @@ describe("partnerEnquirySchema", () => {
       companyName: "Global Edu Partners",
       city: "Hyderabad",
       isOwner: "false",
+      mobileIsWhatsapp: "true",
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.mobileIsWhatsapp).toBe(true);
+    }
   });
 
-  it("accepts partner enquiry with whatsapp when owner", () => {
+  it("accepts partner enquiry with separate whatsapp when mobile is not WhatsApp", () => {
     const result = partnerEnquirySchema.safeParse({
       name: "Raj Kumar",
       email: "raj@agency.com",
@@ -53,15 +57,16 @@ describe("partnerEnquirySchema", () => {
       companyName: "Global Edu Partners",
       city: "Hyderabad",
       isOwner: "true",
+      mobileIsWhatsapp: "false",
       whatsapp: "9123456780",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.isOwner).toBe(true);
+      expect(result.data.mobileIsWhatsapp).toBe(false);
     }
   });
 
-  it("rejects invalid whatsapp when owner provides one", () => {
+  it("rejects missing whatsapp when mobile is not WhatsApp", () => {
     const result = partnerEnquirySchema.safeParse({
       name: "Raj Kumar",
       email: "raj@agency.com",
@@ -69,6 +74,20 @@ describe("partnerEnquirySchema", () => {
       companyName: "Global Edu Partners",
       city: "Hyderabad",
       isOwner: "true",
+      mobileIsWhatsapp: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid whatsapp when mobile is not WhatsApp", () => {
+    const result = partnerEnquirySchema.safeParse({
+      name: "Raj Kumar",
+      email: "raj@agency.com",
+      phone: "9876543210",
+      companyName: "Global Edu Partners",
+      city: "Hyderabad",
+      isOwner: "true",
+      mobileIsWhatsapp: "false",
       whatsapp: "123",
     });
     expect(result.success).toBe(false);

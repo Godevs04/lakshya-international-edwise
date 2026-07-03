@@ -438,6 +438,9 @@ export const partnerEnquirySchema = z
     isOwner: z
       .union([z.literal("true"), z.literal("false"), z.boolean()])
       .transform((value) => value === true || value === "true"),
+    mobileIsWhatsapp: z
+      .union([z.literal("true"), z.literal("false"), z.boolean()])
+      .transform((value) => value === true || value === "true"),
     whatsapp: z.string().max(20).optional(),
     website: z.string().max(0).optional(),
   })
@@ -449,7 +452,18 @@ export const partnerEnquirySchema = z
         path: ["phone"],
       });
     }
-    if (data.isOwner && data.whatsapp && !isBlank(data.whatsapp) && !isValidIndianPhone(data.whatsapp)) {
+    if (data.mobileIsWhatsapp) return;
+
+    const whatsapp = data.whatsapp?.trim() ?? "";
+    if (!whatsapp) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "WhatsApp number is required when mobile is not WhatsApp",
+        path: ["whatsapp"],
+      });
+      return;
+    }
+    if (!isValidIndianPhone(whatsapp)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "WhatsApp must be a valid 10-digit Indian mobile number",

@@ -168,7 +168,10 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
                         key={child.href}
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
-                        className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-secondary"
+                        className={cn(
+                          "block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-secondary",
+                          child.href.includes("#") && "pl-6 text-xs"
+                        )}
                       >
                         {child.label}
                       </Link>

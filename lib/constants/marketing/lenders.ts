@@ -8,13 +8,26 @@ const LOGO_BY_SLUG = new Map<string, Partial<MarketingLender>>(
       logo: lender.logo,
       logoWidth: lender.logoWidth,
       logoHeight: lender.logoHeight,
+      logoDisplayHeight: lender.logoDisplayHeight,
+      logoMaxWidth: lender.logoMaxWidth,
       accent: lender.accent,
     },
   ])
 );
 
+const EXTRA_LOGOS: Record<string, Partial<MarketingLender>> = {
+  "avanse-global": {
+    logo: "/lenders/images/Avanse.png",
+    logoWidth: 600,
+    logoHeight: 400,
+    logoDisplayHeight: 34,
+    logoMaxWidth: 96,
+    accent: "#00a651",
+  },
+};
+
 function withLogo(lender: MarketingLender): MarketingLender {
-  const brand = LOGO_BY_SLUG.get(lender.slug);
+  const brand = LOGO_BY_SLUG.get(lender.slug) ?? EXTRA_LOGOS[lender.slug];
   return brand ? { ...lender, ...brand } : lender;
 }
 
@@ -197,6 +210,22 @@ const RAW_LENDERS: MarketingLender[] = [
 ];
 
 export const MARKETING_LENDERS: MarketingLender[] = RAW_LENDERS.map(withLogo);
+
+/** Curated mix for hero card — one strong pick per lender type, good logo contrast */
+export const HERO_SHOWCASE_LENDER_SLUGS = [
+  "sbi",
+  "icici-bank",
+  "credila",
+  "prodigy-finance",
+  "axis-bank",
+  "mpower",
+] as const;
+
+export function getHeroShowcaseLenders(): MarketingLender[] {
+  return HERO_SHOWCASE_LENDER_SLUGS.map(
+    (slug) => MARKETING_LENDERS.find((lender) => lender.slug === slug)!
+  ).filter(Boolean);
+}
 
 export const LENDER_CATEGORY_LABELS: Record<LenderCategory, string> = {
   government: "Government Banks",

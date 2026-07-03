@@ -1,4 +1,5 @@
 import type { MarketingService } from "@/types/marketing";
+import { EDUCATION_LOAN_OPTIONS } from "@/lib/constants/marketing/education-loan-options";
 
 export const MARKETING_SERVICES: MarketingService[] = [
   {
@@ -13,6 +14,7 @@ export const MARKETING_SERVICES: MarketingService[] = [
       "ROI starting from 8.25%",
     ],
     icon: "Landmark",
+    subOptions: EDUCATION_LOAN_OPTIONS,
   },
   {
     slug: "accommodation",

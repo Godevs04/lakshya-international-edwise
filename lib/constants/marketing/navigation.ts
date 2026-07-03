@@ -1,6 +1,27 @@
 import type { MarketingNavItem } from "@/types/marketing";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
+import {
+  EDUCATION_LOAN_OPTIONS,
+  getEducationLoanOptionHref,
+} from "@/lib/constants/marketing/education-loan-options";
+
+function buildServiceNavChildren(): MarketingNavItem[] {
+  return MARKETING_SERVICES.flatMap((service) => {
+    const items: MarketingNavItem[] = [
+      { label: service.title, href: `/services/${service.slug}` },
+    ];
+    if (service.slug === "education-loan") {
+      items.push(
+        ...EDUCATION_LOAN_OPTIONS.map((option) => ({
+          label: option.title,
+          href: getEducationLoanOptionHref(option.slug),
+        }))
+      );
+    }
+    return items;
+  });
+}
 
 export const MARKETING_NAV: MarketingNavItem[] = [
   { label: "Home", href: "/" },
@@ -8,10 +29,7 @@ export const MARKETING_NAV: MarketingNavItem[] = [
     label: "Our Services",
     href: "/services",
     megaMenu: "services",
-    children: MARKETING_SERVICES.map((service) => ({
-      label: service.title,
-      href: `/services/${service.slug}`,
-    })),
+    children: buildServiceNavChildren(),
   },
   { label: "Lending Partners", href: "/lending-partners" },
   {

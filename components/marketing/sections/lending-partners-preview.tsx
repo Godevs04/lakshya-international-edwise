@@ -24,9 +24,15 @@ export function LendingPartnersPreview() {
               <p className="text-sm font-semibold text-foreground">
                 {LENDER_CATEGORY_LABELS[category]}
               </p>
-              <div className="mt-4 flex flex-col gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-2.5">
                 {lenders.map((lender) => (
-                  <LenderLogo key={lender.slug} lender={lender} className="h-6 self-start" />
+                  <div
+                    key={lender.slug}
+                    className="flex h-14 items-center justify-center rounded-xl border border-border/60 bg-white px-3 shadow-sm ring-1 ring-black/[0.03]"
+                    title={lender.name}
+                  >
+                    <LenderLogo lender={lender} size="md" />
+                  </div>
                 ))}
               </div>
             </div>

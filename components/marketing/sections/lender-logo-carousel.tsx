@@ -41,10 +41,10 @@ export function LenderLogoCarousel() {
                 onClick={() =>
                   open({ preferredLender: lender.name, source: "lender-carousel" })
                 }
-                className="lender-logo group flex h-16 items-center justify-center rounded-xl bg-white px-6 shadow-sm"
+                className="lender-logo group flex h-[4.5rem] min-w-[6.5rem] items-center justify-center rounded-xl bg-white px-4 shadow-sm"
                 aria-label={`Check eligibility with ${lender.name}`}
               >
-                <LenderLogo lender={lender} />
+                <LenderLogo lender={lender} size="lg" />
               </button>
             </li>
           ))}

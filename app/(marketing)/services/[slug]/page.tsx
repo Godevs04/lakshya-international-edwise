@@ -5,6 +5,7 @@ import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { getMarketingService, MARKETING_SERVICES } from "@/lib/constants/marketing/services";
+import { EducationLoanOptionsSection } from "@/components/marketing/services/education-loan-options-section";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { getMarketingContact } from "@/lib/config/marketing";
 import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
@@ -73,6 +74,18 @@ export default async function ServiceDetailPage({
           </div>
         </div>
       </section>
+
+      {service.subOptions && service.subOptions.length > 0 && (
+        <SectionShell
+          variant="muted"
+          eyebrow="Loan Types"
+          title="Choose the right education loan for your profile"
+          description="Compare non-cosigner, cosigner, collateral, and non-collateral options — we match you with the best lender."
+          align="center"
+        >
+          <EducationLoanOptionsSection options={service.subOptions} />
+        </SectionShell>
+      )}
 
       <SectionShell variant="white" title="What you get" eyebrow="Highlights" align="center">
         <ul className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2">

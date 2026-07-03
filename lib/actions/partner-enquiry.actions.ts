@@ -36,8 +36,9 @@ export async function submitPartnerEnquiryAction(
     }
 
     const data = parsed.data;
-    const whatsapp =
-      data.isOwner && data.whatsapp?.trim()
+    const whatsapp = data.mobileIsWhatsapp
+      ? normalizeIndianPhone(data.phone)
+      : data.whatsapp?.trim()
         ? normalizeIndianPhone(data.whatsapp)
         : undefined;
 

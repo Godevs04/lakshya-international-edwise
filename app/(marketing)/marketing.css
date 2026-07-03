@@ -322,6 +322,61 @@
   border: 1px solid var(--border);
   border-radius: 1rem;
   box-shadow: 0 20px 60px rgba(11, 143, 216, 0.12);
+  overflow: hidden;
+}
+
+.marketing-site .mega-menu-tabbed {
+  display: flex;
+  min-width: min(90vw, 640px);
+}
+
+.marketing-site .mega-menu-sidebar {
+  width: 13.5rem;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  padding: 0.5rem 0;
+}
+
+.marketing-site .mega-menu-sidebar-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.marketing-site .mega-menu-sidebar-item:hover,
+.marketing-site .mega-menu-sidebar-item-active {
+  background: var(--accent-soft);
+  color: var(--primary-hover);
+}
+
+.marketing-site .mega-menu-detail {
+  min-width: 0;
+  flex: 1;
+  background: linear-gradient(180deg, rgba(230, 247, 255, 0.65) 0%, rgba(244, 251, 255, 0.35) 100%);
+  padding: 1rem 1.25rem;
+}
+
+.marketing-site .mega-menu-detail-link {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.marketing-site .mega-menu-detail-link:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateX(2px);
 }
 
 /* Lender logo carousel — hover pauses the auto-scroll */
@@ -329,7 +384,7 @@
   display: flex;
   width: max-content;
   align-items: center;
-  gap: 3rem;
+  gap: 2rem;
   animation: marketing-marquee 42s linear infinite;
 }
 

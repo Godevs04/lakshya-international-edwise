@@ -54,8 +54,8 @@ export function LendingPartnersExplorer() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {lenders.map((lender) => (
           <div key={lender.slug} className="card-premium flex flex-col p-6">
-            <div className="flex h-12 items-center">
-              <LenderLogo lender={lender} className="h-8" />
+            <div className="flex min-h-12 items-center">
+              <LenderLogo lender={lender} />
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-primary">

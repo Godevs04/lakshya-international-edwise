@@ -29,6 +29,10 @@ export interface MarketingLender {
   logo?: string;
   logoWidth?: number;
   logoHeight?: number;
+  /** CSS display height in px — tuned per logo aspect ratio */
+  logoDisplayHeight?: number;
+  /** CSS max width in px — prevents wide or square logos from dominating */
+  logoMaxWidth?: number;
   accent?: string;
   category: LenderCategory;
   roiFrom: number;
@@ -38,6 +42,13 @@ export interface MarketingLender {
   featured?: boolean;
 }
 
+export interface MarketingServiceSubOption {
+  slug: string;
+  title: string;
+  shortDescription: string;
+  icon: string;
+}
+
 export interface MarketingService {
   slug: string;
   title: string;
@@ -45,6 +56,7 @@ export interface MarketingService {
   description: string;
   highlights: string[];
   icon: string;
+  subOptions?: MarketingServiceSubOption[];
 }
 
 export interface MarketingCountry {

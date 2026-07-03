@@ -12,15 +12,37 @@ import { submitPartnerEnquiryAction } from "@/lib/actions/partner-enquiry.action
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const partnerFormSchema = z.object({
-  name: z.string().min(2, "Please enter your name"),
-  email: z.string().email("Enter a valid email"),
-  phone: z.string().min(10, "Enter a valid 10-digit mobile number"),
-  companyName: z.string().min(2, "Company name is required"),
-  city: z.string().min(2, "City is required"),
-  isOwner: z.enum(["yes", "no"]),
-  whatsapp: z.string().optional(),
-});
+const partnerFormSchema = z
+  .object({
+    name: z.string().min(2, "Please enter your name"),
+    email: z.string().email("Enter a valid email"),
+    phone: z.string().min(10, "Enter a valid 10-digit mobile number"),
+    companyName: z.string().min(2, "Company name is required"),
+    city: z.string().min(2, "City is required"),
+    isOwner: z.enum(["yes", "no"]),
+    mobileIsWhatsapp: z.enum(["yes", "no"]),
+    whatsapp: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.mobileIsWhatsapp === "no") {
+      const whatsapp = data.whatsapp?.trim() ?? "";
+      if (!whatsapp) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please enter your WhatsApp number",
+          path: ["whatsapp"],
+        });
+        return;
+      }
+      if (whatsapp.length < 10) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Enter a valid 10-digit WhatsApp number",
+          path: ["whatsapp"],
+        });
+      }
+    }
+  });
 
 type PartnerFormValues = z.infer<typeof partnerFormSchema>;
 
@@ -41,12 +63,18 @@ export function PartnerLeadForm() {
       companyName: "",
       city: "",
       isOwner: "no",
+      mobileIsWhatsapp: "yes",
       whatsapp: "",
     },
   });
 
   const ownerSelection = useWatch({ control: form.control, name: "isOwner", defaultValue: "no" });
-  const isOwner = ownerSelection === "yes";
+  const mobileIsWhatsappSelection = useWatch({
+    control: form.control,
+    name: "mobileIsWhatsapp",
+    defaultValue: "yes",
+  });
+  const needsSeparateWhatsapp = mobileIsWhatsappSelection === "no";
 
   function onSubmit(values: PartnerFormValues) {
     setError(null);
@@ -57,7 +85,11 @@ export function PartnerLeadForm() {
     formData.set("companyName", values.companyName);
     formData.set("city", values.city);
     formData.set("isOwner", values.isOwner === "yes" ? "true" : "false");
-    if (values.isOwner === "yes" && values.whatsapp) {
+    formData.set(
+      "mobileIsWhatsapp",
+      values.mobileIsWhatsapp === "yes" ? "true" : "false"
+    );
+    if (values.mobileIsWhatsapp === "no" && values.whatsapp) {
       formData.set("whatsapp", values.whatsapp);
     }
 
@@ -113,6 +145,50 @@ export function PartnerLeadForm() {
             <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
           )}
         </div>
+
+        <div className="space-y-2 sm:col-span-2">
+          <Label>Is this mobile number also your WhatsApp?</Label>
+          <div className="flex gap-3">
+            {(["yes", "no"] as const).map((value) => {
+              const checked = mobileIsWhatsappSelection === value;
+              return (
+                <label
+                  key={value}
+                  className={cn(
+                    "flex flex-1 cursor-pointer items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium capitalize transition-colors",
+                    checked
+                      ? "border-primary bg-primary/[0.06] text-primary"
+                      : "border-border bg-white text-secondary/80 hover:border-primary/30"
+                  )}
+                >
+                  <input
+                    type="radio"
+                    value={value}
+                    {...form.register("mobileIsWhatsapp")}
+                    className="sr-only"
+                  />
+                  {value}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {needsSeparateWhatsapp && (
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="partner-whatsapp">WhatsApp number</Label>
+            <Input
+              id="partner-whatsapp"
+              {...form.register("whatsapp")}
+              placeholder="10-digit WhatsApp number"
+              className={fieldClass}
+            />
+            {form.formState.errors.whatsapp && (
+              <p className="text-xs text-destructive">{form.formState.errors.whatsapp.message}</p>
+            )}
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="partner-company">Company registered name</Label>
           <Input id="partner-company" {...form.register("companyName")} placeholder="Your company" className={fieldClass} />
@@ -155,15 +231,6 @@ export function PartnerLeadForm() {
             })}
           </div>
         </div>
-
-        {isOwner && (
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="partner-whatsapp">
-              WhatsApp number <span className="font-normal text-muted-foreground">(optional)</span>
-            </Label>
-            <Input id="partner-whatsapp" {...form.register("whatsapp")} placeholder="10-digit WhatsApp number" className={fieldClass} />
-          </div>
-        )}
       </div>
 
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}

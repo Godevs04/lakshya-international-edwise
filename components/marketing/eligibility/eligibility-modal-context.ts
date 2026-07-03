@@ -10,6 +10,7 @@ export interface EligibilityModalOptions {
 export interface EligibilityModalContextValue {
   open: (options?: EligibilityModalOptions) => void;
   close: () => void;
+  isOpen: boolean;
 }
 
 export const EligibilityModalContext =

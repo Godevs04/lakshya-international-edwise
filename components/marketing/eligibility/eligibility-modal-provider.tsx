@@ -24,7 +24,7 @@ export function EligibilityModalProvider({
 
   const close = useCallback(() => setIsOpen(false), []);
 
-  const value = useMemo(() => ({ open, close }), [open, close]);
+  const value = useMemo(() => ({ open, close, isOpen }), [open, close, isOpen]);
 
   return (
     <EligibilityModalContext.Provider value={value}>

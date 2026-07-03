@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
+import { getEducationLoanOptionHref } from "@/lib/constants/marketing/education-loan-options";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { getCountryFlagLabel } from "@/lib/constants/marketing/countries";
-import { ArrowRight } from "lucide-react";
+import type { MarketingService, MarketingServiceSubOption } from "@/types/marketing";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface MegaMenuProps {
   type: "services" | "countries" | "resources";
@@ -23,7 +27,7 @@ export function MegaMenu({ type, isOpen, onClose }: MegaMenuProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          className="mega-menu-panel absolute left-0 top-full z-50 mt-2 p-4"
+          className="mega-menu-panel absolute left-0 top-full z-50 mt-2 p-0"
           role="menu"
           onMouseLeave={onClose}
         >
@@ -35,42 +39,158 @@ export function MegaMenu({ type, isOpen, onClose }: MegaMenuProps) {
   );
 }
 
-function ServicesMegaMenu({ onClose }: { onClose: () => void }) {
+function ServiceDetailLink({
+  href,
+  icon,
+  title,
+  description,
+  onClose,
+}: {
+  href: string;
+  icon: string;
+  title: string;
+  description?: string;
+  onClose: () => void;
+}) {
   return (
-    <div className="w-[min(90vw,640px)]">
-      <div className="mb-3 flex items-center justify-between px-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Our Services
-        </p>
-        <Link
-          href="/services"
-          onClick={onClose}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-        >
-          View all
-          <ArrowRight className="h-3 w-3" />
-        </Link>
-      </div>
-      <div className="grid gap-1 sm:grid-cols-2">
-        {MARKETING_SERVICES.map((service) => (
-            <Link
-              key={service.slug}
-              href={`/services/${service.slug}`}
-              onClick={onClose}
-              role="menuitem"
-              className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <MarketingIcon name={service.icon} className="h-4 w-4" />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold text-secondary">{service.title}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground line-clamp-1">
-                  {service.shortDescription}
-                </span>
-              </span>
-            </Link>
+    <Link href={href} onClick={onClose} role="menuitem" className="mega-menu-detail-link group">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary shadow-sm ring-1 ring-primary/10">
+        <MarketingIcon name={icon} className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-foreground group-hover:text-primary">
+          {title}
+        </span>
+        {description ? (
+          <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground line-clamp-2">
+            {description}
+          </span>
+        ) : null}
+      </span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+    </Link>
+  );
+}
+
+function ServiceDetailPanel({
+  service,
+  onClose,
+}: {
+  service: MarketingService;
+  onClose: () => void;
+}) {
+  const subOptions = service.subOptions ?? [];
+
+  if (subOptions.length > 0) {
+    return (
+      <div className="space-y-1">
+        {subOptions.map((option: MarketingServiceSubOption, index) => (
+          <motion.div
+            key={option.slug}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.18,
+              delay: index * 0.04,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            <ServiceDetailLink
+              href={getEducationLoanOptionHref(option.slug)}
+              icon={option.icon}
+              title={option.title}
+              description={option.shortDescription}
+              onClose={onClose}
+            />
+          </motion.div>
         ))}
+        <div className="mt-3 border-t border-primary/10 pt-3">
+          <Link
+            href={`/services/${service.slug}`}
+            onClick={onClose}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+          >
+            View all education loan options
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <ServiceDetailLink
+        href={`/services/${service.slug}`}
+        icon={service.icon}
+        title={service.title}
+        description={service.shortDescription}
+        onClose={onClose}
+      />
+      <ul className="space-y-2 pl-1">
+        {service.highlights.slice(0, 3).map((highlight) => (
+          <li
+            key={highlight}
+            className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground"
+          >
+            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
+            {highlight}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ServicesMegaMenu({ onClose }: { onClose: () => void }) {
+  const [activeSlug, setActiveSlug] = useState(MARKETING_SERVICES[0]?.slug ?? "education-loan");
+  const activeService =
+    MARKETING_SERVICES.find((service) => service.slug === activeSlug) ?? MARKETING_SERVICES[0];
+
+  if (!activeService) return null;
+
+  return (
+    <div className="mega-menu-tabbed">
+      <div className="mega-menu-sidebar" role="tablist" aria-label="Service categories">
+        {MARKETING_SERVICES.map((service) => {
+          const isActive = service.slug === activeSlug;
+          return (
+            <button
+              key={service.slug}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onMouseEnter={() => setActiveSlug(service.slug)}
+              onFocus={() => setActiveSlug(service.slug)}
+              className={cn(
+                "mega-menu-sidebar-item",
+                isActive && "mega-menu-sidebar-item-active"
+              )}
+            >
+              <span>{service.title}</span>
+              <ChevronRight
+                className={cn(
+                  "h-4 w-4 shrink-0 transition-opacity",
+                  isActive ? "opacity-100" : "opacity-0"
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mega-menu-detail" role="tabpanel">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeService.slug}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -6 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ServiceDetailPanel service={activeService} onClose={onClose} />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -78,7 +198,7 @@ function ServicesMegaMenu({ onClose }: { onClose: () => void }) {
 
 function CountriesMegaMenu({ onClose }: { onClose: () => void }) {
   return (
-    <div className="w-[min(90vw,560px)]">
+    <div className="w-[min(90vw,560px)] p-4">
       <div className="mb-3 flex items-center justify-between px-1">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Loan Destinations

@@ -4,8 +4,8 @@ import { MarketingContainer } from "@/components/marketing/layout/marketing-cont
 import { HeroBackground } from "@/components/marketing/sections/hero-background";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { LenderLogo } from "@/components/marketing/lenders/lender-logo";
-import { MARKETING_LENDERS } from "@/lib/constants/marketing/lenders";
-import { CheckCircle2, TrendingUp, Clock, Wallet } from "lucide-react";
+import { getHeroShowcaseLenders } from "@/lib/constants/marketing/lenders";
+import { CheckCircle2, TrendingUp, Clock, Wallet, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const HERO_HIGHLIGHTS = [
@@ -15,7 +15,7 @@ const HERO_HIGHLIGHTS = [
 ];
 
 export function FinanceHero() {
-  const featured = MARKETING_LENDERS.filter((l) => l.featured).slice(0, 4);
+  const showcaseLenders = getHeroShowcaseLenders();
 
   return (
     <section className="hero-gradient relative overflow-hidden pb-16 pt-16 md:pb-24 md:pt-20">
@@ -87,12 +87,27 @@ export function FinanceHero() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-border/60 p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Featured lenders
-                </p>
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                  {featured.map((lender) => (
-                    <LenderLogo key={lender.slug} lender={lender} className="h-7" />
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Banks · NBFCs · Global lenders
+                  </p>
+                  <Link
+                    href="/lending-partners"
+                    className="inline-flex shrink-0 items-center gap-0.5 text-xs font-semibold text-primary hover:underline"
+                  >
+                    View all
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {showcaseLenders.map((lender) => (
+                    <div
+                      key={lender.slug}
+                      className="flex h-11 items-center justify-center rounded-xl bg-white px-2 shadow-sm ring-1 ring-black/[0.04]"
+                      title={lender.name}
+                    >
+                      <LenderLogo lender={lender} size="sm" />
+                    </div>
                   ))}
                 </div>
               </div>
