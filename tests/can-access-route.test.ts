@@ -43,6 +43,7 @@ describe("canAccessRoute", () => {
     ]);
     expect(canAccessRoute(user, "/dashboard/students")).toBe(true);
     expect(canAccessRoute(user, "/dashboard/admissions")).toBe(false);
+    expect(canAccessRoute(user, "/dashboard/site-leads")).toBe(true);
   });
 
   it("blocks unauthenticated access", () => {

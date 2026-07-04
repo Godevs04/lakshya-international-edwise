@@ -6,8 +6,6 @@ export type EnquiryType =
   | "country"
   | "eligibility";
 
-export type LeadFormVariant = EnquiryType;
-
 export type MegaMenuType = "services" | "countries" | "resources" | "none";
 
 export interface MarketingNavItem {

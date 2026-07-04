@@ -22,6 +22,26 @@ describe("websiteEnquirySchema eligibility fields", () => {
     }
   });
 
+  it("accepts empty eligibility honeypot field", () => {
+    const result = websiteEnquirySchema.safeParse({
+      name: "Priya Sharma",
+      phone: "9876543210",
+      enquiryType: "eligibility",
+      website: "",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects filled eligibility honeypot field", () => {
+    const result = websiteEnquirySchema.safeParse({
+      name: "Priya Sharma",
+      phone: "9876543210",
+      enquiryType: "eligibility",
+      website: "bot.example",
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects invalid phone for eligibility", () => {
     const result = websiteEnquirySchema.safeParse({
       name: "Test User",
@@ -29,6 +49,21 @@ describe("websiteEnquirySchema eligibility fields", () => {
       enquiryType: "eligibility",
     });
     expect(result.success).toBe(false);
+  });
+
+  it("accepts contact enquiry with structured subject", () => {
+    const result = websiteEnquirySchema.safeParse({
+      name: "Anita Rao",
+      phone: "9876543210",
+      enquiryType: "contact",
+      subject: "Loan for Canada MBA",
+      message: "Please call me tomorrow morning.",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.subject).toBe("Loan for Canada MBA");
+      expect(result.data.message).toBe("Please call me tomorrow morning.");
+    }
   });
 });
 

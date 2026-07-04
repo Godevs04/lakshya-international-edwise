@@ -183,6 +183,43 @@ export interface AdmissionListItem {
   createdAt: Date;
 }
 
+export interface SiteStudentLeadListItem {
+  _id: string;
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+  targetCountry?: string;
+  enquiryType?: string;
+  formPage?: string;
+  loanAmountText?: string;
+  preferredLender?: string;
+  promotionStatus?: string;
+  createdAt: Date;
+}
+
+export interface SitePartnerLeadListItem {
+  _id: string;
+  partnerCode?: string;
+  companyName: string;
+  owner?: string;
+  phone?: string;
+  email?: string;
+  city?: string;
+  isOwner?: boolean;
+  whatsapp?: string;
+  possibleDuplicate?: boolean;
+  promotionStatus?: string;
+  createdAt: Date;
+}
+
+export interface SiteLeadCounts {
+  students: number;
+  partners: number;
+  total: number;
+}
+
 export interface PartnerListItem {
   _id: string;
   companyName: string;
@@ -194,6 +231,7 @@ export interface PartnerListItem {
   studentsCount: number;
   totalLoanValue: number;
   commissionPercent?: number;
+  partnerCode?: string;
 }
 
 export interface ApplicationListItem {

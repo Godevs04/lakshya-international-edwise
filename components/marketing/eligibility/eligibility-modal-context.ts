@@ -4,6 +4,7 @@ import { createContext } from "react";
 
 export interface EligibilityModalOptions {
   preferredLender?: string;
+  targetCountry?: string;
   source?: string;
 }
 

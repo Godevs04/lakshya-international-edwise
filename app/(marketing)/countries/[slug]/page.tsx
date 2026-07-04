@@ -101,6 +101,7 @@ export default async function CountryDetailPage({
       <CtaBanner
         title={`Check your ${country.name} education loan eligibility`}
         source={`country-${slug}-banner`}
+        targetCountry={country.name}
       />
     </>
   );

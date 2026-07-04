@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { LenderLogo } from "@/components/marketing/lenders/lender-logo";
+import { LenderLogo, LENDER_LOGO_MARKETING_SIZE, LENDER_LOGO_TILE_CLASS } from "@/components/marketing/lenders/lender-logo";
 import {
   MARKETING_LENDERS,
   LENDER_CATEGORY_LABELS,
   LENDER_CATEGORY_ORDER,
 } from "@/lib/constants/marketing/lenders";
+import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 
 export function LendingPartnersPreview() {
@@ -36,14 +37,17 @@ export function LendingPartnersPreview() {
                   <p>{sample.processingLabel} · {sample.maxLoanLabel}</p>
                 </div>
               )}
-              <div className="mt-4 grid grid-cols-2 gap-2.5">
+              <div className="mt-4 grid grid-cols-2 gap-3">
                 {lenders.map((lender) => (
                   <div
                     key={lender.slug}
-                    className="flex h-14 items-center justify-center rounded-xl border border-border/60 bg-white px-3 shadow-sm ring-1 ring-black/[0.03] transition-transform group-hover:scale-[1.02]"
+                    className={cn(
+                      LENDER_LOGO_TILE_CLASS,
+                      "border border-border/60 transition-transform group-hover:scale-[1.02]"
+                    )}
                     title={lender.name}
                   >
-                    <LenderLogo lender={lender} size="md" />
+                    <LenderLogo lender={lender} size={LENDER_LOGO_MARKETING_SIZE} />
                   </div>
                 ))}
               </div>

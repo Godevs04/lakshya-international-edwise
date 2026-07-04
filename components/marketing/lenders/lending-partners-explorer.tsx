@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LenderLogo } from "@/components/marketing/lenders/lender-logo";
+import { LenderLogo, LENDER_LOGO_MARKETING_SIZE, LENDER_LOGO_TILE_CLASS } from "@/components/marketing/lenders/lender-logo";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import {
   MARKETING_LENDERS,
@@ -54,8 +54,8 @@ export function LendingPartnersExplorer() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {lenders.map((lender) => (
           <div key={lender.slug} className="card-premium flex flex-col p-6">
-            <div className="flex min-h-12 items-center">
-              <LenderLogo lender={lender} />
+            <div className={cn(LENDER_LOGO_TILE_CLASS, "border border-border/60")}>
+              <LenderLogo lender={lender} size={LENDER_LOGO_MARKETING_SIZE} />
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-primary">

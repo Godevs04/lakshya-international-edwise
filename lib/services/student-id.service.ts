@@ -53,3 +53,33 @@ export async function allocateStudentId(): Promise<string> {
 
   return formatStudentId(maxSequence + 1, code);
 }
+
+export function buildWebsiteLeadIdPrefix(code = getStudentIdCompanyCode()): string {
+  return `LEAD-${code}-`;
+}
+
+export function parseWebsiteLeadIdSequence(leadId: string, code = getStudentIdCompanyCode()): number | null {
+  const match = leadId.match(new RegExp(`^LEAD-${code}-(\\d+)$`));
+  return match ? parseInt(match[1], 10) : null;
+}
+
+export function formatWebsiteLeadId(sequence: number, code = getStudentIdCompanyCode()): string {
+  return `${buildWebsiteLeadIdPrefix(code)}${String(sequence).padStart(SEQUENCE_PAD, "0")}`;
+}
+
+export async function allocateWebsiteLeadId(): Promise<string> {
+  const code = getStudentIdCompanyCode();
+  const pattern = new RegExp(`^${escapeRegExp(buildWebsiteLeadIdPrefix(code))}\\d+$`);
+
+  const existing = await Student.find({ studentId: pattern }).select("studentId").lean();
+
+  let maxSequence = 0;
+  for (const { studentId } of existing) {
+    const sequence = parseWebsiteLeadIdSequence(studentId, code);
+    if (sequence !== null && sequence > maxSequence) {
+      maxSequence = sequence;
+    }
+  }
+
+  return formatWebsiteLeadId(maxSequence + 1, code);
+}

@@ -45,7 +45,12 @@ import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
+import { officialPartnersFilter } from "@/lib/constants/site-leads";
 import type { PartnerInput } from "@/lib/validations/schemas";
+
+function officialPartnerByIdFilter(id: string) {
+  return mergeMongoFilter({ _id: id }, officialPartnersFilter());
+}
 
 function buildPartnerContacts(data: PartnerInput) {
   const contacts = [];
@@ -85,18 +90,21 @@ export async function getPartners(params: {
   const pageSize = params.pageSize ?? 10;
   const skip = (page - 1) * pageSize;
 
-  const filter: Record<string, unknown> = {};
+  const baseFilter = officialPartnersFilter();
+  let filter: Record<string, unknown> = { ...baseFilter };
   if (params.search) {
     const regex = toSafeRegExp(params.search);
-    filter.$or = [
-      { companyName: regex },
-      { owner: regex },
-      { phone: regex },
-      { email: regex },
-    ];
+    filter = mergeMongoFilter(baseFilter, {
+      $or: [
+        { companyName: regex },
+        { owner: regex },
+        { phone: regex },
+        { email: regex },
+      ],
+    });
   }
-  if (params.status) filter.status = params.status;
-  if (params.actionStatus) filter.actionStatus = params.actionStatus;
+  if (params.status) filter = mergeMongoFilter(filter, { status: params.status });
+  if (params.actionStatus) filter = mergeMongoFilter(filter, { actionStatus: params.actionStatus });
 
   const [data, total] = await Promise.all([
     Partner.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),
@@ -130,7 +138,7 @@ export async function getPartnerById(id: string) {
   requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
   await connectDB();
-  const partner = await Partner.findById(id).lean();
+  const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
   if (!partner) return null;
 
   return {
@@ -151,7 +159,7 @@ export async function getPartnerForEdit(id: string) {
   requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
   await connectDB();
-  const partner = await Partner.findById(id).lean();
+  const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
   if (!partner) return null;
 
   return {
@@ -278,7 +286,7 @@ export async function updatePartnerAction(
 
   await connectDB();
   const data = parsed.data;
-  const existing = await Partner.findById(id);
+  const existing = await Partner.findOne(officialPartnerByIdFilter(id));
   if (!existing) return { success: false, error: "Partner not found" };
 
   const logoError = getOptionalLinkUrlError(data.companyLogo);
@@ -286,8 +294,8 @@ export async function updatePartnerAction(
     return { success: false, error: `Company logo link: ${logoError}` };
   }
 
-  const partner = await Partner.findByIdAndUpdate(
-    id,
+  const partner = await Partner.findOneAndUpdate(
+    officialPartnerByIdFilter(id),
     {
       companyName: sanitizeText(data.companyName),
       owner: data.owner ? sanitizeText(data.owner) : undefined,
@@ -346,7 +354,7 @@ export async function deletePartnerAction(id: string): Promise<ActionResult> {
   requirePermission(user, PERMISSIONS.PARTNERS_DELETE);
 
   await connectDB();
-  const partner = await Partner.findByIdAndDelete(id);
+  const partner = await Partner.findOneAndDelete(officialPartnerByIdFilter(id));
   if (!partner) return { success: false, error: "Partner not found" };
 
   await logActivity({

@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { MarketingLender } from "@/types/marketing";
 import { cn } from "@/lib/utils";
 
-type LenderLogoSize = "sm" | "md" | "lg";
+type LenderLogoSize = "sm" | "md" | "lg" | "carousel";
 
 interface LenderLogoProps {
   lender: MarketingLender;
@@ -14,7 +14,15 @@ const SIZE_SCALE: Record<LenderLogoSize, number> = {
   sm: 0.78,
   md: 1,
   lg: 1.12,
+  carousel: 1.28,
 };
+
+/** Default marketing size — matches the homepage lender carousel. */
+export const LENDER_LOGO_MARKETING_SIZE: LenderLogoSize = "carousel";
+
+/** Shared logo tile shell for carousel, preview grids, and partner cards. */
+export const LENDER_LOGO_TILE_CLASS =
+  "flex h-20 w-full min-w-0 items-center justify-center overflow-hidden rounded-xl bg-white px-3 shadow-sm ring-1 ring-black/[0.03]";
 
 /**
  * Renders a lender logo image when available, otherwise a styled text wordmark.
@@ -28,16 +36,21 @@ export function LenderLogo({ lender, size = "md", className }: LenderLogoProps) 
 
   if (lender.logo) {
     return (
-      <Image
-        src={lender.logo}
-        alt={`${lender.name} education loan partner logo`}
-        width={lender.logoWidth ?? 220}
-        height={lender.logoHeight ?? 60}
-        quality={85}
-        className={cn("w-auto shrink-0 object-contain object-center", className)}
-        style={{ height: displayHeight, maxWidth }}
-        sizes={`${Math.round(maxWidth * 2)}px`}
-      />
+      <div className="flex h-full w-full min-w-0 items-center justify-center">
+        <Image
+          src={lender.logo}
+          alt={`${lender.name} education loan partner logo`}
+          width={lender.logoWidth ?? 220}
+          height={lender.logoHeight ?? 60}
+          quality={85}
+          className={cn(
+            "h-auto w-auto max-h-full max-w-full object-contain object-center",
+            className
+          )}
+          style={{ maxHeight: displayHeight, maxWidth }}
+          sizes={`${Math.round(maxWidth * 2)}px`}
+        />
+      </div>
     );
   }
 

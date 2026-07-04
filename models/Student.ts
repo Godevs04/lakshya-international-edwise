@@ -214,6 +214,16 @@ export interface IStudent extends Document {
     leadSource?: string;
     enquiryType?: string;
     formPage?: string;
+    promotionStatus?: string;
+    promotedAt?: Date;
+    promotedBy?: Types.ObjectId;
+    promotedByName?: string;
+    loanAmountText?: string;
+    currentStatus?: string;
+    preferredLender?: string;
+    contactSubject?: string;
+    resubmittedAt?: Date;
+    resubmissionCount?: number;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -335,6 +345,16 @@ const StudentSchema = new Schema<IStudent>(
       leadSource: { type: String, trim: true },
       enquiryType: { type: String, trim: true },
       formPage: { type: String, trim: true },
+      promotionStatus: { type: String, enum: ["pending", "promoted"], trim: true },
+      promotedAt: { type: Date },
+      promotedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      promotedByName: { type: String, trim: true },
+      loanAmountText: { type: String, trim: true },
+      currentStatus: { type: String, trim: true },
+      preferredLender: { type: String, trim: true },
+      contactSubject: { type: String, trim: true },
+      resubmittedAt: { type: Date },
+      resubmissionCount: { type: Number, min: 0 },
     },
   },
   { timestamps: true }

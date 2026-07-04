@@ -7,6 +7,7 @@ import type { DashboardMetrics, ChartDataPoint } from "@/types";
 import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 import { formatMetricTrend } from "@/lib/utils/metrics-trend";
 import { excludeAdmissionLeadsFilter } from "@/lib/constants/student-record-type";
+import { officialPartnersFilter } from "@/lib/constants/site-leads";
 import { buildStudentVisibilityFilter } from "@/lib/services/student-visibility.service";
 import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
 import type { SessionUser } from "@/types";
@@ -77,6 +78,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
   } = bounds;
 
   return [
+    { $match: excludeAdmissionLeadsFilter() },
     {
       $group: {
         _id: null,
@@ -297,13 +299,25 @@ function buildPartnerDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
         },
         partnersThisMonth: {
-          $sum: { $cond: [{ $gte: ["$createdAt", monthStart] }, 1, 0] },
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "active"] },
+                  { $gte: ["$createdAt", monthStart] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
         },
         partnersLastMonth: {
           $sum: {
             $cond: [
               {
                 $and: [
+                  { $eq: ["$status", "active"] },
                   { $gte: ["$createdAt", lastMonthStart] },
                   { $lte: ["$createdAt", lastMonthEnd] },
                 ],
@@ -323,6 +337,25 @@ function buildApplicationDashboardPipeline(bounds: DashboardDateBounds) {
   const pendingStatuses = [...PENDING_STATUSES];
 
   return [
+    {
+      $lookup: {
+        from: "students",
+        localField: "studentId",
+        foreignField: "_id",
+        as: "student",
+      },
+    },
+    { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
+    {
+      $match: {
+        $or: [
+          { student: null },
+          { "student.recordType": { $ne: "lead" } },
+          { "student.metadata.leadSource": { $ne: "website" } },
+          { "student.metadata.promotionStatus": "promoted" },
+        ],
+      },
+    },
     {
       $group: {
         _id: null,
@@ -431,6 +464,7 @@ export async function getDashboardMetricTrends(): Promise<DashboardMetricTrends>
 export async function getLoanStatusChart(): Promise<ChartDataPoint[]> {
   await connectDB();
   const results = await Student.aggregate([
+    { $match: excludeAdmissionLeadsFilter() },
     { $group: { _id: "$status", value: { $sum: 1 } } },
     { $sort: { value: -1 } },
   ]);
@@ -444,7 +478,12 @@ export async function getMonthlyStudentsChart(): Promise<ChartDataPoint[]> {
   await connectDB();
   const sixMonthsAgo = subMonths(new Date(), 5);
   const results = await Student.aggregate([
-    { $match: { createdAt: { $gte: startOfDay(sixMonthsAgo) } } },
+    {
+      $match: {
+        ...excludeAdmissionLeadsFilter(),
+        createdAt: { $gte: startOfDay(sixMonthsAgo) },
+      },
+    },
     {
       $group: {
         _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
@@ -463,7 +502,12 @@ export async function getLoanAmountChart(): Promise<ChartDataPoint[]> {
   await connectDB();
   const sixMonthsAgo = subMonths(new Date(), 5);
   const results = await Student.aggregate([
-    { $match: { createdAt: { $gte: startOfDay(sixMonthsAgo) } } },
+    {
+      $match: {
+        ...excludeAdmissionLeadsFilter(),
+        createdAt: { $gte: startOfDay(sixMonthsAgo) },
+      },
+    },
     {
       $group: {
         _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
@@ -506,7 +550,7 @@ export async function getLatestStudents(limit = 5, user?: SessionUser | null) {
 
 export async function getLatestPartners(limit = 5) {
   await connectDB();
-  return Partner.find()
+  return Partner.find(officialPartnersFilter())
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();

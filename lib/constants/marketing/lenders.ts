@@ -20,8 +20,8 @@ const EXTRA_LOGOS: Record<string, Partial<MarketingLender>> = {
     logo: "/lenders/images/Avanse.png",
     logoWidth: 600,
     logoHeight: 400,
-    logoDisplayHeight: 34,
-    logoMaxWidth: 96,
+    logoDisplayHeight: 48,
+    logoMaxWidth: 124,
     accent: "#00a651",
   },
 };

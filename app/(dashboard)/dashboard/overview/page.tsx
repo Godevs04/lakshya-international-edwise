@@ -15,7 +15,7 @@ import { StudentListCard } from "@/components/cards/student-list-card";
 import { FollowUpCards } from "@/components/cards/follow-up-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { Handshake } from "lucide-react";
+import { Handshake, Globe } from "lucide-react";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 
@@ -78,6 +78,7 @@ export default async function OverviewPage() {
     latestPartners,
     followups,
     commissionTotals,
+    siteLeadCounts,
   } = await getOverviewDashboardAction();
 
   const metricCards = [
@@ -100,6 +101,48 @@ export default async function OverviewPage() {
   return (
     <div className="space-y-8">
       <DashboardHero userName={session?.user?.name ?? "User"} />
+
+      {siteLeadCounts.total > 0 ? (
+        <GlassCard className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#E8952E]/12">
+              <Globe className="h-5 w-5 text-[#E8952E]" />
+            </div>
+            <div>
+              <p className="font-semibold">
+                {siteLeadCounts.total} lead{siteLeadCounts.total === 1 ? "" : "s"} awaiting review from site
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {siteLeadCounts.students} student · {siteLeadCounts.partners} partner
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {siteLeadCounts.students > 0 ? (
+              <Link
+                href="/dashboard/site-leads?tab=students"
+                className="inline-flex items-center justify-center rounded-full border border-[#E8952E]/30 px-4 py-2 text-sm font-semibold text-[#E8952E] transition-colors hover:bg-[#E8952E]/10"
+              >
+                {siteLeadCounts.students} student lead{siteLeadCounts.students === 1 ? "" : "s"}
+              </Link>
+            ) : null}
+            {siteLeadCounts.partners > 0 ? (
+              <Link
+                href="/dashboard/site-leads?tab=partners"
+                className="inline-flex items-center justify-center rounded-full border border-[#E8952E]/30 px-4 py-2 text-sm font-semibold text-[#E8952E] transition-colors hover:bg-[#E8952E]/10"
+              >
+                {siteLeadCounts.partners} partner lead{siteLeadCounts.partners === 1 ? "" : "s"}
+              </Link>
+            ) : null}
+            <Link
+              href="/dashboard/site-leads"
+              className="inline-flex items-center justify-center rounded-full bg-[#E8952E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E8952E]/90"
+            >
+              Review from site
+            </Link>
+          </div>
+        </GlassCard>
+      ) : null}
 
       <MetricCardsGrid cards={metricCards} />
 

@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export const UNASSIGNED_ASSIGNEE = "__unassigned__";
 
@@ -22,6 +23,7 @@ interface AssigneeSelectProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   allowUnassigned?: boolean;
+  triggerClassName?: string;
 }
 
 function buildAssigneeItems(users: AssigneeOption[], allowUnassigned: boolean) {
@@ -38,6 +40,7 @@ export function AssigneeSelect({
   onValueChange,
   placeholder = "Select assignee",
   allowUnassigned = false,
+  triggerClassName,
 }: AssigneeSelectProps) {
   const items = buildAssigneeItems(users, allowUnassigned);
   const selectValue = value || (allowUnassigned ? UNASSIGNED_ASSIGNEE : "");
@@ -50,7 +53,7 @@ export function AssigneeSelect({
       }
       items={items}
     >
-      <SelectTrigger id={id} className="w-full">
+      <SelectTrigger id={id} className={cn("w-full", triggerClassName)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

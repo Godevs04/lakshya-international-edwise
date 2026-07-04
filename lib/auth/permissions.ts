@@ -1,5 +1,5 @@
 import type { SessionUser, UserRole } from "@/types";
-import { ROLE_PERMISSIONS } from "@/lib/constants/permissions";
+import { ROLE_PERMISSIONS, PERMISSIONS } from "@/lib/constants/permissions";
 import { inheritLegacyAdmissionsPermissions } from "@/lib/constants/menu-permissions";
 
 export function getPermissionsForRole(role: UserRole): string[] {
@@ -57,6 +57,13 @@ export function canAccessRoute(
 ): boolean {
   if (!user) return false;
   if (user.role === "super_admin") return true;
+
+  if (route.startsWith("/dashboard/site-leads")) {
+    return hasAnyPermission(user, [
+      PERMISSIONS.ADMISSIONS_READ,
+      PERMISSIONS.PARTNERS_READ,
+    ]);
+  }
 
   for (const { prefix, permission } of ROUTE_PERMISSIONS) {
     if (route.startsWith(prefix)) {

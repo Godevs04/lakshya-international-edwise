@@ -22,6 +22,7 @@ const partnerFormSchema = z
     isOwner: z.enum(["yes", "no"]),
     mobileIsWhatsapp: z.enum(["yes", "no"]),
     whatsapp: z.string().optional(),
+    website: z.string().max(0).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.mobileIsWhatsapp === "no") {
@@ -65,6 +66,7 @@ export function PartnerLeadForm() {
       isOwner: "no",
       mobileIsWhatsapp: "yes",
       whatsapp: "",
+      website: "",
     },
   });
 
@@ -92,6 +94,7 @@ export function PartnerLeadForm() {
     if (values.mobileIsWhatsapp === "no" && values.whatsapp) {
       formData.set("whatsapp", values.whatsapp);
     }
+    if (values.website) formData.set("website", values.website);
 
     startTransition(async () => {
       const result = await submitPartnerEnquiryAction(formData);
@@ -232,6 +235,8 @@ export function PartnerLeadForm() {
           </div>
         </div>
       </div>
+
+      <input type="text" tabIndex={-1} autoComplete="off" className="hidden" {...form.register("website")} />
 
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 

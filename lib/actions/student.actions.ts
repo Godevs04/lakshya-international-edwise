@@ -890,7 +890,7 @@ export async function deleteStudentAction(id: string): Promise<ActionResult> {
 
 export async function bulkUpdateStudentsAction(
   ids: string[],
-  action: "delete" | "assign_partner" | "change_status",
+  action: "delete" | "assign_partner" | "assign_assignee" | "change_status",
   value?: string
 ): Promise<ActionResult> {
   return runLoggedMutation("bulkUpdateStudentsAction", async () => {
@@ -943,6 +943,48 @@ export async function bulkUpdateStudentsAction(
       userName: user?.name,
       metadata: { count: accessibleIds.length, studentIds: accessibleIds },
     });
+  } else if (action === "assign_assignee") {
+    if (value === undefined) {
+      return { success: false, error: "Assignee is required" };
+    }
+
+    if (value === "") {
+      await Student.updateMany(
+        { _id: { $in: accessibleIds } },
+        { $unset: { assignedTo: "", assignedAt: "" } }
+      );
+      await logActivity({
+        action: "students.bulk_assignee_cleared",
+        description: `Unassigned ${accessibleIds.length} student(s)`,
+        resourceType: "student",
+        userId: user?.id,
+        userName: user?.name,
+        metadata: { count: accessibleIds.length, studentIds: accessibleIds },
+      });
+    } else {
+      const assignee = await User.findById(value).select("name").lean();
+      if (!assignee) {
+        return { success: false, error: "Assignee not found" };
+      }
+
+      await Student.updateMany(
+        { _id: { $in: accessibleIds } },
+        { assignedTo: new Types.ObjectId(value), assignedAt: new Date() }
+      );
+      await logActivity({
+        action: "students.bulk_assignee_assigned",
+        description: `Assigned ${accessibleIds.length} student(s) to ${assignee.name}`,
+        resourceType: "user",
+        resourceId: value,
+        userId: user?.id,
+        userName: user?.name,
+        metadata: {
+          count: accessibleIds.length,
+          studentIds: accessibleIds,
+          assigneeName: assignee.name,
+        },
+      });
+    }
   } else if (action === "change_status" && value) {
     await Student.updateMany({ _id: { $in: accessibleIds } }, { status: value });
     await Application.updateMany(

@@ -33,6 +33,7 @@ export function EligibilityModalProvider({
         open={isOpen}
         onOpenChange={setIsOpen}
         preferredLender={options.preferredLender}
+        targetCountry={options.targetCountry}
         source={options.source}
       />
     </EligibilityModalContext.Provider>
