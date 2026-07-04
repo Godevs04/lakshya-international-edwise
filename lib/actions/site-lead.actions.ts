@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
+import { User } from "@/models/User";
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission, hasPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -18,7 +19,7 @@ import {
 } from "@/lib/constants/site-leads";
 import { allocateStudentId } from "@/lib/services/student-id.service";
 import { allocatePartnerCode } from "@/lib/services/partner-id.service";
-import { logActivity } from "@/lib/services/activity.service";
+import { getActivitiesForResource, logActivity } from "@/lib/services/activity.service";
 import { revalidateInsightCaches } from "@/lib/cache/revalidate";
 import { runLoggedQuery, runLoggedMutation, emptyPaginated } from "@/lib/action-utils";
 import { toSafeRegExp } from "@/lib/utils/sanitize";
@@ -39,6 +40,35 @@ function resolveAssignedTo(assignedToId: string | undefined) {
     assignedTo: new Types.ObjectId(assignedToId),
     assignedAt: new Date(),
   };
+}
+
+async function getAssigneeName(assignedToId: string | undefined) {
+  if (!assignedToId?.trim()) return undefined;
+  const user = await User.findById(assignedToId).select("name").lean();
+  return user?.name;
+}
+
+function serializeActivity(entry: {
+  action: string;
+  description: string;
+  userName?: string;
+  createdAt?: Date;
+}) {
+  return {
+    action: entry.action,
+    description: entry.description,
+    userName: entry.userName,
+    createdAt: entry.createdAt ? new Date(entry.createdAt).toISOString() : undefined,
+  };
+}
+
+function csvCell(value: unknown) {
+  const text = value == null ? "" : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function buildCsv(rows: unknown[][]) {
+  return rows.map((row) => row.map(csvCell).join(",")).join("\n");
 }
 
 export async function getSiteLeadCounts(): Promise<SiteLeadCounts> {
@@ -72,6 +102,24 @@ export async function getSiteLeadCounts(): Promise<SiteLeadCounts> {
   }, { students: 0, partners: 0, total: 0 });
 }
 
+export async function getSiteLeadAssignableUsers() {
+  return runLoggedQuery("getSiteLeadAssignableUsers", async () => {
+    const user = await getSessionUser();
+    const canAssignStudents = hasPermission(user, PERMISSIONS.ADMISSIONS_WRITE);
+    const canAssignPartners = hasPermission(user, PERMISSIONS.PARTNERS_WRITE);
+    if (!canAssignStudents && !canAssignPartners) return [];
+
+    await connectDB();
+    const users = await User.find({ status: "active" }).select("name email role").sort({ name: 1 }).lean();
+    return users.map((entry) => ({
+      _id: entry._id.toString(),
+      name: entry.name,
+      email: entry.email,
+      role: entry.role,
+    }));
+  }, []);
+}
+
 export async function getSiteStudentLeads(params: {
   page?: number;
   pageSize?: number;
@@ -98,6 +146,9 @@ export async function getSiteStudentLeads(params: {
           { phone: regex },
           { email: regex },
           { studentId: regex },
+          { "metadata.contactSubject": regex },
+          { "metadata.preferredLender": regex },
+          { "metadata.loanAmountText": regex },
         ],
       });
     }
@@ -105,7 +156,7 @@ export async function getSiteStudentLeads(params: {
     const [data, total] = await Promise.all([
       Student.find(mongoFilter)
         .select(
-          "studentId firstName lastName phone email targetCountry metadata.enquiryType metadata.formPage metadata.promotionStatus createdAt notes"
+          "studentId firstName lastName phone email targetCountry metadata.enquiryType metadata.formPage metadata.loanAmountText metadata.preferredLender metadata.promotionStatus createdAt notes"
         )
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -125,6 +176,8 @@ export async function getSiteStudentLeads(params: {
         targetCountry: entry.targetCountry,
         enquiryType: entry.metadata?.enquiryType,
         formPage: entry.metadata?.formPage,
+        loanAmountText: entry.metadata?.loanAmountText,
+        preferredLender: entry.metadata?.preferredLender,
         promotionStatus: entry.metadata?.promotionStatus,
         createdAt: entry.createdAt,
       })),
@@ -170,7 +223,7 @@ export async function getSitePartnerLeads(params: {
     const [data, total] = await Promise.all([
       Partner.find(mongoFilter)
         .select(
-          "partnerCode companyName owner phone email location.city metadata.isOwner metadata.formCity metadata.promotionStatus createdAt"
+          "partnerCode companyName owner phone email location.city metadata.isOwner metadata.formCity metadata.whatsapp metadata.possibleDuplicate metadata.promotionStatus createdAt"
         )
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -189,6 +242,8 @@ export async function getSitePartnerLeads(params: {
         email: entry.email,
         city: entry.metadata?.formCity ?? entry.location?.city,
         isOwner: entry.metadata?.isOwner,
+        whatsapp: entry.metadata?.whatsapp,
+        possibleDuplicate: entry.metadata?.possibleDuplicate,
         promotionStatus: entry.metadata?.promotionStatus,
         createdAt: entry.createdAt,
       })),
@@ -208,9 +263,16 @@ export async function getSiteStudentLeadById(id: string) {
 
     const student = await Student.findOne(
       mergeMongoFilter({ _id: id }, websitePendingStudentLeadsFilter())
-    ).lean();
+    )
+      .populate("assignedTo", "name")
+      .lean();
 
     if (!student) return null;
+
+    const assignedTo = student.assignedTo as
+      | { _id?: { toString(): string }; name?: string }
+      | { toString(): string }
+      | undefined;
 
     return {
       _id: student._id.toString(),
@@ -222,12 +284,164 @@ export async function getSiteStudentLeadById(id: string) {
       targetCountry: student.targetCountry,
       enquiryType: student.metadata?.enquiryType,
       formPage: student.metadata?.formPage,
+      loanAmountText: student.metadata?.loanAmountText,
+      currentStatus: student.metadata?.currentStatus,
+      preferredLender: student.metadata?.preferredLender,
+      contactSubject: student.metadata?.contactSubject,
+      assignedTo:
+        assignedTo && "_id" in assignedTo ? assignedTo._id?.toString() : assignedTo?.toString(),
+      assignedToName: assignedTo && "name" in assignedTo ? String(assignedTo.name) : undefined,
       notes: (student.notes ?? []).map((note) => ({
         content: note.content,
         createdByName: note.createdByName,
         createdAt: note.createdAt ? new Date(note.createdAt).toISOString() : undefined,
       })),
+      activities: (await getActivitiesForResource("student", student._id.toString(), 12)).map(
+        serializeActivity
+      ),
       createdAt: new Date(student.createdAt).toISOString(),
+    };
+  }, null);
+}
+
+export async function getSitePartnerLeadById(id: string) {
+  return runLoggedQuery("getSitePartnerLeadById", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+    await connectDB();
+    await repairLegacyWebsitePartnerLeads();
+
+    const partner = await Partner.findOne(
+      mergeMongoFilter({ _id: id }, websitePendingPartnerLeadsFilter())
+    ).lean();
+
+    if (!partner) return null;
+
+    return {
+      _id: partner._id.toString(),
+      partnerCode: partner.partnerCode,
+      companyName: partner.companyName,
+      owner: partner.owner,
+      phone: partner.phone,
+      email: partner.email,
+      city: partner.metadata?.formCity ?? partner.location?.city,
+      isOwner: partner.metadata?.isOwner,
+      whatsapp: partner.metadata?.whatsapp,
+      possibleDuplicate: partner.metadata?.possibleDuplicate,
+      assignedTo: partner.metadata?.assignedTo?.toString(),
+      assignedToName: partner.metadata?.assignedToName,
+      activities: (await getActivitiesForResource("partner", partner._id.toString(), 12)).map(
+        serializeActivity
+      ),
+      createdAt: new Date(partner.createdAt).toISOString(),
+    };
+  }, null);
+}
+
+export async function assignSiteStudentLeadAction(
+  id: string,
+  assignedToId?: string
+): Promise<ActionResult> {
+  return runLoggedMutation("assignSiteStudentLeadAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
+    await connectDB();
+
+    const student = await Student.findOne(
+      mergeMongoFilter({ _id: id }, websitePendingStudentLeadsFilter())
+    );
+    if (!student) return { success: false, error: "Site lead not found" };
+
+    const assigneeName = await getAssigneeName(assignedToId);
+    Object.assign(student, resolveAssignedTo(assignedToId));
+    if (!assignedToId?.trim()) {
+      student.assignedTo = undefined;
+      student.assignedAt = undefined;
+    }
+    await student.save();
+
+    await logActivity({
+      action: "site_lead.student_assigned",
+      description: assigneeName
+        ? `Assigned website lead ${student.studentId} to ${assigneeName}`
+        : `Unassigned website lead ${student.studentId}`,
+      resourceType: "student",
+      resourceId: student._id.toString(),
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { assignedToId, assigneeName },
+    });
+
+    revalidatePath("/dashboard/site-leads");
+    return { success: true };
+  });
+}
+
+export async function assignSitePartnerLeadAction(
+  id: string,
+  assignedToId?: string
+): Promise<ActionResult> {
+  return runLoggedMutation("assignSitePartnerLeadAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+    await connectDB();
+
+    const partner = await Partner.findOne(
+      mergeMongoFilter({ _id: id }, websitePendingPartnerLeadsFilter())
+    );
+    if (!partner) return { success: false, error: "Site lead not found" };
+
+    const assigneeName = await getAssigneeName(assignedToId);
+    partner.metadata = {
+      ...partner.metadata,
+      assignedTo: assignedToId?.trim() ? new Types.ObjectId(assignedToId) : undefined,
+      assignedToName: assigneeName,
+      assignedAt: assignedToId?.trim() ? new Date() : undefined,
+    };
+    await partner.save();
+
+    await logActivity({
+      action: "site_lead.partner_assigned",
+      description: assigneeName
+        ? `Assigned partner lead ${partner.partnerCode ?? partner.companyName} to ${assigneeName}`
+        : `Unassigned partner lead ${partner.partnerCode ?? partner.companyName}`,
+      resourceType: "partner",
+      resourceId: partner._id.toString(),
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { assignedToId, assigneeName },
+    });
+
+    revalidatePath("/dashboard/site-leads");
+    return { success: true };
+  });
+}
+
+export async function getSiteStudentLeadApplication(studentLeadId: string) {
+  return runLoggedQuery("getSiteStudentLeadApplication", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+    await connectDB();
+
+    const student = await Student.findOne(
+      mergeMongoFilter({ _id: studentLeadId }, websitePendingStudentLeadsFilter())
+    )
+      .select("_id")
+      .lean();
+
+    if (!student) return null;
+
+    const application = await Application.findOne({ studentId: student._id })
+      .select("loanAmount status pipelineStage createdAt")
+      .lean();
+
+    if (!application) return null;
+
+    return {
+      loanAmount: application.loanAmount,
+      status: application.status,
+      pipelineStage: application.pipelineStage,
+      createdAt: new Date(application.createdAt).toISOString(),
     };
   }, null);
 }
@@ -415,5 +629,168 @@ export async function promoteSitePartnerLeadAction(
       success: true,
       data: { partnerId: partner._id.toString(), officialCode },
     };
+  });
+}
+
+export async function bulkPromoteSiteStudentLeadsAction(
+  ids: string[]
+): Promise<ActionResult<{ promoted: number; failed: number }>> {
+  return runLoggedMutation("bulkPromoteSiteStudentLeadsAction", async () => {
+    const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+    let promoted = 0;
+    let failed = 0;
+
+    for (const id of uniqueIds) {
+      const result = await promoteSiteStudentLeadAction(id, new FormData());
+      if (result.success) promoted += 1;
+      else failed += 1;
+    }
+
+    return { success: true, data: { promoted, failed } };
+  });
+}
+
+export async function bulkPromoteSitePartnerLeadsAction(
+  ids: string[]
+): Promise<ActionResult<{ promoted: number; failed: number }>> {
+  return runLoggedMutation("bulkPromoteSitePartnerLeadsAction", async () => {
+    const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+    let promoted = 0;
+    let failed = 0;
+
+    for (const id of uniqueIds) {
+      const formData = new FormData();
+      const result = await promoteSitePartnerLeadAction(id, formData);
+      if (result.success) promoted += 1;
+      else failed += 1;
+    }
+
+    return { success: true, data: { promoted, failed } };
+  });
+}
+
+export async function bulkDeleteSiteStudentLeadsAction(
+  ids: string[]
+): Promise<ActionResult<{ deleted: number; failed: number }>> {
+  return runLoggedMutation("bulkDeleteSiteStudentLeadsAction", async () => {
+    const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+    let deleted = 0;
+    let failed = 0;
+
+    for (const id of uniqueIds) {
+      const result = await deleteSiteStudentLeadAction(id);
+      if (result.success) deleted += 1;
+      else failed += 1;
+    }
+
+    return { success: true, data: { deleted, failed } };
+  });
+}
+
+export async function bulkDeleteSitePartnerLeadsAction(
+  ids: string[]
+): Promise<ActionResult<{ deleted: number; failed: number }>> {
+  return runLoggedMutation("bulkDeleteSitePartnerLeadsAction", async () => {
+    const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+    let deleted = 0;
+    let failed = 0;
+
+    for (const id of uniqueIds) {
+      const result = await deleteSitePartnerLeadAction(id);
+      if (result.success) deleted += 1;
+      else failed += 1;
+    }
+
+    return { success: true, data: { deleted, failed } };
+  });
+}
+
+export async function exportSiteStudentLeadsCsvAction(search?: string): Promise<ActionResult<string>> {
+  return runLoggedMutation("exportSiteStudentLeadsCsvAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+    await connectDB();
+
+    const baseFilter = mergeMongoFilter(
+      websitePendingStudentLeadsFilter(),
+      buildAdmissionVisibilityFilter(user)
+    );
+    const mongoFilter = search?.trim()
+      ? mergeMongoFilter(baseFilter, {
+          $or: [
+            { firstName: toSafeRegExp(search) },
+            { lastName: toSafeRegExp(search) },
+            { phone: toSafeRegExp(search) },
+            { email: toSafeRegExp(search) },
+            { studentId: toSafeRegExp(search) },
+          ],
+        })
+      : baseFilter;
+
+    const leads = await Student.find(mongoFilter)
+      .select(
+        "studentId firstName lastName phone email targetCountry metadata.enquiryType metadata.loanAmountText metadata.preferredLender createdAt"
+      )
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const rows = [
+      ["ID", "Name", "Phone", "Email", "Country", "Enquiry", "Loan amount", "Lender", "Submitted"],
+      ...leads.map((lead) => [
+        lead.studentId,
+        `${lead.firstName} ${lead.lastName}`.trim(),
+        lead.phone,
+        lead.email,
+        lead.targetCountry,
+        lead.metadata?.enquiryType,
+        lead.metadata?.loanAmountText,
+        lead.metadata?.preferredLender,
+        new Date(lead.createdAt).toISOString(),
+      ]),
+    ];
+
+    return { success: true, data: buildCsv(rows) };
+  });
+}
+
+export async function exportSitePartnerLeadsCsvAction(search?: string): Promise<ActionResult<string>> {
+  return runLoggedMutation("exportSitePartnerLeadsCsvAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+    await connectDB();
+    await repairLegacyWebsitePartnerLeads();
+
+    const baseFilter = websitePendingPartnerLeadsFilter();
+    const mongoFilter = search?.trim()
+      ? mergeMongoFilter(baseFilter, {
+          $or: [
+            { companyName: toSafeRegExp(search) },
+            { owner: toSafeRegExp(search) },
+            { phone: toSafeRegExp(search) },
+            { email: toSafeRegExp(search) },
+            { partnerCode: toSafeRegExp(search) },
+          ],
+        })
+      : baseFilter;
+
+    const leads = await Partner.find(mongoFilter)
+      .select("partnerCode companyName owner phone email location.city metadata.formCity createdAt")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const rows = [
+      ["ID", "Company", "Owner", "Phone", "Email", "City", "Submitted"],
+      ...leads.map((lead) => [
+        lead.partnerCode,
+        lead.companyName,
+        lead.owner,
+        lead.phone,
+        lead.email,
+        lead.metadata?.formCity ?? lead.location?.city,
+        new Date(lead.createdAt).toISOString(),
+      ]),
+    ];
+
+    return { success: true, data: buildCsv(rows) };
   });
 }

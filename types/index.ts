@@ -193,6 +193,8 @@ export interface SiteStudentLeadListItem {
   targetCountry?: string;
   enquiryType?: string;
   formPage?: string;
+  loanAmountText?: string;
+  preferredLender?: string;
   promotionStatus?: string;
   createdAt: Date;
 }
@@ -206,6 +208,8 @@ export interface SitePartnerLeadListItem {
   email?: string;
   city?: string;
   isOwner?: boolean;
+  whatsapp?: string;
+  possibleDuplicate?: boolean;
   promotionStatus?: string;
   createdAt: Date;
 }

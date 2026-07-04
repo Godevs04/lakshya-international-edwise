@@ -84,6 +84,11 @@ export interface IPartner extends Document {
     promotedByName?: string;
     isOwner?: boolean;
     formCity?: string;
+    whatsapp?: string;
+    possibleDuplicate?: boolean;
+    assignedTo?: mongoose.Types.ObjectId;
+    assignedToName?: string;
+    assignedAt?: Date;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -162,6 +167,11 @@ const PartnerSchema = new Schema<IPartner>(
       promotedByName: { type: String, trim: true },
       isOwner: { type: Boolean },
       formCity: { type: String, trim: true },
+      whatsapp: { type: String, trim: true },
+      possibleDuplicate: { type: Boolean },
+      assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
+      assignedToName: { type: String, trim: true },
+      assignedAt: { type: Date },
     },
   },
   { timestamps: true }

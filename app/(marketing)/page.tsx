@@ -48,6 +48,14 @@ const LendingPartnersPreview = dynamic(
   { ssr: true }
 );
 
+const LoanCalculatorSection = dynamic(
+  () =>
+    import("@/components/marketing/sections/loan-calculator-section").then(
+      (mod) => mod.LoanCalculatorSection
+    ),
+  { ssr: true }
+);
+
 const TestimonialsSection = dynamic(
   () =>
     import("@/components/marketing/sections/testimonials").then((mod) => mod.TestimonialsSection),
@@ -91,6 +99,7 @@ export default function MarketingHomePage() {
       <TrustMetricsBar />
       <LenderLogoCarousel />
       <FinanceServicesGrid />
+      <LoanCalculatorSection />
       <FinanceProcessHorizontal />
       <LakshyaRootMap />
 

@@ -117,12 +117,30 @@ export default async function OverviewPage() {
               </p>
             </div>
           </div>
-          <Link
-            href="/dashboard/site-leads"
-            className="inline-flex items-center justify-center rounded-full bg-[#E8952E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E8952E]/90"
-          >
-            Review from site
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {siteLeadCounts.students > 0 ? (
+              <Link
+                href="/dashboard/site-leads?tab=students"
+                className="inline-flex items-center justify-center rounded-full border border-[#E8952E]/30 px-4 py-2 text-sm font-semibold text-[#E8952E] transition-colors hover:bg-[#E8952E]/10"
+              >
+                {siteLeadCounts.students} student lead{siteLeadCounts.students === 1 ? "" : "s"}
+              </Link>
+            ) : null}
+            {siteLeadCounts.partners > 0 ? (
+              <Link
+                href="/dashboard/site-leads?tab=partners"
+                className="inline-flex items-center justify-center rounded-full border border-[#E8952E]/30 px-4 py-2 text-sm font-semibold text-[#E8952E] transition-colors hover:bg-[#E8952E]/10"
+              >
+                {siteLeadCounts.partners} partner lead{siteLeadCounts.partners === 1 ? "" : "s"}
+              </Link>
+            ) : null}
+            <Link
+              href="/dashboard/site-leads"
+              className="inline-flex items-center justify-center rounded-full bg-[#E8952E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E8952E]/90"
+            >
+              Review from site
+            </Link>
+          </div>
         </GlassCard>
       ) : null}
 

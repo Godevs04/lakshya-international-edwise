@@ -10,6 +10,7 @@ interface CtaBannerProps {
   description?: string;
   className?: string;
   source?: string;
+  targetCountry?: string;
 }
 
 export function CtaBanner({
@@ -17,6 +18,7 @@ export function CtaBanner({
   description = "Check your eligibility in under 7 minutes and get matched with the best lender for your profile.",
   className,
   source = "cta-banner",
+  targetCountry,
 }: CtaBannerProps) {
   const whatsapp = getWhatsAppLink(
     "Hello, I would like to check my education loan eligibility."
@@ -38,6 +40,7 @@ export function CtaBanner({
           <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
             <EligibilityCta
               source={source}
+              targetCountry={targetCountry}
               variant="outline"
               className="btn-shine border-white bg-white px-7 py-3.5 text-base text-primary hover:bg-white/90"
             />

@@ -7,9 +7,10 @@ interface EligibilityCtaProps {
   children?: React.ReactNode;
   className?: string;
   preferredLender?: string;
+  targetCountry?: string;
   source?: string;
   variant?: "primary" | "outline" | "ghost";
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   "aria-label"?: string;
 }
 
@@ -17,6 +18,7 @@ export function EligibilityCta({
   children = "Check Eligibility",
   className,
   preferredLender,
+  targetCountry,
   source,
   variant = "primary",
   onClick,
@@ -36,9 +38,9 @@ export function EligibilityCta({
   return (
     <button
       type="button"
-      onClick={() => {
-        onClick?.();
-        open({ preferredLender, source });
+      onClick={(event) => {
+        onClick?.(event);
+        open({ preferredLender, targetCountry, source });
       }}
       className={cn(base, variants[variant], className)}
       {...rest}

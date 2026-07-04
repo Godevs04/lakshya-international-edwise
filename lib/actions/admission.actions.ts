@@ -9,7 +9,6 @@ import { canViewAdmissionRevenue } from "@/lib/auth/page-access";
 import { requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import {
-  admissionLeadsFilter,
   manualAdmissionLeadsFilter,
   STUDENT_RECORD_TYPE,
 } from "@/lib/constants/student-record-type";
@@ -139,7 +138,7 @@ export async function updateAdmissionRevenueAction(
 
     await connectDB();
     const mongoFilter = mergeMongoFilter(
-      { _id: parsed.data.studentId, ...admissionLeadsFilter() },
+      { _id: parsed.data.studentId, ...manualAdmissionLeadsFilter() },
       buildAdmissionVisibilityFilter(user)
     );
     const existing = await Student.findOne(mongoFilter).select("_id").lean();
@@ -184,7 +183,7 @@ export async function getAdmissionById(id: string) {
 
     await connectDB();
     const mongoFilter = mergeMongoFilter(
-      { _id: id, ...admissionLeadsFilter() },
+      { _id: id, ...manualAdmissionLeadsFilter() },
       buildAdmissionVisibilityFilter(user)
     );
     const admission = await Student.findOne(mongoFilter)
@@ -226,7 +225,7 @@ export async function getAdmissionForEdit(id: string) {
 
     await connectDB();
     const mongoFilter = mergeMongoFilter(
-      { _id: id, ...admissionLeadsFilter() },
+      { _id: id, ...manualAdmissionLeadsFilter() },
       buildAdmissionVisibilityFilter(user)
     );
     const admission = await Student.findOne(mongoFilter)
@@ -275,7 +274,7 @@ export async function updateAdmissionAction(
 
     await connectDB();
     const mongoFilter = mergeMongoFilter(
-      { _id: id, ...admissionLeadsFilter() },
+      { _id: id, ...manualAdmissionLeadsFilter() },
       buildAdmissionVisibilityFilter(user)
     );
     const existing = await Student.findOne(mongoFilter);

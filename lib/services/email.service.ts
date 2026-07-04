@@ -385,17 +385,28 @@ export async function sendWebsiteEnquiryNotification(params: {
   targetCountry?: string;
   course?: string;
   loanRequired?: boolean;
+  loanAmount?: string;
+  currentStatus?: string;
+  preferredLender?: string;
+  contactSubject?: string;
   message?: string;
   enquiryType: string;
   formPage?: string;
   studentCode: string;
+  leadId?: string;
+  resubmitted?: boolean;
 }): Promise<boolean> {
   const { getMarketingContact } = await import("@/lib/config/marketing");
+  const { getSiteLeadInboxCounts } = await import("@/lib/services/site-lead-counts.service");
   const contact = getMarketingContact();
   const notifyEmail = contact.enquiryNotifyEmail?.trim();
   if (!notifyEmail) {
     return false;
   }
+
+  const inboxCounts = await getSiteLeadInboxCounts();
+  const highlightParam = params.leadId ? `&highlight=${encodeURIComponent(params.leadId)}` : "";
+  const reviewUrl = `${getPublicAuthUrl()}/dashboard/site-leads?tab=students${highlightParam}`;
 
   const company = await getEmailBranding();
   const lines = [
@@ -405,6 +416,12 @@ export async function sendWebsiteEnquiryNotification(params: {
     params.targetCountry ? `<strong>Country:</strong> ${escapeHtml(params.targetCountry)}` : null,
     params.course ? `<strong>Course:</strong> ${escapeHtml(params.course)}` : null,
     params.loanRequired ? "<strong>Loan required:</strong> Yes" : null,
+    params.loanAmount ? `<strong>Loan amount:</strong> ${escapeHtml(params.loanAmount)}` : null,
+    params.currentStatus ? `<strong>Current status:</strong> ${escapeHtml(params.currentStatus)}` : null,
+    params.preferredLender
+      ? `<strong>Preferred lender:</strong> ${escapeHtml(params.preferredLender)}`
+      : null,
+    params.contactSubject ? `<strong>Subject:</strong> ${escapeHtml(params.contactSubject)}` : null,
     `<strong>Enquiry type:</strong> ${escapeHtml(params.enquiryType)}`,
     params.formPage ? `<strong>Form page:</strong> ${escapeHtml(params.formPage)}` : null,
     `<strong>Student ID:</strong> ${escapeHtml(params.studentCode)}`,
@@ -413,15 +430,16 @@ export async function sendWebsiteEnquiryNotification(params: {
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
-      A new website enquiry has been captured in the CRM admissions pipeline.
+      ${params.resubmitted ? "A website enquiry was resubmitted and updated in the From Site inbox." : "A new website enquiry is awaiting review in the From Site inbox."}
     </p>
     ${renderInfoBox(lines.join("<br/>"))}
-    ${emailButton(`${getPublicAuthUrl()}/dashboard/admissions`, "Open Admissions")}
+    ${emailButton(reviewUrl, "Open From Site")}
+    ${renderMutedNote(`Inbox pending: ${inboxCounts.students} student · ${inboxCounts.partners} partner`)}
     ${renderMutedNote("This lead was created automatically from the public marketing website.")}`;
 
   return sendEmail({
     to: notifyEmail,
-    subject: `New Website Enquiry — ${params.name}`,
+    subject: `${params.resubmitted ? "Updated" : "New"} Website Enquiry — ${params.name} (${params.studentCode})`,
     html: renderEmailLayout({
       company,
       preheader: `New enquiry from ${params.name}`,
@@ -440,13 +458,20 @@ export async function sendPartnerEnquiryNotification(params: {
   city: string;
   isOwner: boolean;
   whatsapp?: string;
+  partnerCode?: string;
+  leadId?: string;
 }): Promise<boolean> {
   const { getMarketingContact } = await import("@/lib/config/marketing");
+  const { getSiteLeadInboxCounts } = await import("@/lib/services/site-lead-counts.service");
   const contact = getMarketingContact();
   const notifyEmail = contact.enquiryNotifyEmail?.trim();
   if (!notifyEmail) {
     return false;
   }
+
+  const inboxCounts = await getSiteLeadInboxCounts();
+  const highlightParam = params.leadId ? `&highlight=${encodeURIComponent(params.leadId)}` : "";
+  const reviewUrl = `${getPublicAuthUrl()}/dashboard/site-leads?tab=partners${highlightParam}`;
 
   const company = await getEmailBranding();
   const lines = [
@@ -461,14 +486,16 @@ export async function sendPartnerEnquiryNotification(params: {
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: ${BRAND.text};">
-      A new partnership enquiry has been submitted from the marketing website.
+      A new partnership enquiry is awaiting review in the From Site inbox.
     </p>
     ${renderInfoBox(lines.join("<br/>"))}
+    ${emailButton(reviewUrl, "Review partner lead")}
+    ${renderMutedNote(`Inbox pending: ${inboxCounts.students} student · ${inboxCounts.partners} partner`)}
     ${renderMutedNote("This partner lead was created from the public Become a Partner page.")}`;
 
   return sendEmail({
     to: notifyEmail,
-    subject: `New Partner Enquiry — ${params.companyName}`,
+    subject: `New Partner Enquiry — ${params.companyName}${params.partnerCode ? ` (${params.partnerCode})` : ""}`,
     html: renderEmailLayout({
       company,
       preheader: `New partner enquiry from ${params.name}`,

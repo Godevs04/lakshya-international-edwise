@@ -411,6 +411,7 @@ export const websiteEnquirySchema = z
     loanAmount: z.string().max(60).optional(),
     currentStatus: z.string().max(120).optional(),
     preferredLender: z.string().max(120).optional(),
+    subject: z.string().max(120).optional(),
     message: z.string().max(2000).optional(),
     enquiryType: z
       .enum(["consultation", "quick", "contact", "loan", "country", "eligibility"])

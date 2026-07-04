@@ -43,6 +43,7 @@ export function CountryHero({ country, slug }: CountryHeroProps) {
             <div className="mt-8">
               <EligibilityCta
                 source={`country-${slug}`}
+                targetCountry={country.name}
                 className="nav-eligibility-cta px-7 py-3.5 text-base"
               />
             </div>

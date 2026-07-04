@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
+import { useSiteLeadHighlight } from "@/hooks/use-site-lead-highlight";
 import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -32,10 +34,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PromotePartnerLeadSheet } from "@/components/dashboard/promote-partner-lead-sheet";
 import { SitePartnerLeadDetail } from "@/components/dashboard/site-partner-lead-detail";
-import { deleteSitePartnerLeadAction } from "@/lib/actions/site-lead.actions";
+import { AssigneeSelect } from "@/components/forms/assignee-select";
+import {
+  assignSitePartnerLeadAction,
+  bulkDeleteSitePartnerLeadsAction,
+  bulkPromoteSitePartnerLeadsAction,
+  deleteSitePartnerLeadAction,
+  exportSitePartnerLeadsCsvAction,
+  getSitePartnerLeadById,
+} from "@/lib/actions/site-lead.actions";
 import { formatDate } from "@/lib/utils/format";
 import type { SitePartnerLeadListItem } from "@/types";
-import { ArrowUpRight, Eye, Search, Trash2 } from "lucide-react";
+import { ArrowUpRight, Download, Eye, Search, Trash2 } from "lucide-react";
+
+interface AssigneeOption {
+  _id: string;
+  name: string;
+}
 
 interface SitePartnerLeadsTableProps {
   data: SitePartnerLeadListItem[];
@@ -44,6 +59,8 @@ interface SitePartnerLeadsTableProps {
   totalPages: number;
   canWrite: boolean;
   search?: string;
+  highlightId?: string;
+  assignableUsers: AssigneeOption[];
 }
 
 function buildUrl(params: { search?: string; page?: number; tab?: string }) {
@@ -54,6 +71,20 @@ function buildUrl(params: { search?: string; page?: number; tab?: string }) {
   return `/dashboard/site-leads?${query.toString()}`;
 }
 
+function isStale(createdAt: Date) {
+  return Date.now() - new Date(createdAt).getTime() > 24 * 60 * 60 * 1000;
+}
+
+function downloadCsv(filename: string, csv: string) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function SitePartnerLeadsTable({
   data,
   total,
@@ -61,6 +92,8 @@ export function SitePartnerLeadsTable({
   totalPages,
   canWrite,
   search,
+  highlightId,
+  assignableUsers,
 }: SitePartnerLeadsTableProps) {
   const router = useRouter();
   const [searchDraft, setSearchDraft] = useState(search ?? "");
@@ -68,12 +101,30 @@ export function SitePartnerLeadsTable({
   const [promoteOpen, setPromoteOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeLead, setActiveLead] = useState<SitePartnerLeadListItem | null>(null);
+  const [detailLead, setDetailLead] = useState<Awaited<ReturnType<typeof getSitePartnerLeadById>>>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [assigning, setAssigning] = useState(false);
 
-  function openView(lead: SitePartnerLeadListItem) {
+  const openView = useCallback(async (lead: SitePartnerLeadListItem) => {
+    setHighlightedRowId(lead._id);
     setActiveLead(lead);
     setViewOpen(true);
-  }
+    setLoadingDetail(true);
+    const detail = await getSitePartnerLeadById(lead._id);
+    setDetailLead(detail);
+    setLoadingDetail(false);
+  }, []);
+
+  useSiteLeadHighlight({
+    highlightId,
+    data,
+    onHighlight: openView,
+    toastMessage: "New partner lead from website",
+  });
 
   function openPromote(lead: SitePartnerLeadListItem) {
     setActiveLead(lead);
@@ -83,6 +134,68 @@ export function SitePartnerLeadsTable({
   function openDelete(lead: SitePartnerLeadListItem) {
     setActiveLead(lead);
     setDeleteOpen(true);
+  }
+
+  function toggleSelected(id: string, checked: boolean) {
+    setSelectedIds((current) =>
+      checked ? Array.from(new Set([...current, id])) : current.filter((entry) => entry !== id)
+    );
+  }
+
+  function toggleAll(checked: boolean) {
+    setSelectedIds(checked ? data.map((lead) => lead._id) : []);
+  }
+
+  async function runBulkPromote() {
+    if (!selectedIds.length) return;
+    setBulkLoading(true);
+    const result = await bulkPromoteSitePartnerLeadsAction(selectedIds);
+    if (result.success) {
+      notify.success(`Promoted ${result.data?.promoted ?? 0} partner leads`);
+      setSelectedIds([]);
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to promote selected leads");
+    }
+    setBulkLoading(false);
+  }
+
+  async function runBulkDelete() {
+    if (!selectedIds.length) return;
+    setBulkLoading(true);
+    const result = await bulkDeleteSitePartnerLeadsAction(selectedIds);
+    if (result.success) {
+      notify.success(`Deleted ${result.data?.deleted ?? 0} partner leads`);
+      setSelectedIds([]);
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to delete selected leads");
+    }
+    setBulkLoading(false);
+  }
+
+  async function exportCsv() {
+    const result = await exportSitePartnerLeadsCsvAction(search);
+    if (result.success && result.data) {
+      downloadCsv("site-partner-leads.csv", result.data);
+    } else {
+      notify.error(result.error ?? "Failed to export leads");
+    }
+  }
+
+  async function assignLead(assignedToId: string) {
+    if (!detailLead) return;
+    setAssigning(true);
+    const result = await assignSitePartnerLeadAction(detailLead._id, assignedToId);
+    if (result.success) {
+      notify.success(assignedToId ? "Lead assigned" : "Lead unassigned");
+      const refreshed = await getSitePartnerLeadById(detailLead._id);
+      setDetailLead(refreshed);
+      router.refresh();
+    } else {
+      notify.error(result.error ?? "Failed to assign lead");
+    }
+    setAssigning(false);
   }
 
   async function confirmDelete() {
@@ -121,13 +234,45 @@ export function SitePartnerLeadsTable({
           <Button type="submit" variant="outline" size="sm">
             Search
           </Button>
+          <Button type="button" variant="outline" size="sm" onClick={exportCsv}>
+            <Download className="mr-1.5 h-4 w-4" />
+            Export CSV
+          </Button>
         </form>
       </GlassCard>
+
+      {canWrite && selectedIds.length > 0 ? (
+        <GlassCard className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium">{selectedIds.length} selected</p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" size="sm" onClick={runBulkPromote} disabled={bulkLoading}>
+              Bulk promote
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={runBulkDelete}
+              disabled={bulkLoading}
+            >
+              Bulk delete
+            </Button>
+          </div>
+        </GlassCard>
+      ) : null}
 
       <GlassCard className="overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
+              {canWrite ? (
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={data.length > 0 && selectedIds.length === data.length}
+                    onCheckedChange={(checked) => toggleAll(checked === true)}
+                  />
+                </TableHead>
+              ) : null}
               <TableHead>ID</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Owner</TableHead>
@@ -140,13 +285,33 @@ export function SitePartnerLeadsTable({
           <TableBody>
             {data.length ? (
               data.map((lead) => (
-                <TableRow key={lead._id}>
+                <TableRow
+                  key={lead._id}
+                  className={highlightedRowId === lead._id ? "bg-[#E8952E]/10" : undefined}
+                >
+                  {canWrite ? (
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.includes(lead._id)}
+                        onCheckedChange={(checked) => toggleSelected(lead._id, checked === true)}
+                      />
+                    </TableCell>
+                  ) : null}
                   <TableCell className="font-mono text-xs">{lead.partnerCode ?? "—"}</TableCell>
                   <TableCell className="font-medium">{lead.companyName}</TableCell>
                   <TableCell>{lead.owner ?? "—"}</TableCell>
                   <TableCell>{lead.phone ?? "—"}</TableCell>
                   <TableCell>{lead.city ?? "—"}</TableCell>
-                  <TableCell>{formatDate(lead.createdAt)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <span>{formatDate(lead.createdAt)}</span>
+                      {isStale(lead.createdAt) ? (
+                        <span className="w-fit rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                          SLA &gt;24h
+                        </span>
+                      ) : null}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
                       <Button type="button" variant="ghost" size="sm" onClick={() => openView(lead)}>
@@ -178,7 +343,10 @@ export function SitePartnerLeadsTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={canWrite ? 8 : 7}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   No website partner leads awaiting review.
                 </TableCell>
               </TableRow>
@@ -217,9 +385,32 @@ export function SitePartnerLeadsTable({
           <SheetHeader className="border-b border-border/60 px-4 py-4 pr-12">
             <SheetTitle>Partner lead details</SheetTitle>
           </SheetHeader>
-          {activeLead ? (
+          {loadingDetail ? (
             <div className="px-4 py-4">
-              <SitePartnerLeadDetail lead={activeLead} />
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </div>
+          ) : detailLead ? (
+            <div className="px-4 py-4">
+              <div className="space-y-4">
+                {canWrite ? (
+                  <GlassCard className="p-4">
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Assign before promote</p>
+                      <AssigneeSelect
+                        users={assignableUsers}
+                        value={detailLead.assignedTo ?? ""}
+                        onValueChange={assignLead}
+                        allowUnassigned
+                        placeholder="Select assignee"
+                      />
+                      {assigning ? (
+                        <p className="text-xs text-muted-foreground">Saving assignment...</p>
+                      ) : null}
+                    </div>
+                  </GlassCard>
+                ) : null}
+                <SitePartnerLeadDetail lead={detailLead} />
+              </div>
             </div>
           ) : null}
         </SheetContent>

@@ -49,7 +49,8 @@ export function ContactForm() {
     formData.set("phone", values.phone);
     formData.set("enquiryType", "contact");
     formData.set("formPage", "/contact");
-    formData.set("message", `Subject: ${values.subject}\n\n${values.message}`);
+    formData.set("subject", values.subject);
+    formData.set("message", values.message);
     if (values.email) formData.set("email", values.email);
     if (values.website) formData.set("website", values.website);
 

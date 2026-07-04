@@ -5,11 +5,11 @@ import { SiteLeadsTabs } from "@/components/dashboard/site-leads-tabs";
 import { SiteStudentLeadsTable } from "@/components/tables/site-student-leads-table";
 import { SitePartnerLeadsTable } from "@/components/tables/site-partner-leads-table";
 import {
+  getSiteLeadAssignableUsers,
   getSiteLeadCounts,
   getSitePartnerLeads,
   getSiteStudentLeads,
 } from "@/lib/actions/site-lead.actions";
-import { getAssignableUsers } from "@/lib/actions/student.actions";
 import { getPartnersList } from "@/lib/actions/partner.actions";
 import { getSiteLeadsPageAccess } from "@/lib/auth/page-access";
 import { auth } from "@/lib/auth/auth";
@@ -56,7 +56,9 @@ export default async function SiteLeadsPage({
     tab === "partners" && canViewPartners
       ? getSitePartnerLeads({ page, search: params.search })
       : Promise.resolve(null),
-    canViewStudents && access.canWriteStudents ? getAssignableUsers() : Promise.resolve([]),
+    access.canWriteStudents || access.canWritePartners
+      ? getSiteLeadAssignableUsers()
+      : Promise.resolve([]),
     canViewStudents && access.canWriteStudents ? getPartnersList() : Promise.resolve([]),
   ]);
 
@@ -87,6 +89,7 @@ export default async function SiteLeadsPage({
           {...studentResult}
           canWrite={access.canWriteStudents}
           search={params.search}
+          highlightId={params.highlight}
           partners={partners.map((partner) => ({
             _id: partner._id.toString(),
             companyName: partner.companyName,
@@ -103,6 +106,11 @@ export default async function SiteLeadsPage({
           {...partnerResult}
           canWrite={access.canWritePartners}
           search={params.search}
+          highlightId={params.highlight}
+          assignableUsers={assignableUsers.map((entry) => ({
+            _id: entry._id,
+            name: entry.name,
+          }))}
         />
       ) : null}
     </div>

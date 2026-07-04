@@ -48,6 +48,10 @@ import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-
 import { officialPartnersFilter } from "@/lib/constants/site-leads";
 import type { PartnerInput } from "@/lib/validations/schemas";
 
+function officialPartnerByIdFilter(id: string) {
+  return mergeMongoFilter({ _id: id }, officialPartnersFilter());
+}
+
 function buildPartnerContacts(data: PartnerInput) {
   const contacts = [];
 
@@ -134,7 +138,7 @@ export async function getPartnerById(id: string) {
   requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
   await connectDB();
-  const partner = await Partner.findById(id).lean();
+  const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
   if (!partner) return null;
 
   return {
@@ -155,7 +159,7 @@ export async function getPartnerForEdit(id: string) {
   requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
   await connectDB();
-  const partner = await Partner.findById(id).lean();
+  const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
   if (!partner) return null;
 
   return {
@@ -282,7 +286,7 @@ export async function updatePartnerAction(
 
   await connectDB();
   const data = parsed.data;
-  const existing = await Partner.findById(id);
+  const existing = await Partner.findOne(officialPartnerByIdFilter(id));
   if (!existing) return { success: false, error: "Partner not found" };
 
   const logoError = getOptionalLinkUrlError(data.companyLogo);
@@ -290,8 +294,8 @@ export async function updatePartnerAction(
     return { success: false, error: `Company logo link: ${logoError}` };
   }
 
-  const partner = await Partner.findByIdAndUpdate(
-    id,
+  const partner = await Partner.findOneAndUpdate(
+    officialPartnerByIdFilter(id),
     {
       companyName: sanitizeText(data.companyName),
       owner: data.owner ? sanitizeText(data.owner) : undefined,
@@ -350,7 +354,7 @@ export async function deletePartnerAction(id: string): Promise<ActionResult> {
   requirePermission(user, PERMISSIONS.PARTNERS_DELETE);
 
   await connectDB();
-  const partner = await Partner.findByIdAndDelete(id);
+  const partner = await Partner.findOneAndDelete(officialPartnerByIdFilter(id));
   if (!partner) return { success: false, error: "Partner not found" };
 
   await logActivity({

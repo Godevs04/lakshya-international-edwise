@@ -218,6 +218,12 @@ export interface IStudent extends Document {
     promotedAt?: Date;
     promotedBy?: Types.ObjectId;
     promotedByName?: string;
+    loanAmountText?: string;
+    currentStatus?: string;
+    preferredLender?: string;
+    contactSubject?: string;
+    resubmittedAt?: Date;
+    resubmissionCount?: number;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -343,6 +349,12 @@ const StudentSchema = new Schema<IStudent>(
       promotedAt: { type: Date },
       promotedBy: { type: Schema.Types.ObjectId, ref: "User" },
       promotedByName: { type: String, trim: true },
+      loanAmountText: { type: String, trim: true },
+      currentStatus: { type: String, trim: true },
+      preferredLender: { type: String, trim: true },
+      contactSubject: { type: String, trim: true },
+      resubmittedAt: { type: Date },
+      resubmissionCount: { type: Number, min: 0 },
     },
   },
   { timestamps: true }

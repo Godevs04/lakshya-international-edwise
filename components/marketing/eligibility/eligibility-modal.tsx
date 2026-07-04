@@ -23,6 +23,7 @@ const step1Schema = z.object({
   name: z.string().min(2, "Please enter your name"),
   phone: z.string().min(10, "Enter a valid 10-digit mobile number"),
   email: z.string().email("Enter a valid email").optional().or(z.literal("")),
+  website: z.string().max(0).optional(),
 });
 
 const step2Schema = z.object({
@@ -63,13 +64,22 @@ interface EligibilityModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preferredLender?: string;
+  targetCountry?: string;
   source?: string;
+}
+
+function resolveDestinationPreset(targetCountry?: string) {
+  if (!targetCountry?.trim()) return "";
+  const normalized = targetCountry.trim();
+  if (DESTINATIONS.includes(normalized)) return normalized;
+  return normalized;
 }
 
 export function EligibilityModal({
   open,
   onOpenChange,
   preferredLender,
+  targetCountry,
   source,
 }: EligibilityModalProps) {
   const [step, setStep] = useState<1 | 2>(1);
@@ -79,7 +89,7 @@ export function EligibilityModal({
 
   const step1 = useForm<Step1Values>({
     resolver: zodResolver(step1Schema),
-    defaultValues: { name: "", phone: "", email: "" },
+    defaultValues: { name: "", phone: "", email: "", website: "" },
   });
 
   const step2 = useForm<Step2Values>({
@@ -99,14 +109,32 @@ export function EligibilityModal({
     setSubmitted(false);
     setError(null);
     step1.reset();
-    step2.reset({ preferredLender: preferredLender ?? "" });
+    const destination = resolveDestinationPreset(targetCountry);
+    step2.reset({
+      targetCountry: targetCountry?.trim() ?? "",
+      loanAmount: "",
+      currentStatus: "",
+      destination,
+      preferredLender: preferredLender ?? "",
+      message: "",
+    });
   }
 
   function handleOpenChange(next: boolean) {
     onOpenChange(next);
-    if (!next) {
-      window.setTimeout(reset, 200);
+    if (next) {
+      const destination = resolveDestinationPreset(targetCountry);
+      step2.reset({
+        targetCountry: targetCountry?.trim() ?? "",
+        loanAmount: "",
+        currentStatus: "",
+        destination,
+        preferredLender: preferredLender ?? "",
+        message: "",
+      });
+      return;
     }
+    window.setTimeout(reset, 200);
   }
 
   function goToStep2() {
@@ -124,6 +152,7 @@ export function EligibilityModal({
     formData.set("loanRequired", "true");
     formData.set("formPage", source ?? "eligibility-modal");
     if (s1.email) formData.set("email", s1.email);
+    if (s1.website) formData.set("website", s1.website);
     const country = values.destination || values.targetCountry;
     if (country) formData.set("targetCountry", country);
     if (values.loanAmount) formData.set("loanAmount", values.loanAmount);
@@ -221,6 +250,13 @@ export function EligibilityModal({
                       <p className="text-xs text-destructive">{step1.formState.errors.email.message}</p>
                     )}
                   </div>
+                  <input
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    className="hidden"
+                    {...step1.register("website")}
+                  />
                   <Button type="submit" variant="ghost" className="btn-marketing w-full rounded-full hover:bg-transparent">
                     Continue
                     <ArrowRight className="ml-1.5 h-4 w-4" />

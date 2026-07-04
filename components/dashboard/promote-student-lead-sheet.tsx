@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/toast";
+import { GlassCard } from "@/components/cards/glass-card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,7 +22,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { AssigneeSelect } from "@/components/forms/assignee-select";
-import { promoteSiteStudentLeadAction } from "@/lib/actions/site-lead.actions";
+import {
+  promoteSiteStudentLeadAction,
+} from "@/lib/actions/site-lead.actions";
+import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { formatPersonName } from "@/lib/utils/person-name";
 import { ArrowUpRight } from "lucide-react";
 
@@ -46,6 +50,13 @@ interface PromoteStudentLeadSheetProps {
   };
   partners: PartnerOption[];
   assignableUsers: AssigneeOption[];
+  application: {
+    loanAmount: number;
+    status: string;
+    pipelineStage: string;
+    createdAt: string;
+  } | null;
+  loadingApplication: boolean;
 }
 
 export function PromoteStudentLeadSheet({
@@ -54,6 +65,8 @@ export function PromoteStudentLeadSheet({
   lead,
   partners,
   assignableUsers,
+  application,
+  loadingApplication,
 }: PromoteStudentLeadSheetProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -91,6 +104,35 @@ export function PromoteStudentLeadSheet({
         </SheetHeader>
 
         <div className="space-y-4 px-4 py-4">
+          <GlassCard className="p-4">
+            <h3 className="text-sm font-semibold">Linked application</h3>
+            {loadingApplication ? (
+              <p className="mt-2 text-sm text-muted-foreground">Loading application...</p>
+            ) : application ? (
+              <div className="mt-3 space-y-2 text-sm">
+                <p>
+                  <span className="text-muted-foreground">Loan amount:</span>{" "}
+                  {application.loanAmount > 0
+                    ? formatCurrency(application.loanAmount)
+                    : "Not captured"}
+                </p>
+                <p>
+                  <span className="text-muted-foreground">Status:</span> {application.status}
+                </p>
+                <p>
+                  <span className="text-muted-foreground">Pipeline:</span>{" "}
+                  {application.pipelineStage}
+                </p>
+                <p>
+                  <span className="text-muted-foreground">Created:</span>{" "}
+                  {formatDate(application.createdAt)}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No linked application found.</p>
+            )}
+          </GlassCard>
+
           <div className="space-y-2">
             <Label htmlFor="promote-partnerId">Consultancy (optional)</Label>
             <Select value={partnerId} onValueChange={(value) => setPartnerId(value ?? "")}>
