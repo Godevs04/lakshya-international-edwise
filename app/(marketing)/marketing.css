@@ -839,11 +839,31 @@
 .marketing-site .loan-calc-lottie-stage {
   position: relative;
   z-index: 1;
-  width: min(220px, 72%);
-  aspect-ratio: 1;
+  width: min(280px, 88%);
+  aspect-ratio: 1.48;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.marketing-site .loan-calc-lottie-stage--loading {
+  border-radius: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(11, 143, 216, 0.08) 0%,
+    rgba(56, 189, 248, 0.05) 100%
+  );
+  animation: loan-calc-lottie-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes loan-calc-lottie-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .marketing-site .loan-calc-lottie-player {
@@ -1315,7 +1335,8 @@
   .marketing-site .btn-marketing-cta-glow,
   .marketing-site .loan-calc-ambient,
   .marketing-site .loan-calc-summary-orb,
-  .marketing-site .loan-calc-cta::before {
+  .marketing-site .loan-calc-cta::before,
+  .marketing-site .loan-calc-lottie-stage--loading {
     animation: none;
   }
 
