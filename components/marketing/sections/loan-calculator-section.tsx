@@ -13,6 +13,7 @@ import { GlassCard } from "@/components/cards/glass-card";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { Reveal, RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
+import { LoanCalculatorLottie } from "@/components/marketing/sections/loan-calculator-lottie";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -471,6 +472,10 @@ export function LoanCalculatorSection() {
                   />
                 </RevealItem>
               </div>
+
+              <RevealItem>
+                <LoanCalculatorLottie />
+              </RevealItem>
 
               <div className="loan-calc-mobile-emi lg:hidden">
                 <p className="text-xs font-medium uppercase tracking-wider text-primary/80">
