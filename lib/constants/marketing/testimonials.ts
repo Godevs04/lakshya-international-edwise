@@ -13,6 +13,8 @@ export const MARKETING_TESTIMONIALS: MarketingTestimonial[] = [
     rating: 5,
     photo: "/marketing/students/student-1.svg",
     visaStatus: "F-1 Visa Approved",
+    loanAmount: "₹45 Lakh",
+    approvalDate: "Approved in 5 days",
   },
   {
     id: "2",
@@ -26,6 +28,8 @@ export const MARKETING_TESTIMONIALS: MarketingTestimonial[] = [
     rating: 5,
     photo: "/marketing/students/student-2.svg",
     visaStatus: "Study Permit Approved",
+    loanAmount: "₹38 Lakh",
+    approvalDate: "Approved in 4 days",
   },
   {
     id: "3",
@@ -39,6 +43,8 @@ export const MARKETING_TESTIMONIALS: MarketingTestimonial[] = [
     rating: 5,
     photo: "/marketing/students/student-3.svg",
     visaStatus: "Stamp 2 Approved",
+    loanAmount: "₹32 Lakh",
+    approvalDate: "Approved in 6 days",
   },
   {
     id: "4",
@@ -52,5 +58,7 @@ export const MARKETING_TESTIMONIALS: MarketingTestimonial[] = [
     rating: 5,
     photo: "/marketing/students/student-4.svg",
     visaStatus: "National Visa Approved",
+    loanAmount: "₹28 Lakh",
+    approvalDate: "Approved in 7 days",
   },
 ];

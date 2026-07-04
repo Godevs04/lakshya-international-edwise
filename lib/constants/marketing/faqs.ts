@@ -2,57 +2,51 @@ import type { MarketingFaq } from "@/types/marketing";
 
 export const MARKETING_FAQS: MarketingFaq[] = [
   {
-    category: "General",
-    question: "What services does Lakshya International Edwise provide?",
+    category: "Eligibility",
+    question: "Can I get an education loan with a low CIBIL score?",
     answer:
-      "We offer study abroad counselling, education loan assistance, visa support, scholarships guidance, documentation, accommodation, forex, and travel insurance services.",
+      "Yes. We work with lenders who assess your full profile, not just your credit score. Even with a low CIBIL or a past rejection, we can often find a suitable no-collateral or co-signer option.",
   },
   {
-    category: "Admissions",
-    question: "When should I start my study abroad application?",
+    category: "Eligibility",
+    question: "Do I need a co-signer or collateral to get a loan?",
     answer:
-      "Ideally 12-18 months before your intended intake. Early planning improves university choices, scholarship chances, and loan approvals.",
+      "Not always. We offer non-collateral and non-cosigner loans for eligible profiles through NBFCs and international lenders, alongside secured options for the lowest rates.",
   },
   {
     category: "Loans",
-    question: "Can you help with education loan approval?",
+    question: "How much can I borrow and what is the interest rate?",
     answer:
-      "Yes. We work with partner lenders to review eligibility, prepare documents, and track sanction and disbursement status.",
+      "You can fund up to ₹2 crore with 100% coverage of tuition and living costs. Interest rates start from 8.25% depending on your profile, destination, and chosen lender.",
   },
   {
-    category: "Visa",
-    question: "Do you assist with visa interviews?",
+    category: "Loans",
+    question: "How fast can my loan be approved?",
     answer:
-      "We provide document checks, financial proof review, and mock interview preparation tailored to your destination country.",
+      "Eligible applications are approved in as fast as 73 hours after document verification, with disbursement typically within 8 days.",
   },
   {
-    category: "General",
-    question: "Is the initial consultation free?",
+    category: "Process",
+    question: "What does Check Eligibility do?",
     answer:
-      "Yes. Book a free consultation to discuss your profile, preferred countries, and next steps with our counsellors.",
+      "It is a quick two-step form that captures your details so our loan experts can compare offers across all our lenders and call you back — it is not an automated calculator.",
   },
   {
-    category: "Admissions",
-    question: "Which countries do you support?",
+    category: "Process",
+    question: "Is there any charge for your service?",
     answer:
-      "We support USA, Canada, UK, Australia, Germany, Ireland, France, New Zealand, Dubai, and broader European destinations.",
-  },
-];
-
-export const MARKETING_LOAN_FAQS: MarketingFaq[] = [
-  {
-    question: "Who is eligible for an education loan?",
-    answer:
-      "Indian students with confirmed admission, co-applicant support, and required academic/financial documents may apply.",
+      "Our guidance is completely free for students. We have zero service charges and even help you secure processing-fee discounts with partner lenders.",
   },
   {
+    category: "Countries",
+    question: "Which countries do you fund education loans for?",
+    answer:
+      "We support loans for the USA, Canada, UK, Germany, Ireland, Australia, New Zealand, Dubai, and more — including blocked accounts for Germany and GIC for Canada.",
+  },
+  {
+    category: "Documents",
     question: "What documents are usually required?",
     answer:
-      "Admission letter, KYC, academic records, fee structure, income proof, and collateral documents if applicable.",
-  },
-  {
-    question: "How long does loan sanction take?",
-    answer:
-      "Timelines vary by lender, typically 7-21 working days after complete documentation.",
+      "Typically your admission letter, KYC, academic records, fee structure, and income proof of a co-applicant if applicable. Collateral documents are only needed for secured loans.",
   },
 ];

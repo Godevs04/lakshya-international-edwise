@@ -10,9 +10,9 @@ import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
   return buildMarketingMetadata({
-    title: `Services | ${contact.companyName}`,
+    title: `Our Services | ${contact.companyName}`,
     description:
-      "Study abroad counselling, education loans, visa assistance, scholarships, SOP review, and university admissions support in India.",
+      "Education loans, forex & transfers, blocked accounts & GIC, test preparation, accommodation, and student credit cards — everything you need to fund studying abroad.",
     path: "/services",
   });
 }
@@ -21,9 +21,9 @@ export default function ServicesPage() {
   return (
     <>
       <PageHero
-        eyebrow="Services"
-        title="Comprehensive support for your global education journey"
-        description="From profile assessment to loan disbursement, our team supports every milestone."
+        eyebrow="Our Services"
+        title="Everything you need to fund your education abroad"
+        description="One finance partner for loans, forex, blocked accounts, and more — with a single Check Eligibility form."
       />
       <SectionShell variant="white" padding>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

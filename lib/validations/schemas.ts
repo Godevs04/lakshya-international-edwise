@@ -408,9 +408,12 @@ export const websiteEnquirySchema = z
       .union([z.literal("true"), z.literal("false"), z.boolean()])
       .optional()
       .transform((value) => value === true || value === "true"),
+    loanAmount: z.string().max(60).optional(),
+    currentStatus: z.string().max(120).optional(),
+    preferredLender: z.string().max(120).optional(),
     message: z.string().max(2000).optional(),
     enquiryType: z
-      .enum(["consultation", "quick", "contact", "loan", "country"])
+      .enum(["consultation", "quick", "contact", "loan", "country", "eligibility"])
       .default("consultation"),
     formPage: z.string().max(200).optional(),
     website: z.string().max(0).optional(),
@@ -421,6 +424,50 @@ export const websiteEnquirySchema = z
         code: z.ZodIssueCode.custom,
         message: "Phone must be a valid 10-digit Indian mobile number",
         path: ["phone"],
+      });
+    }
+  });
+
+export const partnerEnquirySchema = z
+  .object({
+    name: z.string().min(2, "Name is required").max(120),
+    email: z.string().email("Enter a valid email"),
+    phone: z.string().min(1, "Phone is required"),
+    companyName: z.string().min(2, "Company name is required").max(200),
+    city: z.string().min(2, "City is required").max(120),
+    isOwner: z
+      .union([z.literal("true"), z.literal("false"), z.boolean()])
+      .transform((value) => value === true || value === "true"),
+    mobileIsWhatsapp: z
+      .union([z.literal("true"), z.literal("false"), z.boolean()])
+      .transform((value) => value === true || value === "true"),
+    whatsapp: z.string().max(20).optional(),
+    website: z.string().max(0).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!isValidIndianPhone(data.phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone must be a valid 10-digit Indian mobile number",
+        path: ["phone"],
+      });
+    }
+    if (data.mobileIsWhatsapp) return;
+
+    const whatsapp = data.whatsapp?.trim() ?? "";
+    if (!whatsapp) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "WhatsApp number is required when mobile is not WhatsApp",
+        path: ["whatsapp"],
+      });
+      return;
+    }
+    if (!isValidIndianPhone(whatsapp)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "WhatsApp must be a valid 10-digit Indian mobile number",
+        path: ["whatsapp"],
       });
     }
   });

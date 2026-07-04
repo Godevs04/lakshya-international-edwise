@@ -1,39 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MarketingHero } from "@/components/marketing/sections/hero";
-import { StatsBar } from "@/components/marketing/sections/stats-bar";
+import { FinanceHero } from "@/components/marketing/sections/finance-hero";
+import { TrustMetricsBar } from "@/components/marketing/sections/trust-metrics-bar";
+import { LenderLogoCarousel } from "@/components/marketing/sections/lender-logo-carousel";
+import { FinanceServicesGrid } from "@/components/marketing/sections/finance-services-grid";
+import { FinanceProcessHorizontal } from "@/components/marketing/sections/finance-process-horizontal";
+import { LakshyaRootMap } from "@/components/marketing/sections/lakshya-root-map";
+import { ValuePropsGrid } from "@/components/marketing/sections/value-props-grid";
+import { AboutJourneySection } from "@/components/marketing/sections/about-journey-section";
+import { LendingPartnersPreview } from "@/components/marketing/sections/lending-partners-preview";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
+import { CountryCard } from "@/components/marketing/cards/country-card";
 import { TestimonialsSection } from "@/components/marketing/sections/testimonials";
 import { FaqSection } from "@/components/marketing/sections/faq";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
-import { ServiceCard, BlogCard } from "@/components/marketing/cards/marketing-cards";
-import { CountryCard } from "@/components/marketing/cards/country-card";
-import { WhyChooseSection } from "@/components/marketing/sections/why-choose";
-import { ProcessTimelineSection } from "@/components/marketing/sections/process-timeline";
-import { PartnerUniversitiesSection } from "@/components/marketing/sections/partner-universities";
-import { BankingPartnersSection } from "@/components/marketing/sections/banking-partners";
-import { GoogleReviewsSection } from "@/components/marketing/sections/google-reviews";
-import { OfficeHighlightsSection } from "@/components/marketing/sections/office-highlights";
+import { HomepageJourneyPath } from "@/components/marketing/motion/homepage-journey-path";
 import { JsonLd, faqPageJsonLd, websiteJsonLd } from "@/components/marketing/seo/json-ld";
-import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 import { MARKETING_FAQS } from "@/lib/constants/marketing/faqs";
-import { getAllBlogPosts } from "@/lib/blog";
+import {
+  WHAT_LAKSHYA_ACCEPTS,
+  WHAT_LAKSHYA_GIVES_BACK,
+} from "@/lib/constants/marketing/lakshya-value-props";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
   return buildMarketingMetadata({
-    title: `${contact.companyName} | Study Abroad Consultancy India & Education Loans`,
+    title: `${contact.companyName} | Overseas Education Loan Experts`,
     description:
-      "Premium study abroad counselling, visa assistance, scholarships, and education loan support for students in India. Trusted guidance for Canada, UK, Australia, and more.",
+      "Fund your global education with the lowest interest education loan from 20+ trusted lenders. Non-collateral options, 73-hour approvals, up to ₹2 Cr, 100% cost coverage.",
     path: "/",
   });
 }
 
 export default function MarketingHomePage() {
-  const latestPosts = getAllBlogPosts().slice(0, 3);
   const contact = getMarketingContact();
   const siteUrl = getSiteUrl();
 
@@ -44,35 +46,46 @@ export default function MarketingHomePage() {
           websiteJsonLd({
             name: contact.companyName,
             url: siteUrl,
-            searchUrl: `${siteUrl}/blog`,
+            searchUrl: `${siteUrl}/services`,
           }),
           faqPageJsonLd(MARKETING_FAQS),
         ]}
       />
-      <MarketingHero />
-      <PartnerUniversitiesSection />
-      <StatsBar />
+
+      <HomepageJourneyPath />
+      <FinanceHero />
+      <TrustMetricsBar />
+      <LenderLogoCarousel />
+      <FinanceServicesGrid />
+      <FinanceProcessHorizontal />
+      <LakshyaRootMap />
+
+      <ValuePropsGrid
+        eyebrow="What Lakshya Accepts"
+        title="Rejected elsewhere? We still say yes."
+        description="Low CIBIL, no co-signer, gap years — we work with lenders who look at the whole picture."
+        items={WHAT_LAKSHYA_ACCEPTS}
+        variant="white"
+        ctaSource="accepts-grid"
+      />
+
+      <ValuePropsGrid
+        eyebrow="What Lakshya Gives Back"
+        title="More than a loan — real value for students"
+        description="Lower rates, fee waivers, and end-to-end support that saves you time and money."
+        items={WHAT_LAKSHYA_GIVES_BACK}
+        variant="accent"
+        ctaSource="gives-back-grid"
+      />
 
       <SectionShell
-        variant="white"
-        eyebrow="Services"
-        title="Everything you need to study abroad with confidence"
+        variant="muted"
+        background="map"
+        journeyNode="countries"
+        eyebrow="Countries"
+        title="Education loans for every top destination"
+        description="Country-specific loan guidance, visa financials, and lender options."
       >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {MARKETING_SERVICES.slice(0, 4).map((service) => (
-            <ServiceCard key={service.slug} service={service} />
-          ))}
-        </div>
-        <div className="mt-8 text-center">
-          <Link href="/services" className="text-sm font-semibold text-primary hover:underline">
-            View all services
-          </Link>
-        </div>
-      </SectionShell>
-
-      <WhyChooseSection />
-
-      <SectionShell variant="muted" eyebrow="Destinations" title="Top study abroad destinations">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {MARKETING_COUNTRIES.slice(0, 6).map((country) => (
             <CountryCard key={country.slug} country={country} />
@@ -85,28 +98,10 @@ export default function MarketingHomePage() {
         </div>
       </SectionShell>
 
-      <ProcessTimelineSection />
-      <BankingPartnersSection />
+      <LendingPartnersPreview />
+      <AboutJourneySection />
       <TestimonialsSection />
-      <GoogleReviewsSection />
-      <OfficeHighlightsSection />
-
-      {latestPosts.length > 0 && (
-        <SectionShell variant="white" eyebrow="Blog" title="Latest insights">
-          <div className="grid gap-4 md:grid-cols-3">
-            {latestPosts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link href="/blog" className="text-sm font-semibold text-primary hover:underline">
-              Read all articles
-            </Link>
-          </div>
-        </SectionShell>
-      )}
-
-      <FaqSection items={MARKETING_FAQS} />
+      <FaqSection items={MARKETING_FAQS.slice(0, 6)} />
       <CtaBanner />
     </>
   );

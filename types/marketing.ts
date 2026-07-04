@@ -3,7 +3,8 @@ export type EnquiryType =
   | "quick"
   | "contact"
   | "loan"
-  | "country";
+  | "country"
+  | "eligibility";
 
 export type LeadFormVariant = EnquiryType;
 
@@ -11,9 +12,45 @@ export type MegaMenuType = "services" | "countries" | "resources" | "none";
 
 export interface MarketingNavItem {
   label: string;
+  /** Shorter label for compact desktop nav (lg–xl breakpoints) */
+  shortLabel?: string;
+  /** Visually prominent nav item (e.g. partner programme CTA) */
+  featured?: boolean;
   href: string;
   megaMenu?: MegaMenuType;
   children?: MarketingNavItem[];
+}
+
+export type LenderCategory =
+  | "government"
+  | "private"
+  | "nbfc"
+  | "international";
+
+export interface MarketingLender {
+  name: string;
+  slug: string;
+  logo?: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  /** CSS display height in px — tuned per logo aspect ratio */
+  logoDisplayHeight?: number;
+  /** CSS max width in px — prevents wide or square logos from dominating */
+  logoMaxWidth?: number;
+  accent?: string;
+  category: LenderCategory;
+  roiFrom: number;
+  maxLoanLabel: string;
+  processingLabel: string;
+  unsecured?: boolean;
+  featured?: boolean;
+}
+
+export interface MarketingServiceSubOption {
+  slug: string;
+  title: string;
+  shortDescription: string;
+  icon: string;
 }
 
 export interface MarketingService {
@@ -23,6 +60,7 @@ export interface MarketingService {
   description: string;
   highlights: string[];
   icon: string;
+  subOptions?: MarketingServiceSubOption[];
 }
 
 export interface MarketingCountry {
@@ -56,33 +94,14 @@ export interface MarketingTestimonial {
   photo?: string;
   visaStatus?: string;
   videoUrl?: string;
+  loanAmount?: string;
+  approvalDate?: string;
 }
 
 export interface MarketingFaq {
   question: string;
   answer: string;
   category?: string;
-}
-
-export interface BlogPostMeta {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  coverImage?: string;
-  author: string;
-  readingTimeMinutes?: number;
-}
-
-export interface BlogPost extends BlogPostMeta {
-  content: string;
-}
-
-export interface MarketingPartnerUniversity {
-  name: string;
-  country: string;
-  logo?: string;
 }
 
 export interface MarketingAward {

@@ -1,24 +1,40 @@
 import type { MarketingNavItem } from "@/types/marketing";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
+import {
+  EDUCATION_LOAN_OPTIONS,
+  getEducationLoanOptionHref,
+} from "@/lib/constants/marketing/education-loan-options";
 
-export const MARKETING_RESOURCES: MarketingNavItem[] = [
-  { label: "Blog", href: "/blog" },
-  { label: "Success Stories", href: "/success-stories" },
-  { label: "Gallery", href: "/gallery" },
-];
+function buildServiceNavChildren(): MarketingNavItem[] {
+  return MARKETING_SERVICES.flatMap((service) => {
+    const items: MarketingNavItem[] = [
+      { label: service.title, href: `/services/${service.slug}` },
+    ];
+    if (service.slug === "education-loan") {
+      items.push(
+        ...EDUCATION_LOAN_OPTIONS.map((option) => ({
+          label: option.title,
+          href: getEducationLoanOptionHref(option.slug),
+        }))
+      );
+    }
+    return items;
+  });
+}
 
 export const MARKETING_NAV: MarketingNavItem[] = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
   {
-    label: "Services",
+    label: "Our Services",
     href: "/services",
     megaMenu: "services",
-    children: MARKETING_SERVICES.map((service) => ({
-      label: service.title,
-      href: `/services/${service.slug}`,
-    })),
+    children: buildServiceNavChildren(),
+  },
+  {
+    label: "Lending Partners",
+    shortLabel: "Lenders",
+    href: "/lending-partners",
   },
   {
     label: "Countries",
@@ -29,25 +45,25 @@ export const MARKETING_NAV: MarketingNavItem[] = [
       href: `/countries/${country.slug}`,
     })),
   },
-  { label: "Education Loans", href: "/education-loans" },
+  { label: "About Us", href: "/#about" },
   {
-    label: "Resources",
-    href: "/blog",
-    megaMenu: "resources",
-    children: MARKETING_RESOURCES,
+    label: "Become a Partner",
+    shortLabel: "Partner",
+    href: "/become-a-partner",
+    featured: true,
   },
+  { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];
 
 export const MARKETING_FOOTER_LINKS = {
   company: [
-    { label: "About Us", href: "/about" },
-    { label: "Success Stories", href: "/success-stories" },
-    { label: "Gallery", href: "/gallery" },
-    { label: "Blog", href: "/blog" },
+    { label: "About Us", href: "/#about" },
+    { label: "Lending Partners", href: "/lending-partners" },
+    { label: "Become a Partner", href: "/become-a-partner" },
+    { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/contact" },
   ],
-  resources: MARKETING_RESOURCES,
   services: MARKETING_SERVICES.map((service) => ({
     label: service.title,
     href: `/services/${service.slug}`,
