@@ -80,6 +80,9 @@ export interface MarketingCountry {
   livingCost?: string;
   studentCount?: string;
   careerOutlook: string;
+  /** Hero/card image path under public/ */
+  image?: string;
+  imageAlt?: string;
 }
 
 export interface MarketingTestimonial {

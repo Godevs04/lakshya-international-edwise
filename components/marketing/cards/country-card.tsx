@@ -1,66 +1,69 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { MarketingCountry } from "@/types/marketing";
 import { getCountryFlagLabel } from "@/lib/constants/marketing/countries";
 import { ArrowRight, Wallet, Clock, Home, Plane } from "lucide-react";
 
-const COUNTRY_GRADIENTS: Record<string, string> = {
-  usa: "from-blue-600/20 via-indigo-500/10 to-sky-400/20",
-  canada: "from-red-500/15 via-white/40 to-red-600/15",
-  uk: "from-blue-700/20 via-red-500/10 to-blue-800/20",
-  germany: "from-yellow-500/15 via-red-500/10 to-black/10",
-  ireland: "from-green-600/20 via-white/30 to-orange-500/15",
-  australia: "from-blue-600/15 via-white/30 to-green-600/15",
-};
-
 export function CountryCard({ country }: { country: MarketingCountry }) {
-  const gradient = COUNTRY_GRADIENTS[country.slug] ?? "from-primary/15 via-accent/30 to-sky-400/15";
+  const flagLabel = getCountryFlagLabel(country);
 
   return (
     <Link
       href={`/countries/${country.slug}`}
       className="card-premium card-premium-lift group block overflow-hidden"
     >
-      <div
-        className={`relative flex h-28 items-end bg-gradient-to-br ${gradient} p-4`}
-      >
-        <span className="text-4xl">{country.flagEmoji ?? getCountryFlagLabel(country)}</span>
-        <div className="absolute right-3 top-3 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="relative h-36 overflow-hidden sm:h-40">
+        {country.image ? (
+          <Image
+            src={country.image}
+            alt={country.imageAlt ?? `${country.name} study destination`}
+            fill
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            quality={85}
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-primary/15 via-accent/30 to-sky-400/15" />
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/5" />
+
+        <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-secondary shadow-sm backdrop-blur-sm">
+          {flagLabel}
+        </span>
+
+        <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-primary opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
           <Plane className="mr-1 inline h-3 w-3" />
           India → {country.name}
         </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-lg font-semibold text-white drop-shadow-sm">{country.name}</h3>
+          {country.studentCount && (
+            <p className="mt-0.5 text-xs text-white/80">{country.studentCount}</p>
+          )}
+        </div>
       </div>
 
-      <div className="p-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
-            {getCountryFlagLabel(country)}
-          </span>
-          <div>
-            <h3 className="text-lg font-semibold text-secondary">{country.name}</h3>
-            {country.studentCount && (
-              <p className="text-xs text-muted-foreground">{country.studentCount}</p>
-            )}
-          </div>
-        </div>
-
-        <p className="mt-3 text-sm text-muted-foreground">{country.shortDescription}</p>
+      <div className="p-5 sm:p-6">
+        <p className="text-sm leading-relaxed text-muted-foreground">{country.shortDescription}</p>
 
         <div className="mt-4 space-y-2 text-xs text-muted-foreground">
           {country.tuitionRange && (
             <p className="flex items-center gap-2">
-              <Wallet className="h-3.5 w-3.5 text-primary" />
+              <Wallet className="h-3.5 w-3.5 shrink-0 text-primary" />
               {country.tuitionRange}
             </p>
           )}
           {country.visaDuration && (
             <p className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-primary" />
+              <Clock className="h-3.5 w-3.5 shrink-0 text-primary" />
               {country.visaDuration}
             </p>
           )}
           {country.livingCost && (
             <p className="flex items-center gap-2">
-              <Home className="h-3.5 w-3.5 text-primary" />
+              <Home className="h-3.5 w-3.5 shrink-0 text-primary" />
               {country.livingCost}
             </p>
           )}
