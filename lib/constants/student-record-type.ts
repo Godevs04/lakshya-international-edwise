@@ -19,3 +19,5 @@ export function admissionLeadsFilter() {
 export function isAdmissionLead(recordType?: string | null): boolean {
   return recordType === STUDENT_RECORD_TYPE.ADMISSION;
 }
+
+export { websitePendingStudentLeadsFilter, manualAdmissionLeadsFilter } from "@/lib/constants/site-leads";

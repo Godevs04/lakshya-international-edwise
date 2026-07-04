@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { notify } from "@/lib/toast";
+import { AnimatePresence } from "framer-motion";
 import {
   useReactTable,
   getCoreRowModel,
@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
-import { bulkUpdateStudentsAction } from "@/lib/actions/student.actions";
 import type { StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
@@ -38,7 +37,8 @@ import {
   type StudentListFilters,
 } from "@/lib/utils/student-list-filters";
 import { QuickAddStudentSheet } from "@/components/dashboard/quick-add-student-sheet";
-import { Trash2, Download } from "lucide-react";
+import { StudentBulkActionsBar } from "@/components/dashboard/student-bulk-actions-bar";
+import { Download } from "lucide-react";
 
 interface PartnerOption {
   _id: string;
@@ -81,6 +81,14 @@ export function StudentsTable({
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState(filters.search ?? "");
 
+  const canSelect = canWrite || canDelete;
+
+  function toggleSelected(id: string) {
+    setSelected((current) =>
+      current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]
+    );
+  }
+
   const isMine = filters.mine === "1";
 
   function navigate(next: Partial<StudentListFilters>) {
@@ -92,20 +100,22 @@ export function StudentsTable({
     {
       id: "select",
       header: ({ table }) => (
-        canDelete ? (
+        canSelect ? (
           <input
             type="checkbox"
             checked={table.getIsAllPageRowsSelected()}
             onChange={table.getToggleAllPageRowsSelectedHandler()}
+            aria-label="Select all students on this page"
           />
         ) : null
       ),
       cell: ({ row }) => (
-        canDelete ? (
+        canSelect ? (
           <input
             type="checkbox"
             checked={row.getIsSelected()}
             onChange={row.getToggleSelectedHandler()}
+            aria-label={`Select ${row.original.firstName} ${row.original.lastName}`}
           />
         ) : null
       ),
@@ -186,16 +196,9 @@ export function StudentsTable({
     },
   });
 
-  async function handleBulkDelete() {
-    if (!selected.length) return;
-    const result = await bulkUpdateStudentsAction(selected, "delete");
-    if (result.success) {
-      notify.success("Students deleted");
-      setSelected([]);
-      router.refresh();
-    } else {
-      notify.error(result.error ?? "Delete failed");
-    }
+  function handleBulkComplete() {
+    setSelected([]);
+    router.refresh();
   }
 
   function handleExportCSV() {
@@ -317,11 +320,6 @@ export function StudentsTable({
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {canDelete && selected.length > 0 && (
-              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
-                <Trash2 className="mr-1 h-4 w-4" /> Delete ({selected.length})
-              </Button>
-            )}
             {canWrite && (
               <QuickAddStudentSheet assignableUsers={assignableUsers} />
             )}
@@ -333,6 +331,20 @@ export function StudentsTable({
             )}
           </div>
         </div>
+
+        <AnimatePresence mode="wait">
+          {canSelect && selected.length > 0 && (
+            <StudentBulkActionsBar
+              key="bulk-actions"
+              selectedIds={selected}
+              assignableUsers={assignableUsers}
+              partners={partners}
+              canDelete={canDelete}
+              onClear={() => setSelected([])}
+              onComplete={handleBulkComplete}
+            />
+          )}
+        </AnimatePresence>
       </GlassCard>
 
       {paginationBar}
@@ -340,31 +352,43 @@ export function StudentsTable({
       <div className="space-y-3 md:hidden">
         {data.length ? (
           data.map((student) => {
+            const isSelected = selected.includes(student._id);
             return (
               <GlassCard key={student._id} className="p-4">
-                <div
-                  role="link"
-                  tabIndex={0}
-                  onClick={() => router.push(`/dashboard/students/${student._id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      router.push(`/dashboard/students/${student._id}`);
-                    }
-                  }}
-                  className="block cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#E8952E]/40"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">
-                        <span className="inline-flex items-center gap-1">
-                          {student.firstName} {student.lastName}
-                          <ProfileCompleteBadge verified={Boolean(student.profileVerified)} />
-                        </span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">{student.studentId}</p>
+                <div className="flex items-start gap-3">
+                  {canSelect && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelected(student._id)}
+                      aria-label={`Select ${student.firstName} ${student.lastName}`}
+                      className="mt-1"
+                    />
+                  )}
+                  <div
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => router.push(`/dashboard/students/${student._id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        router.push(`/dashboard/students/${student._id}`);
+                      }
+                    }}
+                    className="block min-w-0 flex-1 cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#E8952E]/40"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">
+                          <span className="inline-flex items-center gap-1">
+                            {student.firstName} {student.lastName}
+                            <ProfileCompleteBadge verified={Boolean(student.profileVerified)} />
+                          </span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">{student.studentId}</p>
+                      </div>
+                      <StatusBadge status={student.status as StudentStatus} />
                     </div>
-                    <StatusBadge status={student.status as StudentStatus} />
                   </div>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">

@@ -15,6 +15,7 @@ const DocumentSchema = new Schema(
 );
 
 export interface IPartner extends Document {
+  partnerCode?: string;
   photo?: string;
   companyLogo?: string;
   companyName: string;
@@ -76,6 +77,13 @@ export interface IPartner extends Document {
   metadata: {
     createdBy?: mongoose.Types.ObjectId;
     createdByName?: string;
+    leadSource?: string;
+    promotionStatus?: string;
+    promotedAt?: Date;
+    promotedBy?: mongoose.Types.ObjectId;
+    promotedByName?: string;
+    isOwner?: boolean;
+    formCity?: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -83,6 +91,7 @@ export interface IPartner extends Document {
 
 const PartnerSchema = new Schema<IPartner>(
   {
+    partnerCode: { type: String, trim: true, unique: true, sparse: true },
     photo: { type: String },
     companyLogo: { type: String },
     companyName: { type: String, required: true, trim: true },
@@ -146,6 +155,13 @@ const PartnerSchema = new Schema<IPartner>(
     metadata: {
       createdBy: { type: Schema.Types.ObjectId, ref: "User" },
       createdByName: { type: String },
+      leadSource: { type: String, trim: true },
+      promotionStatus: { type: String, enum: ["pending", "promoted"], trim: true },
+      promotedAt: { type: Date },
+      promotedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      promotedByName: { type: String, trim: true },
+      isOwner: { type: Boolean },
+      formCity: { type: String, trim: true },
     },
   },
   { timestamps: true }
@@ -158,6 +174,11 @@ PartnerSchema.index(
   { companyName: "text", owner: "text", phone: "text", email: "text", gst: "text" },
   { name: "partner_text_search" }
 );
+
+// Next.js hot reload keeps a stale Mongoose model; re-register in dev so schema changes apply.
+if (process.env.NODE_ENV !== "production" && mongoose.models.Partner) {
+  delete mongoose.models.Partner;
+}
 
 export const Partner: Model<IPartner> =
   mongoose.models.Partner ?? mongoose.model<IPartner>("Partner", PartnerSchema);

@@ -16,6 +16,7 @@ import {
 } from "@/lib/services/dashboard.service";
 import { getGlobalCommissionTotals } from "@/lib/services/partner-commission.service";
 import { getRecentActivities } from "@/lib/services/activity.service";
+import { getSiteLeadCounts } from "@/lib/actions/site-lead.actions";
 import { CACHE_TAGS } from "@/lib/cache/revalidate";
 import { runLogged } from "@/lib/action-utils";
 
@@ -97,6 +98,7 @@ export async function getOverviewDashboardAction() {
       latestPartners,
       followups,
       commissionTotals,
+      siteLeadCounts,
     ] = await Promise.all([
       cachedDashboardCoreStats(),
       cachedLoanStatusChart(),
@@ -108,6 +110,7 @@ export async function getOverviewDashboardAction() {
       cachedLatestPartners(),
       user.role === "super_admin" ? cachedFollowups() : getUpcomingFollowups(5, user),
       getGlobalCommissionTotals(),
+      getSiteLeadCounts(),
     ]);
 
     return {
@@ -122,6 +125,7 @@ export async function getOverviewDashboardAction() {
       latestPartners,
       followups,
       commissionTotals,
+      siteLeadCounts,
     };
   });
 }

@@ -5,7 +5,11 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Application } from "@/models/Application";
 import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
-import { allocateStudentId } from "@/lib/services/student-id.service";
+import { allocateWebsiteLeadId } from "@/lib/services/student-id.service";
+import {
+  SITE_LEAD_PROMOTION_STATUS,
+  SITE_LEAD_SOURCE,
+} from "@/lib/constants/site-leads";
 import { logActivity } from "@/lib/services/activity.service";
 import { sendWebsiteEnquiryNotification } from "@/lib/services/email.service";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -59,7 +63,7 @@ export async function submitWebsiteEnquiryAction(
     }
 
     const { firstName, lastName } = splitFullName(data.name);
-    const studentId = await allocateStudentId();
+    const studentId = await allocateWebsiteLeadId();
     const noteLines = [
       `Enquiry type: ${data.enquiryType}`,
       data.formPage ? `Submitted from: ${data.formPage}` : null,
@@ -97,12 +101,10 @@ export async function submitWebsiteEnquiryAction(
         : [],
       metadata: {
         createdByName: "Website",
-        leadSource: "website",
+        leadSource: SITE_LEAD_SOURCE.WEBSITE,
         enquiryType: data.enquiryType,
         formPage: data.formPage,
-        loanAmount: data.loanAmount?.trim() || undefined,
-        currentStatus: data.currentStatus?.trim() || undefined,
-        preferredLender: data.preferredLender?.trim() || undefined,
+        promotionStatus: SITE_LEAD_PROMOTION_STATUS.PENDING,
         ip,
       },
     });
@@ -116,8 +118,8 @@ export async function submitWebsiteEnquiryAction(
     });
 
     await logActivity({
-      action: "admission.created",
-      description: `Website enquiry from ${data.name} (${studentId})`,
+      action: "site_lead.student_created",
+      description: `Website student lead from ${data.name} (${studentId})`,
       resourceType: "student",
       resourceId: student._id.toString(),
       userName: "Website",
@@ -141,7 +143,7 @@ export async function submitWebsiteEnquiryAction(
       studentCode: studentId,
     });
 
-    revalidatePath("/dashboard/admissions");
+    revalidatePath("/dashboard/site-leads");
     revalidatePath("/dashboard/overview");
     revalidateInsightCaches();
 

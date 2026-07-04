@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
-import { LenderLogo } from "@/components/marketing/lenders/lender-logo";
+import { LenderLogo, LENDER_LOGO_MARKETING_SIZE, LENDER_LOGO_TILE_CLASS } from "@/components/marketing/lenders/lender-logo";
 import {
   MARKETING_LENDERS,
   LENDER_CATEGORY_LABELS,
@@ -44,11 +44,15 @@ export function LenderLogoCarousel() {
             onMouseLeave={() =>
               setActiveTooltip((current) => (current === lender.slug ? null : current))
             }
-            className="lender-logo group flex h-[4.5rem] min-w-[6.5rem] items-center justify-center rounded-xl bg-white px-4 shadow-sm ring-1 ring-transparent transition-all hover:scale-[1.08] hover:shadow-md hover:ring-primary/20"
+            className={cn(
+              "lender-logo group min-w-[8rem] transition-all hover:scale-[1.06] hover:shadow-md hover:ring-primary/20",
+              LENDER_LOGO_TILE_CLASS,
+              "ring-transparent"
+            )}
             aria-label={`Check eligibility with ${lender.name}`}
             aria-expanded={tooltipOpen}
           >
-            <LenderLogo lender={lender} size="lg" />
+            <LenderLogo lender={lender} size={LENDER_LOGO_MARKETING_SIZE} />
           </button>
 
           <div

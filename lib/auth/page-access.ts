@@ -69,3 +69,15 @@ export async function getAdmissionsPageAccess() {
     canViewRevenue: canViewAdmissionRevenue(user?.role),
   };
 }
+
+export async function getSiteLeadsPageAccess() {
+  const session = await auth();
+  const user = session?.user;
+
+  return {
+    canViewStudents: hasPermission(user, PERMISSIONS.ADMISSIONS_READ),
+    canViewPartners: hasPermission(user, PERMISSIONS.PARTNERS_READ),
+    canWriteStudents: hasPermission(user, PERMISSIONS.ADMISSIONS_WRITE),
+    canWritePartners: hasPermission(user, PERMISSIONS.PARTNERS_WRITE),
+  };
+}

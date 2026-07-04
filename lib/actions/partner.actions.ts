@@ -45,6 +45,7 @@ import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
 import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-utils";
+import { officialPartnersFilter } from "@/lib/constants/site-leads";
 import type { PartnerInput } from "@/lib/validations/schemas";
 
 function buildPartnerContacts(data: PartnerInput) {
@@ -85,18 +86,21 @@ export async function getPartners(params: {
   const pageSize = params.pageSize ?? 10;
   const skip = (page - 1) * pageSize;
 
-  const filter: Record<string, unknown> = {};
+  const baseFilter = officialPartnersFilter();
+  let filter: Record<string, unknown> = { ...baseFilter };
   if (params.search) {
     const regex = toSafeRegExp(params.search);
-    filter.$or = [
-      { companyName: regex },
-      { owner: regex },
-      { phone: regex },
-      { email: regex },
-    ];
+    filter = mergeMongoFilter(baseFilter, {
+      $or: [
+        { companyName: regex },
+        { owner: regex },
+        { phone: regex },
+        { email: regex },
+      ],
+    });
   }
-  if (params.status) filter.status = params.status;
-  if (params.actionStatus) filter.actionStatus = params.actionStatus;
+  if (params.status) filter = mergeMongoFilter(filter, { status: params.status });
+  if (params.actionStatus) filter = mergeMongoFilter(filter, { actionStatus: params.actionStatus });
 
   const [data, total] = await Promise.all([
     Partner.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),

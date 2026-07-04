@@ -90,7 +90,7 @@ export default async function StudentsPage({
     <div className="space-y-6">
       <PageHeader
         title="Students"
-        description="Manage your student CRM records"
+        description="Manage your student CRM records. Select rows to bulk assign, update status, or set partner."
         badge="CRM"
         action={
           access.canWrite ? (

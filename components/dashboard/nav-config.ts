@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   GraduationCap,
+  Globe,
   type LucideIcon,
 } from "lucide-react";
 import type { AppModules } from "@/types";
@@ -20,10 +21,12 @@ export interface NavItem {
   icon: LucideIcon;
   module: keyof AppModules | null;
   permission: string | null;
+  anyPermissions?: string[];
 }
 
 export const navItems: NavItem[] = [
   { href: "/dashboard/overview", label: "Overview", icon: LayoutDashboard, module: null, permission: null },
+  { href: "/dashboard/site-leads", label: "From Site", icon: Globe, module: null, permission: null, anyPermissions: ["admissions:read", "partners:read"] },
   { href: "/dashboard/students", label: "Students", icon: Users, module: "students", permission: "students:read" },
   { href: "/dashboard/admissions", label: "Admission Details", icon: GraduationCap, module: "students", permission: "admissions:read" },
   { href: "/dashboard/partners", label: "Partners", icon: Handshake, module: "partners", permission: "partners:read" },
@@ -55,7 +58,11 @@ export function filterNavItems(
   const hasWildcard = perms.includes("*");
 
   return navItems.filter((item) => {
-    if (item.permission && !hasWildcard && !perms.includes(item.permission)) {
+    if (item.anyPermissions?.length) {
+      if (!hasWildcard && !item.anyPermissions.some((p) => perms.includes(p))) {
+        return false;
+      }
+    } else if (item.permission && !hasWildcard && !perms.includes(item.permission)) {
       return false;
     }
     if (!item.module) return true;

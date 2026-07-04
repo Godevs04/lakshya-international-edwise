@@ -19,6 +19,7 @@ import { NavBadge } from "@/components/dashboard/nav-badge";
 import type { AppModules } from "@/types";
 
 const TASKS_HREF = "/dashboard/tasks";
+const SITE_LEADS_HREF = "/dashboard/site-leads";
 
 interface MobileNavSheetProps {
   open: boolean;
@@ -28,6 +29,7 @@ interface MobileNavSheetProps {
   modules?: AppModules;
   items?: NavItem[];
   overdueTaskCount?: number;
+  pendingSiteLeadCount?: number;
 }
 
 export function MobileNavSheet({
@@ -38,6 +40,7 @@ export function MobileNavSheet({
   modules,
   items,
   overdueTaskCount = 0,
+  pendingSiteLeadCount = 0,
 }: MobileNavSheetProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -52,6 +55,12 @@ export function MobileNavSheet({
         <nav className="space-y-1 p-3">
           {filteredNav.map((item) => {
             const isActive = isNavItemActive(pathname, item.href);
+            const badgeCount =
+              item.href === TASKS_HREF
+                ? overdueTaskCount
+                : item.href === SITE_LEADS_HREF
+                  ? pendingSiteLeadCount
+                  : 0;
             const href =
               item.href === TASKS_HREF && overdueTaskCount > 0
                 ? `${TASKS_HREF}?overdue=1`
@@ -72,17 +81,24 @@ export function MobileNavSheet({
                 >
                   <div className="relative shrink-0">
                     <item.icon className="h-4 w-4" />
-                    {item.href === TASKS_HREF && (
-                      <NavBadge count={overdueTaskCount} className="-right-1 -top-1" />
-                    )}
+                    {item.href === TASKS_HREF || item.href === SITE_LEADS_HREF ? (
+                      <NavBadge count={badgeCount} className="-right-1 -top-1" />
+                    ) : null}
                   </div>
                   <span className="flex min-w-0 flex-1 items-center gap-2">
                     <span className="truncate">{item.label}</span>
-                    {item.href === TASKS_HREF && overdueTaskCount > 0 && (
-                      <span className="shrink-0 rounded-full bg-[#EF4444]/12 px-2 py-0.5 text-[10px] font-semibold text-[#EF4444]">
-                        {overdueTaskCount > 9 ? "9+" : overdueTaskCount}
+                    {badgeCount > 0 ? (
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                          item.href === SITE_LEADS_HREF
+                            ? "bg-[#E8952E]/12 text-[#E8952E]"
+                            : "bg-[#EF4444]/12 text-[#EF4444]"
+                        )}
+                      >
+                        {badgeCount > 9 ? "9+" : badgeCount}
                       </span>
-                    )}
+                    ) : null}
                   </span>
                 </div>
               </Link>

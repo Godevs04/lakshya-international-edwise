@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth/auth";
 import { getAppConfig } from "@/lib/config/app-config";
 import { getUnreadNotificationCount, getCurrentUserProfile } from "@/lib/actions/settings.actions";
 import { getTaskSummary } from "@/lib/actions/task.actions";
+import { getSiteLeadCounts } from "@/lib/actions/site-lead.actions";
 import { Sidebar, MobileNav } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { PremiumBackground } from "@/components/layout/premium-background";
@@ -28,12 +29,14 @@ export default async function DashboardLayout({
   }
 
   const config = await getAppConfig();
-  const [unreadCount, taskSummary, profile] = await Promise.all([
+  const [unreadCount, taskSummary, profile, siteLeadCounts] = await Promise.all([
     getUnreadNotificationCount(),
     config.modules?.tasks !== false ? getTaskSummary() : Promise.resolve({ overdue: 0 }),
     getCurrentUserProfile(),
+    getSiteLeadCounts(),
   ]);
   const overdueTaskCount = taskSummary.overdue;
+  const pendingSiteLeadCount = siteLeadCounts.total;
 
   return (
     <DashboardSessionBridge session={session}>
@@ -44,6 +47,7 @@ export default async function DashboardLayout({
           logo={config.company.logo}
           modules={config.modules}
           overdueTaskCount={overdueTaskCount}
+          pendingSiteLeadCount={pendingSiteLeadCount}
         />
         <div className="relative flex min-h-screen min-w-0 flex-col lg:pl-[260px]">
           <Design06TopWaves />
@@ -69,6 +73,7 @@ export default async function DashboardLayout({
           companyName={config.company.name}
           logo={config.company.logo}
           overdueTaskCount={overdueTaskCount}
+          pendingSiteLeadCount={pendingSiteLeadCount}
         />
       </div>
     </DashboardSessionBridge>

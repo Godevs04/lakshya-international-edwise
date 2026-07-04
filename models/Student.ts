@@ -214,6 +214,10 @@ export interface IStudent extends Document {
     leadSource?: string;
     enquiryType?: string;
     formPage?: string;
+    promotionStatus?: string;
+    promotedAt?: Date;
+    promotedBy?: Types.ObjectId;
+    promotedByName?: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -335,6 +339,10 @@ const StudentSchema = new Schema<IStudent>(
       leadSource: { type: String, trim: true },
       enquiryType: { type: String, trim: true },
       formPage: { type: String, trim: true },
+      promotionStatus: { type: String, enum: ["pending", "promoted"], trim: true },
+      promotedAt: { type: Date },
+      promotedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      promotedByName: { type: String, trim: true },
     },
   },
   { timestamps: true }

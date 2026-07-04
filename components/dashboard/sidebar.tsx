@@ -25,15 +25,17 @@ import { NavBadge } from "@/components/dashboard/nav-badge";
 import type { AppModules } from "@/types";
 
 const TASKS_HREF = "/dashboard/tasks";
+const SITE_LEADS_HREF = "/dashboard/site-leads";
 
 interface SidebarProps {
   companyName: string;
   logo?: string;
   modules?: AppModules;
   overdueTaskCount?: number;
+  pendingSiteLeadCount?: number;
 }
 
-export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0 }: SidebarProps) {
+export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0, pendingSiteLeadCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -56,6 +58,12 @@ export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0 }: Si
         <nav className="space-y-1 py-2">
           {filteredNav.map((item) => {
             const isActive = isNavItemActive(pathname, item.href);
+            const badgeCount =
+              item.href === TASKS_HREF
+                ? overdueTaskCount
+                : item.href === SITE_LEADS_HREF
+                  ? pendingSiteLeadCount
+                  : 0;
             const href =
               item.href === TASKS_HREF && overdueTaskCount > 0
                 ? `${TASKS_HREF}?overdue=1`
@@ -77,18 +85,25 @@ export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0 }: Si
                     )}
                   >
                     <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-primary")} />
-                    {item.href === TASKS_HREF && (
-                      <NavBadge count={overdueTaskCount} collapsed={collapsed} />
-                    )}
+                    {item.href === TASKS_HREF || item.href === SITE_LEADS_HREF ? (
+                      <NavBadge count={badgeCount} collapsed={collapsed} />
+                    ) : null}
                   </div>
                   {!collapsed && (
                     <span className="relative z-10 flex min-w-0 flex-1 items-center gap-2 truncate">
                       <span className="truncate">{item.label}</span>
-                      {item.href === TASKS_HREF && overdueTaskCount > 0 && (
-                        <span className="shrink-0 rounded-full bg-[#EF4444]/12 px-2 py-0.5 text-[10px] font-semibold text-[#EF4444]">
-                          {overdueTaskCount > 9 ? "9+" : overdueTaskCount}
+                      {badgeCount > 0 ? (
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                            item.href === SITE_LEADS_HREF
+                              ? "bg-[#E8952E]/12 text-[#E8952E]"
+                              : "bg-[#EF4444]/12 text-[#EF4444]"
+                          )}
+                        >
+                          {badgeCount > 9 ? "9+" : badgeCount}
                         </span>
-                      )}
+                      ) : null}
                     </span>
                   )}
                 </div>
@@ -174,11 +189,13 @@ export function MobileNav({
   companyName = "CRM",
   logo,
   overdueTaskCount = 0,
+  pendingSiteLeadCount = 0,
 }: {
   modules?: AppModules;
   companyName?: string;
   logo?: string;
   overdueTaskCount?: number;
+  pendingSiteLeadCount?: number;
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -193,7 +210,13 @@ export function MobileNav({
   );
   const moreActive = secondaryNav.some((item) => isNavItemActive(pathname, item.href));
   const tasksInSecondary = secondaryNav.some((item) => item.href === TASKS_HREF);
-  const showMoreBadge = tasksInSecondary && overdueTaskCount > 0;
+  const showMoreBadge =
+    (tasksInSecondary && overdueTaskCount > 0) ||
+    (secondaryNav.some((item) => item.href === SITE_LEADS_HREF) && pendingSiteLeadCount > 0);
+  const moreBadgeCount = Math.max(
+    tasksInSecondary ? overdueTaskCount : 0,
+    secondaryNav.some((item) => item.href === SITE_LEADS_HREF) ? pendingSiteLeadCount : 0
+  );
 
   return (
     <>
@@ -221,7 +244,7 @@ export function MobileNav({
                 )}
               >
                 <MoreHorizontal className="h-4 w-4" />
-                {showMoreBadge && <NavBadge count={overdueTaskCount} />}
+                {showMoreBadge && <NavBadge count={moreBadgeCount} />}
               </div>
               <span
                 className={cn(
@@ -244,6 +267,7 @@ export function MobileNav({
         modules={modules}
         items={secondaryNav}
         overdueTaskCount={overdueTaskCount}
+        pendingSiteLeadCount={pendingSiteLeadCount}
       />
     </>
   );
