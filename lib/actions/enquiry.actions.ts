@@ -139,7 +139,8 @@ export async function submitWebsiteEnquiryAction(
     const student = await Student.create({
       studentId,
       firstName: sanitizeText(firstName),
-      lastName: sanitizeText(lastName),
+      // Student.lastName is required; "." is the hidden placeholder for single-word names.
+      lastName: sanitizeText(lastName) || ".",
       phone: normalizeIndianPhone(data.phone),
       email: data.email?.trim() || undefined,
       targetCountry: data.targetCountry?.trim() || undefined,
