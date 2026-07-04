@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { LenderLogo } from "@/components/marketing/lenders/lender-logo";
 import {
@@ -7,10 +8,73 @@ import {
   LENDER_CATEGORY_LABELS,
 } from "@/lib/constants/marketing/lenders";
 import { useEligibilityModal } from "@/hooks/use-eligibility-modal";
+import { cn } from "@/lib/utils";
+
+function isTouchDevice() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(pointer: coarse)").matches;
+}
 
 export function LenderLogoCarousel() {
   const { open } = useEligibilityModal();
-  const loop = [...MARKETING_LENDERS, ...MARKETING_LENDERS];
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  const handleLenderClick = useCallback(
+    (lender: (typeof MARKETING_LENDERS)[number]) => {
+      if (isTouchDevice() && activeTooltip !== lender.slug) {
+        setActiveTooltip(lender.slug);
+        return;
+      }
+      setActiveTooltip(null);
+      open({ preferredLender: lender.name, source: "lender-carousel" });
+    },
+    [activeTooltip, open]
+  );
+
+  const renderLender = (lender: (typeof MARKETING_LENDERS)[number], index: number) => {
+    const tooltipOpen = activeTooltip === lender.slug;
+
+    return (
+      <li key={`${lender.slug}-${index}`}>
+        <div className="lender-logo-wrap group relative">
+          <button
+            type="button"
+            onClick={() => handleLenderClick(lender)}
+            onMouseEnter={() => setActiveTooltip(lender.slug)}
+            onMouseLeave={() =>
+              setActiveTooltip((current) => (current === lender.slug ? null : current))
+            }
+            className="lender-logo group flex h-[4.5rem] min-w-[6.5rem] items-center justify-center rounded-xl bg-white px-4 shadow-sm ring-1 ring-transparent transition-all hover:scale-[1.08] hover:shadow-md hover:ring-primary/20"
+            aria-label={`Check eligibility with ${lender.name}`}
+            aria-expanded={tooltipOpen}
+          >
+            <LenderLogo lender={lender} size="lg" />
+          </button>
+
+          <div
+            className={cn(
+              "lender-tooltip absolute bottom-full left-1/2 z-20 mb-2 w-44 -translate-x-1/2 rounded-xl border border-border bg-white p-3 text-left shadow-lg",
+              tooltipOpen && "lender-tooltip-visible"
+            )}
+            role="tooltip"
+          >
+            <p className="text-xs font-semibold text-foreground">{lender.name}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              {LENDER_CATEGORY_LABELS[lender.category]}
+            </p>
+            <p className="mt-1 text-[10px] text-primary">
+              ROI from {lender.roiFrom}% · {lender.processingLabel}
+            </p>
+            {tooltipOpen && isTouchDevice() && (
+              <p className="mt-2 text-[10px] font-medium text-muted-foreground">
+                Tap again to check eligibility
+              </p>
+            )}
+          </div>
+        </div>
+      </li>
+    );
+  };
 
   return (
     <section
@@ -41,40 +105,15 @@ export function LenderLogoCarousel() {
           aria-hidden
         />
         <ul className="lender-track" role="list">
-          {loop.map((lender, index) => (
-            <li key={`${lender.slug}-${index}`}>
-              <div className="lender-logo-wrap group relative">
-                <button
-                  type="button"
-                  onClick={() =>
-                    open({ preferredLender: lender.name, source: "lender-carousel" })
-                  }
-                  className="lender-logo group flex h-[4.5rem] min-w-[6.5rem] items-center justify-center rounded-xl bg-white px-4 shadow-sm ring-1 ring-transparent transition-all hover:scale-[1.08] hover:shadow-md hover:ring-primary/20"
-                  aria-label={`Check eligibility with ${lender.name}`}
-                >
-                  <LenderLogo lender={lender} size="lg" />
-                </button>
-                <div
-                  className="lender-tooltip absolute bottom-full left-1/2 z-20 mb-2 w-44 -translate-x-1/2 rounded-xl border border-border bg-white p-3 text-left shadow-lg"
-                  role="tooltip"
-                >
-                  <p className="text-xs font-semibold text-foreground">{lender.name}</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    {LENDER_CATEGORY_LABELS[lender.category]}
-                  </p>
-                  <p className="mt-1 text-[10px] text-primary">
-                    ROI from {lender.roiFrom}% · {lender.processingLabel}
-                  </p>
-                </div>
-              </div>
-            </li>
-          ))}
+          {MARKETING_LENDERS.map((lender, index) => renderLender(lender, index))}
+          {MARKETING_LENDERS.map((lender, index) => renderLender(lender, index + MARKETING_LENDERS.length))}
         </ul>
       </div>
 
       <MarketingContainer>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Hover to pause · Click a lender to check eligibility
+          <span className="hidden sm:inline">Hover for details · </span>
+          Tap for details on mobile · Click to check eligibility
         </p>
       </MarketingContainer>
     </section>

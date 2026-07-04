@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { MARKETING_SERVICES } from "@/lib/constants/marketing/services";
@@ -219,11 +220,23 @@ function CountriesMegaMenu({ onClose }: { onClose: () => void }) {
             href={`/countries/${country.slug}`}
             onClick={onClose}
             role="menuitem"
-            className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted"
+            className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted"
           >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
-              {getCountryFlagLabel(country)}
-            </span>
+            {country.image ? (
+              <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg ring-1 ring-black/5">
+                <Image
+                  src={country.image}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="40px"
+                />
+              </span>
+            ) : (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                {getCountryFlagLabel(country)}
+              </span>
+            )}
             <span>
               <span className="block text-sm font-semibold text-secondary">{country.name}</span>
               {country.tuitionRange && (

@@ -1,5 +1,6 @@
 import type { MarketingCountry } from "@/types/marketing";
 import { MARKETING_COUNTRIES_RAW } from "./countries-data";
+import { getCountryImage } from "./country-images";
 
 const COUNTRY_EXTRAS: Record<
   string,
@@ -92,8 +93,12 @@ const COUNTRY_EXTRAS: Record<
 
 function enrichCountry(country: MarketingCountry): MarketingCountry {
   const extras = COUNTRY_EXTRAS[country.slug];
-  if (!extras) return country;
-  return { ...country, ...extras };
+  const imageMeta = getCountryImage(country.slug);
+  return {
+    ...country,
+    ...extras,
+    ...(imageMeta ? { image: imageMeta.src, imageAlt: imageMeta.alt } : {}),
+  };
 }
 
 export const MARKETING_COUNTRIES = MARKETING_COUNTRIES_RAW.map(enrichCountry);

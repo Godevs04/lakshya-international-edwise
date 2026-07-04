@@ -546,6 +546,7 @@
 /* Premium navbar */
 .marketing-site .marketing-navbar {
   isolation: isolate;
+  overflow-x: clip;
 }
 
 .marketing-site .nav-glass {
@@ -557,9 +558,22 @@
   box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
   padding: 10px 16px;
   height: 64px;
+  max-width: 100%;
   transition:
     height 250ms cubic-bezier(0.22, 1, 0.36, 1),
     padding 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 1919px) {
+  .marketing-site .nav-glass {
+    padding: 8px 10px;
+  }
+
+  .marketing-site .nav-eligibility-cta {
+    height: 44px;
+    padding: 0 20px !important;
+    font-size: 0.875rem;
+  }
 }
 
 .marketing-site .marketing-navbar.is-compact .nav-glass {
@@ -575,7 +589,7 @@
 .marketing-site .nav-partner-badge {
   position: absolute;
   top: -2px;
-  right: -2px;
+  right: 2px;
   display: inline-flex;
   height: 18px;
   align-items: center;
@@ -642,6 +656,12 @@
 }
 
 .marketing-site .lender-logo-wrap:hover .lender-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.marketing-site .lender-tooltip-visible {
   visibility: visible;
   opacity: 1;
   transform: translateY(0);

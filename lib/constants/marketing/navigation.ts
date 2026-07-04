@@ -27,6 +27,7 @@ export const MARKETING_NAV: MarketingNavItem[] = [
   { label: "Home", href: "/" },
   {
     label: "Our Services",
+    shortLabel: "Services",
     href: "/services",
     megaMenu: "services",
     children: buildServiceNavChildren(),
@@ -45,7 +46,7 @@ export const MARKETING_NAV: MarketingNavItem[] = [
       href: `/countries/${country.slug}`,
     })),
   },
-  { label: "About Us", href: "/#about" },
+  { label: "About Us", shortLabel: "About", href: "/about" },
   {
     label: "Become a Partner",
     shortLabel: "Partner",
@@ -58,7 +59,7 @@ export const MARKETING_NAV: MarketingNavItem[] = [
 
 export const MARKETING_FOOTER_LINKS = {
   company: [
-    { label: "About Us", href: "/#about" },
+    { label: "About Us", href: "/about" },
     { label: "Lending Partners", href: "/lending-partners" },
     { label: "Become a Partner", href: "/become-a-partner" },
     { label: "FAQ", href: "/faq" },

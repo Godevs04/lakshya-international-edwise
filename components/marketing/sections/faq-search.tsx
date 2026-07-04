@@ -1,15 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Search } from "lucide-react";
 import type { MarketingFaq } from "@/types/marketing";
 import { cn } from "@/lib/utils";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
-export function FaqSearch({ items }: { items: MarketingFaq[] }) {
-  const [query, setQuery] = useState("");
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q") ?? "";
+  const [localQuery, setLocalQuery] = useState<string | null>(null);
+  const query = localQuery ?? urlQuery;
+  const [openIndex, setOpenIndex] = useState<number | null>(urlQuery ? null : 0);
   const { prefersReducedMotion } = useMarketingMotion();
 
   const filtered = useMemo(() => {
@@ -31,7 +35,7 @@ export function FaqSearch({ items }: { items: MarketingFaq[] }) {
           type="search"
           value={query}
           onChange={(event) => {
-            setQuery(event.target.value);
+            setLocalQuery(event.target.value);
             setOpenIndex(null);
           }}
           placeholder="Search questions..."
@@ -85,5 +89,19 @@ export function FaqSearch({ items }: { items: MarketingFaq[] }) {
         </div>
       )}
     </div>
+  );
+}
+
+export function FaqSearch({ items }: { items: MarketingFaq[] }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-3xl py-12 text-center text-sm text-muted-foreground">
+          Loading questions…
+        </div>
+      }
+    >
+      <FaqSearchContent items={items} />
+    </Suspense>
   );
 }

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
+import { CountryHero } from "@/components/marketing/sections/country-hero";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { getMarketingCountry, getCountryFlagLabel, MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
+import { getMarketingCountry, MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 import { getMarketingContact } from "@/lib/config/marketing";
 import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
 import { JsonLd, breadcrumbJsonLd, serviceJsonLd } from "@/components/marketing/seo/json-ld";
@@ -79,22 +79,7 @@ export default async function CountryDetailPage({
           ]),
         ]}
       />
-      <section className="hero-gradient section-padding">
-        <div className="container mx-auto max-w-3xl px-4 text-center">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
-            {getCountryFlagLabel(country)}
-          </span>
-          <h1 className="heading-display mt-4 text-foreground">
-            Education loans for {country.name}
-          </h1>
-          <p className="prose-marketing mx-auto mt-5 text-lg text-muted-foreground">
-            {country.description}
-          </p>
-          <div className="mt-8">
-            <EligibilityCta source={`country-${slug}`} className="px-7 py-3.5 text-base" />
-          </div>
-        </div>
-      </section>
+      <CountryHero country={country} slug={slug} />
 
       <SectionShell variant="muted" padding>
         <div className="grid gap-6 md:grid-cols-2">

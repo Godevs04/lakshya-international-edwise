@@ -4,7 +4,7 @@ import { Users, Landmark, Clock, TrendingUp } from "lucide-react";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
 import { RevealStagger, RevealItem } from "@/components/marketing/motion/reveal";
-import { TRUST_METRICS } from "@/lib/constants/marketing/lakshya-value-props";
+import { TRUST_METRICS, TRUST_METRICS_SOURCE } from "@/lib/constants/marketing/lakshya-value-props";
 
 const METRIC_ICONS = [Users, Landmark, Clock, TrendingUp];
 
@@ -38,6 +38,7 @@ export function TrustMetricsBar() {
             );
           })}
         </RevealStagger>
+        <p className="mt-6 text-center text-xs text-muted-foreground/80">{TRUST_METRICS_SOURCE}</p>
       </MarketingContainer>
     </section>
   );

@@ -24,16 +24,7 @@ const REGULAR_NAV = MARKETING_NAV.filter((item) => !item.featured);
 const FEATURED_NAV = MARKETING_NAV.filter((item) => item.featured);
 
 function NavLabel({ item }: { item: MarketingNavItem }) {
-  if (!item.shortLabel) {
-    return <>{item.label}</>;
-  }
-
-  return (
-    <>
-      <span className="xl:hidden">{item.shortLabel}</span>
-      <span className="hidden xl:inline">{item.label}</span>
-    </>
-  );
+  return <>{item.shortLabel ?? item.label}</>;
 }
 
 function useNavActive() {
@@ -73,11 +64,11 @@ function NavItemLink({
       <Link
         href={item.href}
         className={cn(
-          "nav-item group relative inline-flex h-11 items-center gap-1 rounded-full px-3 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms] xl:px-3.5",
+          "nav-item group relative inline-flex h-11 items-center gap-1 rounded-full px-2 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms] xl:px-2.5 2xl:px-3.5",
           "hover:text-secondary hover:shadow-[0_0_0_4px_rgba(11,143,216,0.08)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
           active && "nav-item-active text-primary",
-          showJoinBadge && "pr-4",
+          showJoinBadge && "mr-0.5 pr-5",
           className
         )}
       >
@@ -133,7 +124,7 @@ function DesktopNavItem({
           href={item.href}
           aria-expanded={hasMega ? openMega === item.megaMenu : undefined}
           className={cn(
-            "nav-item group relative inline-flex h-11 items-center gap-1 rounded-full px-3 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms] xl:px-3.5",
+            "nav-item group relative inline-flex h-11 items-center gap-1 rounded-full px-2 text-sm font-medium text-secondary/80 transition-[color,background,box-shadow] duration-[250ms] xl:px-2.5 2xl:px-3.5",
             "hover:text-secondary hover:shadow-[0_0_0_4px_rgba(11,143,216,0.08)]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
             active && "nav-item-active text-primary"
@@ -260,30 +251,45 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
           compact ? "h-[68px]" : "h-20"
         )}
       >
-        {/* LEFT — Logo + company name */}
+        {/* LEFT bookend — Logo + company name */}
+        <div className="hidden min-w-0 flex-1 items-center justify-start lg:flex">
+          <Link
+            href="/"
+            className="group relative z-10 flex min-w-0 max-w-full items-center gap-2.5"
+            aria-label={`${companyName} home`}
+          >
+            <motion.div
+              className="flex shrink-0 items-center origin-left"
+              animate={{ scale: compact ? 0.9 : 1 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: EASE }}
+            >
+              <AppLogo
+                alt={companyName}
+                variant="mobile"
+                className="!h-9 !max-w-[3rem] !rounded-xl !px-2 !py-1 !shadow-sm !ring-1 !ring-black/[0.04] transition-shadow duration-[250ms] group-hover:!shadow-md"
+              />
+            </motion.div>
+            <span className="hidden min-w-0 truncate text-sm font-semibold tracking-tight text-secondary transition-colors duration-[250ms] group-hover:text-primary min-[1680px]:inline">
+              {companyName}
+            </span>
+          </Link>
+        </div>
+
+        {/* Mobile logo */}
         <Link
           href="/"
-          className="group flex shrink-0 items-center gap-3"
+          className="group relative z-10 flex shrink-0 items-center gap-2.5 lg:hidden"
           aria-label={`${companyName} home`}
         >
-          <motion.div
-            className="flex items-center origin-left"
-            animate={{ scale: compact ? 0.9 : 1 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: EASE }}
-          >
-            <AppLogo
-              alt={companyName}
-              variant="mobile"
-              className="!h-9 !max-w-[3rem] !rounded-xl !px-2 !py-1 !shadow-sm !ring-1 !ring-black/[0.04] transition-shadow duration-[250ms] group-hover:!shadow-md"
-            />
-          </motion.div>
-          <span className="hidden max-w-[10rem] truncate text-sm font-semibold tracking-tight text-secondary transition-colors duration-[250ms] group-hover:text-primary sm:inline xl:max-w-[14rem]">
-            {companyName}
-          </span>
+          <AppLogo
+            alt={companyName}
+            variant="mobile"
+            className="!h-9 !max-w-[3rem] !rounded-xl !px-2 !py-1 !shadow-sm !ring-1 !ring-black/[0.04]"
+          />
         </Link>
 
         {/* CENTER — Single glass navigation container */}
-        <div className="ml-8 hidden min-w-0 flex-1 justify-center lg:flex">
+        <div className="hidden shrink-0 px-3 lg:block xl:px-4">
           <LayoutGroup id="marketing-nav">
             <nav
               className="nav-glass flex items-center gap-0.5 xl:gap-1"
@@ -304,8 +310,8 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
           </LayoutGroup>
         </div>
 
-        {/* RIGHT — Partner, Staff Login, CTA */}
-        <div className="ml-6 hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
+        {/* RIGHT bookend — Partner, Staff Portal, CTA */}
+        <div className="relative z-20 hidden min-w-0 flex-1 items-center justify-end gap-2.5 md:flex lg:gap-3 xl:gap-4">
           {FEATURED_NAV.map((item) => (
             <NavItemLink
               key={item.href}
@@ -318,10 +324,11 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
 
           <Link
             href="/login"
+            aria-label="Staff portal login"
             className="group inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-secondary opacity-70 transition-[opacity,color] duration-[250ms] hover:text-secondary hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <LogIn className="h-4 w-4" aria-hidden />
-            <span className="hidden xl:inline">Staff Login</span>
+            <span className="hidden xl:inline">Staff Portal</span>
           </Link>
 
           <EligibilityCta
@@ -446,7 +453,7 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
                   className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-secondary/70 transition-colors hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <LogIn className="h-4 w-4" />
-                  Staff Login
+                  Staff Portal
                 </Link>
                 <EligibilityCta
                   source="navbar-mobile"
