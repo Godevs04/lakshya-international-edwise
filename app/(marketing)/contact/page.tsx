@@ -3,6 +3,7 @@ import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { ContactForm } from "@/components/marketing/forms/contact-form";
+import { LeadForm } from "@/components/marketing/forms/lead-form";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { OfficeLocationShowcase } from "@/components/marketing/maps/office-location-showcase";
 import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
@@ -102,6 +103,21 @@ export default function ContactPage() {
               />
             ) : null}
           </div>
+        </div>
+      </SectionShell>
+
+      <SectionShell variant="muted" padding>
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-6 text-center">
+            <p className="accent-chip mx-auto">Free Consultation</p>
+            <h2 className="heading-section mt-3 text-foreground">
+              Book a personalised loan consultation
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Share your study plans and we will map the best lender options for your profile.
+            </p>
+          </div>
+          <LeadForm variant="consultation" formPage="/contact" premium />
         </div>
       </SectionShell>
     </>

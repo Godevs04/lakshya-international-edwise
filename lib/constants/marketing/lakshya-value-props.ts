@@ -20,6 +20,9 @@ export const TRUST_METRICS: TrustMetric[] = [
   { value: 8.25, suffix: "%", label: "ROI Starts From", decimals: 2 },
 ];
 
+export const TRUST_METRICS_SOURCE =
+  "Figures based on cumulative student enquiries, partner lender network, and average sanction timelines (FY 2024–25). Rates are indicative and subject to lender policy.";
+
 export const HOW_IT_WORKS_STEPS: ValueProp[] = [
   { title: "Check Eligibility", description: "7 minutes", icon: "ShieldCheck" },
   { title: "Document Verification", description: "Same day", icon: "FileText" },

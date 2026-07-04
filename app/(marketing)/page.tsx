@@ -1,19 +1,14 @@
+import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FinanceHero } from "@/components/marketing/sections/finance-hero";
 import { TrustMetricsBar } from "@/components/marketing/sections/trust-metrics-bar";
 import { LenderLogoCarousel } from "@/components/marketing/sections/lender-logo-carousel";
 import { FinanceServicesGrid } from "@/components/marketing/sections/finance-services-grid";
-import { FinanceProcessHorizontal } from "@/components/marketing/sections/finance-process-horizontal";
-import { LakshyaRootMap } from "@/components/marketing/sections/lakshya-root-map";
-import { ValuePropsGrid } from "@/components/marketing/sections/value-props-grid";
-import { AboutJourneySection } from "@/components/marketing/sections/about-journey-section";
-import { LendingPartnersPreview } from "@/components/marketing/sections/lending-partners-preview";
+import { AboutPreviewSection } from "@/components/marketing/sections/about-preview-section";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { CountryCard } from "@/components/marketing/cards/country-card";
-import { TestimonialsSection } from "@/components/marketing/sections/testimonials";
 import { FaqSection } from "@/components/marketing/sections/faq";
-import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { HomepageJourneyPath } from "@/components/marketing/motion/homepage-journey-path";
 import { JsonLd, faqPageJsonLd, websiteJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
@@ -24,6 +19,45 @@ import {
 } from "@/lib/constants/marketing/lakshya-value-props";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 import { buildMarketingMetadata } from "@/lib/seo/marketing-metadata";
+
+const FinanceProcessHorizontal = dynamic(
+  () =>
+    import("@/components/marketing/sections/finance-process-horizontal").then(
+      (mod) => mod.FinanceProcessHorizontal
+    ),
+  { ssr: true }
+);
+
+const LakshyaRootMap = dynamic(
+  () =>
+    import("@/components/marketing/sections/lakshya-root-map").then((mod) => mod.LakshyaRootMap),
+  { ssr: true }
+);
+
+const ValuePropsGrid = dynamic(
+  () =>
+    import("@/components/marketing/sections/value-props-grid").then((mod) => mod.ValuePropsGrid),
+  { ssr: true }
+);
+
+const LendingPartnersPreview = dynamic(
+  () =>
+    import("@/components/marketing/sections/lending-partners-preview").then(
+      (mod) => mod.LendingPartnersPreview
+    ),
+  { ssr: true }
+);
+
+const TestimonialsSection = dynamic(
+  () =>
+    import("@/components/marketing/sections/testimonials").then((mod) => mod.TestimonialsSection),
+  { ssr: true }
+);
+
+const CtaBanner = dynamic(
+  () => import("@/components/marketing/sections/cta-banner").then((mod) => mod.CtaBanner),
+  { ssr: true }
+);
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
@@ -46,7 +80,7 @@ export default function MarketingHomePage() {
           websiteJsonLd({
             name: contact.companyName,
             url: siteUrl,
-            searchUrl: `${siteUrl}/services`,
+            searchUrl: `${siteUrl}/faq`,
           }),
           faqPageJsonLd(MARKETING_FAQS),
         ]}
@@ -99,7 +133,7 @@ export default function MarketingHomePage() {
       </SectionShell>
 
       <LendingPartnersPreview />
-      <AboutJourneySection />
+      <AboutPreviewSection />
       <TestimonialsSection />
       <FaqSection items={MARKETING_FAQS.slice(0, 6)} />
       <CtaBanner />

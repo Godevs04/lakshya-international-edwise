@@ -6,7 +6,7 @@ describe("next.config redirects", () => {
   const configSource = readFileSync(resolve(process.cwd(), "next.config.ts"), "utf8");
 
   it("redirects legacy admissions routes to finance pages", () => {
-    expect(configSource).toContain('source: "/about", destination: "/#about"');
+    expect(configSource).not.toContain('source: "/about", destination: "/#about"');
     expect(configSource).toContain(
       'source: "/education-loans", destination: "/services/education-loan"'
     );
