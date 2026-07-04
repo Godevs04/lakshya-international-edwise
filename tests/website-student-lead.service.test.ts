@@ -89,4 +89,34 @@ describe("website student lead resubmission", () => {
       { $set: { loanAmount: 5_000_000 } }
     );
   });
+
+  it("stores a placeholder last name when resubmitted with a single-word name", async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    const studentDoc = {
+      _id: { toString: () => "lead-1" },
+      firstName: "Priya",
+      lastName: "Sharma",
+      phone: "9876543210",
+      notes: [] as Array<Record<string, unknown>>,
+      metadata: {},
+      save,
+    };
+    studentFindById.mockResolvedValue(studentDoc);
+
+    const { updatePendingWebsiteStudentLead } = await import(
+      "@/lib/services/website-student-lead.service"
+    );
+
+    const updated = await updatePendingWebsiteStudentLead("lead-1", {
+      name: "GOWTHAM",
+      phone: "9876543210",
+      enquiryType: "eligibility",
+      loanRequired: false,
+    });
+
+    expect(updated).toBeTruthy();
+    expect(studentDoc.firstName).toBe("GOWTHAM");
+    expect(studentDoc.lastName).toBe(".");
+    expect(save).toHaveBeenCalledOnce();
+  });
 });

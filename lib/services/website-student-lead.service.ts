@@ -67,7 +67,8 @@ export async function updatePendingWebsiteStudentLead(
   if (!student) return null;
 
   student.firstName = sanitizeText(firstName);
-  student.lastName = sanitizeText(lastName);
+  // Student.lastName is required; "." is the hidden placeholder for single-word names.
+  student.lastName = sanitizeText(lastName) || ".";
   student.phone = normalizeIndianPhone(data.phone);
   if (data.email?.trim()) student.email = data.email.trim();
   if (data.targetCountry?.trim()) student.targetCountry = data.targetCountry.trim();
