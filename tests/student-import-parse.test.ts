@@ -118,6 +118,9 @@ describe("student-import-parse", () => {
   it("resolves application status from new and legacy columns", () => {
     expect(resolveImportApplicationStatus({ applicationStatus: "pf_paid" })).toBe("pf_paid");
     expect(resolveImportApplicationStatus({ applicationStatus: "not_interested" })).toBe("not_interested");
+    expect(resolveImportApplicationStatus({ applicationStatus: "need_callback" })).toBe("need_callback");
+    expect(resolveImportApplicationStatus({ applicationStatus: "Need Call Back" })).toBe("need_callback");
+    expect(resolveImportApplicationStatus({ applicationStatus: "future_intake" })).toBe("future_intake");
     expect(resolveImportApplicationStatus({ status: "disbursed" })).toBe("disbursed");
     expect(resolveImportApplicationStatus({ status: "documents_pending" })).toBe("docs_pending");
     expect(resolveImportApplicationStatus({})).toBe("docs_pending");

@@ -6,6 +6,8 @@ export interface StudentWorkflowFilter {
 export const STUDENT_WORKFLOW_FILTERS: StudentWorkflowFilter[] = [
   { id: "all", label: "All" },
   { id: "docs_pending", label: "Docs Pending" },
+  { id: "need_callback", label: "Need Call Back" },
+  { id: "future_intake", label: "Future Intake" },
   { id: "loggedin", label: "Logged In" },
   { id: "sanctioned", label: "Sanctioned" },
   { id: "pf_paid", label: "PF Paid" },
