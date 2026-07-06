@@ -15,6 +15,8 @@ describe("student workflow filters", () => {
     expect(STUDENT_WORKFLOW_FILTERS.map((workflow) => workflow.id)).toEqual([
       "all",
       "docs_pending",
+      "need_callback",
+      "future_intake",
       "loggedin",
       "sanctioned",
       "pf_paid",

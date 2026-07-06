@@ -120,6 +120,8 @@ function normalizeApplicationStatus(value?: string): ApplicationStatusId | undef
   if (trimmed === "docs_pending" || trimmed === "documents_pending") return "docs_pending";
   if (trimmed === "pf_paid") return "pf_paid";
   if (trimmed === "pf_pending") return "pf_pending";
+  if (trimmed === "need_call_back" || trimmed === "need_callback") return "need_callback";
+  if (trimmed === "future_intake") return "future_intake";
   return undefined;
 }
 

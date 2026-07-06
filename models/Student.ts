@@ -1,4 +1,5 @@
 import mongoose, { Schema, type Document, type Model, Types } from "mongoose";
+import { APPLICATION_STATUS_VALUES } from "@/lib/constants/application-status";
 import type { StudentStatus } from "@/lib/constants/statuses";
 
 const DocumentSchema = new Schema(
@@ -58,15 +59,7 @@ const LoanApplicationSchema = new Schema(
     lenderId: { type: Schema.Types.ObjectId, ref: "Lender", required: true },
     applicationStatus: {
       type: String,
-      enum: [
-        "docs_pending",
-        "loggedin",
-        "sanctioned",
-        "pf_paid",
-        "pf_pending",
-        "disbursed",
-        "rejected",
-      ],
+      enum: [...APPLICATION_STATUS_VALUES],
       default: "docs_pending",
     },
     applicationNumber: { type: String, trim: true },
@@ -279,15 +272,7 @@ const StudentSchema = new Schema<IStudent>(
     recordType: { type: String, enum: ["lead", "student"], default: "student" },
     applicationStatus: {
       type: String,
-      enum: [
-        "docs_pending",
-        "loggedin",
-        "sanctioned",
-        "pf_paid",
-        "pf_pending",
-        "disbursed",
-        "rejected",
-      ],
+      enum: [...APPLICATION_STATUS_VALUES],
       default: "docs_pending",
     },
     loggedIn: { type: Boolean, default: false },

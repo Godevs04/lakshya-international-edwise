@@ -33,6 +33,24 @@ describe("application status", () => {
       pfPaid: false,
     });
   });
+
+  it("maps need callback to contacted", () => {
+    expect(applyApplicationStatus("need_callback")).toEqual({
+      applicationStatus: "need_callback",
+      status: "contacted",
+      loggedIn: false,
+      pfPaid: false,
+    });
+  });
+
+  it("maps future intake to contacted", () => {
+    expect(applyApplicationStatus("future_intake")).toEqual({
+      applicationStatus: "future_intake",
+      status: "contacted",
+      loggedIn: false,
+      pfPaid: false,
+    });
+  });
 });
 
 describe("buildWorkflowMongoFilter", () => {

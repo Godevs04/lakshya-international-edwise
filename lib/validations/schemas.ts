@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { APPLICATION_STATUS_VALUES } from "@/lib/constants/application-status";
 import { roundMoney } from "@/lib/utils/format";
 import {
   isBlank,
@@ -134,16 +135,7 @@ export const studentSchema = z.object({
   lenderId: z.string().optional(),
   roi: z.coerce.number().min(0).max(100).transform(roundMoney).optional(),
   processingFee: optionalMoney,
-  applicationStatus: z.enum([
-    "docs_pending",
-    "loggedin",
-    "sanctioned",
-    "pf_paid",
-    "pf_pending",
-    "disbursed",
-    "not_interested",
-    "rejected",
-  ]).optional(),
+  applicationStatus: z.enum(APPLICATION_STATUS_VALUES).optional(),
   commissionPercentOverride: z.coerce
     .number()
     .min(0, "Partner share cannot be negative")
