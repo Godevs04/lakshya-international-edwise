@@ -519,7 +519,15 @@ export async function updateLoanApplicationStatus(
       : undefined,
   });
 
-  if (app.isPrimary) {
+  // Sync the overall student status from the primary application. Fall back to
+  // this application when it's the only one, or when none is marked primary,
+  // so single-lender students still reflect the change end-to-end.
+  const applications = student.loanApplications ?? [];
+  const hasPrimary = applications.some((entry) => entry.isPrimary);
+  const shouldSyncStudentStatus =
+    app.isPrimary || applications.length <= 1 || !hasPrimary;
+
+  if (shouldSyncStudentStatus) {
     const appFields = applyApplicationStatus(applicationStatus);
     student.applicationStatus = appFields.applicationStatus;
     student.status = appFields.status;
