@@ -74,28 +74,31 @@ export function AnimatedCounter({
     if (!started || prefersReducedMotion) return;
 
     let cancelled = false;
-    let timer: ReturnType<typeof setInterval> | undefined;
     let rafId = 0;
-    let delayTimer: ReturnType<typeof setTimeout> | undefined;
+    let delayTimer: number | undefined;
 
     const runAnimation = () => {
       if (cancelled) return;
 
       if (variant === "linear") {
-        let frame = 0;
-        const totalFrames = Math.max(24, Math.round(duration / 16));
-        timer = window.setInterval(() => {
+        const startTime = performance.now();
+
+        const tick = (now: number) => {
           if (cancelled) return;
-          frame += 1;
-          const progress = frame / totalFrames;
-          setCount(value * easeOutCubic(progress));
-          if (frame >= totalFrames) {
+          const elapsed = now - startTime;
+          const t = Math.min(elapsed / duration, 1);
+          setCount(value * easeOutCubic(t));
+
+          if (t < 1) {
+            rafId = requestAnimationFrame(tick);
+          } else {
             setCount(value);
             setSettled(true);
             if (pulseOnComplete) setPulsed(true);
-            window.clearInterval(timer);
           }
-        }, duration / totalFrames);
+        };
+
+        rafId = requestAnimationFrame(tick);
         return;
       }
 
@@ -141,8 +144,7 @@ export function AnimatedCounter({
 
     return () => {
       cancelled = true;
-      if (delayTimer) window.clearTimeout(delayTimer);
-      if (timer) window.clearInterval(timer);
+      if (delayTimer !== undefined) window.clearTimeout(delayTimer);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [started, value, duration, delay, prefersReducedMotion, pulseOnComplete, variant]);
