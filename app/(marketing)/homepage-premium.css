@@ -1,0 +1,550 @@
+/* Homepage premium — scoped under .homepage-premium */
+
+.homepage-premium {
+  --hp-radius-card: 24px;
+  --hp-radius-btn: 16px;
+  --hp-shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.04), 0 12px 40px rgba(11, 143, 216, 0.06);
+  --hp-shadow-lift: 0 8px 24px rgba(15, 23, 42, 0.06), 0 24px 56px rgba(11, 143, 216, 0.1);
+}
+
+/* Section spacing — 56 / 80 / 120px */
+.homepage-premium .section-padding {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .homepage-premium .section-padding {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .homepage-premium .section-padding {
+    padding-top: 7.5rem;
+    padding-bottom: 7.5rem;
+  }
+}
+
+/* Section headings — max ~54px */
+.homepage-premium .heading-section,
+.homepage-premium h2.text-3xl,
+.homepage-premium .section-shell h2 {
+  font-size: clamp(1.875rem, 3.2vw, 3.375rem) !important;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+/* Premium cards */
+.homepage-premium .card-premium {
+  border-radius: var(--hp-radius-card);
+  border-color: rgba(226, 232, 240, 0.65);
+  box-shadow: var(--hp-shadow-soft);
+}
+
+.homepage-premium .card-premium:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--hp-shadow-lift);
+}
+
+.homepage-premium .service-card-premium {
+  border-radius: var(--hp-radius-card);
+}
+
+.homepage-premium .service-card-premium:hover .service-card-link {
+  transform: translateX(4px);
+}
+
+/* Primary / ghost CTA */
+.marketing-site .btn-premium-primary {
+  border-radius: var(--hp-radius-btn);
+  background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 50%, #0ea5e9 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow:
+    0 2px 4px rgba(11, 143, 216, 0.15),
+    0 8px 24px rgba(11, 143, 216, 0.28);
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.marketing-site .btn-premium-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 8px rgba(11, 143, 216, 0.2),
+    0 12px 32px rgba(11, 143, 216, 0.35),
+    0 0 24px rgba(79, 195, 247, 0.2);
+}
+
+.marketing-site .btn-premium-ghost {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--hp-radius-btn);
+  border: 1px solid rgba(11, 143, 216, 0.28);
+  background: rgba(255, 255, 255, 0.75);
+  color: #097bb8;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.marketing-site .btn-premium-ghost:hover {
+  transform: translateY(-1px);
+  border-color: rgba(11, 143, 216, 0.5);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 16px rgba(11, 143, 216, 0.12);
+}
+
+/* Hero section */
+.marketing-site .hero-premium {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.marketing-site .hero-premium-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.marketing-site .hero-premium-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% -5%, rgba(11, 143, 216, 0.07), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 85% 10%, rgba(79, 195, 247, 0.06), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(11, 143, 216, 0.04), transparent 60%);
+}
+
+.marketing-site .hero-premium-map {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400' fill='none'%3E%3Cellipse cx='400' cy='200' rx='360' ry='160' stroke='%230b8fd8' stroke-width='0.8'/%3E%3Cpath d='M120 180 Q200 120 280 160 T440 140 T600 180 T680 150' stroke='%230b8fd8' stroke-width='0.6'/%3E%3Cpath d='M100 240 Q220 200 340 220 T520 210 T700 230' stroke='%234fc3f7' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+}
+
+.marketing-site .hero-premium-routes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.06;
+}
+
+.marketing-site .hero-premium-routes-animated {
+  opacity: 0.05;
+}
+
+.marketing-site .hero-premium-blur {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  opacity: 0.07;
+  will-change: transform;
+}
+
+.marketing-site .hero-premium-blur-1 {
+  width: 420px;
+  height: 420px;
+  top: -8%;
+  right: 8%;
+  background: #0b8fd8;
+}
+
+.marketing-site .hero-premium-blur-2 {
+  width: 320px;
+  height: 320px;
+  bottom: 5%;
+  left: 2%;
+  background: #4fc3f7;
+}
+
+.marketing-site .hero-premium-blur-3 {
+  width: 240px;
+  height: 240px;
+  top: 40%;
+  left: 45%;
+  background: #0ea5e9;
+  opacity: 0.05;
+}
+
+.marketing-site .hero-premium-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0b8fd8;
+  opacity: 0.2;
+  will-change: transform, opacity;
+}
+
+/* Hero typography */
+.marketing-site .hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: rgba(11, 143, 216, 0.08);
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #097bb8;
+}
+
+.marketing-site .hero-premium-heading {
+  font-size: clamp(2.25rem, 4.8vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.marketing-site .hero-premium-heading-accent {
+  background: linear-gradient(135deg, #0b8fd8 0%, #0ea5e9 50%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.marketing-site .hero-premium-subcopy {
+  max-width: 36rem;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #64748b;
+}
+
+/* Trust badges */
+.marketing-site .hero-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(11, 143, 216, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0b1e48;
+  box-shadow: 0 2px 8px rgba(11, 30, 72, 0.04);
+}
+
+/* Mini stats */
+.marketing-site .hero-mini-stat {
+  text-align: left;
+}
+
+.marketing-site .hero-mini-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0b1e48;
+  letter-spacing: -0.02em;
+}
+
+.marketing-site .hero-mini-stat-label {
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+
+/* Navy stats bar */
+.marketing-site .hero-stats-navy {
+  border-radius: var(--hp-radius-card);
+  background: linear-gradient(135deg, #0b1e48 0%, #102456 52%, #0f2557 100%);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 16px 48px rgba(11, 30, 72, 0.18);
+}
+
+.marketing-site .hero-stats-navy-icon {
+  background: rgba(79, 195, 247, 0.14);
+  color: #4fc3f7;
+}
+
+.marketing-site .hero-stats-navy-value {
+  color: #ffffff;
+}
+
+.marketing-site .hero-stats-navy-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Hero composition */
+.marketing-site .hero-composition {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  height: clamp(380px, 42vw, 480px);
+}
+
+.marketing-site .hero-comp-globe {
+  position: absolute;
+  top: 2%;
+  right: 0;
+  z-index: 1;
+  width: 72%;
+  max-width: 340px;
+  pointer-events: none;
+}
+
+.marketing-site .hero-comp-globe-img {
+  width: 100%;
+  height: auto;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+}
+
+.marketing-site .hero-comp-landmarks {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  z-index: 3;
+  width: 100%;
+  max-width: 520px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.marketing-site .hero-comp-landmarks-img {
+  width: 100%;
+  height: auto;
+  mix-blend-mode: screen;
+  opacity: 0.95;
+  filter: drop-shadow(0 12px 28px rgba(11, 30, 72, 0.08));
+}
+
+.marketing-site .hero-comp-float {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 16px rgba(11, 30, 72, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.marketing-site .hero-comp-cap {
+  top: 12%;
+  left: 8%;
+}
+
+.marketing-site .hero-comp-passport {
+  top: 28%;
+  right: 6%;
+}
+
+.marketing-site .hero-comp-visa {
+  bottom: 38%;
+  left: 4%;
+}
+
+.marketing-site .hero-comp-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.marketing-site .hero-glass-card {
+  position: absolute;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.75rem 0.875rem;
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 4px 16px rgba(11, 30, 72, 0.08),
+    0 0 0 1px rgba(11, 143, 216, 0.06);
+  will-change: transform;
+}
+
+.marketing-site .hero-glass-loan {
+  top: 8%;
+  left: 0;
+  min-width: 140px;
+}
+
+.marketing-site .hero-glass-approval {
+  top: 42%;
+  right: 0;
+  min-width: 150px;
+}
+
+.marketing-site .hero-glass-student {
+  bottom: 12%;
+  left: 8%;
+  min-width: 130px;
+}
+
+.marketing-site .hero-glass-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.marketing-site .hero-glass-value {
+  margin-top: 0.125rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #0b1e48;
+  letter-spacing: -0.02em;
+}
+
+.marketing-site .hero-glass-meta {
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.marketing-site .hero-approval-bar {
+  margin-top: 0.375rem;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(11, 143, 216, 0.12);
+}
+
+.marketing-site .hero-approval-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0b8fd8, #4fc3f7);
+}
+
+.marketing-site .hero-comp-lenders {
+  position: absolute;
+  bottom: 4%;
+  right: 4%;
+  z-index: 6;
+  display: flex;
+  gap: 0.375rem;
+}
+
+.marketing-site .hero-comp-lender-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.25rem;
+  box-shadow: 0 2px 8px rgba(11, 30, 72, 0.06);
+}
+
+.marketing-site .hero-comp-lender-img {
+  width: auto;
+  max-height: 100%;
+  object-fit: contain;
+  opacity: 1;
+}
+
+.marketing-site .hero-comp-lender-chip:hover .hero-comp-lender-img {
+  opacity: 1;
+}
+
+/* Premium lender marquee — full color, scroll */
+.marketing-site .lender-carousel-premium .lender-logo {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 12px rgba(11, 30, 72, 0.05);
+}
+
+/* Premium CTA banner */
+.homepage-premium .cta-premium {
+  border-radius: var(--hp-radius-card);
+  background:
+    radial-gradient(ellipse 80% 80% at 20% 0%, rgba(79, 195, 247, 0.25), transparent 50%),
+    linear-gradient(135deg, #0b1e48 0%, #0f2557 40%, #0b8fd8 100%);
+  box-shadow: 0 24px 64px rgba(11, 30, 72, 0.2);
+  animation: hp-cta-glow 6s ease-in-out infinite;
+}
+
+@keyframes hp-cta-glow {
+  0%, 100% {
+    box-shadow: 0 24px 64px rgba(11, 30, 72, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 24px 64px rgba(11, 30, 72, 0.25),
+      0 0 48px rgba(11, 143, 216, 0.15);
+  }
+}
+
+.homepage-premium .cta-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400' fill='none'%3E%3Cellipse cx='400' cy='200' rx='360' ry='160' stroke='white' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: cover;
+  pointer-events: none;
+}
+
+/* FAQ glass */
+.homepage-premium .glass-faq {
+  border-radius: var(--hp-radius-card);
+}
+
+/* Country cards */
+.homepage-premium .card-premium-lift.group:hover {
+  transform: translateY(-8px);
+}
+
+/* Testimonial cards */
+.homepage-premium .testimonial-card-premium {
+  border-radius: var(--hp-radius-card);
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.homepage-premium .testimonial-card-premium:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--hp-shadow-lift);
+}
+
+@media (max-width: 1023px) {
+  .marketing-site .hero-composition {
+    min-height: 320px;
+    height: auto;
+    margin-top: 1rem;
+  }
+
+  .marketing-site .hero-comp-landmarks-img {
+    max-width: 100%;
+  }
+
+  .marketing-site .hero-glass-loan,
+  .marketing-site .hero-glass-approval,
+  .marketing-site .hero-glass-student {
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homepage-premium .cta-premium {
+    animation: none;
+  }
+}

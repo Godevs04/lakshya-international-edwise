@@ -26,7 +26,7 @@ export function CtaBanner({
 
   return (
     <section data-journey-node="cta" className={cn("section-padding section-relative", className)}>
-      <div className="container relative mx-auto max-w-6xl px-4">
+      <div className="container relative mx-auto max-w-[90rem] px-4">
         <div className="cta-premium relative overflow-hidden rounded-3xl px-6 py-10 md:px-10 md:py-14">
           <div
             className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"

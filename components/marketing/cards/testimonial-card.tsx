@@ -4,7 +4,7 @@ import { Star, BadgeCheck, Play, Wallet, Calendar } from "lucide-react";
 
 export function TestimonialCard({ testimonial }: { testimonial: MarketingTestimonial }) {
   return (
-    <blockquote className="card-premium group flex h-full flex-col overflow-hidden p-0">
+    <blockquote className="card-premium testimonial-card-premium group flex h-full flex-col overflow-hidden p-0">
       <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-primary/10 via-accent/40 to-sky-100/60">
         {testimonial.photo ? (
           <div className="relative h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-lg">
