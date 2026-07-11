@@ -2,12 +2,14 @@ import Image from "next/image";
 import type { MarketingLender } from "@/types/marketing";
 import { cn } from "@/lib/utils";
 
-type LenderLogoSize = "sm" | "md" | "lg" | "carousel";
+type LenderLogoSize = "sm" | "md" | "lg" | "carousel" | "dashboard";
 
 interface LenderLogoProps {
   lender: MarketingLender;
   size?: LenderLogoSize;
   className?: string;
+  /** Dashboard tiles — sizing handled by CSS, not inline styles */
+  fitTile?: boolean;
 }
 
 const SIZE_SCALE: Record<LenderLogoSize, number> = {
@@ -15,6 +17,7 @@ const SIZE_SCALE: Record<LenderLogoSize, number> = {
   md: 1,
   lg: 1.12,
   carousel: 1.28,
+  dashboard: 0.52,
 };
 
 /** Default marketing size — matches the homepage lender carousel. */
@@ -29,26 +32,33 @@ export const LENDER_LOGO_TILE_CLASS =
  * Display dimensions are tuned per lender so wide, square, and compact marks
  * sit at a similar visual weight across carousels and cards.
  */
-export function LenderLogo({ lender, size = "md", className }: LenderLogoProps) {
+export function LenderLogo({
+  lender,
+  size = "md",
+  className,
+  fitTile = false,
+}: LenderLogoProps) {
   const scale = SIZE_SCALE[size];
+  const useTileFit = fitTile && size === "dashboard";
   const displayHeight = Math.round((lender.logoDisplayHeight ?? 40) * scale);
   const maxWidth = Math.round((lender.logoMaxWidth ?? 150) * scale);
 
   if (lender.logo) {
     return (
-      <div className="flex h-full w-full min-w-0 items-center justify-center">
+      <div className="flex h-full w-full min-w-0 items-center justify-center overflow-hidden">
         <Image
           src={lender.logo}
           alt={`${lender.name} education loan partner logo`}
           width={lender.logoWidth ?? 220}
           height={lender.logoHeight ?? 60}
-          quality={85}
+          quality={90}
           className={cn(
             "h-auto w-auto max-h-full max-w-full object-contain object-center",
+            useTileFit && "services-bento-dashboard-logo-img",
             className
           )}
-          style={{ maxHeight: displayHeight, maxWidth }}
-          sizes={`${Math.round(maxWidth * 2)}px`}
+          style={useTileFit ? undefined : { maxHeight: displayHeight, maxWidth }}
+          sizes={useTileFit ? "80px" : `${Math.round(maxWidth * 2)}px`}
         />
       </div>
     );

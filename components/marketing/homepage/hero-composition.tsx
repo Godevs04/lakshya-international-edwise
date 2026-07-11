@@ -10,6 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
+import { AnimatedCounter } from "@/components/marketing/motion/counter";
 
 const ASSETS = {
   landmarks: "/assets/hero/Multiple.png",
@@ -133,10 +134,26 @@ export function HeroComposition() {
           {...(prefersReducedMotion ? {} : floatSlow)}
         >
           <p className="hero-glass-label">Loan Summary</p>
-          <p className="hero-glass-value">₹45,00,000</p>
+          <p className="hero-glass-value">
+            <AnimatedCounter
+              value={4500000}
+              prefix="₹"
+              duration={2000}
+              variant="scramble"
+              pulseOnComplete
+            />
+          </p>
           <p className="hero-glass-meta flex items-center gap-1 text-primary">
             <TrendingUp className="h-3 w-3" />
-            ROI from 8.25%
+            ROI from{" "}
+            <AnimatedCounter
+              value={8.25}
+              suffix="%"
+              decimals={2}
+              duration={1600}
+              variant="scramble"
+              className="font-semibold"
+            />
           </p>
         </motion.div>
 
@@ -158,7 +175,16 @@ export function HeroComposition() {
               transition={{ duration: 1.2, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
-          <p className="hero-glass-meta text-emerald-600">Approved · 73 hrs</p>
+          <p className="hero-glass-meta text-emerald-600">
+            Approved ·{" "}
+            <AnimatedCounter
+              value={73}
+              suffix=" hrs"
+              duration={1700}
+              variant="scramble"
+              className="font-semibold"
+            />
+          </p>
         </motion.div>
 
         <motion.div

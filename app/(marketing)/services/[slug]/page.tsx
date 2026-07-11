@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
+import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
@@ -60,24 +61,23 @@ export default async function ServiceDetailPage({
           ]),
         ]}
       />
-      <section className="hero-gradient section-padding">
-        <div className="container mx-auto max-w-3xl px-4 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+      <PageHero
+        align="center"
+        icon={
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm">
             <MarketingIcon name={service.icon} className="h-7 w-7" />
           </div>
-          <h1 className="heading-display text-foreground">{service.title}</h1>
-          <p className="prose-marketing mx-auto mt-5 text-lg text-muted-foreground">
-            {service.description}
-          </p>
-          <div className="mt-8">
-            <EligibilityCta source={`service-${slug}`} className="px-7 py-3.5 text-base" />
-          </div>
-        </div>
-      </section>
+        }
+        title={service.title}
+        description={service.description}
+      >
+        <EligibilityCta source={`service-${slug}`} className="px-7 py-3.5 text-base" />
+      </PageHero>
 
       {service.subOptions && service.subOptions.length > 0 && (
         <SectionShell
           variant="muted"
+          background="grid"
           eyebrow="Loan Types"
           title="Choose the right education loan for your profile"
           description="Compare non-cosigner, cosigner, collateral, and non-collateral options — we match you with the best lender."
@@ -87,7 +87,14 @@ export default async function ServiceDetailPage({
         </SectionShell>
       )}
 
-      <SectionShell variant="white" title="What you get" eyebrow="Highlights" align="center">
+      <SectionShell
+        variant="white"
+        background="grid"
+        title="What you get"
+        eyebrow="Highlights"
+        align="center"
+        className="page-section-premium"
+      >
         <ul className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2">
           {service.highlights.map((item) => (
             <li key={item} className="card-premium flex items-center gap-3 px-4 py-3 text-sm text-foreground">

@@ -36,8 +36,14 @@ export default function AboutPage() {
       />
       <PageHero
         eyebrow="About Us"
-        title={`${contact.companyName}`}
-        description="Making global education Affordable, Accessible, and Achievable — with transparent loan comparisons and expert guidance at every step."
+        title="Making global education"
+        titleAccent="Affordable, Accessible, Achievable"
+        description={`${contact.companyName} — transparent loan comparisons and expert guidance at every step.`}
+        stats={[
+          { label: "Students guided", value: 8500, suffix: "+" },
+          { label: "Lending partners", value: 20, suffix: "+" },
+          { label: "Years of experience", value: 12, suffix: "+" },
+        ]}
       />
       <AboutJourneySection />
       <WhyChooseSection />
@@ -45,9 +51,11 @@ export default function AboutPage() {
       <ProcessTimelineSection />
       <SectionShell
         variant="muted"
+        background="grid"
         eyebrow="Gallery"
         title="Life at Lakshya"
         description="Counselling sessions, workshops, and student success moments across our offices."
+        className="page-section-premium"
       >
         <GalleryGrid />
       </SectionShell>

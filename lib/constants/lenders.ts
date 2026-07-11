@@ -55,8 +55,8 @@ export const LENDER_SEEDS = [
     logo: "/lenders/images/Icici.png",
     logoWidth: 512,
     logoHeight: 512,
-    logoDisplayHeight: 52,
-    logoMaxWidth: 104,
+    logoDisplayHeight: 36,
+    logoMaxWidth: 168,
     accent: "#b02a30",
   },
   {
@@ -130,16 +130,6 @@ export const LENDER_SEEDS = [
     accent: "#486aae",
   },
   {
-    name: "Fintifi",
-    slug: "fintifi",
-    logo: "/lenders/images/Fintifi.png",
-    logoWidth: 1600,
-    logoHeight: 566,
-    logoDisplayHeight: 30,
-    logoMaxWidth: 120,
-    accent: "#0ea5e9",
-  },
-  {
     name: "Prodigy Finance",
     slug: "prodigy-finance",
     logo: "/lenders/images/Prodigy.png",
@@ -158,16 +148,6 @@ export const LENDER_SEEDS = [
     logoDisplayHeight: 38,
     logoMaxWidth: 148,
     accent: "#1b998b",
-  },
-  {
-    name: "Leap Finance",
-    slug: "leap-finance",
-    logo: "/lenders/images/LeapFinance.png",
-    logoWidth: 1200,
-    logoHeight: 600,
-    logoDisplayHeight: 30,
-    logoMaxWidth: 120,
-    accent: "#7c3aed",
   },
 ] as const;
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { SectionHeading } from "@/components/marketing/sections/section-heading";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { getWhatsAppLink } from "@/lib/config/marketing";
@@ -26,7 +27,7 @@ export function CtaBanner({
 
   return (
     <section data-journey-node="cta" className={cn("section-padding section-relative", className)}>
-      <div className="container relative mx-auto max-w-[90rem] px-4">
+      <MarketingContainer size="premium" className="relative">
         <div className="cta-premium relative overflow-hidden rounded-3xl px-6 py-10 md:px-10 md:py-14">
           <div
             className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"
@@ -57,7 +58,7 @@ export function CtaBanner({
             )}
           </div>
         </div>
-      </div>
+      </MarketingContainer>
     </section>
   );
 }

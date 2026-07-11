@@ -37,15 +37,16 @@ export default function ContactPage() {
       />
       <PageHero
         eyebrow="Contact"
-        title="Talk to our loan experts"
+        title="Talk to our"
+        titleAccent="loan experts"
         description="Reach out for education loan guidance. We respond within one business day."
       />
 
-      <SectionShell variant="white" padding>
+      <SectionShell variant="white" padding className="page-section-premium" background="grid">
         <div className="grid gap-8 lg:grid-cols-2">
-          <div className="space-y-6">
+          <div className="glass-form-panel space-y-6 rounded-3xl p-6 md:p-8">
             <ContactForm />
-            <div className="rounded-2xl border border-border/60 bg-accent/30 p-5">
+            <div className="rounded-2xl border border-primary/15 bg-primary/5 p-5">
               <h3 className="text-sm font-semibold text-foreground">
                 Prefer a faster loan check?
               </h3>

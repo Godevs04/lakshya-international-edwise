@@ -7,8 +7,10 @@ import { HeroBackground } from "@/components/marketing/sections/hero-background"
 import { LenderLogoCarouselTrack } from "@/components/marketing/sections/lender-logo-carousel-track";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { HeroComposition } from "@/components/marketing/homepage/hero-composition";
-import { HeroTrustBadges } from "@/components/marketing/homepage/hero-trust-badges";
+import { HeroPromiseStrip } from "@/components/marketing/homepage/hero-promise-strip";
+import { AnimatedCounter } from "@/components/marketing/motion/counter";
 import { Reveal, RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
+import { TRUST_METRICS } from "@/lib/constants/marketing/lakshya-value-props";
 
 export function FinanceHero() {
   return (
@@ -33,18 +35,25 @@ export function FinanceHero() {
             </RevealItem>
             <RevealItem>
               <p className="hero-premium-subcopy mt-5">
-                Making global education{" "}
-                <span className="font-semibold text-primary">
-                  affordable, accessible, and achievable
-                </span>{" "}
+                Making global education
+                <span className="hero-value-triad" aria-label="Affordable, Accessible, and Achievable">
+                  {["Affordable", "Accessible", "Achievable"].map((word, index) => (
+                    <span key={word} className="hero-value-word">
+                      {index > 0 && (
+                        <span className="hero-value-join">{index === 2 ? ", and " : ", "}</span>
+                      )}
+                      <span className="hero-value-word-text">{word}</span>
+                    </span>
+                  ))}
+                </span>
                 — with the right education loan from 20+ trusted lending partners.
               </p>
             </RevealItem>
             <RevealItem>
-              <HeroTrustBadges />
+              <HeroPromiseStrip />
             </RevealItem>
             <RevealItem>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-wrap gap-3">
                 <EligibilityCta
                   source="hero"
                   className="btn-premium-primary group px-7 py-3.5 text-base"
@@ -58,15 +67,21 @@ export function FinanceHero() {
               </div>
             </RevealItem>
             <RevealItem>
-              <div className="hero-mini-stats mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {[
-                  { value: "20K+", label: "Students" },
-                  { value: "20+", label: "Lenders" },
-                  { value: "73h", label: "Approval" },
-                  { value: "8.25%", label: "ROI from" },
-                ].map((stat) => (
+              <div className="hero-mini-stats mt-7">
+                {TRUST_METRICS.map((stat) => (
                   <div key={stat.label} className="hero-mini-stat">
-                    <p className="hero-mini-stat-value">{stat.value}</p>
+                    <p className="hero-mini-stat-value">
+                      <AnimatedCounter
+                        value={stat.value}
+                        suffix={stat.suffix}
+                        prefix={stat.prefix}
+                        decimals={stat.decimals}
+                        duration={1800}
+                        variant="scramble"
+                        pulseOnComplete
+                        className="hero-mini-stat-counter"
+                      />
+                    </p>
                     <p className="hero-mini-stat-label">{stat.label}</p>
                   </div>
                 ))}

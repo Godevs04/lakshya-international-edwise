@@ -26,7 +26,7 @@ export function StatsBar() {
                   </div>
                 )}
                 <p className="text-2xl font-bold text-primary md:text-3xl">
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} variant="scramble" />
                 </p>
                 <p className="mt-1 text-sm font-medium text-secondary">{stat.label}</p>
                 {stat.description && (

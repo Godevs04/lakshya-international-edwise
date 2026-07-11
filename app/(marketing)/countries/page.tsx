@@ -22,11 +22,16 @@ export default function CountriesPage() {
     <>
       <PageHero
         eyebrow="Countries"
-        title="Fund your education in every top destination"
+        title="Fund your education"
+        titleAccent="in every top destination"
         description="Compare loan options, visa financial requirements, and typical costs for each country."
+        stats={[
+          { label: "Countries covered", value: MARKETING_COUNTRIES.length },
+          { label: "Students guided", value: 8500, suffix: "+" },
+        ]}
       />
-      <SectionShell variant="muted" padding>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <SectionShell variant="muted" background="map" padding containerClassName="max-w-[90rem]">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {MARKETING_COUNTRIES.map((country) => (
             <CountryCard key={country.slug} country={country} />
           ))}

@@ -39,10 +39,10 @@ export function LendingPartnersExplorer() {
             type="button"
             onClick={() => setFilter(item.value)}
             className={cn(
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "lenders-filter-pill rounded-full px-4 py-2 text-sm font-medium transition-all",
               filter === item.value
-                ? "bg-primary text-white"
-                : "border border-border bg-white text-secondary/80 hover:border-primary/40 hover:text-primary"
+                ? "lenders-filter-pill-active"
+                : "lenders-filter-pill-inactive"
             )}
             aria-pressed={filter === item.value}
           >
@@ -53,12 +53,12 @@ export function LendingPartnersExplorer() {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {lenders.map((lender) => (
-          <div key={lender.slug} className="card-premium flex flex-col p-6">
-            <div className={cn(LENDER_LOGO_TILE_CLASS, "border border-border/60")}>
+          <div key={lender.slug} className="lenders-card-premium card-premium flex flex-col p-6">
+            <div className={cn(LENDER_LOGO_TILE_CLASS, "lenders-logo-tile border border-border/60")}>
               <LenderLogo lender={lender} size={LENDER_LOGO_MARKETING_SIZE} />
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-primary">
+              <span className="lenders-category-chip rounded-full px-2.5 py-1 text-xs font-medium">
                 {LENDER_CATEGORY_LABELS[lender.category]}
               </span>
               {lender.unsecured && (

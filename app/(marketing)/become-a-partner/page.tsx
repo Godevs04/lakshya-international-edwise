@@ -46,16 +46,17 @@ export default function BecomePartnerPage() {
       />
       <PageHero
         eyebrow="Become a Partner"
-        title="Grow with a finance partner who won't compete for your students"
+        title="Grow with a finance partner"
+        titleAccent="who won't compete for your students"
         description="Refer students for education loans and let us handle the funding end-to-end — you focus on admissions."
       />
 
-      <section className="section-padding section-white">
-        <MarketingContainer>
+      <section className="section-padding page-section-premium section-white">
+        <MarketingContainer size="premium">
           <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="space-y-5">
+            <div className="space-y-4">
               {BENEFITS.map(({ icon: Icon, title, description }) => (
-                <div key={title} className="flex gap-4">
+                <div key={title} className="card-premium flex gap-4 p-5">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
@@ -68,7 +69,9 @@ export default function BecomePartnerPage() {
                 </div>
               ))}
             </div>
-            <PartnerLeadForm />
+            <div className="glass-form-panel rounded-3xl p-6 md:p-8">
+              <PartnerLeadForm />
+            </div>
           </div>
         </MarketingContainer>
       </section>

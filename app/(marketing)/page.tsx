@@ -92,59 +92,57 @@ export default function MarketingHomePage() {
         ]}
       />
 
-      <div className="homepage-premium">
-        <HomepageJourneyPath />
-        <FinanceHero />
-        <FinanceServicesGrid />
-        <LoanCalculatorSection />
-        <FinanceProcessHorizontal />
-        <LakshyaRootMap />
+      <HomepageJourneyPath />
+      <FinanceHero />
+      <FinanceServicesGrid />
+      <LoanCalculatorSection />
+      <FinanceProcessHorizontal />
+      <LakshyaRootMap />
 
-        <ValuePropsGrid
-          eyebrow="What Lakshya Accepts"
-          title="Rejected elsewhere? We still say yes."
-          description="Low CIBIL, no co-signer, gap years — we work with lenders who look at the whole picture."
-          items={WHAT_LAKSHYA_ACCEPTS}
-          variant="white"
-          ctaSource="accepts-grid"
-        />
+      <ValuePropsGrid
+        eyebrow="What Lakshya Accepts"
+        title="Rejected elsewhere? We still say yes."
+        description="Low CIBIL, no co-signer, gap years — we work with lenders who look at the whole picture."
+        items={WHAT_LAKSHYA_ACCEPTS}
+        variant="white"
+        ctaSource="accepts-grid"
+      />
 
-        <ValuePropsGrid
-          eyebrow="What Lakshya Gives Back"
-          title="More than a loan — real value for students"
-          description="Lower rates, fee waivers, and end-to-end support that saves you time and money."
-          items={WHAT_LAKSHYA_GIVES_BACK}
-          variant="accent"
-          ctaSource="gives-back-grid"
-        />
+      <ValuePropsGrid
+        eyebrow="What Lakshya Gives Back"
+        title="More than a loan — real value for students"
+        description="Lower rates, fee waivers, and end-to-end support that saves you time and money."
+        items={WHAT_LAKSHYA_GIVES_BACK}
+        variant="accent"
+        ctaSource="gives-back-grid"
+      />
 
-        <SectionShell
-          variant="muted"
-          background="map"
-          journeyNode="countries"
-          eyebrow="Countries"
-          title="Education loans for every top destination"
-          description="Country-specific loan guidance, visa financials, and lender options."
-          containerClassName="max-w-[90rem]"
-        >
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {MARKETING_COUNTRIES.slice(0, 6).map((country) => (
-              <CountryCard key={country.slug} country={country} />
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link href="/countries" className="text-sm font-semibold text-primary hover:underline">
-              Explore all countries
-            </Link>
-          </div>
-        </SectionShell>
+      <SectionShell
+        variant="muted"
+        background="map"
+        journeyNode="countries"
+        eyebrow="Countries"
+        title="Education loans for every top destination"
+        description="Country-specific loan guidance, visa financials, and lender options."
+        containerClassName="max-w-[90rem]"
+      >
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {MARKETING_COUNTRIES.slice(0, 6).map((country) => (
+            <CountryCard key={country.slug} country={country} />
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link href="/countries" className="text-sm font-semibold text-primary hover:underline">
+            Explore all countries
+          </Link>
+        </div>
+      </SectionShell>
 
-        <LendingPartnersPreview />
-        <AboutPreviewSection />
-        <TestimonialsSection />
-        <FaqSection items={MARKETING_FAQS.slice(0, 6)} />
-        <CtaBanner />
-      </div>
+      <LendingPartnersPreview />
+      <AboutPreviewSection />
+      <TestimonialsSection />
+      <FaqSection items={MARKETING_FAQS.slice(0, 6)} />
+      <CtaBanner />
     </>
   );
 }

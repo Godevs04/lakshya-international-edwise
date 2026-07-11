@@ -32,10 +32,11 @@ export default function FaqPage() {
       />
       <PageHero
         eyebrow="FAQ"
-        title="Education loan questions, answered"
+        title="Education loan questions,"
+        titleAccent="answered"
         description="Everything you need to know about eligibility, rates, approvals, and funding your global education."
       />
-      <SectionShell variant="white">
+      <SectionShell variant="white" className="page-section-premium" background="grid">
         <FaqSearch items={MARKETING_FAQS} />
       </SectionShell>
       <CtaBanner source="faq-banner" />

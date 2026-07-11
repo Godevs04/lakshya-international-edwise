@@ -40,7 +40,7 @@ function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
           }}
           placeholder="Search questions..."
           aria-label="Search frequently asked questions"
-          className="lead-form-field h-12 w-full rounded-xl border border-border/80 bg-white pl-11 pr-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary/40"
+          className="lead-form-field glass-form-search h-12 w-full rounded-xl border border-border/80 bg-white pl-11 pr-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary/40"
         />
       </div>
 
@@ -53,7 +53,7 @@ function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
           {filtered.map((item, index) => {
             const open = openIndex === index;
             return (
-              <div key={item.question} className="card-premium overflow-hidden">
+              <div key={item.question} className="glass-faq card-premium overflow-hidden">
                 <button
                   type="button"
                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/30"

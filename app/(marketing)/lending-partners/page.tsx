@@ -42,10 +42,20 @@ export default function LendingPartnersPage() {
       />
       <PageHero
         eyebrow="Lending Partners"
-        title="One application, every top lender compared"
+        title="One application,"
+        titleAccent="every top lender compared"
         description="Government banks for the lowest rates, NBFCs for speed, and international lenders for no-collateral funding — we match you to the best fit."
+        stats={[
+          { label: "Lending partners", value: MARKETING_LENDERS.length, suffix: "+" },
+          { label: "Avg. approval time", value: 73, suffix: " hrs" },
+          { label: "Max loan amount", value: 2, prefix: "₹", suffix: " Cr" },
+        ]}
       />
-      <SectionShell variant="white">
+      <SectionShell variant="white" className="services-section-premium page-section-premium">
+        <div className="services-bento-bg-orbs" aria-hidden>
+          <span className="services-bento-bg-orb services-bento-bg-orb-1" />
+          <span className="services-bento-bg-orb services-bento-bg-orb-2" />
+        </div>
         <LendingPartnersExplorer />
       </SectionShell>
       <CtaBanner source="lending-partners-banner" />

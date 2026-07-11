@@ -41,7 +41,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       />
       <EligibilityModalProvider>
         <MarketingNavbar companyName={contact.companyName} />
-        <main>{children}</main>
+        <main className="marketing-premium">{children}</main>
         <MarketingFooter />
         <FloatingContactBar whatsappLink={whatsappLink} phone={contact.phone} />
         <InactivityEligibilityPrompt />
