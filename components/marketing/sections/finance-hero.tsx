@@ -77,7 +77,7 @@ export function FinanceHero() {
             </RevealItem>
             <RevealItem>
               <p className="prose-marketing mt-6 text-muted-foreground">
-                Making global education affordable, accessible, and achievable — with the
+                Making global education Affordable, Accessible, and Achievable — with the
                 right education loan from 20+ trusted lending partners.
               </p>
             </RevealItem>

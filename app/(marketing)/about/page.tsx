@@ -37,7 +37,7 @@ export default function AboutPage() {
       <PageHero
         eyebrow="About Us"
         title={`${contact.companyName}`}
-        description="Making global education affordable, accessible, and achievable — with transparent loan comparisons and expert guidance at every step."
+        description="Making global education Affordable, Accessible, and Achievable — with transparent loan comparisons and expert guidance at every step."
       />
       <AboutJourneySection />
       <WhyChooseSection />
