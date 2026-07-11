@@ -9,6 +9,8 @@ interface AnimatedCounterProps {
   suffix?: string;
   prefix?: string;
   duration?: number;
+  /** Milliseconds to wait after entering view before counting */
+  delay?: number;
   decimals?: number;
   className?: string;
   pulseOnComplete?: boolean;
@@ -33,6 +35,7 @@ export function AnimatedCounter({
   suffix = "",
   prefix = "",
   duration = 1600,
+  delay = 0,
   decimals = 0,
   className,
   pulseOnComplete = false,
@@ -70,58 +73,79 @@ export function AnimatedCounter({
   useEffect(() => {
     if (!started || prefersReducedMotion) return;
 
-    if (variant === "linear") {
-      let frame = 0;
-      const totalFrames = Math.max(24, Math.round(duration / 16));
-      const timer = window.setInterval(() => {
-        frame += 1;
-        const progress = frame / totalFrames;
-        setCount(value * easeOutCubic(progress));
-        if (frame >= totalFrames) {
+    let cancelled = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    let rafId = 0;
+    let delayTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const runAnimation = () => {
+      if (cancelled) return;
+
+      if (variant === "linear") {
+        let frame = 0;
+        const totalFrames = Math.max(24, Math.round(duration / 16));
+        timer = window.setInterval(() => {
+          if (cancelled) return;
+          frame += 1;
+          const progress = frame / totalFrames;
+          setCount(value * easeOutCubic(progress));
+          if (frame >= totalFrames) {
+            setCount(value);
+            setSettled(true);
+            if (pulseOnComplete) setPulsed(true);
+            window.clearInterval(timer);
+          }
+        }, duration / totalFrames);
+        return;
+      }
+
+      const scrambleEnd = duration * 0.72;
+      const startTime = performance.now();
+
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+
+        if (elapsed < scrambleEnd) {
+          const scrambleProgress = elapsed / scrambleEnd;
+          const trend = value * scrambleProgress * (0.55 + Math.random() * 0.45);
+          const noise = (Math.random() - 0.45) * value * 0.22 * (1 - scrambleProgress * 0.85);
+          const next = Math.max(0, trend + noise);
+          setCount(next);
+          settleFromRef.current = next;
+        } else {
+          const settleProgress = (elapsed - scrambleEnd) / (duration - scrambleEnd);
+          const eased = easeOutCubic(Math.min(settleProgress, 1));
+          const from = settleFromRef.current;
+          setCount(from + (value - from) * eased);
+        }
+
+        if (t < 1) {
+          rafId = requestAnimationFrame(tick);
+        } else {
           setCount(value);
           setSettled(true);
           if (pulseOnComplete) setPulsed(true);
-          window.clearInterval(timer);
         }
-      }, duration / totalFrames);
+      };
 
-      return () => window.clearInterval(timer);
-    }
-
-    const scrambleEnd = duration * 0.72;
-    const startTime = performance.now();
-    let rafId = 0;
-
-    const tick = (now: number) => {
-      const elapsed = now - startTime;
-      const t = Math.min(elapsed / duration, 1);
-
-      if (elapsed < scrambleEnd) {
-        const scrambleProgress = elapsed / scrambleEnd;
-        const trend = value * scrambleProgress * (0.55 + Math.random() * 0.45);
-        const noise = (Math.random() - 0.45) * value * 0.22 * (1 - scrambleProgress * 0.85);
-        const next = Math.max(0, trend + noise);
-        setCount(next);
-        settleFromRef.current = next;
-      } else {
-        const settleProgress = (elapsed - scrambleEnd) / (duration - scrambleEnd);
-        const eased = easeOutCubic(Math.min(settleProgress, 1));
-        const from = settleFromRef.current;
-        setCount(from + (value - from) * eased);
-      }
-
-      if (t < 1) {
-        rafId = requestAnimationFrame(tick);
-      } else {
-        setCount(value);
-        setSettled(true);
-        if (pulseOnComplete) setPulsed(true);
-      }
+      rafId = requestAnimationFrame(tick);
     };
 
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [started, value, duration, prefersReducedMotion, pulseOnComplete, variant]);
+    if (delay > 0) {
+      delayTimer = window.setTimeout(runAnimation, delay);
+    } else {
+      runAnimation();
+    }
+
+    return () => {
+      cancelled = true;
+      if (delayTimer) window.clearTimeout(delayTimer);
+      if (timer) window.clearInterval(timer);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [started, value, duration, delay, prefersReducedMotion, pulseOnComplete, variant]);
 
   return (
     <span

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { LenderLogo, LENDER_LOGO_MARKETING_SIZE, LENDER_LOGO_TILE_CLASS } from "@/components/marketing/lenders/lender-logo";
+import {
+  LenderLogo,
+  LENDER_LOGO_PREVIEW_SIZE,
+  LENDER_LOGO_PREVIEW_TILE_CLASS,
+} from "@/components/marketing/lenders/lender-logo";
 import {
   MARKETING_LENDERS,
   LENDER_CATEGORY_LABELS,
@@ -8,6 +12,12 @@ import {
 } from "@/lib/constants/marketing/lenders";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
+
+function previewGridClass(count: number) {
+  if (count <= 1) return "grid-cols-1";
+  if (count === 3) return "grid-cols-3";
+  return "grid-cols-2";
+}
 
 export function LendingPartnersPreview() {
   return (
@@ -26,7 +36,7 @@ export function LendingPartnersPreview() {
           return (
             <div
               key={category}
-              className="card-premium group p-5 transition-all hover:shadow-lg hover:ring-1 hover:ring-primary/10"
+              className="card-premium lender-preview-category group flex flex-col p-5 transition-all hover:shadow-lg hover:ring-1 hover:ring-primary/10"
             >
               <p className="text-sm font-semibold text-foreground">
                 {LENDER_CATEGORY_LABELS[category]}
@@ -34,20 +44,32 @@ export function LendingPartnersPreview() {
               {sample && (
                 <div className="mt-2 space-y-1 text-[10px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
                   <p>ROI from {sample.roiFrom}%</p>
-                  <p>{sample.processingLabel} · {sample.maxLoanLabel}</p>
+                  <p>
+                    {sample.processingLabel} · {sample.maxLoanLabel}
+                  </p>
                 </div>
               )}
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div
+                className={cn(
+                  "mt-4 grid flex-1 gap-2.5",
+                  previewGridClass(lenders.length)
+                )}
+              >
                 {lenders.map((lender) => (
                   <div
                     key={lender.slug}
                     className={cn(
-                      LENDER_LOGO_TILE_CLASS,
-                      "border border-border/60 transition-transform group-hover:scale-[1.02]"
+                      LENDER_LOGO_PREVIEW_TILE_CLASS,
+                      `lender-preview-logo-tile-${lender.slug}`,
+                      "transition-transform group-hover:scale-[1.02]"
                     )}
                     title={lender.name}
                   >
-                    <LenderLogo lender={lender} size={LENDER_LOGO_MARKETING_SIZE} />
+                    <LenderLogo
+                      lender={lender}
+                      size={LENDER_LOGO_PREVIEW_SIZE}
+                      fitTile
+                    />
                   </div>
                 ))}
               </div>

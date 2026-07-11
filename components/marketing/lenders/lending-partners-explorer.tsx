@@ -1,99 +1,99 @@
 "use client";
 
-import { useState } from "react";
-import { LenderLogo, LENDER_LOGO_MARKETING_SIZE, LENDER_LOGO_TILE_CLASS } from "@/components/marketing/lenders/lender-logo";
-import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
-import {
-  MARKETING_LENDERS,
-  LENDER_CATEGORY_LABELS,
-  LENDER_CATEGORY_ORDER,
-} from "@/lib/constants/marketing/lenders";
-import type { LenderCategory } from "@/types/marketing";
-import { cn } from "@/lib/utils";
-import { TrendingUp, Wallet, Clock } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { MARKETING_LENDERS } from "@/lib/constants/marketing/lenders";
+import { LendingPartnersFilter, type LenderFilter } from "@/components/marketing/lenders/lending-partners-filter";
+import { LenderPartnerCard } from "@/components/marketing/lenders/lender-partner-card";
+import { LendingPartnersEmptyState } from "@/components/marketing/lenders/lending-partners-empty-state";
+import { LenderCompareBar } from "@/components/marketing/lenders/lender-compare-bar";
+import { LenderCompareDrawer } from "@/components/marketing/lenders/lender-compare-drawer";
 
-type Filter = "all" | LenderCategory;
+const MAX_COMPARE = 3;
 
 export function LendingPartnersExplorer() {
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<LenderFilter>("all");
+  const [compareSlugs, setCompareSlugs] = useState<string[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const lenders =
-    filter === "all"
-      ? MARKETING_LENDERS
-      : MARKETING_LENDERS.filter((l) => l.category === filter);
+  const lenders = useMemo(
+    () =>
+      filter === "all"
+        ? MARKETING_LENDERS
+        : MARKETING_LENDERS.filter((l) => l.category === filter),
+    [filter]
+  );
 
-  const filters: { value: Filter; label: string }[] = [
-    { value: "all", label: "All Lenders" },
-    ...LENDER_CATEGORY_ORDER.map((category) => ({
-      value: category,
-      label: LENDER_CATEGORY_LABELS[category],
-    })),
-  ];
+  const compareLenders = useMemo(
+    () =>
+      compareSlugs
+        .map((slug) => MARKETING_LENDERS.find((l) => l.slug === slug))
+        .filter(Boolean) as typeof MARKETING_LENDERS,
+    [compareSlugs]
+  );
+
+  const toggleCompare = useCallback((slug: string) => {
+    setCompareSlugs((prev) => {
+      if (prev.includes(slug)) return prev.filter((s) => s !== slug);
+      if (prev.length >= MAX_COMPARE) return prev;
+      return [...prev, slug];
+    });
+  }, []);
+
+  const removeCompare = useCallback((slug: string) => {
+    setCompareSlugs((prev) => prev.filter((s) => s !== slug));
+  }, []);
+
+  const clearCompare = useCallback(() => {
+    setCompareSlugs([]);
+    setDrawerOpen(false);
+  }, []);
 
   return (
-    <div>
-      <div className="mb-8 flex flex-wrap justify-center gap-2">
-        {filters.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => setFilter(item.value)}
-            className={cn(
-              "lenders-filter-pill rounded-full px-4 py-2 text-sm font-medium transition-all",
-              filter === item.value
-                ? "lenders-filter-pill-active"
-                : "lenders-filter-pill-inactive"
-            )}
-            aria-pressed={filter === item.value}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+    <div id="lender-marketplace" className="lender-marketplace">
+      <LendingPartnersFilter value={filter} onChange={setFilter} />
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {lenders.map((lender) => (
-          <div key={lender.slug} className="lenders-card-premium card-premium flex flex-col p-6">
-            <div className={cn(LENDER_LOGO_TILE_CLASS, "lenders-logo-tile border border-border/60")}>
-              <LenderLogo lender={lender} size={LENDER_LOGO_MARKETING_SIZE} />
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="lenders-category-chip rounded-full px-2.5 py-1 text-xs font-medium">
-                {LENDER_CATEGORY_LABELS[lender.category]}
-              </span>
-              {lender.unsecured && (
-                <span className="rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
-                  No collateral
-                </span>
-              )}
-            </div>
-            <dl className="mt-5 space-y-2.5 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <dt className="sr-only">Interest from</dt>
-                <dd>ROI from {lender.roiFrom}%</dd>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Wallet className="h-4 w-4 text-primary" />
-                <dt className="sr-only">Max loan</dt>
-                <dd>{lender.maxLoanLabel}</dd>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Clock className="h-4 w-4 text-primary" />
-                <dt className="sr-only">Processing time</dt>
-                <dd>{lender.processingLabel}</dd>
-              </div>
-            </dl>
-            <EligibilityCta
-              source={`lending-partners-${lender.slug}`}
-              preferredLender={lender.name}
-              className="mt-6 w-full py-2.5 text-sm"
-            >
-              Apply through this lender
-            </EligibilityCta>
-          </div>
-        ))}
-      </div>
+      <div className="lender-section-divider" aria-hidden />
+
+      {lenders.length === 0 ? (
+        <LendingPartnersEmptyState />
+      ) : (
+        <div
+          className="lender-marketplace-grid"
+          role="tabpanel"
+          aria-label={
+            filter === "all"
+              ? "All lending partners"
+              : `Lending partners filtered by ${filter}`
+          }
+        >
+          {lenders.map((lender, index) => (
+            <LenderPartnerCard
+              key={lender.slug}
+              lender={lender}
+              index={index}
+              isCompareSelected={compareSlugs.includes(lender.slug)}
+              compareDisabled={
+                compareSlugs.length >= MAX_COMPARE && !compareSlugs.includes(lender.slug)
+              }
+              onToggleCompare={() => toggleCompare(lender.slug)}
+            />
+          ))}
+        </div>
+      )}
+
+      <LenderCompareBar
+        lenders={compareLenders}
+        maxCount={MAX_COMPARE}
+        onRemove={removeCompare}
+        onClear={clearCompare}
+        onCompare={() => setDrawerOpen(true)}
+      />
+
+      <LenderCompareDrawer
+        lenders={compareLenders}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </div>
   );
 }
