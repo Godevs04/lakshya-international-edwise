@@ -1,4 +1,5 @@
 import compareBarsAnimation from "@/public/lottie/compare-bars.json";
+import businessAnalysisAnimation from "@/public/lottie/Business Analysis.json";
 import contactUsAnimation from "@/public/lottie/Contact_us.json";
 import globeOrbitAnimation from "@/public/lottie/globe-orbit.json";
 import partnerHandshakeAnimation from "@/public/lottie/Stickman and woman handshake.json";
@@ -17,7 +18,8 @@ export type MarketingLottiePreset =
   | "live-pulse"
   | "live-chatbot"
   | "contact-us"
-  | "partner-handshake";
+  | "partner-handshake"
+  | "business-analysis";
 
 export type MarketingLottieAnimation = object;
 
@@ -34,6 +36,7 @@ export const MARKETING_LOTTIE_PRESETS: Record<
   "live-chatbot": liveChatbotAnimation,
   "contact-us": contactUsAnimation,
   "partner-handshake": partnerHandshakeAnimation,
+  "business-analysis": businessAnalysisAnimation,
 };
 
 export interface MarketingLottiePlayerProps {

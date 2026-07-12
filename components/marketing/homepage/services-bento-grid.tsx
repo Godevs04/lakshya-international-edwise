@@ -11,6 +11,7 @@ import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 import { ServicesFeaturedPanel } from "@/components/marketing/homepage/services-featured-panel";
 import { ServiceCardAccent } from "@/components/marketing/homepage/service-card-accent";
 import { ServiceCardPreview } from "@/components/marketing/homepage/service-card-preview";
+import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const HOVER_TRANSITION = { duration: 0.28, ease: EASE } as const;
@@ -116,6 +117,28 @@ function FeaturedServiceCard({ service, index }: { service: MarketingService; in
                 ))}
               </ul>
             )}
+
+            <motion.div
+              className="services-bento-analysis-visual"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 12, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.34, ease: EASE }}
+            >
+              <span className="services-bento-analysis-glow" aria-hidden />
+              <MarketingLottie
+                preset="business-analysis"
+                loop
+                reveal={false}
+                className="services-bento-analysis-lottie"
+                stageClassName="services-bento-analysis-stage"
+                playerClassName="services-bento-analysis-player"
+              />
+              <div className="services-bento-analysis-label" aria-hidden>
+                <span className="services-bento-analysis-dot" />
+                Smart loan analysis
+              </div>
+            </motion.div>
 
             <div className="services-bento-featured-actions">
               <EligibilityCta
