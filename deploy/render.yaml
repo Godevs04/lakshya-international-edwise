@@ -49,3 +49,17 @@ services:
         sync: false
       - key: ALLOW_PUBLIC_REGISTRATION
         value: "false"
+      - key: NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
+        sync: false
+      - key: NEXT_PUBLIC_POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: POSTHOG_PERSONAL_API_KEY
+        sync: false
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: POSTHOG_ENV_ID
+        sync: false
+      - key: POSTHOG_PROJECT_ID
+        value: "508776"
+      - key: POSTHOG_HOST
+        value: https://us.posthog.com

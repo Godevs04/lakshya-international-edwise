@@ -1,5 +1,6 @@
 "use server";
 
+import { captureServerPostHogEvent } from "@/lib/posthog-server";
 import { revalidatePath } from "next/cache";
 import { revalidateInsightCaches } from "@/lib/cache/revalidate";
 import { connectDB } from "@/lib/db/mongoose";
@@ -548,6 +549,14 @@ export async function createStudentAction(
     userName: user?.name,
   });
 
+  await captureServerPostHogEvent("student_created", user?.id ?? "anonymous", {
+    student_id: studentId,
+    target_country: data.targetCountry,
+    loan_requested: data.loanRequested,
+    has_partner: !!data.partnerId,
+    application_status: data.applicationStatus ?? "docs_pending",
+  });
+
   revalidatePath("/dashboard/students");
   revalidatePath("/dashboard/overview");
   revalidateInsightCaches();
@@ -711,6 +720,11 @@ export async function createLeadAction(
       resourceId: student._id.toString(),
       userId: user?.id,
       userName: user?.name,
+    });
+
+    await captureServerPostHogEvent("admission_lead_created", user?.id ?? "anonymous", {
+      student_id: studentId,
+      target_country: data.targetCountry,
     });
 
     revalidatePath("/dashboard/admissions");
@@ -1317,6 +1331,11 @@ export async function markStudentSentToBankAction(
       userName: user?.name,
     });
 
+    await captureServerPostHogEvent("student_sent_to_bank", user?.id ?? "anonymous", {
+      student_id: student.studentId,
+      sent_to_bank_at: result.sentToBankAt.toISOString(),
+    });
+
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
     return {
@@ -1487,6 +1506,12 @@ export async function updateLoanApplicationStatusAction(
       metadata: { applicationId, applicationStatus },
     });
 
+    await captureServerPostHogEvent("loan_application_status_updated", user?.id ?? "anonymous", {
+      student_id: student.studentId,
+      application_status: applicationStatus,
+      application_status_label: getApplicationStatusLabel(applicationStatus),
+    });
+
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);
     return { success: true };
@@ -1595,6 +1620,15 @@ export async function updateStudentLoanDetailsAction(
         loanDisbursed: parsed.data.loanDisbursed,
       },
     });
+
+    if (parsed.data.loanDisbursed && parsed.data.loanDisbursed > 0) {
+      await captureServerPostHogEvent("loan_disbursed", user?.id ?? "anonymous", {
+        student_id: student.studentId,
+        loan_disbursed: parsed.data.loanDisbursed,
+        loan_sanctioned: parsed.data.loanSanctioned,
+        loan_currency: parsed.data.loanCurrency,
+      });
+    }
 
     revalidatePath("/dashboard/students");
     revalidatePath(`/dashboard/students/${studentId}`);

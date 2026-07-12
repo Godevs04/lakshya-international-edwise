@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import posthog from "posthog-js";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
@@ -140,6 +141,7 @@ export function EligibilityModal({
   function goToStep2() {
     setError(null);
     setStep(2);
+    posthog.capture("eligibility_check_started", { source: source ?? "eligibility-modal" });
   }
 
   function onFinalSubmit(values: Step2Values) {
@@ -163,6 +165,11 @@ export function EligibilityModal({
     startTransition(async () => {
       const result = await submitWebsiteEnquiryAction(formData);
       if (result.success) {
+        posthog.capture("eligibility_check_completed", {
+          destination: values.destination || values.targetCountry,
+          current_status: values.currentStatus,
+          source: source ?? "eligibility-modal",
+        });
         setSubmitted(true);
       } else {
         setError(result.error ?? "Unable to submit. Please try again.");

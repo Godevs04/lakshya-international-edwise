@@ -1,10 +1,17 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
 import {
   getSentryOrg,
   getSentryProject,
   isSentryBuildConfigured,
 } from "@/lib/config/sentry-env";
+import {
+  getPostHogAppHost,
+  getPostHogEnvId,
+  getPostHogPersonalApiKey,
+  isPostHogSourceMapsConfigured,
+} from "@/lib/config/posthog-env";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -14,7 +21,7 @@ const cspValue = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data: blob:",
-  "connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io",
+  "connect-src 'self' https://api.cloudinary.com https://*.ingest.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "frame-ancestors 'self'",
@@ -52,6 +59,23 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/array/:path*",
+        destination: "https://us-assets.i.posthog.com/array/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
+  skipTrailingSlashRedirect: true,
   async redirects() {
     return [
       { source: "/education-loans", destination: "/services/education-loan", permanent: true },
@@ -72,8 +96,23 @@ const nextConfig: NextConfig = {
 const sentryOrg = getSentryOrg();
 const sentryProject = getSentryProject();
 
-const config = isSentryBuildConfigured()
-  ? withSentryConfig(nextConfig, {
+let config: NextConfig = nextConfig;
+
+if (isPostHogSourceMapsConfigured()) {
+  config = withPostHogConfig(config, {
+    personalApiKey: getPostHogPersonalApiKey()!,
+    envId: getPostHogEnvId()!,
+    host: getPostHogAppHost(),
+    sourcemaps: {
+      enabled: isProduction,
+      project: "lakshya-international-edwise",
+      deleteAfterUpload: true,
+    },
+  });
+}
+
+const exportedConfig = isSentryBuildConfigured()
+  ? withSentryConfig(config, {
       org: sentryOrg!,
       project: sentryProject!,
       silent: !process.env.CI,
@@ -88,6 +127,6 @@ const config = isSentryBuildConfigured()
         },
       },
     })
-  : nextConfig;
+  : config;
 
-export default config;
+export default exportedConfig;

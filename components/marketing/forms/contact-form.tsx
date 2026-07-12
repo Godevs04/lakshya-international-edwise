@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -61,6 +62,9 @@ export function ContactForm({ embedded = false }: ContactFormProps) {
     startTransition(async () => {
       const result = await submitWebsiteEnquiryAction(formData);
       if (result.success) {
+        posthog.capture("contact_form_submitted", {
+          subject: values.subject,
+        });
         setSubmitted(true);
         form.reset();
       } else {
