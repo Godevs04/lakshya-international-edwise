@@ -19,6 +19,7 @@ import {
   MARKETING_LENDERS,
 } from "@/lib/constants/marketing/lenders";
 import { RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
+import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 import { cn } from "@/lib/utils";
 
@@ -134,8 +135,19 @@ export function LendingPartnersHero() {
                 })}
           >
             <div className="lp-hero-dashboard-shell">
+              <MarketingLottie
+                preset="compare-bars"
+                variant="inline"
+                className="lp-hero-dashboard-lottie-accent"
+                playerClassName="lp-hero-dashboard-lottie-player"
+              />
               <div className="lp-hero-dashboard-header">
-                <span className="lp-hero-live-dot" aria-hidden />
+                <MarketingLottie
+                  preset="live-pulse"
+                  variant="inline"
+                  className="lp-hero-live-lottie"
+                  playerClassName="lp-hero-live-lottie-player"
+                />
                 <span className="text-xs font-semibold text-white/90">Live comparison</span>
                 <BadgeCheck className="ml-auto h-4 w-4 text-sky-300" aria-hidden />
               </div>

@@ -3,6 +3,7 @@ import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { ContactForm } from "@/components/marketing/forms/contact-form";
+import { ContactUsLottiePanel } from "@/components/marketing/sections/contact-us-lottie-panel";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { OfficeLocationShowcase } from "@/components/marketing/maps/office-location-showcase";
 import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
@@ -43,7 +44,7 @@ export default function ContactPage() {
       />
 
       <SectionShell variant="white" padding className="page-section-premium" background="grid">
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="contact-page-layout grid gap-8 lg:grid-cols-2">
           <div className="glass-form-panel space-y-6 rounded-3xl p-6 md:p-8">
             <ContactForm />
             <div className="rounded-2xl border border-primary/15 bg-primary/5 p-5">
@@ -56,7 +57,8 @@ export default function ContactPage() {
               <EligibilityCta source="contact-page" className="mt-4 px-6 py-2.5 text-sm" />
             </div>
           </div>
-          <div className="space-y-4">
+          <div className="contact-page-aside space-y-4">
+            <ContactUsLottiePanel />
             <div className="card-premium p-6">
               <h2 className="text-lg font-semibold text-foreground">Office contact</h2>
               <ul className="mt-4 space-y-3 text-sm text-muted-foreground">

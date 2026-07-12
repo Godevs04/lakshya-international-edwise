@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/marketing/sections/section-heading"
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { getWhatsAppLink } from "@/lib/config/marketing";
 import { MessageCircle } from "lucide-react";
+import { CtaBannerLottieAccent } from "@/components/marketing/sections/cta-banner-lottie-accent";
 
 interface CtaBannerProps {
   title?: string;
@@ -29,6 +30,7 @@ export function CtaBanner({
     <section data-journey-node="cta" className={cn("section-padding section-relative", className)}>
       <MarketingContainer size="premium" className="relative">
         <div className="cta-premium relative overflow-hidden rounded-3xl px-6 py-10 md:px-10 md:py-14">
+          <CtaBannerLottieAccent />
           <div
             className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"
             aria-hidden

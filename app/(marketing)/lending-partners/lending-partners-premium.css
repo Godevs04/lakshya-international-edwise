@@ -145,6 +145,8 @@
 }
 
 .marketing-site .lp-hero-dashboard-header {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -159,12 +161,40 @@
   animation: lp-pulse-dot 2s ease-in-out infinite;
 }
 
+.marketing-site .lp-hero-live-lottie {
+  flex-shrink: 0;
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.marketing-site .lp-hero-live-lottie-player {
+  width: 100%;
+  height: 100%;
+}
+
+.marketing-site .lp-hero-dashboard-lottie-accent {
+  pointer-events: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 0;
+  width: 5.5rem;
+  opacity: 0.22;
+}
+
+.marketing-site .lp-hero-dashboard-lottie-player {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
 @keyframes lp-pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
 
 .marketing-site .lp-hero-dashboard-grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   gap: 0.75rem;
   grid-template-columns: 1fr 1fr;
@@ -920,16 +950,27 @@
   box-shadow: var(--lp-shadow);
 }
 
-.marketing-site .lender-empty-icon-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 5rem;
-  height: 5rem;
+.marketing-site .lender-empty-lottie-panel {
+  width: min(12rem, 70vw);
+  padding: 1rem 1.25rem 0.75rem;
   border-radius: 1.25rem;
-  background: rgba(11, 143, 216, 0.08);
-  border: 1px solid rgba(11, 143, 216, 0.15);
+  border: 1px solid rgba(11, 143, 216, 0.12);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(236, 246, 255, 0.85) 100%
+  );
+  box-shadow: 0 8px 24px rgba(11, 30, 72, 0.06);
+}
+
+.marketing-site .lender-empty-lottie-stage {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.marketing-site .lender-empty-lottie-player {
+  width: 100%;
+  height: 100%;
 }
 
 /* Reduced motion */

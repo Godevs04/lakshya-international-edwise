@@ -26,6 +26,7 @@ export function PageHero({
   stats,
   primaryCta,
   secondaryCta,
+  decorativeLottie,
   children,
 }: PageHeroProps) {
   if (variant === "premium") {
@@ -41,6 +42,7 @@ export function PageHero({
         stats={stats}
         primaryCta={primaryCta}
         secondaryCta={secondaryCta}
+        decorativeLottie={decorativeLottie}
       >
         {children}
       </PageHeroPremium>

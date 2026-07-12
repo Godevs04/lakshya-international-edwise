@@ -29,6 +29,7 @@ export default function CountriesPage() {
           { label: "Countries covered", value: MARKETING_COUNTRIES.length },
           { label: "Students guided", value: 8500, suffix: "+" },
         ]}
+        decorativeLottie="globe-orbit"
       />
       <SectionShell variant="muted" background="map" padding containerClassName="max-w-[90rem]">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

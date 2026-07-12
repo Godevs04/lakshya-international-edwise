@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
 import { RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
+import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
+import type { MarketingLottiePreset } from "@/lib/constants/marketing/lottie-presets";
 
 export interface PageHeroStat {
   label: string;
@@ -24,6 +26,7 @@ export interface PageHeroPremiumProps {
   stats?: PageHeroStat[];
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
+  decorativeLottie?: MarketingLottiePreset;
   children?: React.ReactNode;
 }
 
@@ -38,6 +41,7 @@ export function PageHeroPremium({
   stats,
   primaryCta,
   secondaryCta,
+  decorativeLottie,
   children,
 }: PageHeroPremiumProps) {
   const centered = align === "center";
@@ -53,6 +57,15 @@ export function PageHeroPremium({
         <span className="page-hero-premium-orb page-hero-premium-orb-1" />
         <span className="page-hero-premium-orb page-hero-premium-orb-2" />
       </div>
+
+      {decorativeLottie ? (
+        <MarketingLottie
+          preset={decorativeLottie}
+          variant="inline"
+          className="page-hero-premium-lottie"
+          playerClassName="page-hero-premium-lottie-player"
+        />
+      ) : null}
 
       <MarketingContainer size="premium" className="relative z-10">
         <RevealStagger className={cn("max-w-3xl", centered && "mx-auto text-center")}>

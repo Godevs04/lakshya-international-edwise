@@ -23,6 +23,7 @@ export default function ServicesPage() {
         title="Everything you need"
         titleAccent="to fund your education abroad"
         description="One finance partner for loans, forex, blocked accounts, and more — with a single Check Eligibility form."
+        decorativeLottie="globe-orbit"
       />
       <PremiumServicesSection showHeading={false} />
       <CtaBanner />

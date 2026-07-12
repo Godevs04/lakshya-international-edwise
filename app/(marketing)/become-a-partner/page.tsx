@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { PartnerLeadForm } from "@/components/marketing/forms/partner-lead-form";
+import { PartnerHandshakePanel } from "@/components/marketing/sections/partner-handshake-panel";
 import { JsonLd, breadcrumbJsonLd } from "@/components/marketing/seo/json-ld";
 import { getMarketingContact } from "@/lib/config/marketing";
 import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
@@ -53,8 +54,9 @@ export default function BecomePartnerPage() {
 
       <section className="section-padding page-section-premium section-white">
         <MarketingContainer size="premium">
-          <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="space-y-4">
+          <div className="partner-page-layout grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="partner-page-aside space-y-4">
+              <PartnerHandshakePanel />
               {BENEFITS.map(({ icon: Icon, title, description }) => (
                 <div key={title} className="card-premium flex gap-4 p-5">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
