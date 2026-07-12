@@ -158,16 +158,6 @@ const RAW_LENDERS: MarketingLender[] = [
     accent: "#486aae",
   },
   {
-    name: "Fintifi",
-    slug: "fintifi",
-    category: "nbfc",
-    roiFrom: 11.25,
-    maxLoanLabel: "Up to ₹65 L",
-    processingLabel: "4-7 days",
-    unsecured: true,
-    accent: "#0ea5e9",
-  },
-  {
     name: "Prodigy Finance",
     slug: "prodigy-finance",
     category: "international",
@@ -196,16 +186,6 @@ const RAW_LENDERS: MarketingLender[] = [
     processingLabel: "5-8 days",
     unsecured: true,
     accent: "#00a651",
-  },
-  {
-    name: "Leap Finance",
-    slug: "leap-finance",
-    category: "international",
-    roiFrom: 11.0,
-    maxLoanLabel: "Up to $80K",
-    processingLabel: "5-8 days",
-    unsecured: true,
-    accent: "#7c3aed",
   },
 ];
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import posthog from "posthog-js";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { z } from "zod";
@@ -99,6 +100,10 @@ export function PartnerLeadForm() {
     startTransition(async () => {
       const result = await submitPartnerEnquiryAction(formData);
       if (result.success) {
+        posthog.capture("partner_lead_submitted", {
+          city: values.city,
+          is_owner: values.isOwner === "yes",
+        });
         setSubmitted(true);
         form.reset();
       } else {

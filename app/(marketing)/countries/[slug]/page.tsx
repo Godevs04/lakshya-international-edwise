@@ -81,7 +81,7 @@ export default async function CountryDetailPage({
       />
       <CountryHero country={country} slug={slug} />
 
-      <SectionShell variant="muted" padding>
+      <SectionShell variant="muted" padding className="page-section-premium" background="grid">
         <div className="grid gap-6 md:grid-cols-2">
           <InfoBlock title="Why fund with Lakshya" items={country.benefits} />
           <InfoBlock

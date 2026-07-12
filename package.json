@@ -47,6 +47,8 @@
     "next-mdx-remote": "^6.0.0",
     "next-themes": "^0.4.6",
     "nodemailer": "^7.0.13",
+    "posthog-js": "^1.399.2",
+    "posthog-node": "^5.21.2",
     "rate-limiter-flexible": "^11.2.0",
     "react": "19.2.4",
     "react-day-picker": "^10.0.1",
@@ -63,6 +65,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@posthog/nextjs-config": "^1.7.6",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",

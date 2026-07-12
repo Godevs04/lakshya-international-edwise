@@ -1,0 +1,1324 @@
+/* Lending Partners — premium fintech marketplace UI */
+
+.lending-partners-page {
+  --lp-navy: #0b1e48;
+  --lp-sea: #0b8fd8;
+  --lp-sky: #4fc3f7;
+  --lp-radius-card: 24px;
+  --lp-card-max-h: 440px;
+  --lp-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(11, 143, 216, 0.07);
+  --lp-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.07), 0 20px 48px rgba(11, 143, 216, 0.12);
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────── */
+
+.marketing-site .lending-partners-hero {
+  position: relative;
+  padding: 2.75rem 0 3rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(11, 143, 216, 0.07), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 95% 20%, rgba(79, 195, 247, 0.06), transparent 50%),
+    linear-gradient(180deg, #f4f9ff 0%, #f8fbff 45%, #fafcff 100%);
+}
+
+@media (min-width: 768px) {
+  .marketing-site .lending-partners-hero {
+    padding: 3.25rem 0 3.5rem;
+  }
+}
+
+.marketing-site .lending-partners-hero-bg {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.marketing-site .lending-partners-hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(11, 143, 216, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 143, 216, 0.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(180deg, black 0%, transparent 88%);
+  opacity: 0.45;
+}
+
+.marketing-site .lp-hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+}
+
+.marketing-site .lp-hero-orb-1 {
+  top: -8%;
+  right: 12%;
+  width: 22rem;
+  height: 22rem;
+  background: rgba(11, 143, 216, 0.14);
+}
+
+.marketing-site .lp-hero-orb-2 {
+  bottom: 0;
+  left: -6%;
+  width: 18rem;
+  height: 18rem;
+  background: rgba(11, 30, 72, 0.08);
+}
+
+.marketing-site .lp-hero-orb-3 {
+  top: 40%;
+  left: 45%;
+  width: 12rem;
+  height: 12rem;
+  background: rgba(79, 195, 247, 0.1);
+}
+
+.marketing-site .lp-hero-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(11, 143, 216, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.35;
+  mask-image: linear-gradient(180deg, black 0%, transparent 70%);
+}
+
+.marketing-site .lp-trust-badge {
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.875rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 12px rgba(11, 30, 72, 0.04);
+  backdrop-filter: blur(10px);
+}
+
+.marketing-site .lp-trust-badge-icon {
+  background: rgba(11, 143, 216, 0.08);
+}
+
+.marketing-site .lp-hero-primary-cta {
+  background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 50%, #0ea5e9 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(11, 143, 216, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.marketing-site .lp-hero-primary-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(11, 143, 216, 0.42);
+}
+
+.marketing-site .lp-hero-secondary-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(11, 143, 216, 0.25);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--lp-navy);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.marketing-site .lp-hero-secondary-cta:hover {
+  border-color: rgba(11, 143, 216, 0.45);
+  box-shadow: 0 4px 16px rgba(11, 143, 216, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Hero dashboard */
+.marketing-site .lp-hero-dashboard-shell {
+  position: relative;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgba(11, 30, 72, 0.94) 0%, rgba(15, 37, 87, 0.92) 45%, rgba(11, 143, 216, 0.88) 100%);
+  box-shadow:
+    0 24px 64px rgba(11, 30, 72, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.marketing-site .lp-hero-dashboard-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.marketing-site .lp-hero-live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  animation: lp-pulse-dot 2s ease-in-out infinite;
+}
+
+.marketing-site .lp-hero-live-lottie {
+  flex-shrink: 0;
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.marketing-site .lp-hero-live-lottie-player {
+  width: 100%;
+  height: 100%;
+}
+
+.marketing-site .lp-hero-dashboard-lottie-accent {
+  pointer-events: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 0;
+  width: 5.5rem;
+  opacity: 0.22;
+}
+
+.marketing-site .lp-hero-dashboard-lottie-player {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+@keyframes lp-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.marketing-site .lp-hero-dashboard-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.marketing-site .lp-hero-glass-card {
+  padding: 0.875rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.marketing-site .lp-hero-glass-card-wide {
+  grid-column: 1 / -1;
+}
+
+.marketing-site .lp-hero-glass-card-rates {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: stretch;
+}
+
+.marketing-site .lp-hero-glass-card-logos {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+}
+
+@media (max-width: 639px) {
+  .marketing-site .lp-hero-glass-card-rates,
+  .marketing-site .lp-hero-glass-card-logos {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+.marketing-site .lp-hero-progress-track,
+.marketing-site .lp-hero-rate-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.marketing-site .lp-hero-progress-fill {
+  background: linear-gradient(90deg, #4fc3f7, #0b8fd8);
+}
+
+.marketing-site .lp-hero-rate-fill {
+  transform-origin: left center;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+}
+
+/* Matched lenders — uniform tiles, crisp logos */
+.marketing-site .lp-hero-logo-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-content: start;
+}
+
+.marketing-site .lp-hero-logo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 3.25rem;
+  padding: 0.375rem 0.5rem;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 2px 8px rgba(11, 30, 72, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* Default — fill tile height like marketplace cards */
+.marketing-site .lp-hero-logo-tile .lender-card-logo-img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-height: 2.375rem;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.marketing-site .lp-hero-logo-tile-sbi .lender-card-logo-img {
+  max-height: 2.375rem;
+  max-width: 76%;
+}
+
+.marketing-site .lp-hero-logo-tile-credila .lender-card-logo-img {
+  max-height: 1.75rem;
+  max-width: 98%;
+}
+
+/* ICICI — square PNG; crop to the red orb mark */
+.marketing-site .lp-hero-logo-tile-icici-bank .lender-card-logo-img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  max-width: none;
+  object-fit: cover;
+  object-position: 16% 50%;
+}
+
+/* Prodigy — light mark; fill the tile for legibility */
+.marketing-site .lp-hero-logo-tile-prodigy-finance {
+  background: #f8fbff;
+}
+
+.marketing-site .lp-hero-logo-tile-prodigy-finance .lender-card-logo-img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  max-width: none;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.15);
+}
+
+.marketing-site .lp-hero-logo-tile-axis-bank .lender-card-logo-img {
+  max-height: 2rem;
+  max-width: 94%;
+}
+
+.marketing-site .lp-hero-logo-tile-mpower .lender-card-logo-img {
+  max-height: 2rem;
+  max-width: 92%;
+}
+
+.marketing-site .lp-hero-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  filter: blur(1px);
+  animation: lp-float-particle 8s ease-in-out infinite;
+}
+
+.marketing-site .lp-hero-particle-1 {
+  top: 12%;
+  right: 8%;
+  width: 6px;
+  height: 6px;
+}
+
+.marketing-site .lp-hero-particle-2 {
+  bottom: 20%;
+  left: 6%;
+  width: 4px;
+  height: 4px;
+  animation-delay: 2s;
+}
+
+.marketing-site .lp-hero-particle-3 {
+  top: 55%;
+  right: 18%;
+  width: 5px;
+  height: 5px;
+  animation-delay: 4s;
+}
+
+@keyframes lp-float-particle {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-8px); opacity: 0.8; }
+}
+
+/* ── Marketplace section ──────────────────────────────────────────── */
+
+.marketing-site .lender-marketplace-section {
+  position: relative;
+}
+
+.marketing-site .lender-filter-sticky {
+  position: relative;
+  z-index: 1;
+  padding: 0 0 1.5rem;
+  margin: 0;
+  background: transparent;
+}
+
+.marketing-site .lender-section-divider {
+  height: 1px;
+  margin: 0 0 1.75rem;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(11, 143, 216, 0.2) 20%,
+    rgba(11, 143, 216, 0.35) 50%,
+    rgba(11, 143, 216, 0.2) 80%,
+    transparent 100%
+  );
+}
+
+.marketing-site .lender-segmented-control {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 24px rgba(11, 30, 72, 0.06);
+  backdrop-filter: blur(16px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.marketing-site .lender-segmented-control::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .marketing-site .lender-segmented-control {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    border-radius: 9999px;
+  }
+}
+
+.marketing-site .lender-segmented-tab {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: fit-content;
+  padding: 0.625rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(11, 30, 72, 0.65);
+  transition: color 0.3s ease;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .marketing-site .lender-segmented-tab {
+    flex: 1 1 auto;
+    padding: 0.625rem 1.125rem;
+  }
+}
+
+.marketing-site .lender-segmented-tab:hover {
+  color: var(--lp-sea);
+}
+
+.marketing-site .lender-segmented-tab-active {
+  color: #fff;
+}
+
+.marketing-site .lender-segmented-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #0b8fd8 0%, #0ea5e9 100%);
+  box-shadow: 0 4px 16px rgba(11, 143, 216, 0.35);
+}
+
+.marketing-site .lender-segmented-tab-active:hover {
+  color: #fff;
+}
+
+/* ── Lender grid ──────────────────────────────────────────────────── */
+
+.marketing-site .lender-marketplace-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-site .lender-marketplace-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.125rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .marketing-site .lender-marketplace-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.125rem;
+  }
+}
+
+/* ── Lender card ──────────────────────────────────────────────────── */
+
+.marketing-site .lender-marketplace-card {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  border-radius: var(--lp-radius-card);
+  transition: box-shadow 0.3s ease;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.marketing-site .lender-marketplace-card-selected .lender-marketplace-card-inner {
+  border-color: rgba(11, 143, 216, 0.45);
+  box-shadow:
+    0 0 0 2px rgba(11, 143, 216, 0.15),
+    var(--lp-shadow);
+}
+
+.marketing-site .lender-marketplace-card-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 22rem;
+  padding: 0.875rem 0.875rem 0.75rem;
+  border-radius: var(--lp-radius-card);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(248, 251, 255, 0.94) 100%
+  );
+  border: 1px solid rgba(226, 232, 240, 0.75);
+  box-shadow: var(--lp-shadow);
+  backdrop-filter: blur(12px);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.marketing-site .lender-marketplace-card:hover .lender-marketplace-card-inner {
+  border-color: rgba(11, 143, 216, 0.35);
+  box-shadow: var(--lp-shadow-hover);
+}
+
+.marketing-site .lender-card-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--lp-radius-card) + 2px);
+  background: linear-gradient(135deg, rgba(11, 143, 216, 0.25), rgba(79, 195, 247, 0.15));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.marketing-site .lender-marketplace-card:hover .lender-card-glow {
+  opacity: 1;
+}
+
+.marketing-site .lender-card-particles {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.marketing-site .lender-marketplace-card:hover .lender-card-particles {
+  opacity: 1;
+}
+
+.marketing-site .lender-card-particles span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(11, 143, 216, 0.35);
+}
+
+.marketing-site .lender-card-particles span:nth-child(1) {
+  top: 12%;
+  right: 10%;
+}
+
+.marketing-site .lender-card-particles span:nth-child(2) {
+  bottom: 28%;
+  left: 8%;
+}
+
+.marketing-site .lender-card-particles span:nth-child(3) {
+  top: 45%;
+  right: 6%;
+}
+
+/* Featured ribbon — inside logo well, no layout shift */
+.marketing-site .lender-featured-ribbon {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  max-width: calc(100% - 1rem);
+  padding: 0.1875rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  animation: lp-badge-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.marketing-site .lender-badge-top {
+  background: linear-gradient(135deg, #c4920a 0%, #e8b923 50%, #c4920a 100%);
+}
+
+.marketing-site .lender-badge-popular {
+  background: linear-gradient(135deg, #0b8fd8 0%, #4fc3f7 100%);
+}
+
+.marketing-site .lender-badge-fast {
+  background: linear-gradient(135deg, #059669 0%, #34d399 100%);
+}
+
+.marketing-site .lender-badge-roi {
+  background: linear-gradient(135deg, #6d28d9 0%, #a78bfa 100%);
+}
+
+@keyframes lp-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
+
+/* Logo block — fixed height for grid alignment */
+.marketing-site .lender-card-logo-block {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.marketing-site .lender-card-logo-well {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 7.75rem;
+  min-height: 7.75rem;
+  padding: 1.5rem;
+  margin-top: 0;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.marketing-site .lender-card-logo-category {
+  margin-top: 0.375rem;
+  min-height: 1rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(11, 30, 72, 0.45);
+}
+
+.marketing-site .lender-category-text-government { color: rgba(11, 30, 72, 0.55); }
+.marketing-site .lender-category-text-private { color: rgba(151, 20, 77, 0.65); }
+.marketing-site .lender-category-text-nbfc { color: rgba(9, 123, 184, 0.75); }
+.marketing-site .lender-category-text-international { color: rgba(27, 153, 139, 0.75); }
+
+.marketing-site .lender-marketplace-card:hover .lender-card-logo-well {
+  transform: scale(1.02);
+}
+
+.marketing-site .lender-card-logo-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 70px;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.marketing-site .lender-card-logo-well-icici-bank .lender-card-logo-img {
+  width: 100%;
+  height: 100%;
+  max-height: 70px;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: 16% 50%;
+}
+
+.marketing-site .lender-card-logo-well-prodigy-finance .lender-card-logo-img {
+  width: 100%;
+  height: 100%;
+  max-height: 70px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.marketing-site .lender-card-logo-well-mpower .lender-card-logo-img {
+  max-height: 52px;
+}
+
+.marketing-site .lender-card-logo-well-yes-bank .lender-card-logo-img {
+  max-height: 56px;
+}
+
+/* Compact stat grid — equal cell heights */
+.marketing-site .lender-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+  flex-shrink: 0;
+}
+
+.marketing-site .lender-stat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 4.25rem;
+  padding: 0.4375rem 0.25rem;
+  border-radius: 0.625rem;
+  text-align: center;
+  background: rgba(11, 143, 216, 0.04);
+  border: 1px solid rgba(11, 143, 216, 0.08);
+}
+
+.marketing-site .lender-stat-label {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(11, 30, 72, 0.45);
+}
+
+.marketing-site .lender-stat-value {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: 0.125rem;
+  width: 100%;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--lp-navy);
+}
+
+/* Hover / tap details — inline expand between stats and actions */
+.marketing-site .lender-card-details-toggle {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.marketing-site .lender-card-details-toggle-hint {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--lp-sea);
+}
+
+@media (hover: none), (max-width: 767px) {
+  .marketing-site .lender-card-details-toggle-hint {
+    display: inline-flex;
+  }
+}
+
+.marketing-site .lender-card-details-hover {
+  flex-shrink: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.3s ease,
+    margin-top 0.35s ease;
+}
+
+@media (hover: hover) {
+  .marketing-site .lender-marketplace-card:hover .lender-card-details-hover {
+    max-height: 7rem;
+    opacity: 1;
+    margin-top: 0.5rem;
+  }
+
+  .marketing-site .lender-card-details-toggle-hint {
+    display: none !important;
+  }
+}
+
+.marketing-site .lender-marketplace-card.lender-card-details-open .lender-card-details-hover {
+  max-height: 7rem;
+  opacity: 1;
+  margin-top: 0.5rem;
+}
+
+.marketing-site .lender-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.625rem;
+  background: rgba(248, 251, 255, 0.98);
+  border: 1px solid rgba(11, 143, 216, 0.18);
+  box-shadow: 0 2px 8px rgba(11, 30, 72, 0.06);
+}
+
+.marketing-site .lender-details-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Card actions — pinned to bottom */
+.marketing-site .lender-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.625rem;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.marketing-site .lender-card-compare-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(11, 30, 72, 0.65);
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+.marketing-site .lender-card-compare-btn-active {
+  border-color: rgba(11, 143, 216, 0.45);
+  background: rgba(11, 143, 216, 0.08);
+  color: var(--lp-sea);
+  box-shadow: 0 2px 8px rgba(11, 143, 216, 0.12);
+}
+
+.marketing-site .lender-card-compare-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.marketing-site .lender-card-compare-btn:hover:not(:disabled),
+.marketing-site .lender-card-compare-btn-active:hover {
+  border-color: rgba(11, 143, 216, 0.35);
+  color: var(--lp-sea);
+  box-shadow: 0 2px 8px rgba(11, 143, 216, 0.1);
+}
+
+.marketing-site .lender-card-compare-btn:focus-visible {
+  outline: 2px solid var(--lp-sea);
+  outline-offset: 2px;
+}
+
+/* Compact Apply CTA */
+.marketing-site .lender-card-cta {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem !important;
+  border: none !important;
+  border-radius: 9999px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 45%, #0ea5e9 100%) !important;
+  box-shadow: 0 4px 14px rgba(11, 143, 216, 0.28);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.marketing-site .lender-card-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.25), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.marketing-site .lender-card-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+.marketing-site .lender-card-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(11, 143, 216, 0.38);
+}
+
+.marketing-site .lender-card-cta:hover::before {
+  opacity: 1;
+}
+
+.marketing-site .lender-marketplace-card:hover .lender-card-cta {
+  box-shadow: 0 8px 24px rgba(11, 143, 216, 0.42);
+}
+
+/* Empty state */
+.marketing-site .lender-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  border-radius: var(--lp-radius-card);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 251, 255, 0.95));
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: var(--lp-shadow);
+}
+
+.marketing-site .lender-empty-lottie-panel {
+  width: min(12rem, 70vw);
+  padding: 1rem 1.25rem 0.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(11, 143, 216, 0.12);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(236, 246, 255, 0.85) 100%
+  );
+  box-shadow: 0 8px 24px rgba(11, 30, 72, 0.06);
+}
+
+.marketing-site .lender-empty-lottie-stage {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.marketing-site .lender-empty-lottie-player {
+  width: 100%;
+  height: 100%;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marketing-site .lp-hero-live-dot,
+  .marketing-site .lender-featured-ribbon,
+  .marketing-site .lp-hero-particle {
+    animation: none;
+  }
+
+  .marketing-site .lender-marketplace-card:hover .lender-card-logo-well {
+    transform: none;
+  }
+
+  .marketing-site .lender-card-cta:hover {
+    transform: none;
+  }
+
+  .marketing-site .lender-card-details-hover {
+    transition: none;
+  }
+}
+
+/* ── Compare bar & drawer ─────────────────────────────────────────── */
+
+.marketing-site .lender-compare-bar {
+  position: fixed;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 50;
+  width: calc(100% - 1rem);
+  max-width: 42rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-site .lender-compare-bar {
+    bottom: 1.25rem;
+    width: calc(100% - 2rem);
+  }
+}
+
+.marketing-site .lender-compare-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(11, 143, 216, 0.2);
+  box-shadow: 0 12px 40px rgba(11, 30, 72, 0.14);
+  backdrop-filter: blur(16px);
+}
+
+@media (max-width: 639px) {
+  .marketing-site .lender-compare-bar-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .marketing-site .lender-compare-bar-chips {
+    width: 100%;
+  }
+
+  .marketing-site .lender-compare-bar-actions {
+    width: 100%;
+  }
+
+  .marketing-site .lender-compare-bar-go {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.marketing-site .lender-compare-bar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.marketing-site .lender-compare-bar-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--lp-navy);
+  white-space: nowrap;
+}
+
+.marketing-site .lender-compare-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.marketing-site .lender-compare-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background: rgba(11, 143, 216, 0.08);
+  border: 1px solid rgba(11, 143, 216, 0.15);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--lp-sea);
+}
+
+.marketing-site .lender-compare-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem;
+  border-radius: 9999px;
+  color: rgba(11, 30, 72, 0.5);
+  transition: color 0.2s, background 0.2s;
+}
+
+.marketing-site .lender-compare-chip-remove:hover {
+  color: var(--lp-sea);
+  background: rgba(11, 143, 216, 0.1);
+}
+
+.marketing-site .lender-compare-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.marketing-site .lender-compare-bar-clear {
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(11, 30, 72, 0.55);
+  border-radius: 9999px;
+  transition: color 0.2s;
+}
+
+.marketing-site .lender-compare-bar-clear:hover {
+  color: var(--lp-navy);
+}
+
+.marketing-site .lender-compare-bar-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #0b8fd8, #0ea5e9);
+  box-shadow: 0 4px 14px rgba(11, 143, 216, 0.3);
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.marketing-site .lender-compare-bar-go:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(11, 143, 216, 0.38);
+}
+
+.marketing-site .lender-compare-bar-go:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.marketing-site .lender-compare-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(11, 30, 72, 0.4);
+  backdrop-filter: blur(4px);
+  border: none;
+  cursor: pointer;
+}
+
+.marketing-site .lender-compare-drawer-shell {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 70;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .marketing-site .lender-compare-drawer-shell {
+    padding: 0 1rem 1.5rem;
+  }
+}
+
+.marketing-site .lender-compare-drawer {
+  position: relative;
+  pointer-events: auto;
+  width: 100%;
+  max-width: 100%;
+  max-height: min(92vh, 36rem);
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-bottom: none;
+  box-shadow: 0 -12px 48px rgba(11, 30, 72, 0.18);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 640px) {
+  .marketing-site .lender-compare-drawer {
+    width: min(100%, 56rem);
+    max-width: 56rem;
+    max-height: min(85vh, 32rem);
+    border-radius: 1.25rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    padding-bottom: 0;
+  }
+}
+
+.marketing-site .lender-compare-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.marketing-site .lender-compare-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  color: rgba(11, 30, 72, 0.55);
+  transition: background 0.2s, color 0.2s;
+}
+
+.marketing-site .lender-compare-close:hover {
+  background: rgba(11, 143, 216, 0.08);
+  color: var(--lp-sea);
+}
+
+.marketing-site .lender-card-details-toggle:focus-visible {
+  outline: 2px solid var(--lp-sea);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+.marketing-site .lender-compare-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.marketing-site .lender-compare-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.marketing-site .lender-compare-th-feature,
+.marketing-site .lender-compare-td-label {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: rgba(11, 30, 72, 0.55);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  white-space: nowrap;
+  background: #fff;
+  box-shadow: 4px 0 8px rgba(11, 30, 72, 0.04);
+}
+
+.marketing-site .lender-compare-th-lender {
+  min-width: 6.5rem;
+  padding: 0.625rem 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--lp-navy);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.marketing-site .lender-compare-td-value {
+  min-width: 6.5rem;
+  padding: 0.625rem 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--lp-navy);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.marketing-site .lender-compare-drawer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+@media (max-width: 639px) {
+  .marketing-site .lender-compare-drawer-header {
+    padding: 0.875rem 1rem;
+  }
+
+  .marketing-site .lender-compare-drawer-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .marketing-site .lender-compare-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.marketing-site .lender-compare-cta {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.marketing-site .lender-marketplace {
+  padding-bottom: 5rem;
+}
+
+/* Focus */
+.marketing-site .lender-segmented-tab:focus-visible,
+.marketing-site .lender-card-details-toggle:focus-visible,
+.marketing-site .lender-card-cta:focus-visible,
+.marketing-site .lender-card-compare-btn:focus-visible,
+.marketing-site .lp-hero-secondary-cta:focus-visible {
+  outline: 2px solid var(--lp-sea);
+  outline-offset: 2px;
+}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { notify } from "@/lib/toast";
@@ -52,6 +53,8 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
         return;
       }
 
+      posthog.identify(email);
+      posthog.capture("user_signed_in");
       notify.success("Welcome back", {
         description: "Signed in to your workspace.",
       });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -10,6 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitWebsiteEnquiryAction } from "@/lib/actions/enquiry.actions";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
+
+interface ContactFormProps {
+  embedded?: boolean;
+}
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -25,7 +30,7 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 const fieldClass =
   "lead-form-field h-11 rounded-xl border-border/80 bg-white text-foreground shadow-sm placeholder:text-muted-foreground";
 
-export function ContactForm() {
+export function ContactForm({ embedded = false }: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -57,6 +62,9 @@ export function ContactForm() {
     startTransition(async () => {
       const result = await submitWebsiteEnquiryAction(formData);
       if (result.success) {
+        posthog.capture("contact_form_submitted", {
+          subject: values.subject,
+        });
         setSubmitted(true);
         form.reset();
       } else {
@@ -70,7 +78,7 @@ export function ContactForm() {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="consultation-card rounded-2xl p-8 text-center"
+        className={embedded ? "contact-form-success" : "consultation-card rounded-2xl p-8 text-center"}
       >
         <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-primary" />
         <h3 className="text-xl font-semibold text-foreground">Message sent!</h3>
@@ -82,14 +90,21 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="consultation-card rounded-2xl p-6 md:p-8">
-      <h2 className="text-lg font-semibold text-foreground">Send us a message</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Have a question about education loans, forex, or blocked accounts? Fill in the form
-        and we will get back to you shortly.
-      </p>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className={embedded ? "contact-form-embedded" : "consultation-card rounded-2xl p-6 md:p-8"}
+    >
+      {!embedded ? (
+        <>
+          <h2 className="text-lg font-semibold text-foreground">Send us a message</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Have a question about education loans, forex, or blocked accounts? Fill in the form
+            and we will get back to you shortly.
+          </p>
+        </>
+      ) : null}
 
-      <div className="mt-6 space-y-4">
+      <div className={embedded ? "space-y-4" : "mt-6 space-y-4"}>
         <div className="space-y-2">
           <Label htmlFor="contact-name">Full name</Label>
           <Input

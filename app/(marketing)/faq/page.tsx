@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { FaqSearch } from "@/components/marketing/sections/faq-search";
+import { FaqPageSection } from "@/components/marketing/sections/faq-section";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { JsonLd, faqPageJsonLd, breadcrumbJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_FAQS } from "@/lib/constants/marketing/faqs";
@@ -32,11 +32,12 @@ export default function FaqPage() {
       />
       <PageHero
         eyebrow="FAQ"
-        title="Education loan questions, answered"
+        title="Education loan questions,"
+        titleAccent="answered"
         description="Everything you need to know about eligibility, rates, approvals, and funding your global education."
       />
-      <SectionShell variant="white">
-        <FaqSearch items={MARKETING_FAQS} />
+      <SectionShell variant="white" className="page-section-premium" background="grid">
+        <FaqPageSection items={MARKETING_FAQS} />
       </SectionShell>
       <CtaBanner source="faq-banner" />
     </>

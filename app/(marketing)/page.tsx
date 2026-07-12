@@ -2,8 +2,6 @@ import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FinanceHero } from "@/components/marketing/sections/finance-hero";
-import { TrustMetricsBar } from "@/components/marketing/sections/trust-metrics-bar";
-import { LenderLogoCarousel } from "@/components/marketing/sections/lender-logo-carousel";
 import { FinanceServicesGrid } from "@/components/marketing/sections/finance-services-grid";
 import { AboutPreviewSection } from "@/components/marketing/sections/about-preview-section";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
@@ -96,8 +94,6 @@ export default function MarketingHomePage() {
 
       <HomepageJourneyPath />
       <FinanceHero />
-      <TrustMetricsBar />
-      <LenderLogoCarousel />
       <FinanceServicesGrid />
       <LoanCalculatorSection />
       <FinanceProcessHorizontal />
@@ -128,8 +124,9 @@ export default function MarketingHomePage() {
         eyebrow="Countries"
         title="Education loans for every top destination"
         description="Country-specific loan guidance, visa financials, and lender options."
+        containerClassName="max-w-[90rem]"
       >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {MARKETING_COUNTRIES.slice(0, 6).map((country) => (
             <CountryCard key={country.slug} country={country} />
           ))}

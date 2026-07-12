@@ -1,24 +1,54 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
+import {
+  PageHeroPremium,
+  type PageHeroPremiumProps,
+  type PageHeroStat,
+} from "@/components/marketing/sections/page-hero-premium";
 
-interface PageHeroProps {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  className?: string;
-  primaryCta?: { label: string; href: string };
-  secondaryCta?: { label: string; href: string };
+export type { PageHeroStat };
+
+interface PageHeroProps extends Omit<PageHeroPremiumProps, "titleAccent"> {
+  variant?: "default" | "premium";
+  titleAccent?: string;
 }
 
 export function PageHero({
+  variant = "premium",
   eyebrow,
   title,
+  titleAccent,
   description,
   className,
+  align,
+  icon,
+  stats,
   primaryCta,
   secondaryCta,
+  decorativeLottie,
+  children,
 }: PageHeroProps) {
+  if (variant === "premium") {
+    return (
+      <PageHeroPremium
+        eyebrow={eyebrow}
+        title={title}
+        titleAccent={titleAccent}
+        description={description}
+        className={className}
+        align={align}
+        icon={icon}
+        stats={stats}
+        primaryCta={primaryCta}
+        secondaryCta={secondaryCta}
+        decorativeLottie={decorativeLottie}
+      >
+        {children}
+      </PageHeroPremium>
+    );
+  }
+
   return (
     <section className={cn("hero-gradient section-padding pb-12 pt-16 md:pb-16 md:pt-20", className)}>
       <MarketingContainer>
@@ -32,10 +62,13 @@ export function PageHero({
           {description ? (
             <p className="prose-marketing mt-5 text-lg text-muted-foreground">{description}</p>
           ) : null}
-          {(primaryCta || secondaryCta) && (
+          {(primaryCta || secondaryCta || children) && (
             <div className="mt-8 flex flex-wrap gap-3">
               {primaryCta ? (
-                <Link href={primaryCta.href} className="btn-marketing rounded-full px-6 py-3 text-sm font-semibold">
+                <Link
+                  href={primaryCta.href}
+                  className="btn-marketing rounded-full px-6 py-3 text-sm font-semibold"
+                >
                   {primaryCta.label}
                 </Link>
               ) : null}
@@ -47,6 +80,7 @@ export function PageHero({
                   {secondaryCta.label}
                 </Link>
               ) : null}
+              {children}
             </div>
           )}
         </div>

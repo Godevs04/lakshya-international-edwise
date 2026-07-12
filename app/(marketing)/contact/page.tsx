@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/marketing/sections/page-hero";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
-import { ContactForm } from "@/components/marketing/forms/contact-form";
-import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
+import { ContactMessageSection } from "@/components/marketing/sections/contact-message-section";
+import { ContactUsLottiePanel } from "@/components/marketing/sections/contact-us-lottie-panel";
 import { OfficeLocationShowcase } from "@/components/marketing/maps/office-location-showcase";
 import { JsonLd, localBusinessJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_OFFICE_HOURS } from "@/lib/constants/marketing/offices";
@@ -37,25 +37,16 @@ export default function ContactPage() {
       />
       <PageHero
         eyebrow="Contact"
-        title="Talk to our loan experts"
+        title="Talk to our"
+        titleAccent="loan experts"
         description="Reach out for education loan guidance. We respond within one business day."
       />
 
-      <SectionShell variant="white" padding>
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="space-y-6">
-            <ContactForm />
-            <div className="rounded-2xl border border-border/60 bg-accent/30 p-5">
-              <h3 className="text-sm font-semibold text-foreground">
-                Prefer a faster loan check?
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Compare offers across 20+ lenders in under 7 minutes.
-              </p>
-              <EligibilityCta source="contact-page" className="mt-4 px-6 py-2.5 text-sm" />
-            </div>
-          </div>
-          <div className="space-y-4">
+      <SectionShell variant="white" padding className="page-section-premium" background="grid">
+        <div className="contact-page-layout grid gap-8 lg:grid-cols-2">
+          <ContactMessageSection />
+          <div className="contact-page-aside space-y-4">
+            <ContactUsLottiePanel />
             <div className="card-premium p-6">
               <h2 className="text-lg font-semibold text-foreground">Office contact</h2>
               <ul className="mt-4 space-y-3 text-sm text-muted-foreground">

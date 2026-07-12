@@ -1,17 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { GraduationCap, Sparkles } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
-import type { LottieComponentProps } from "lottie-react";
-import loanCalculatorAnimation from "@/public/lottie/loan-calculator.json";
-
-const Lottie = dynamic<LottieComponentProps>(
-  () => import("lottie-react"),
-  { ssr: false },
-);
-
-const EASE = [0.22, 1, 0.36, 1] as const;
+import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
 
 function LottieCopy() {
   return (
@@ -29,36 +19,16 @@ function LottieCopy() {
 }
 
 export function LoanCalculatorLottie() {
-  const prefersReducedMotion = useReducedMotion();
-
-  if (prefersReducedMotion) {
-    return (
-      <div className="loan-calc-lottie-panel" aria-hidden>
-        <div className="loan-calc-lottie-fallback">
-          <GraduationCap className="h-10 w-10 text-primary/70" />
-        </div>
-        <LottieCopy />
-      </div>
-    );
-  }
-
   return (
-    <motion.div
-      className="loan-calc-lottie-panel"
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.35 }}
-      transition={{ duration: 0.55, ease: EASE }}
+    <MarketingLottie
+      preset="loan-calculator"
+      variant="panel"
+      panelClassName="loan-calc-lottie-panel"
+      stageClassName="loan-calc-lottie-stage"
+      playerClassName="loan-calc-lottie-player"
+      fallbackIcon={GraduationCap}
     >
-      <div className="loan-calc-lottie-glow" aria-hidden />
-      <div className="loan-calc-lottie-stage">
-        <Lottie
-          animationData={loanCalculatorAnimation}
-          loop
-          className="loan-calc-lottie-player"
-        />
-      </div>
       <LottieCopy />
-    </motion.div>
+    </MarketingLottie>
   );
 }
