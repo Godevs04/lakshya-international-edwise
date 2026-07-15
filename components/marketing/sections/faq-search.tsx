@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Search } from "lucide-react";
 import type { MarketingFaq } from "@/types/marketing";
 import { cn } from "@/lib/utils";
+import { FaqAnswer } from "@/components/marketing/sections/faq-answer";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
 function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
@@ -13,23 +14,34 @@ function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
   const urlQuery = searchParams.get("q") ?? "";
   const [localQuery, setLocalQuery] = useState<string | null>(null);
   const query = localQuery ?? urlQuery;
+  const [category, setCategory] = useState<string>("All");
   const [openIndex, setOpenIndex] = useState<number | null>(urlQuery ? null : 0);
   const { prefersReducedMotion } = useMarketingMotion();
 
+  const categories = useMemo(() => {
+    const unique = Array.from(
+      new Set(items.map((item) => item.category).filter((value): value is string => Boolean(value)))
+    );
+    return ["All", ...unique];
+  }, [items]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter(
-      (item) =>
+    return items.filter((item) => {
+      const matchesCategory = category === "All" || item.category === category;
+      if (!matchesCategory) return false;
+      if (!q) return true;
+      return (
         item.question.toLowerCase().includes(q) ||
         item.answer.toLowerCase().includes(q) ||
         item.category?.toLowerCase().includes(q)
-    );
-  }, [items, query]);
+      );
+    });
+  }, [items, query, category]);
 
   return (
     <div className="faq-section-search mx-auto w-full max-w-none">
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type="search"
@@ -42,6 +54,27 @@ function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
           aria-label="Search frequently asked questions"
           className="lead-form-field glass-form-search h-12 w-full rounded-xl border border-border/80 bg-white pl-11 pr-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary/40"
         />
+      </div>
+
+      <div className="faq-category-row" role="tablist" aria-label="FAQ categories">
+        {categories.map((item) => (
+          <button
+            key={item}
+            type="button"
+            role="tab"
+            aria-selected={category === item}
+            className={cn(
+              "faq-category-chip",
+              category === item && "faq-category-chip-active"
+            )}
+            onClick={() => {
+              setCategory(item);
+              setOpenIndex(null);
+            }}
+          >
+            {item}
+          </button>
+        ))}
       </div>
 
       {filtered.length === 0 ? (
@@ -77,8 +110,11 @@ function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
                       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="border-t border-border px-5 py-4 text-sm leading-relaxed text-muted-foreground">
-                        {item.answer}
+                      <div className="border-t border-border px-5 py-4">
+                        {item.category ? (
+                          <p className="faq-answer-category mb-2">{item.category}</p>
+                        ) : null}
+                        <FaqAnswer answer={item.answer} />
                       </div>
                     </motion.div>
                   )}

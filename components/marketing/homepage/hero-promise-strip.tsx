@@ -1,13 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Globe2, ShieldCheck, Wallet } from "lucide-react";
+import { GraduationCap, Landmark, Users } from "lucide-react";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
 const PROMISES = [
-  { icon: Wallet, label: "Up to ₹2 Cr coverage" },
-  { icon: ShieldCheck, label: "100% transparent process" },
-  { icon: Globe2, label: "Loans for every top destination" },
+  { icon: GraduationCap, label: "Non-cosigner — no repayment during school" },
+  { icon: Users, label: "Cosigner loans up to ₹1.5 Cr" },
+  { icon: Landmark, label: "Collateral loans up to ₹2 Cr" },
 ] as const;
 
 export function HeroPromiseStrip() {
