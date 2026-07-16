@@ -1,16 +1,14 @@
 import { cn } from "@/lib/utils";
 
-const SECTION_HEADINGS = new Set([
-  "Collateral Education Loan (ROI from 8.25%)",
-  "Non-Collateral Education Loan (ROI from 10.5%)",
-  "Non-Co-Signer Education Loan",
-]);
-
 function isBulletBlock(block: string) {
   return block
     .split("\n")
     .filter(Boolean)
     .every((line) => line.trimStart().startsWith("• "));
+}
+
+function isHeading(block: string) {
+  return block.startsWith("## ") || block.startsWith("### ");
 }
 
 interface FaqAnswerProps {
@@ -42,10 +40,15 @@ export function FaqAnswer({ answer, className }: FaqAnswerProps) {
           );
         }
 
-        if (SECTION_HEADINGS.has(block)) {
+        if (isHeading(block)) {
+          const isSub = block.startsWith("### ");
+          const text = block.replace(/^#{2,3}\s+/, "");
           return (
-            <p key={`heading-${index}`} className="faq-answer-heading">
-              {block}
+            <p
+              key={`heading-${index}`}
+              className={isSub ? "faq-answer-subheading" : "faq-answer-heading"}
+            >
+              {text}
             </p>
           );
         }
