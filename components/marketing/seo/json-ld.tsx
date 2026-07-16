@@ -146,7 +146,10 @@ export function faqPageJsonLd(faqs: { question: string; answer: string }[]) {
       name: faq.question,
       acceptedAnswer: {
         "@type": "Answer",
-        text: faq.answer,
+        text: faq.answer
+          .replace(/^#{2,3}\s+/gm, "")
+          .replace(/^•\s+/gm, "- ")
+          .trim(),
       },
     })),
   };

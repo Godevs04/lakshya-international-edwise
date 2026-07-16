@@ -61,11 +61,131 @@ export const MARKETING_FAQS: MarketingFaq[] = [
   },
   {
     category: "Documents",
-    question: "What documents are required for an education loan?",
+    question: "What documents are required for a study abroad education loan?",
     answer: [
-      "We're preparing a complete documents checklist tailored for students and co-applicants.",
-      "Requirements typically depend on your destination, university, lender type, and whether the loan is collateral, non-collateral, or non-co-signer. Share your profile with us and our advisors will send you a customized checklist covering student KYC, academic records, admission offer, and financial documents.",
-      "A full checklist will be published here shortly.",
+      "Below is the Study Abroad Education Loan Document Checklist. Exact requirements can vary by lender, destination, and loan type — our team will confirm a customized list for your profile.",
+      "## 1. KYC Documents (Applicant & Co-applicant)",
+      [
+        "Aadhaar Card",
+        "PAN Card",
+        "Passport (Mandatory for overseas education)",
+        "Passport-size Photographs",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "## 2. Educational Documents",
+      [
+        "10th Mark Sheet",
+        "12th Mark Sheet",
+        "Graduation Mark Sheets (All Semesters)",
+        "Degree Certificate / Provisional Certificate",
+        "Entrance Exam Score Card (GRE / GMAT / IELTS / TOEFL / PTE / Duolingo, if applicable)",
+        "University Offer Letter / Admission Letter",
+        "I-20 (For USA) or CAS / LOA / Equivalent Admission Document (as applicable for other countries)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "## 3. Financial Documents (Based on Co-applicant's Income Source)",
+      "### A. Salaried Employee",
+      [
+        "Last 6 Months' Salary Slips",
+        "Last 6 Months' Bank Statements (Salary Account)",
+        "Employer's Complete Office Address",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### B. Self-Employed / Business Owner",
+      [
+        "Income Tax Returns (ITR) with Computation (Last 2–3 Years)",
+        "Business Proof",
+        "GST Registration or Shop & Establishment License or UDYAM Certificate (if available)",
+        "Business Bank Statements (Last 6–12 Months)",
+        "Financial Statements (Profit & Loss Account & Balance Sheet, if available)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### C. Pensioner",
+      [
+        "Pension Payment Order (PPO) / Pension Certificate",
+        "Last 6 Months' Pension Slips (if available)",
+        "Last 6 Months' Bank Statements showing Pension Credits",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### D. Farmer / Agricultural Income",
+      ["Pattadar Passbook / Land Ownership Documents", "Agriculture Income Certificate"]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "## 4. NRI Co-applicant Documents (If Applicable)",
+      "### Identity & Address Proof",
+      [
+        "Passport (Mandatory)",
+        "Valid Visa / Residence Permit / Work Permit",
+        "Overseas Address Proof",
+        "Utility Bill",
+        "Rental Agreement",
+        "Bank Statement (Address Proof)",
+        "Indian Address Proof",
+        "PAN Card",
+        "Passport-size Photographs",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### Income Proof (NRI Salaried)",
+      [
+        "Last 6 Months' Salary Slips",
+        "Employment Contract / Offer Letter",
+        "Employer ID Card",
+        "Last 6 Months' Overseas Bank Statements",
+        "Foreign Tax Returns (if applicable)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### Income Proof (NRI Self-employed)",
+      [
+        "Business Registration Documents",
+        "Foreign Tax Returns (Last 2–3 Years)",
+        "Last 6 Months' Business Bank Statements",
+        "Financial Statements (P&L & Balance Sheet, if available)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### Banking Documents",
+      [
+        "NRE/NRO Account Statements (if maintained)",
+        "Overseas Bank Statements",
+        "Proof of Remittances to India (if applicable)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### Additional Documents (NRI)",
+      [
+        "Power of Attorney (POA) in favor of an authorized person in India",
+        "Signature Verification",
+        "Passport-size Photographs",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "## 5. Collateral Documents (If Secured Loan)",
+      "### Property Collateral",
+      [
+        "Sale Deed / Title Deed",
+        "Encumbrance Certificate (EC)",
+        "Latest Property Tax Receipts",
+        "Approved Building Plan",
+        "Occupancy Certificate (if applicable)",
+        "Valuation Report (Generally arranged by the lender)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
+      "### Liquid Security",
+      [
+        "Fixed Deposit (FD) Receipts",
+        "LIC Policy Documents (with Surrender Value)",
+        "NSC / Bonds / Shares (if accepted by the lender)",
+      ]
+        .map((item) => `• ${item}`)
+        .join("\n"),
     ].join("\n\n"),
   },
   {
@@ -120,11 +240,11 @@ export const MARKETING_FAQS: MarketingFaq[] = [
     category: "Loan Types",
     question: "How do collateral, non-collateral, and non-co-signer education loans work?",
     answer: [
-      "Collateral Education Loan (ROI from 8.25%)",
+      "## Collateral Education Loan (ROI from 8.25%)",
       "A collateral loan requires you to pledge an asset such as residential property, commercial property, fixed deposits, or other approved securities.",
       "Lakshya has partnerships with 20+ lenders, including leading public sector banks such as SBI, Union Bank of India, Punjab National Bank, as well as private banks and NBFCs.",
       "Most loan approvals are completed within 15–20 working days, subject to document verification and lender policies.",
-      "Non-Collateral Education Loan (ROI from 10.5%)",
+      "## Non-Collateral Education Loan (ROI from 10.5%)",
       "These loans do not require any property as security. However, most lenders require a financial co-applicant with a stable income.",
       "Income may include:",
       [
@@ -137,7 +257,7 @@ export const MARKETING_FAQS: MarketingFaq[] = [
         .map((item) => `• ${item}`)
         .join("\n"),
       "If your financial documents are incomplete, Lakshya's experienced team will guide you in preparing the required documentation, including assistance with income tax filing and other supporting documents, wherever applicable.",
-      "Non-Co-Signer Education Loan",
+      "## Non-Co-Signer Education Loan",
       "Lakshya also offers education loans without collateral and without a financial co-applicant through selected international lending partners.",
       "These loans are available for eligible students pursuing higher education in countries such as:",
       ["USA", "UK", "Germany", "Australia", "Canada and other eligible destinations"]

@@ -3162,10 +3162,17 @@
 }
 
 .marketing-site .faq-answer-heading {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--lp-navy, #0b1e48);
+}
+
+.marketing-site .faq-answer-subheading {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(11, 30, 72, 0.82);
 }
 
 .marketing-site .faq-answer-list {
