@@ -8,6 +8,7 @@ import livePulseAnimation from "@/public/lottie/live-pulse.json";
 import loanApprovedAnimation from "@/public/lottie/loan-approved.json";
 import loanCalculatorAnimation from "@/public/lottie/loan-calculator.json";
 import searchEmptyAnimation from "@/public/lottie/search-empty.json";
+import pageNotFoundAnimation from "@/public/lottie/Page Not Found 404.json";
 
 export type MarketingLottiePreset =
   | "loan-calculator"
@@ -19,7 +20,8 @@ export type MarketingLottiePreset =
   | "live-chatbot"
   | "contact-us"
   | "partner-handshake"
-  | "business-analysis";
+  | "business-analysis"
+  | "page-not-found";
 
 export type MarketingLottieAnimation = object;
 
@@ -37,6 +39,7 @@ export const MARKETING_LOTTIE_PRESETS: Record<
   "contact-us": contactUsAnimation,
   "partner-handshake": partnerHandshakeAnimation,
   "business-analysis": businessAnalysisAnimation,
+  "page-not-found": pageNotFoundAnimation,
 };
 
 export interface MarketingLottiePlayerProps {
