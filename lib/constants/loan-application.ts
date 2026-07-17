@@ -38,6 +38,28 @@ export interface LoanApplicationItem {
   updatedAt?: Date | string;
 }
 
+export const LOAN_APPLICATION_WINNING_STATUSES: ApplicationStatusId[] = [
+  "pf_paid",
+  "disbursed",
+];
+
+export function isWinningLoanApplicationStatus(
+  status: ApplicationStatusId | string | undefined
+): boolean {
+  return Boolean(
+    status &&
+      LOAN_APPLICATION_WINNING_STATUSES.includes(status as ApplicationStatusId)
+  );
+}
+
+export function getWinningLoanApplication<T extends { applicationStatus?: string }>(
+  applications: T[]
+): T | undefined {
+  return applications.find((application) =>
+    isWinningLoanApplicationStatus(application.applicationStatus)
+  );
+}
+
 export function getLoanApplicationHistoryLabel(action: LoanApplicationHistoryAction): string {
   switch (action) {
     case "added":

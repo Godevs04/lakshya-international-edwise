@@ -36,7 +36,7 @@ export function CountryHero({ country, slug }: CountryHeroProps) {
               {getCountryFlagLabel(country)}
             </span>
             <h1 className="hero-premium-heading mt-4 text-white">
-              Education loans for {country.name}
+              {country.heroTitle ?? `Education loans for ${country.name}`}
             </h1>
             <p className="prose-marketing mx-auto mt-5 max-w-2xl text-lg text-white/88">
               {country.description}

@@ -70,8 +70,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMarketingMetadata({
     title: `${contact.companyName} | Overseas Education Loan Experts`,
     description:
-      "Fund your global education with the lowest interest education loan from 20+ trusted lenders. Non-collateral options, 73-hour approvals, up to ₹2 Cr, 100% cost coverage.",
+      "Lakshya International Edwise — overseas education loan experts in India. Fund USA, UK, Canada, Ireland, Germany, Australia, and UAE/Dubai studies with 20+ lenders, non-collateral options, and 73-hour processing.",
     path: "/",
+    absoluteTitle: true,
+    keywords: [
+      "Lakshya International Edwise",
+      "Lakshya Edwise",
+      "overseas education loan",
+      "education loan India",
+      "student loan for international students",
+      "education finance UAE",
+      "student loan Dubai",
+      "education loan for Ireland",
+      "education loan for Canada",
+    ],
   });
 }
 
@@ -86,7 +98,6 @@ export default function MarketingHomePage() {
           websiteJsonLd({
             name: contact.companyName,
             url: siteUrl,
-            searchUrl: `${siteUrl}/faq`,
           }),
           faqPageJsonLd(MARKETING_FAQS),
         ]}

@@ -4,9 +4,13 @@ import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 export const DEFAULT_OG_IMAGE_PATH = "/logo_model.jpeg";
 
 export const DEFAULT_MARKETING_KEYWORDS = [
+  "Lakshya International Edwise",
+  "Lakshya Edwise",
   "education loan India",
   "overseas education loan",
   "study abroad education loan",
+  "education finance",
+  "student loan for international students",
   "non collateral education loan",
   "education loan without cosigner",
   "fast education loan approval",
@@ -15,10 +19,14 @@ export const DEFAULT_MARKETING_KEYWORDS = [
   "education loan for UK",
   "education loan for Canada",
   "education loan for Germany",
-  "Lakshya International Edwise",
+  "education loan for Ireland",
+  "ireland education loan",
+  "education loan for UAE",
+  "education finance UAE",
+  "student loan Dubai",
+  "education loan in Dubai",
   "education loan NBFC",
   "100 percent education loan",
-  "zero processing fee education loan",
 ] as const;
 
 function trim(value: string | undefined): string {
@@ -47,6 +55,8 @@ export type MarketingMetadataInput = {
   keywords?: string[];
   noIndex?: boolean;
   openGraphType?: "website" | "article";
+  /** Prevents root title template from appending the brand twice. */
+  absoluteTitle?: boolean;
 };
 
 export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata {
@@ -56,10 +66,13 @@ export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata 
   const canonical = getAbsoluteUrl(path);
   const imageUrl = input.image ? getAbsoluteUrl(input.image) : getDefaultOgImageUrl();
   const googleVerification = trim(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION);
+  const title = input.absoluteTitle
+    ? { absolute: input.title }
+    : input.title;
 
   const metadata: Metadata = {
     metadataBase,
-    title: input.title,
+    title,
     description: input.description,
     keywords: input.keywords ?? [...DEFAULT_MARKETING_KEYWORDS],
     alternates: {
@@ -77,7 +90,7 @@ export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata 
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: contact.companyName,
+          alt: `${contact.companyName} — overseas education loan experts`,
         },
       ],
     },
@@ -101,10 +114,18 @@ export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata 
 
 export function buildMarketingLayoutMetadata(): Metadata {
   const contact = getMarketingContact();
-  return buildMarketingMetadata({
-    title: `${contact.companyName} | Overseas Education Loan Experts`,
+  const defaultTitle = `${contact.companyName} | Overseas Education Loan Experts`;
+  const metadata = buildMarketingMetadata({
+    title: defaultTitle,
     description:
-      "Fund your global education with the lowest-interest education loan from 20+ trusted lenders. Non-collateral options, 73-hour approvals, up to ₹2 Cr, 100% cost coverage.",
+      "Lakshya International Edwise helps Indian students fund overseas education with education loans from 20+ banks and NBFCs. Non-collateral options, 73-hour processing, and destinations including USA, UK, Canada, Ireland, Germany, and UAE/Dubai.",
     path: "/",
   });
+
+  return {
+    ...metadata,
+    title: {
+      default: defaultTitle,
+    } as Metadata["title"],
+  };
 }

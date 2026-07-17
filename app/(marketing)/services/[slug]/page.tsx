@@ -25,6 +25,24 @@ export async function generateMetadata({
   const service = getMarketingService(slug);
   const contact = getMarketingContact();
   if (!service) return { title: contact.companyName };
+
+  if (slug === "education-loan") {
+    return buildMarketingMetadata({
+      title: `Overseas Education Loan in India | ${contact.companyName}`,
+      description:
+        "Compare overseas education loans from 20+ banks and NBFCs with Lakshya International Edwise. Collateral, non-collateral, and non-cosigner options for USA, UK, Canada, Ireland, Germany, and UAE/Dubai.",
+      path: `/services/${slug}`,
+      keywords: [
+        "overseas education loan",
+        "education loan India",
+        "student loan for international students",
+        "non collateral education loan",
+        "education loan without cosigner",
+        "Lakshya International Edwise",
+      ],
+    });
+  }
+
   return buildMarketingMetadata({
     title: `${service.title} | ${contact.companyName}`,
     description: service.shortDescription,
@@ -53,6 +71,7 @@ export default async function ServiceDetailPage({
             description: service.description,
             url: serviceUrl,
             provider: contact.companyName,
+            providerUrl: getAbsoluteUrl("/"),
           }),
           breadcrumbJsonLd([
             { name: "Home", url: getAbsoluteUrl("/") },

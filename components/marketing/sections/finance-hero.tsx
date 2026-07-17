@@ -24,7 +24,7 @@ export function FinanceHero() {
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <RevealStagger>
             <RevealItem>
-              <p className="hero-eyebrow">Your Dream. Our Lakshya.</p>
+              <p className="hero-eyebrow">Lakshya International Edwise</p>
             </RevealItem>
             <RevealItem>
               <h1 className="hero-premium-heading mt-4">
@@ -35,7 +35,7 @@ export function FinanceHero() {
             </RevealItem>
             <RevealItem>
               <p className="hero-premium-subcopy mt-5">
-                Making global education
+                Lakshya International Edwise makes global education
                 <span className="hero-value-triad" aria-label="Affordable, Accessible, and Achievable">
                   {["Affordable", "Accessible", "Achievable"].map((word, index) => (
                     <span key={word} className="hero-value-word">

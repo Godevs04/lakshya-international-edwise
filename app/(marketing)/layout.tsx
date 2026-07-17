@@ -36,7 +36,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           phone: contact.phone,
           logo: getDefaultOgImageUrl(),
           sameAs,
-          address: contact.phone ? undefined : "India",
+          address: contact.address,
         })}
       />
       <EligibilityModalProvider>

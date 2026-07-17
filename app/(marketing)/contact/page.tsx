@@ -32,7 +32,7 @@ export default function ContactPage() {
           url: getSiteUrl(),
           email: contact.email,
           phone: contact.phone,
-          address: "India",
+          address: contact.address,
         })}
       />
       <PageHero

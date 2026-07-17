@@ -6,7 +6,11 @@ import {
   getApplicationStatusLabel,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
-import type { LoanApplicationHistoryAction } from "@/lib/constants/loan-application";
+import {
+  getWinningLoanApplication,
+  isWinningLoanApplicationStatus,
+  type LoanApplicationHistoryAction,
+} from "@/lib/constants/loan-application";
 import { getLenderSlugById, resolveLenderIdBySlug, resolveLenderNameBySlug } from "@/lib/services/lender.service";
 import { formatDateTime } from "@/lib/utils/format";
 
@@ -49,6 +53,34 @@ export function syncGlobalSentToBank(student: StudentDoc) {
 function findLoanApplication(student: StudentDoc, applicationId: Types.ObjectId | string) {
   const targetId = applicationId.toString();
   return student.loanApplications?.find((entry) => entry._id?.toString() === targetId);
+}
+
+function getLenderName(application: StudentDoc["loanApplications"][number]): string {
+  const lender = application.lenderId as unknown as { name?: string } | undefined;
+  return lender?.name ?? "the selected bank";
+}
+
+function getLoanApplicationLenderId(
+  application: StudentDoc["loanApplications"][number]
+): Types.ObjectId | undefined {
+  const lender = application.lenderId as unknown as
+    | Types.ObjectId
+    | { _id?: Types.ObjectId }
+    | undefined;
+  if (!lender) return undefined;
+  return "_id" in lender && lender._id ? lender._id : (lender as Types.ObjectId);
+}
+
+function assertLoanApplicationIsOpen(
+  student: StudentDoc,
+  applicationId: Types.ObjectId | string
+) {
+  const winner = getWinningLoanApplication(student.loanApplications ?? []);
+  if (winner && winner._id?.toString() !== applicationId.toString()) {
+    throw new Error(
+      `This application is closed because ${getLenderName(winner)} has reached ${getApplicationStatusLabel(winner.applicationStatus)}.`
+    );
+  }
 }
 
 function pushApplicationHistory(
@@ -210,6 +242,19 @@ export async function syncPrimaryLoanApplicationFromStudentEdit(
   }
 
   const newStatus = (student.applicationStatus ?? deriveApplicationStatus(student)) as ApplicationStatusId;
+  if (
+    primary.applicationStatus !== newStatus &&
+    isWinningLoanApplicationStatus(newStatus) &&
+    primary._id
+  ) {
+    await updateLoanApplicationStatus(
+      student,
+      primary._id.toString(),
+      newStatus,
+      options.user
+    );
+  }
+
   if (primary.applicationStatus !== newStatus) {
     const oldStatus = primary.applicationStatus;
     primary.applicationStatus = newStatus;
@@ -272,6 +317,13 @@ export async function setStudentPrimaryLender(
   const lenderId = await resolveLenderIdBySlug(lenderSlug);
   if (!lenderId) {
     throw new Error("Invalid lender selected");
+  }
+
+  const winner = getWinningLoanApplication(student.loanApplications ?? []);
+  if (winner && getLoanApplicationLenderId(winner)?.toString() !== lenderId.toString()) {
+    throw new Error(
+      `The primary lender cannot be changed because ${getLenderName(winner)} has reached ${getApplicationStatusLabel(winner.applicationStatus)}.`
+    );
   }
 
   if ((student.loanApplications?.length ?? 0) === 0) {
@@ -341,6 +393,13 @@ export async function addStudentLoanApplication(
     throw new Error("Invalid lender selected");
   }
 
+  const winner = getWinningLoanApplication(student.loanApplications ?? []);
+  if (winner) {
+    throw new Error(
+      `A parallel bank cannot be added because ${getLenderName(winner)} has reached ${getApplicationStatusLabel(winner.applicationStatus)}.`
+    );
+  }
+
   if ((student.loanApplications?.length ?? 0) === 0) {
     await setStudentPrimaryLender(student, lenderSlug, user);
     return student.loanApplications?.[0];
@@ -391,6 +450,8 @@ export async function sendLoanApplicationToBank(
     throw new Error("Loan application not found");
   }
 
+  assertLoanApplicationIsOpen(student, applicationId);
+
   if (app.sentToBank) {
     return {
       sentToBankAt: app.sentToBankAt ?? new Date(),
@@ -435,6 +496,8 @@ export async function updateLoanApplicationLan(
   if (!app) {
     throw new Error("Loan application not found");
   }
+
+  assertLoanApplicationIsOpen(student, applicationId);
 
   const trimmed = applicationNumber?.trim() || undefined;
   app.applicationNumber = trimmed;
@@ -509,6 +572,8 @@ export async function updateLoanApplicationStatus(
     throw new Error("Loan application not found");
   }
 
+  assertLoanApplicationIsOpen(student, applicationId);
+
   const oldStatus = app.applicationStatus;
   app.applicationStatus = applicationStatus;
 
@@ -519,13 +584,56 @@ export async function updateLoanApplicationStatus(
       : undefined,
   });
 
+  const applications = student.loanApplications ?? [];
+  const isWinningStatus = isWinningLoanApplicationStatus(applicationStatus);
+
+  if (isWinningStatus) {
+    const winnerName = getLenderName(app);
+    const winnerStatusLabel = getApplicationStatusLabel(applicationStatus);
+
+    for (const sibling of applications) {
+      if (sibling._id?.toString() === applicationId.toString()) {
+        sibling.isPrimary = true;
+        continue;
+      }
+
+      sibling.isPrimary = false;
+      if (
+        sibling.applicationStatus !== "not_interested" &&
+        sibling.applicationStatus !== "rejected"
+      ) {
+        const siblingOldStatus = sibling.applicationStatus;
+        sibling.applicationStatus = "not_interested";
+        pushApplicationHistory(student, sibling._id!, "status_updated", user, {
+          status: "not_interested",
+          note: `Auto-closed because ${winnerName} reached ${winnerStatusLabel}${
+            siblingOldStatus
+              ? ` (previously ${getApplicationStatusLabel(siblingOldStatus)})`
+              : ""
+          }`,
+        });
+      }
+    }
+
+    if (!student.loan) {
+      student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+    }
+    student.loan.lenderId = getLoanApplicationLenderId(app);
+    student.loan.applicationNumber = app.applicationNumber;
+
+    appendLoanApplicationNote(
+      student,
+      `${winnerName} reached ${winnerStatusLabel}. Other bank applications were automatically closed.`,
+      user
+    );
+  }
+
   // Sync the overall student status from the primary application. Fall back to
   // this application when it's the only one, or when none is marked primary,
   // so single-lender students still reflect the change end-to-end.
-  const applications = student.loanApplications ?? [];
   const hasPrimary = applications.some((entry) => entry.isPrimary);
   const shouldSyncStudentStatus =
-    app.isPrimary || applications.length <= 1 || !hasPrimary;
+    isWinningStatus || app.isPrimary || applications.length <= 1 || !hasPrimary;
 
   if (shouldSyncStudentStatus) {
     const appFields = applyApplicationStatus(applicationStatus);
@@ -549,6 +657,8 @@ export async function rejectLoanApplication(
   if (!app) {
     throw new Error("Loan application not found");
   }
+
+  assertLoanApplicationIsOpen(student, applicationId);
 
   const rejectedAt = new Date();
   app.applicationStatus = "rejected";

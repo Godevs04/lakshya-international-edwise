@@ -53,12 +53,14 @@ import { runLoggedMutation, runLoggedQuery, emptyPaginated } from "@/lib/action-
 import { buildWorkflowMongoFilter } from "@/lib/constants/student-workflow-filters";
 import { parseStatusFilter } from "@/lib/utils/student-list-filters";
 import {
+  APPLICATION_STATUS_VALUES,
   applyApplicationStatus,
   deriveApplicationStatus,
   getApplicationStatusLabel,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
 import type { DisbursementType } from "@/lib/constants/disbursement";
+import { getWinningLoanApplication } from "@/lib/constants/loan-application";
 import { isStudentProfileVerified } from "@/lib/utils/student-profile";
 import { resolveLenderIdBySlug, resolveLenderNameBySlug, getLenderSlugById } from "@/lib/services/lender.service";
 import {
@@ -1000,18 +1002,58 @@ export async function bulkUpdateStudentsAction(
       });
     }
   } else if (action === "change_status" && value) {
-    await Student.updateMany({ _id: { $in: accessibleIds } }, { status: value });
+    if (!APPLICATION_STATUS_VALUES.includes(value as ApplicationStatusId)) {
+      return { success: false, error: "Invalid application status" };
+    }
+
+    const applicationStatus = value as ApplicationStatusId;
+    const appFields = applyApplicationStatus(applicationStatus);
+    const sessionUser = toSessionUser(user);
+    const students = await Student.find({ _id: { $in: accessibleIds } }).populate(
+      "loanApplications.lenderId",
+      "name slug"
+    );
+
+    for (const student of students) {
+      await ensureStudentLoanApplications(student);
+      const primaryApplication =
+        student.loanApplications?.find((entry) => entry.isPrimary) ??
+        student.loanApplications?.[0];
+
+      if (primaryApplication?._id) {
+        if (primaryApplication.applicationStatus !== applicationStatus) {
+          await updateLoanApplicationStatus(
+            student,
+            primaryApplication._id.toString(),
+            applicationStatus,
+            sessionUser
+          );
+        }
+      } else {
+        student.applicationStatus = appFields.applicationStatus;
+        student.status = appFields.status;
+        student.loggedIn = appFields.loggedIn;
+        if (!student.loan) student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+        student.loan.pfPaid = appFields.pfPaid;
+        await student.save();
+      }
+    }
+
     await Application.updateMany(
       { studentId: { $in: accessibleIds } },
-      { status: value, pipelineStage: value }
+      { status: appFields.status, pipelineStage: appFields.status }
     );
     await logActivity({
       action: "students.bulk_status_changed",
-      description: `Changed status to ${value} for ${accessibleIds.length} student(s)`,
+      description: `Changed application status to ${getApplicationStatusLabel(applicationStatus)} for ${accessibleIds.length} student(s)`,
       resourceType: "student",
       userId: user?.id,
       userName: user?.name,
-      metadata: { count: accessibleIds.length, status: value, studentIds: accessibleIds },
+      metadata: {
+        count: accessibleIds.length,
+        applicationStatus,
+        studentIds: accessibleIds,
+      },
     });
   }
 
@@ -1251,7 +1293,10 @@ export async function updateStudentApplicationStatusAction(
     requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
     await connectDB();
-    const studentLookup = await Student.findById(studentId);
+    const studentLookup = await Student.findById(studentId).populate(
+      "loanApplications.lenderId",
+      "name slug"
+    );
     const access = guardStudentAccess(user, studentLookup);
     if (!access.allowed) return access.error;
     const student = access.student;
@@ -1260,11 +1305,35 @@ export async function updateStudentApplicationStatusAction(
     const oldApplicationStatus = deriveApplicationStatus(student);
     const appFields = applyApplicationStatus(applicationStatus);
 
-    student.applicationStatus = appFields.applicationStatus;
-    student.status = appFields.status;
-    student.loggedIn = appFields.loggedIn;
-    if (!student.loan) student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
-    student.loan.pfPaid = appFields.pfPaid;
+    await ensureStudentLoanApplications(student);
+    const primaryApplication =
+      student.loanApplications?.find((entry) => entry.isPrimary) ??
+      student.loanApplications?.[0];
+
+    if (
+      primaryApplication?._id &&
+      primaryApplication.applicationStatus !== applicationStatus
+    ) {
+      try {
+        await updateLoanApplicationStatus(
+          student,
+          primaryApplication._id.toString(),
+          applicationStatus,
+          toSessionUser(user)
+        );
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Failed to update application status",
+        };
+      }
+    } else {
+      student.applicationStatus = appFields.applicationStatus;
+      student.status = appFields.status;
+      student.loggedIn = appFields.loggedIn;
+      if (!student.loan) student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+      student.loan.pfPaid = appFields.pfPaid;
+    }
 
     if (appFields.status !== oldStatus || appFields.applicationStatus !== oldApplicationStatus) {
       student.timeline.push({
@@ -1358,7 +1427,10 @@ export async function setStudentPrimaryLenderAction(
     requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
     await connectDB();
-    const studentLookup = await Student.findById(studentId);
+    const studentLookup = await Student.findById(studentId).populate(
+      "loanApplications.lenderId",
+      "name slug"
+    );
     const access = guardStudentAccess(user, studentLookup);
     if (!access.allowed) return access.error;
     const student = access.student;
@@ -1480,7 +1552,10 @@ export async function updateLoanApplicationStatusAction(
     requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
     await connectDB();
-    const studentLookup = await Student.findById(studentId);
+    const studentLookup = await Student.findById(studentId).populate(
+      "loanApplications.lenderId",
+      "name slug"
+    );
     const access = guardStudentAccess(user, studentLookup);
     if (!access.allowed) return access.error;
     const student = access.student;
@@ -1587,10 +1662,22 @@ export async function updateStudentLoanDetailsAction(
     }
 
     await connectDB();
-    const studentLookup = await Student.findById(studentId);
+    const studentLookup = await Student.findById(studentId).populate(
+      "loanApplications.lenderId",
+      "name slug"
+    );
     const access = guardStudentAccess(user, studentLookup);
     if (!access.allowed) return access.error;
     const student = access.student;
+
+    await ensureStudentLoanApplications(student);
+    const winningApplication = getWinningLoanApplication(student.loanApplications ?? []);
+    if (winningApplication && parsed.data.pfPaid === false) {
+      return {
+        success: false,
+        error: "Change the selected bank's application status before marking PF as unpaid.",
+      };
+    }
 
     await updateStudentLoanDetails(student, {
       requested: parsed.data.loanRequested,
@@ -1606,6 +1693,37 @@ export async function updateStudentLoanDetailsAction(
       processingFee: parsed.data.processingFee,
       pfPaid: parsed.data.pfPaid,
     });
+
+    const selectedApplication =
+      winningApplication ??
+      student.loanApplications?.find((entry) => entry.isPrimary) ??
+      student.loanApplications?.[0];
+    const selectedStatus =
+      parsed.data.loanDisbursed && parsed.data.loanDisbursed > 0
+        ? "disbursed"
+        : parsed.data.pfPaid
+          ? "pf_paid"
+          : undefined;
+
+    if (
+      selectedApplication?._id &&
+      selectedStatus &&
+      selectedApplication.applicationStatus !== selectedStatus
+    ) {
+      try {
+        await updateLoanApplicationStatus(
+          student,
+          selectedApplication._id.toString(),
+          selectedStatus,
+          toSessionUser(user)
+        );
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Failed to update application status",
+        };
+      }
+    }
 
     await logActivity({
       action: "student.loan_details_updated",
