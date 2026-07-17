@@ -30,9 +30,12 @@ import {
 } from "@/lib/actions/student.actions";
 import { useLenderOptions } from "@/components/lenders/use-lender-options";
 import type { LenderOption } from "@/types";
-import type { LoanApplicationItem } from "@/lib/constants/loan-application";
+import {
+  getWinningLoanApplication,
+  type LoanApplicationItem,
+} from "@/lib/constants/loan-application";
 import { LenderLogo } from "@/components/lenders/lender-logo";
-import { Pencil, Plus, Send, XCircle } from "lucide-react";
+import { LockKeyhole, Pencil, Plus, Send, XCircle } from "lucide-react";
 
 interface StudentApplicationPanelProps {
   studentId: string;
@@ -49,6 +52,7 @@ function BankApplicationCard({
   onUpdated,
   lenderLogo,
   lenderAccent,
+  winningApplication,
 }: {
   studentId: string;
   application: LoanApplicationItem;
@@ -56,6 +60,7 @@ function BankApplicationCard({
   onUpdated: () => void;
   lenderLogo?: string;
   lenderAccent?: string;
+  winningApplication?: LoanApplicationItem;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState<ApplicationStatusId>(application.applicationStatus);
@@ -70,6 +75,13 @@ function BankApplicationCard({
   const [sent, setSent] = useState(application.sentToBank);
   const [sentAt, setSentAt] = useState(application.sentToBankAt);
   const [sentBy, setSentBy] = useState(application.sentToBankByName);
+  const isWinner = winningApplication?._id === application._id;
+  const isClosedByWinner = Boolean(winningApplication && !isWinner);
+  const canEdit = canWrite && !isClosedByWinner;
+  const winnerName = winningApplication?.lenderName ?? "another bank";
+  const winnerStatusLabel = getApplicationStatusLabel(
+    winningApplication?.applicationStatus
+  );
 
   const statusItems = APPLICATION_STATUS_OPTIONS.map((option) => ({
     value: option.value,
@@ -81,7 +93,11 @@ function BankApplicationCard({
     setStatusLoading(true);
     const result = await updateLoanApplicationStatusAction(studentId, application._id, nextStatus);
     if (result.success) {
-      notify.success("Application status updated");
+      notify.success(
+        nextStatus === "pf_paid"
+          ? "PF Paid recorded. Other bank applications were closed."
+          : "Application status updated"
+      );
       onUpdated();
       router.refresh();
     } else {
@@ -166,13 +182,24 @@ function BankApplicationCard({
                   Rejected
                 </Badge>
               ) : null}
+              {isWinner ? (
+                <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15">
+                  Selected lender
+                </Badge>
+              ) : null}
+              {isClosedByWinner ? (
+                <Badge variant="outline" className="gap-1 text-muted-foreground">
+                  <LockKeyhole className="h-3 w-3" aria-hidden />
+                  Closed
+                </Badge>
+              ) : null}
             </div>
 
             <div className="mt-2 space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Bank LAN
               </p>
-              {canWrite && editingLan ? (
+              {canEdit && editingLan ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <Input
                     value={lan}
@@ -200,7 +227,7 @@ function BankApplicationCard({
                   <Badge className="bg-[#1E3A8A] px-3 py-1 font-mono text-white hover:bg-[#1E3A8A]">
                     LAN {application.applicationNumber}
                   </Badge>
-                  {canWrite ? (
+                  {canEdit ? (
                     <Button
                       type="button"
                       size="sm"
@@ -215,7 +242,7 @@ function BankApplicationCard({
               ) : (
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline">LAN not assigned</Badge>
-                  {canWrite ? (
+                  {canEdit ? (
                     <Button type="button" size="sm" variant="outline" onClick={() => setEditingLan(true)}>
                       Add LAN
                     </Button>
@@ -239,7 +266,7 @@ function BankApplicationCard({
           </div>
         </div>
 
-        {canWrite ? (
+        {canEdit ? (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[220px]">
             {!sent ? (
               <Button
@@ -267,7 +294,17 @@ function BankApplicationCard({
         ) : null}
       </div>
 
-      {showRejectForm && canWrite ? (
+      {isClosedByWinner ? (
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
+          <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span>
+            Closed automatically because <strong>{winnerName}</strong> reached{" "}
+            {winnerStatusLabel}.
+          </span>
+        </div>
+      ) : null}
+
+      {showRejectForm && canEdit ? (
         <div className="mt-4 space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
           <Input
             placeholder="Rejection reason (optional)"
@@ -296,7 +333,7 @@ function BankApplicationCard({
           Application Status
         </p>
         <div className="mt-2 max-w-xs">
-          {canWrite ? (
+          {canEdit ? (
             <Select
               value={status}
               onValueChange={(value) => handleStatusChange(value as ApplicationStatusId)}
@@ -314,7 +351,9 @@ function BankApplicationCard({
               </SelectContent>
             </Select>
           ) : (
-            <p className="text-sm font-semibold">{getApplicationStatusLabel(status)}</p>
+            <p className="text-sm font-semibold">
+              {isClosedByWinner ? "Closed" : getApplicationStatusLabel(status)}
+            </p>
           )}
         </div>
       </div>
@@ -336,6 +375,10 @@ export function StudentApplicationPanel({
 
   const primaryApplication = useMemo(
     () => loanApplications.find((entry) => entry.isPrimary) ?? loanApplications[0],
+    [loanApplications]
+  );
+  const winningApplication = useMemo(
+    () => getWinningLoanApplication(loanApplications),
     [loanApplications]
   );
 
@@ -385,6 +428,21 @@ export function StudentApplicationPanel({
   return (
     <div className="space-y-4">
       <GlassCard className="p-5">
+        {winningApplication ? (
+          <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+            <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
+            <div>
+              <p className="font-semibold">
+                {winningApplication.lenderName ?? "Selected lender"} is confirmed
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-800">
+                Other bank applications are closed because this lender reached{" "}
+                {getApplicationStatusLabel(winningApplication.applicationStatus)}.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2 lg:min-w-[260px]">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -399,7 +457,10 @@ export function StudentApplicationPanel({
                   label: lender.name,
                 }))}
               >
-                <SelectTrigger className="w-full" disabled={primaryLoading}>
+                <SelectTrigger
+                  className="w-full"
+                  disabled={primaryLoading || Boolean(winningApplication)}
+                >
                   <SelectValue placeholder="Select lender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -417,7 +478,7 @@ export function StudentApplicationPanel({
             )}
           </div>
 
-          {canWrite && availableLenders.length > 0 ? (
+          {canWrite && !winningApplication && availableLenders.length > 0 ? (
             <div className="space-y-2 lg:min-w-[260px]">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Add parallel bank
@@ -458,16 +519,17 @@ export function StudentApplicationPanel({
                 ? lenderVisualsBySlug.get(application.lenderSlug)
                 : undefined;
               return (
-              <BankApplicationCard
-                key={application._id}
-                studentId={studentId}
-                application={application}
-                canWrite={canWrite}
-                onUpdated={() => onBankActivity?.()}
-                lenderLogo={visuals?.logo}
-                lenderAccent={visuals?.accent}
-              />
-            );
+                <BankApplicationCard
+                  key={application._id}
+                  studentId={studentId}
+                  application={application}
+                  canWrite={canWrite}
+                  onUpdated={() => onBankActivity?.()}
+                  lenderLogo={visuals?.logo}
+                  lenderAccent={visuals?.accent}
+                  winningApplication={winningApplication}
+                />
+              );
             })
           ) : (
             <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">

@@ -61,6 +61,11 @@ export interface MarketingService {
   subOptions?: MarketingServiceSubOption[];
 }
 
+export interface MarketingCountryFaq {
+  question: string;
+  answer: string;
+}
+
 export interface MarketingCountry {
   slug: string;
   name: string;
@@ -81,6 +86,15 @@ export interface MarketingCountry {
   /** Hero/card image path under public/ */
   image?: string;
   imageAlt?: string;
+  /** SEO-optimized page title without brand suffix */
+  seoTitle?: string;
+  seoDescription?: string;
+  heroTitle?: string;
+  /** Answer-first summary for AEO/GEO */
+  answerSummary?: string;
+  loanGuide?: string[];
+  faqs?: MarketingCountryFaq[];
+  keywords?: string[];
 }
 
 export interface MarketingTestimonial {

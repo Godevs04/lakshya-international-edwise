@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { AssigneeSelect } from "@/components/forms/assignee-select";
 import { bulkUpdateStudentsAction } from "@/lib/actions/student.actions";
-import { STUDENT_STATUSES, STUDENT_STATUS_CONFIG } from "@/lib/constants/statuses";
+import { APPLICATION_STATUS_OPTIONS } from "@/lib/constants/application-status";
 import { notify } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
@@ -305,14 +305,21 @@ export function StudentBulkActionsBar({
         </ActionPod>
 
         <ActionPod icon={ListChecks} label="Status" index={2}>
-          <Select value={status} onValueChange={(value) => setStatus(value ?? "")}>
+          <Select
+            value={status}
+            onValueChange={(value) => setStatus(value ?? "")}
+            items={APPLICATION_STATUS_OPTIONS.map((option) => ({
+              value: option.value,
+              label: option.label,
+            }))}
+          >
             <SelectTrigger className={SELECT_TRIGGER_CLASS}>
               <SelectValue placeholder="Set status…" />
             </SelectTrigger>
             <SelectContent>
-              {STUDENT_STATUSES.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {STUDENT_STATUS_CONFIG[item].label}
+              {APPLICATION_STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>

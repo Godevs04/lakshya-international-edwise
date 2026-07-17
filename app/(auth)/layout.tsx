@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import { PremiumBackground } from "@/components/layout/premium-background";
 import { AppLogo } from "@/components/brand/app-logo";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
+};
 
 export default function AuthLayout({
   children,

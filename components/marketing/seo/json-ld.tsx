@@ -20,44 +20,69 @@ export function organizationJsonLd(params: {
   sameAs?: string[];
   address?: string;
 }) {
+  const organizationId = `${params.url.replace(/\/$/, "")}/#organization`;
+
   return {
     "@context": "https://schema.org",
-    "@type": ["Organization", "FinancialService"],
+    "@type": "Organization",
+    "@id": organizationId,
     name: params.name,
+    alternateName: ["Lakshya Edwise", "Lakshya International Edwise Education Loans"],
     url: params.url,
     email: params.email,
     telephone: params.phone,
-    ...(params.logo ? { logo: params.logo } : {}),
+    ...(params.logo ? { logo: params.logo, image: params.logo } : {}),
     ...(params.address
-      ? { address: { "@type": "PostalAddress", addressLocality: params.address } }
-      : {}),
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: params.address,
+            addressCountry: "IN",
+          },
+        }
+      : {
+          address: {
+            "@type": "PostalAddress",
+            addressCountry: "IN",
+          },
+        }),
+    areaServed: {
+      "@type": "Country",
+      name: "India",
+    },
     ...(params.sameAs?.length ? { sameAs: params.sameAs } : {}),
+    knowsAbout: [
+      "Overseas education loans",
+      "Non-collateral education loans",
+      "Student loans for studying abroad",
+      "Education finance for UAE and Dubai",
+      "Education loans for Ireland",
+      "Education loans for Canada",
+    ],
     makesOffer: {
       "@type": "Offer",
       itemOffered: {
         "@type": "Service",
         name: "Overseas Education Loan Assistance",
         description:
-          "Education loan comparison and assistance for students studying abroad in India.",
+          "Education loan comparison and application support for Indian students studying abroad, including USA, UK, Canada, Ireland, Germany, Australia, and UAE/Dubai.",
+        provider: { "@id": organizationId },
       },
     },
   };
 }
 
-export function websiteJsonLd(params: { name: string; url: string; searchUrl: string }) {
+export function websiteJsonLd(params: { name: string; url: string }) {
+  const siteUrl = params.url.replace(/\/$/, "");
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
     name: params.name,
+    alternateName: ["Lakshya Edwise", "Lakshya International Edwise"],
     url: params.url,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${params.searchUrl}?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
+    publisher: { "@id": `${siteUrl}/#organization` },
+    inLanguage: "en-IN",
   };
 }
 
@@ -102,18 +127,36 @@ export function serviceJsonLd(params: {
   description: string;
   url: string;
   provider: string;
+  providerUrl?: string;
+  areaServed?: string | string[];
 }) {
+  const providerUrl = (params.providerUrl ?? "").replace(/\/$/, "");
+  const areas = Array.isArray(params.areaServed)
+    ? params.areaServed
+    : [params.areaServed ?? "IN"];
+
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     name: params.name,
     description: params.description,
     url: params.url,
-    provider: {
-      "@type": "FinancialService",
-      name: params.provider,
+    serviceType: "Education loan assistance",
+    provider: providerUrl
+      ? { "@id": `${providerUrl}/#organization` }
+      : {
+          "@type": "Organization",
+          name: params.provider,
+        },
+    areaServed: areas.map((area) =>
+      area.length === 2
+        ? { "@type": "Country", name: area }
+        : { "@type": "Place", name: area }
+    ),
+    audience: {
+      "@type": "Audience",
+      audienceType: "Indian students planning overseas education",
     },
-    areaServed: "IN",
   };
 }
 
@@ -126,14 +169,31 @@ export function localBusinessJsonLd(params: {
 }) {
   return {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": "ProfessionalService",
+    "@id": `${params.url.replace(/\/$/, "")}/#localbusiness`,
     name: params.name,
     url: params.url,
     email: params.email,
     telephone: params.phone,
+    priceRange: "$$",
     ...(params.address
-      ? { address: { "@type": "PostalAddress", addressLocality: params.address } }
-      : {}),
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: params.address,
+            addressCountry: "IN",
+          },
+        }
+      : {
+          address: {
+            "@type": "PostalAddress",
+            addressCountry: "IN",
+          },
+        }),
+    areaServed: {
+      "@type": "Country",
+      name: "India",
+    },
   };
 }
 

@@ -36,9 +36,11 @@ export function MarketingFooter() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6">
           <div className="space-y-4 lg:col-span-2">
             <AppLogo alt={contact.companyName} variant="mobile" surface="dark" />
+            <p className="text-sm font-semibold text-white">{contact.companyName}</p>
             <p className="max-w-sm text-sm leading-relaxed text-white/70">
-              Your trusted overseas education financial partner — the lowest-interest education
-              loans from 20+ lenders, with fast approvals and zero service charges.
+              Lakshya International Edwise is your trusted overseas education financial partner —
+              education loans from 20+ lenders for USA, UK, Canada, Ireland, Germany, Australia, and
+              UAE/Dubai, with fast approvals and transparent guidance.
             </p>
             {socialLinks.length > 0 && (
               <div className="flex flex-wrap gap-2">

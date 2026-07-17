@@ -5,9 +5,10 @@ export const MARKETING_SERVICES: MarketingService[] = [
   {
     slug: "education-loan",
     title: "Education Loan",
-    shortDescription: "Collateral & non-collateral loans up to ₹2 Cr from 20+ lenders.",
+    shortDescription:
+      "Overseas education loans up to ₹2 Cr from 20+ banks and NBFCs — collateral, non-collateral, and selected non-cosigner options.",
     description:
-      "Compare secured and unsecured education loans across banks and NBFCs. We help you fund 100% of tuition and living costs with the lowest possible interest rate.",
+      "Lakshya International Edwise helps Indian students compare secured and unsecured overseas education loans across banks and NBFCs. Fund tuition, living costs, travel, and visa-related expenses for destinations including USA, UK, Canada, Ireland, Germany, Australia, and UAE/Dubai.",
     highlights: [
       "Non-collateral & non-cosigner options",
       "Up to ₹2 Cr, 100% cost coverage",

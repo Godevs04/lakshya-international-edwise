@@ -3,12 +3,14 @@ import { Providers } from "@/components/providers";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
+import { getSiteUrl } from "@/lib/config/marketing";
 import { fontMono, fontSans } from "@/lib/fonts";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getAppConfig();
   return {
+    metadataBase: new URL(getSiteUrl()),
     title: {
       default: config.company.name,
       template: `%s | ${config.company.name}`,

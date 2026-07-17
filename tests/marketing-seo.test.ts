@@ -55,6 +55,22 @@ describe("marketing SEO metadata", () => {
     });
     expect(metadata.keywords).toEqual([...DEFAULT_MARKETING_KEYWORDS]);
     expect(metadata.keywords).toContain("education loan India");
+    expect(metadata.keywords).toContain("education finance UAE");
+    expect(metadata.keywords).toContain("education loan for Ireland");
+    expect(metadata.keywords).toContain("Lakshya International Edwise");
     expect(metadata.keywords).not.toContain("study abroad consultancy India");
+  });
+
+  it("supports absolute titles to avoid brand duplication", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://lakshyainternationaledwise.com");
+    const metadata = buildMarketingMetadata({
+      title: "Lakshya International Edwise | Overseas Education Loan Experts",
+      description: "Overseas education loan experts in India.",
+      path: "/",
+      absoluteTitle: true,
+    });
+    expect(metadata.title).toEqual({
+      absolute: "Lakshya International Edwise | Overseas Education Loan Experts",
+    });
   });
 });

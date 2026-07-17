@@ -51,17 +51,22 @@ describe("legal content", () => {
 });
 
 describe("structured data", () => {
-  it("points site search to FAQ with query parameter", () => {
+  it("publishes website entity without a fake search action", () => {
     const data = websiteJsonLd({
       name: "Lakshya International Edwise",
       url: "https://lakshyainternationaledwise.com",
-      searchUrl: "https://lakshyainternationaledwise.com/faq",
     }) as {
-      potentialAction: { target: { urlTemplate: string } };
+      "@type": string;
+      alternateName?: string[];
+      potentialAction?: unknown;
+      publisher?: { "@id": string };
     };
 
-    expect(data.potentialAction.target.urlTemplate).toBe(
-      "https://lakshyainternationaledwise.com/faq?q={search_term_string}"
+    expect(data["@type"]).toBe("WebSite");
+    expect(data.alternateName).toContain("Lakshya Edwise");
+    expect(data.potentialAction).toBeUndefined();
+    expect(data.publisher?.["@id"]).toBe(
+      "https://lakshyainternationaledwise.com/#organization"
     );
   });
 });
