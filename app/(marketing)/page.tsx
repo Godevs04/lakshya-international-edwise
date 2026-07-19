@@ -113,7 +113,7 @@ export default function MarketingHomePage() {
       <ValuePropsGrid
         eyebrow="What Lakshya Accepts"
         title="Rejected elsewhere? We still say yes."
-        description="Low CIBIL, no co-signer, gap years — we work with lenders who look at the whole picture."
+        description="Low CIBIL, no guarantor, gap years — we work with lenders who look at the whole picture."
         items={WHAT_LAKSHYA_ACCEPTS}
         variant="white"
         ctaSource="accepts-grid"

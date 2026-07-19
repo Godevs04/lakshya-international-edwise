@@ -2,27 +2,21 @@ import type { MarketingServiceSubOption } from "@/types/marketing";
 
 export const EDUCATION_LOAN_OPTIONS: MarketingServiceSubOption[] = [
   {
-    slug: "non-cosigner",
-    title: "Non Cosigner Loan",
-    shortDescription: "Fund your studies without a co-signer or guarantor.",
+    slug: "without-guarantor",
+    title: "Without Guarantor Loan",
+    shortDescription: "Fund your studies without a financial guarantor — no repayment during school for eligible profiles.",
     icon: "Users",
-  },
-  {
-    slug: "cosigner",
-    title: "Cosigner Loan",
-    shortDescription: "Lower rates with a qualified co-signer on your application.",
-    icon: "HeartHandshake",
   },
   {
     slug: "non-collateral",
     title: "Non Collateral Loan",
-    shortDescription: "Unsecured education loans — no property pledge required.",
+    shortDescription: "Unsecured education loans up to ₹1.5 Cr — no property pledge required.",
     icon: "ShieldCheck",
   },
   {
     slug: "collateral",
     title: "Collateral Loan",
-    shortDescription: "Secured loans with the lowest interest from top banks.",
+    shortDescription: "Secured loans up to ₹2 Cr with the lowest interest from top banks.",
     icon: "Building2",
   },
 ];

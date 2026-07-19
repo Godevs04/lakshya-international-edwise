@@ -43,7 +43,7 @@ export const WHY_LAKSHYA: ValueProp[] = [
 export const WHAT_LAKSHYA_ACCEPTS: ValueProp[] = [
   { title: "Low CIBIL Score", description: "We work with lenders who look beyond the score.", icon: "ShieldCheck", stat: "92% approval rate" },
   { title: "Zero / Low Income", description: "Options that don't hinge on family income.", icon: "Wallet", stat: "Flexible income proof" },
-  { title: "No Co-signer", description: "Non-cosigner loans for eligible profiles.", icon: "Users", stat: "No cosigner needed" },
+  { title: "No Guarantor", description: "Without-guarantor loans for eligible profiles.", icon: "Users", stat: "No guarantor needed" },
   { title: "No Financial Proof", description: "Non-collateral, no-document-heavy pathways.", icon: "FileText", stat: "Low CIBIL accepted" },
   { title: "Rejected Elsewhere", description: "We re-package profiles other lenders declined.", icon: "Route" },
   { title: "Academic / Gap Year", description: "Backlogs and gap years are not deal-breakers.", icon: "Calendar" },

@@ -30,14 +30,14 @@ export async function generateMetadata({
     return buildMarketingMetadata({
       title: `Overseas Education Loan in India | ${contact.companyName}`,
       description:
-        "Compare overseas education loans from 20+ banks and NBFCs with Lakshya International Edwise. Collateral, non-collateral, and non-cosigner options for USA, UK, Canada, Ireland, Germany, and UAE/Dubai.",
+        "Compare overseas education loans from 20+ banks and NBFCs with Lakshya International Edwise. Collateral, non-collateral, and without-guarantor options for USA, UK, Canada, Ireland, Germany, and UAE/Dubai.",
       path: `/services/${slug}`,
       keywords: [
         "overseas education loan",
         "education loan India",
         "student loan for international students",
         "non collateral education loan",
-        "education loan without cosigner",
+        "education loan without guarantor",
         "Lakshya International Edwise",
       ],
     });
@@ -99,7 +99,7 @@ export default async function ServiceDetailPage({
           background="grid"
           eyebrow="Loan Types"
           title="Choose the right education loan for your profile"
-          description="Compare non-cosigner, cosigner, collateral, and non-collateral options — we match you with the best lender."
+          description="Compare without-guarantor, non-collateral, and collateral options — we match you with the best lender."
           align="center"
         >
           <EducationLoanOptionsSection options={service.subOptions} />
