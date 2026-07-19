@@ -39,6 +39,7 @@ const RAW_LENDERS: MarketingLender[] = [
     roiFrom: 8.05,
     maxLoanLabel: "Up to ₹1.5 Cr",
     processingLabel: "7-10 days",
+    collateralLabel: "Collateral mandatory",
     accent: "#22409a",
   },
   {
@@ -48,6 +49,7 @@ const RAW_LENDERS: MarketingLender[] = [
     roiFrom: 8.15,
     maxLoanLabel: "Up to ₹1.5 Cr",
     processingLabel: "7-10 days",
+    collateralLabel: "Collateral mandatory",
     accent: "#f37021",
   },
   {
@@ -57,6 +59,7 @@ const RAW_LENDERS: MarketingLender[] = [
     roiFrom: 8.3,
     maxLoanLabel: "Up to ₹1.5 Cr",
     processingLabel: "7-12 days",
+    collateralLabel: "Not mandatory",
     accent: "#c8102e",
   },
   {
@@ -66,6 +69,7 @@ const RAW_LENDERS: MarketingLender[] = [
     roiFrom: 8.4,
     maxLoanLabel: "Up to ₹1.5 Cr",
     processingLabel: "7-12 days",
+    collateralLabel: "Collateral mandatory",
     accent: "#a6192e",
   },
   {
@@ -73,7 +77,7 @@ const RAW_LENDERS: MarketingLender[] = [
     slug: "axis-bank",
     category: "private",
     roiFrom: 9.5,
-    maxLoanLabel: "Up to ₹75 L",
+    maxLoanLabel: "Cost of education",
     processingLabel: "3-5 days",
     unsecured: true,
     accent: "#97144d",
@@ -83,7 +87,7 @@ const RAW_LENDERS: MarketingLender[] = [
     slug: "icici-bank",
     category: "private",
     roiFrom: 9.75,
-    maxLoanLabel: "Up to ₹1 Cr",
+    maxLoanLabel: "Cost of education",
     processingLabel: "3-5 days",
     unsecured: true,
     accent: "#b02a30",
@@ -93,7 +97,7 @@ const RAW_LENDERS: MarketingLender[] = [
     slug: "idfc-first",
     category: "private",
     roiFrom: 9.9,
-    maxLoanLabel: "Up to ₹75 L",
+    maxLoanLabel: "Cost of education",
     processingLabel: "3-5 days",
     unsecured: true,
     accent: "#9c1d26",
@@ -103,7 +107,7 @@ const RAW_LENDERS: MarketingLender[] = [
     slug: "yes-bank",
     category: "private",
     roiFrom: 10.0,
-    maxLoanLabel: "Up to ₹65 L",
+    maxLoanLabel: "Cost of education",
     processingLabel: "3-6 days",
     unsecured: true,
     accent: "#00518f",
@@ -223,4 +227,21 @@ export const LENDER_CATEGORY_ORDER: LenderCategory[] = [
 
 export function getLendersByCategory(category: LenderCategory): MarketingLender[] {
   return MARKETING_LENDERS.filter((lender) => lender.category === category);
+}
+
+const NON_MANDATORY_COLLATERAL_SLUGS = new Set([
+  "credila",
+  "avanse",
+  "auxilo",
+]);
+
+export function getLenderCollateralLabel(lender: MarketingLender): string {
+  if (lender.collateralLabel) return lender.collateralLabel;
+  if (
+    lender.category === "private" ||
+    NON_MANDATORY_COLLATERAL_SLUGS.has(lender.slug)
+  ) {
+    return "Not mandatory";
+  }
+  return lender.unsecured ? "No collateral" : "May be required";
 }

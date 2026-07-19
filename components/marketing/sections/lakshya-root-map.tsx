@@ -87,21 +87,27 @@ function HubNode() {
 
   return (
     <motion.div
-      className="why-lakshya-hub"
       initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9, y: 16 }}
       whileInView={{ opacity: 1, scale: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, ease: EASE }}
     >
-      <span className="why-lakshya-hub-ring why-lakshya-hub-ring-1" aria-hidden />
-      <span className="why-lakshya-hub-ring why-lakshya-hub-ring-2" aria-hidden />
       <motion.div
-        className="why-lakshya-hub-core"
-        {...(prefersReducedMotion ? {} : { animate: floatSlow.animate, transition: floatSlow.transition })}
+        className="why-lakshya-hub"
+        {...(prefersReducedMotion
+          ? {}
+          : { animate: floatSlow.animate, transition: floatSlow.transition })}
       >
-        <Sparkles className="why-lakshya-hub-icon h-5 w-5" aria-hidden />
-        <span className="why-lakshya-hub-label">Lakshya</span>
-        <span className="why-lakshya-hub-tag">Your finance partner</span>
+        <span className="why-lakshya-hub-ring why-lakshya-hub-ring-1" aria-hidden />
+        <span className="why-lakshya-hub-ring why-lakshya-hub-ring-2" aria-hidden />
+        <div className="why-lakshya-hub-core">
+          <Sparkles className="why-lakshya-hub-icon h-4 w-4" aria-hidden />
+          <span className="why-lakshya-hub-label">Lakshya</span>
+          <span className="why-lakshya-hub-tag">
+            <span>Your finance</span>
+            <span>partner</span>
+          </span>
+        </div>
       </motion.div>
     </motion.div>
   );
@@ -192,7 +198,7 @@ export function LakshyaRootMap() {
     <SectionShell
       variant="muted"
       background="grid"
-      eyebrow="Why Choose Us"
+      eyebrow="Why Lakshya"
       title="One partner, three promises"
       description="From eligibility to disbursement, here is what sets Lakshya apart."
       align="center"

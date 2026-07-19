@@ -7,6 +7,7 @@ import { AboutPreviewSection } from "@/components/marketing/sections/about-previ
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { CountryCard } from "@/components/marketing/cards/country-card";
 import { FaqSection } from "@/components/marketing/sections/faq";
+import { WhyChooseSection } from "@/components/marketing/sections/why-choose";
 import { HomepageJourneyPath } from "@/components/marketing/motion/homepage-journey-path";
 import { JsonLd, faqPageJsonLd, websiteJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
@@ -105,15 +106,15 @@ export default function MarketingHomePage() {
 
       <HomepageJourneyPath />
       <FinanceHero />
-      <FinanceServicesGrid />
       <LoanCalculatorSection />
-      <FinanceProcessHorizontal />
       <LakshyaRootMap />
+      <FinanceProcessHorizontal />
+      <WhyChooseSection />
 
       <ValuePropsGrid
         eyebrow="What Lakshya Accepts"
         title="Rejected elsewhere? We still say yes."
-        description="Low CIBIL, no co-signer, gap years — we work with lenders who look at the whole picture."
+        description="Low CIBIL, no guarantor, gap years — we work with lenders who look at the whole picture."
         items={WHAT_LAKSHYA_ACCEPTS}
         variant="white"
         ctaSource="accepts-grid"
@@ -127,6 +128,8 @@ export default function MarketingHomePage() {
         variant="accent"
         ctaSource="gives-back-grid"
       />
+
+      <FinanceServicesGrid />
 
       <SectionShell
         variant="muted"

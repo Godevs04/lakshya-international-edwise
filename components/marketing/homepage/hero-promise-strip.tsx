@@ -1,12 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GraduationCap, Landmark, Users } from "lucide-react";
+import { GraduationCap, Landmark, ShieldCheck } from "lucide-react";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
 const PROMISES = [
-  { icon: GraduationCap, label: "Non-cosigner — no repayment during school" },
-  { icon: Users, label: "Cosigner loans up to ₹1.5 Cr" },
+  { icon: GraduationCap, label: "Without guarantor — no repayment during school" },
+  { icon: ShieldCheck, label: "Non-collateral loans up to ₹1.5 Cr" },
   { icon: Landmark, label: "Collateral loans up to ₹2 Cr" },
 ] as const;
 

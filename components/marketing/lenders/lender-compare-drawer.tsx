@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, Scale } from "lucide-react";
 import type { MarketingLender } from "@/types/marketing";
-import { LENDER_CATEGORY_LABELS } from "@/lib/constants/marketing/lenders";
+import { LENDER_CATEGORY_LABELS, getLenderCollateralLabel } from "@/lib/constants/marketing/lenders";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
@@ -22,7 +22,7 @@ const ROWS: { key: string; label: string; get: (l: MarketingLender) => string }[
   {
     key: "collateral",
     label: "Collateral",
-    get: (l) => (l.unsecured ? "No collateral" : "May be required"),
+    get: getLenderCollateralLabel,
   },
   { key: "fee", label: "Lakshya fee", get: () => "Zero service charge" },
 ];

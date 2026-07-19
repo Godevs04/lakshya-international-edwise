@@ -7,6 +7,8 @@ import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-c
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { getMarketingService, MARKETING_SERVICES } from "@/lib/constants/marketing/services";
 import { EducationLoanOptionsSection } from "@/components/marketing/services/education-loan-options-section";
+import { EducationLoanTypesDetail } from "@/components/marketing/services/education-loan-types-detail";
+import { EducationLoanLenderCompare } from "@/components/marketing/services/education-loan-lender-compare";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { getMarketingContact } from "@/lib/config/marketing";
 import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
@@ -30,14 +32,16 @@ export async function generateMetadata({
     return buildMarketingMetadata({
       title: `Overseas Education Loan in India | ${contact.companyName}`,
       description:
-        "Compare overseas education loans from 20+ banks and NBFCs with Lakshya International Edwise. Collateral, non-collateral, and non-cosigner options for USA, UK, Canada, Ireland, Germany, and UAE/Dubai.",
+        "Compare without-guarantor, non-collateral, and collateral education loans with Lakshya International Edwise. Lender comparison tables, eligibility, benefits, and document checklists for studying abroad.",
       path: `/services/${slug}`,
       keywords: [
         "overseas education loan",
         "education loan India",
         "student loan for international students",
         "non collateral education loan",
-        "education loan without cosigner",
+        "collateral education loan",
+        "education loan without guarantor",
+        "compare education loan lenders",
         "Lakshya International Edwise",
       ],
     });
@@ -61,6 +65,7 @@ export default async function ServiceDetailPage({
 
   const contact = getMarketingContact();
   const serviceUrl = getAbsoluteUrl(`/services/${slug}`);
+  const isEducationLoan = slug === "education-loan";
 
   return (
     <>
@@ -93,18 +98,48 @@ export default async function ServiceDetailPage({
         <EligibilityCta source={`service-${slug}`} className="px-7 py-3.5 text-base" />
       </PageHero>
 
-      {service.subOptions && service.subOptions.length > 0 && (
+      {service.subOptions && service.subOptions.length > 0 ? (
         <SectionShell
           variant="muted"
           background="grid"
           eyebrow="Loan Types"
           title="Choose the right education loan for your profile"
-          description="Compare non-cosigner, cosigner, collateral, and non-collateral options — we match you with the best lender."
+          description="Compare without-guarantor, non-collateral, and collateral options — then explore detailed eligibility, benefits, and document checklists below."
           align="center"
         >
           <EducationLoanOptionsSection options={service.subOptions} />
         </SectionShell>
-      )}
+      ) : null}
+
+      {isEducationLoan ? (
+        <SectionShell
+          variant="white"
+          background="grid"
+          eyebrow="Detailed guide"
+          title="Types of education loans explained"
+          description="A clear breakdown of each loan type — structured like leading education-finance platforms, tailored for Lakshya International Edwise students."
+          align="center"
+          className="page-section-premium"
+          containerClassName="max-w-[90rem]"
+        >
+          <EducationLoanTypesDetail />
+        </SectionShell>
+      ) : null}
+
+      {isEducationLoan ? (
+        <SectionShell
+          variant="muted"
+          background="grid"
+          eyebrow="Loan schemes & lenders"
+          title="Study abroad education loan interest rates & partners"
+          description="Compare ROI, max loan amount, approval speed, and collateral requirements across 15+ banks, NBFCs, and international lenders."
+          align="center"
+          className="page-section-premium"
+          containerClassName="max-w-[90rem]"
+        >
+          <EducationLoanLenderCompare />
+        </SectionShell>
+      ) : null}
 
       <SectionShell
         variant="white"

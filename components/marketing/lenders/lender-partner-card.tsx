@@ -19,7 +19,7 @@ import {
   LENDER_CARD_LOGO_WELL_CLASS,
 } from "@/components/marketing/lenders/lender-logo";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
-import { LENDER_CATEGORY_LABELS } from "@/lib/constants/marketing/lenders";
+import { LENDER_CATEGORY_LABELS, getLenderCollateralLabel } from "@/lib/constants/marketing/lenders";
 import type { MarketingLender } from "@/types/marketing";
 import { cn } from "@/lib/utils";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
@@ -171,7 +171,7 @@ function LenderPartnerCardInner({
               <Shield className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
               <span className="text-[11px] text-muted-foreground">Collateral</span>
               <span className="ml-auto text-[11px] font-semibold text-secondary">
-                {lender.unsecured ? "No collateral" : "May be required"}
+                {getLenderCollateralLabel(lender)}
               </span>
             </li>
             <li className="lender-details-row">

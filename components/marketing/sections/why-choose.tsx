@@ -6,7 +6,7 @@ export function WhyChooseSection() {
   return (
     <SectionShell
       variant="tint"
-      eyebrow="Why Lakshya"
+      eyebrow="Why Choose Us"
       title="Why students and parents choose us"
       description="A consultancy built on transparency, expertise, and outcomes - not sales pressure."
     >

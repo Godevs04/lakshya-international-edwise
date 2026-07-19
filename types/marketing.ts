@@ -41,6 +41,8 @@ export interface MarketingLender {
   maxLoanLabel: string;
   processingLabel: string;
   unsecured?: boolean;
+  /** Override collateral copy shown on lender cards / compare drawer */
+  collateralLabel?: string;
   featured?: boolean;
 }
 

@@ -31,7 +31,7 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
       "Get an education loan for studying in Canada with Lakshya International Edwise. Cover tuition, living expenses, and Canada GIC requirements with collateral and non-collateral options from 20+ lenders.",
     heroTitle: "Education loans for studying in Canada",
     answerSummary:
-      "Yes — Indian students can fund a Canada education with an overseas education loan that covers tuition, living expenses, and often the Guaranteed Investment Certificate (GIC) needed for a study permit. Lakshya International Edwise compares 20+ banks and NBFCs to match your profile with collateral, non-collateral, and selected non-cosigner options.",
+      "Yes — Indian students can fund a Canada education with an overseas education loan that covers tuition, living expenses, and often the Guaranteed Investment Certificate (GIC) needed for a study permit. Lakshya International Edwise compares 20+ banks and NBFCs to match your profile with collateral, non-collateral, and without-guarantor options.",
     loanGuide: [
       "Typical Canada funding needs include tuition (CAD 18K–35K/year), living costs, and GIC proof for many study-permit applications.",
       "Collateral education loans can start from about 8.25% ROI, while non-collateral options usually need a financially strong co-applicant.",
@@ -142,7 +142,7 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
       {
         question: "Is collateral mandatory for an Ireland student loan?",
         answer:
-          "No. Collateral helps for larger amounts, but non-collateral options exist with a financial co-applicant. Selected non-cosigner programs may also be available for strong profiles.",
+          "No. Collateral helps for larger amounts, but non-collateral options exist with a financial co-applicant. Selected without-guarantor programs may also be available for strong profiles.",
       },
     ],
     keywords: [

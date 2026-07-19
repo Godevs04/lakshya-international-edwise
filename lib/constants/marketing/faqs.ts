@@ -231,14 +231,14 @@ export const MARKETING_FAQS: MarketingFaq[] = [
     category: "Eligibility",
     question: "I don't have a financial guarantor. Am I still eligible for an education loan?",
     answer: [
-      "Yes. Lakshya offers Non-Co-Signer Education Loan programs through selected lending partners.",
+      "Yes. Lakshya offers Without-Guarantor Education Loan programs through selected lending partners.",
       "These loans allow eligible students to obtain education financing without requiring a financial co-applicant or guarantor. Eligibility depends on factors such as your academic profile, university, course, destination country, and lender policies.",
-      "Our experts will evaluate your profile and help you identify the best non-co-signer loan options available.",
+      "Our experts will evaluate your profile and help you identify the best without-guarantor loan options available.",
     ].join("\n\n"),
   },
   {
     category: "Loan Types",
-    question: "How do collateral, non-collateral, and non-co-signer education loans work?",
+    question: "How do collateral, non-collateral, and without-guarantor education loans work?",
     answer: [
       "## Collateral Education Loan (ROI from 8.25%)",
       "A collateral loan requires you to pledge an asset such as residential property, commercial property, fixed deposits, or other approved securities.",
@@ -257,7 +257,7 @@ export const MARKETING_FAQS: MarketingFaq[] = [
         .map((item) => `• ${item}`)
         .join("\n"),
       "If your financial documents are incomplete, Lakshya's experienced team will guide you in preparing the required documentation, including assistance with income tax filing and other supporting documents, wherever applicable.",
-      "## Non-Co-Signer Education Loan",
+      "## Without-Guarantor Education Loan",
       "Lakshya also offers education loans without collateral and without a financial co-applicant through selected international lending partners.",
       "These loans are available for eligible students pursuing higher education in countries such as:",
       ["USA", "UK", "Germany", "Australia", "Canada and other eligible destinations"]
