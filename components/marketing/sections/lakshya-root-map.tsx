@@ -198,7 +198,7 @@ export function LakshyaRootMap() {
     <SectionShell
       variant="muted"
       background="grid"
-      eyebrow="Why Choose Us"
+      eyebrow="Why Lakshya"
       title="One partner, three promises"
       description="From eligibility to disbursement, here is what sets Lakshya apart."
       align="center"
