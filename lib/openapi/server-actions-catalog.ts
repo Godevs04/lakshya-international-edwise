@@ -271,4 +271,127 @@ export const SERVER_ACTION_GROUPS: ServerActionGroup[] = [
       { name: "getUploadSignatureAction", summary: "Cloudinary signed upload parameters", requestProperties: { folder: { type: "string" } } },
     ],
   },
+  {
+    module: "marketing",
+    tag: "Server Actions — Marketing (Public)",
+    actions: [
+      {
+        name: "submitWebsiteEnquiryAction",
+        summary: "Submit a public website / eligibility enquiry (creates or updates a site student lead)",
+        description:
+          "Public server action used by Check Eligibility and contact forms. Rate-limited by IP. Honeypot field `website` silently succeeds.",
+        requestProperties: {
+          formData: {
+            type: "object",
+            description:
+              "FormData: name, email, phone, targetCountry, preferredLender, loanAmount, currentStatus, message, subject, source, website (honeypot)",
+          },
+        },
+        required: ["formData"],
+      },
+      {
+        name: "submitPartnerEnquiryAction",
+        summary: "Submit a Become a Partner enquiry (creates a site partner lead)",
+        description: "Public server action used by the partner programme form. Rate-limited by IP.",
+        requestProperties: {
+          formData: {
+            type: "object",
+            description: "FormData: partner organisation and contact fields from become-a-partner",
+          },
+        },
+        required: ["formData"],
+      },
+    ],
+  },
+  {
+    module: "site-leads",
+    tag: "Server Actions — Site Leads",
+    actions: [
+      { name: "getSiteLeadCounts", summary: "Dashboard badge counts for pending student and partner site leads" },
+      { name: "getSiteLeadAssignableUsers", summary: "Users who can be assigned site leads" },
+      {
+        name: "getSiteStudentLeads",
+        summary: "Paginated website student leads",
+        requestProperties: {
+          page: { type: "integer", minimum: 1 },
+          pageSize: { type: "integer", minimum: 1 },
+          search: { type: "string" },
+          status: { type: "string" },
+        },
+      },
+      {
+        name: "getSitePartnerLeads",
+        summary: "Paginated website partner leads",
+        requestProperties: {
+          page: { type: "integer", minimum: 1 },
+          pageSize: { type: "integer", minimum: 1 },
+          search: { type: "string" },
+          status: { type: "string" },
+        },
+      },
+      { name: "getSiteStudentLeadById", summary: "Website student lead detail", requestProperties: { id: { type: "string" } }, required: ["id"] },
+      { name: "getSitePartnerLeadById", summary: "Website partner lead detail", requestProperties: { id: { type: "string" } }, required: ["id"] },
+      { name: "getSiteStudentLeadApplication", summary: "Linked application for a website student lead", requestProperties: { studentLeadId: { type: "string" } }, required: ["studentLeadId"] },
+      {
+        name: "assignSiteStudentLeadAction",
+        summary: "Assign a website student lead to a user",
+        requestProperties: { id: { type: "string" }, assigneeId: { type: "string" } },
+        required: ["id", "assigneeId"],
+      },
+      {
+        name: "assignSitePartnerLeadAction",
+        summary: "Assign a website partner lead to a user",
+        requestProperties: { id: { type: "string" }, assigneeId: { type: "string" } },
+        required: ["id", "assigneeId"],
+      },
+      {
+        name: "promoteSiteStudentLeadAction",
+        summary: "Promote a website student lead into the CRM student pipeline",
+        requestProperties: { id: { type: "string" }, formData: { type: "object" } },
+        required: ["id"],
+      },
+      {
+        name: "promoteSitePartnerLeadAction",
+        summary: "Promote a website partner lead into a CRM partner",
+        requestProperties: { id: { type: "string" }, formData: { type: "object" } },
+        required: ["id"],
+      },
+      {
+        name: "bulkPromoteSiteStudentLeadsAction",
+        summary: "Bulk promote website student leads",
+        requestProperties: { ids: { type: "array", items: { type: "string" } } },
+        required: ["ids"],
+      },
+      {
+        name: "bulkPromoteSitePartnerLeadsAction",
+        summary: "Bulk promote website partner leads",
+        requestProperties: { ids: { type: "array", items: { type: "string" } } },
+        required: ["ids"],
+      },
+      { name: "deleteSiteStudentLeadAction", summary: "Delete a website student lead", requestProperties: { id: { type: "string" } }, required: ["id"] },
+      { name: "deleteSitePartnerLeadAction", summary: "Delete a website partner lead", requestProperties: { id: { type: "string" } }, required: ["id"] },
+      {
+        name: "bulkDeleteSiteStudentLeadsAction",
+        summary: "Bulk delete website student leads",
+        requestProperties: { ids: { type: "array", items: { type: "string" } } },
+        required: ["ids"],
+      },
+      {
+        name: "bulkDeleteSitePartnerLeadsAction",
+        summary: "Bulk delete website partner leads",
+        requestProperties: { ids: { type: "array", items: { type: "string" } } },
+        required: ["ids"],
+      },
+      {
+        name: "exportSiteStudentLeadsCsvAction",
+        summary: "Export website student leads as CSV",
+        requestProperties: { search: { type: "string" } },
+      },
+      {
+        name: "exportSitePartnerLeadsCsvAction",
+        summary: "Export website partner leads as CSV",
+        requestProperties: { search: { type: "string" } },
+      },
+    ],
+  },
 ];

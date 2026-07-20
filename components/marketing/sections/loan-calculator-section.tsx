@@ -5,7 +5,6 @@ import { ArrowRight, Calculator, CircleAlert, Sparkles, Wallet } from "lucide-re
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
   useSpring,
   useTransform,
 } from "framer-motion";
@@ -15,6 +14,7 @@ import { Reveal, RevealItem, RevealStagger } from "@/components/marketing/motion
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { LoanCalculatorLottie } from "@/components/marketing/sections/loan-calculator-lottie";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const CONFETTI_COLORS = ["#0b8fd8", "#38bdf8", "#7dd3fc", "#fbbf24", "#34d399", "#ffffff"];
@@ -60,7 +60,7 @@ function AnimatedCurrency({
   value: number;
   className?: string;
 }) {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const spring = useSpring(value, {
     stiffness: 90,
     damping: 22,
@@ -106,7 +106,7 @@ function LoanSlider({
   onChange,
 }: LoanSliderProps) {
   const percent = ((value - min) / (max - min)) * 100;
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
 
   return (
     <div className="loan-calc-slider group">
@@ -169,7 +169,7 @@ function LoanBreakdownDonut({
   principal: number;
   totalInterest: number;
 }) {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const total = principal + totalInterest;
   const principalShare = total > 0 ? principal / total : 0.5;
   const interestShare = 1 - principalShare;
@@ -388,7 +388,7 @@ function LoanSummaryFooter({
 
 export function LoanCalculatorSection() {
   const { scaleIn } = useMarketingMotion();
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
 
   const [amount, setAmount] = useState(4_000_000);
   const [rate, setRate] = useState(10.5);

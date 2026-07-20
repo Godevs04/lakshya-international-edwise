@@ -16,7 +16,11 @@ function buildServiceNavChildren(): MarketingNavItem[] {
         ...EDUCATION_LOAN_OPTIONS.map((option) => ({
           label: option.title,
           href: getEducationLoanOptionHref(option.slug),
-        }))
+        })),
+        {
+          label: "Compare Lenders",
+          href: "/services/education-loan#compare-lenders",
+        }
       );
     }
     return items;

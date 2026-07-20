@@ -1,12 +1,12 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 
 export function useHeroMotion() {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
 
   return {
-    prefersReducedMotion: Boolean(prefersReducedMotion),
+    prefersReducedMotion,
     planeFly: prefersReducedMotion
       ? {}
       : {

@@ -1,14 +1,14 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function useMarketingMotion() {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
 
   return {
-    prefersReducedMotion: Boolean(prefersReducedMotion),
+    prefersReducedMotion,
     fadeInUp: prefersReducedMotion
       ? { initial: {}, whileInView: {}, viewport: { once: true } }
       : {

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 import { Menu, X, ChevronDown, LogIn, ArrowRight } from "lucide-react";
 import { MARKETING_NAV } from "@/lib/constants/marketing/navigation";
 import { cn } from "@/lib/utils";
@@ -211,7 +212,7 @@ function MobileNavLink({
 export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
   const isActive = useNavActive();
   const { compact, progress } = useNavbarScroll();
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<MegaMenuType | null>(null);
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null);

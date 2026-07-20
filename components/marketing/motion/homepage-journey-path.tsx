@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 
 /**
  * Subtle SVG journey path that draws as homepage sections enter view.
  */
 export function HomepageJourneyPath() {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {

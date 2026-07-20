@@ -54,5 +54,7 @@ describe("buildOpenApiDocument", () => {
     );
     expect(actionPaths).toHaveLength(actionCount);
     expect(doc.tags.length).toBeGreaterThan(SERVER_ACTION_GROUPS.length);
+    expect(doc.paths["/server-actions/marketing/submitWebsiteEnquiryAction"]).toBeDefined();
+    expect(doc.paths["/server-actions/site-leads/getSiteLeadCounts"]).toBeDefined();
   });
 });
