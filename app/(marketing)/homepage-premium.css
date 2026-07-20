@@ -4635,3 +4635,152 @@
   color: rgba(11, 30, 72, 0.55);
   text-align: left;
 }
+
+/* Mobile / tablet polish for loan types + lender compare */
+@media (max-width: 1023px) {
+  .marketing-site .loan-type-nav {
+    top: 4rem;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.55rem;
+    gap: 0.5rem;
+  }
+
+  .marketing-site .loan-type-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .marketing-site .loan-type-nav-link {
+    flex-shrink: 0;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .marketing-site .loan-type-detail-hero,
+  .marketing-site .loan-type-benefits-grid,
+  .marketing-site .loan-type-checklist,
+  .marketing-site .loan-type-trust {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .marketing-site .loan-type-detail-hero {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .marketing-site .loan-type-detail-aside {
+    padding: 1rem;
+  }
+
+  .marketing-site .loan-type-checklist-head {
+    align-items: flex-start;
+  }
+
+  .marketing-site .loan-lender-compare-intro {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .marketing-site .loan-lender-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .marketing-site .loan-lender-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .marketing-site .loan-lender-tab {
+    flex-shrink: 0;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .marketing-site .loan-lender-table {
+    min-width: 46rem;
+  }
+
+  .marketing-site .loan-lender-table thead th:first-child,
+  .marketing-site .loan-lender-table tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fff;
+    box-shadow: 6px 0 12px rgba(11, 30, 72, 0.05);
+  }
+
+  .marketing-site .loan-lender-table thead th:first-child {
+    background: rgba(248, 250, 252, 0.98);
+    z-index: 3;
+  }
+
+  .marketing-site .loan-lender-name-cell {
+    min-width: 9.5rem;
+    gap: 0.55rem;
+  }
+
+  .marketing-site .loan-lender-logo-tile {
+    height: 2.85rem;
+    width: 5.25rem;
+  }
+
+  .marketing-site .loan-lender-logo-tile .loan-lender-logo-img,
+  .marketing-site .loan-lender-logo-tile .lender-preview-logo-img {
+    max-height: 2.2rem !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .marketing-site .loan-type-nav {
+    top: 3.75rem;
+    margin-inline: -0.25rem;
+  }
+
+  .marketing-site .loan-types-detail-list {
+    gap: 1.25rem;
+  }
+
+  .marketing-site .loan-type-detail {
+    border-radius: 1.15rem;
+  }
+
+  .marketing-site .loan-type-detail-title {
+    font-size: 1.2rem;
+  }
+
+  .marketing-site .loan-type-detail-summary p {
+    font-size: 0.875rem;
+  }
+
+  .marketing-site .loan-type-benefits-grid,
+  .marketing-site .loan-type-checklist,
+  .marketing-site .loan-type-trust {
+    padding-bottom: 1.15rem;
+  }
+
+  .marketing-site .loan-type-checklist-grid {
+    gap: 0.75rem;
+  }
+
+  .marketing-site .loan-lender-table thead th,
+  .marketing-site .loan-lender-table tbody th,
+  .marketing-site .loan-lender-table tbody td {
+    padding: 0.75rem 0.7rem;
+  }
+
+  .marketing-site .loan-lender-name {
+    font-size: 0.8125rem;
+  }
+
+  .marketing-site .loan-lender-row-cta {
+    padding: 0.4rem 0.7rem !important;
+  }
+}

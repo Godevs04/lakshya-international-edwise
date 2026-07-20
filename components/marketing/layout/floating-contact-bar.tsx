@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 import { MessageCircle, Phone, X } from "lucide-react";
 import {
   formatMarketingPhoneDisplay,
@@ -18,7 +19,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function FloatingContactBar({ whatsappLink, phone }: FloatingContactBarProps) {
   const [open, setOpen] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const displayPhone = phone ? formatMarketingPhoneDisplay(phone) : null;
   const telHref = phone ? toMarketingTelHref(phone) : null;
 

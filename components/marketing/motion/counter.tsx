@@ -43,12 +43,16 @@ export function AnimatedCounter({
   locale = "en-IN",
 }: AnimatedCounterProps) {
   const { prefersReducedMotion } = useMarketingMotion();
-  const [count, setCount] = useState(prefersReducedMotion ? value : 0);
-  const [started, setStarted] = useState(prefersReducedMotion);
+  // Always animate from 0 on first paint so SSR and hydration match. Reduced-motion
+  // users skip the animation by deriving the final value after hydration.
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
   const [pulsed, setPulsed] = useState(false);
-  const [settled, setSettled] = useState(prefersReducedMotion);
+  const [settled, setSettled] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
   const settleFromRef = useRef(value * 0.82);
+  const displayCount = prefersReducedMotion ? value : count;
+  const isSettled = prefersReducedMotion || settled;
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -154,13 +158,13 @@ export function AnimatedCounter({
       ref={ref}
       className={cn(
         "animated-counter tabular-nums",
-        !settled && variant === "scramble" && "animated-counter-scrambling",
+        !isSettled && variant === "scramble" && "animated-counter-scrambling",
         pulsed && pulseOnComplete && "counter-pulse inline-block",
         className
       )}
     >
       {prefix}
-      {formatCount(count, decimals, locale)}
+      {formatCount(displayCount, decimals, locale)}
       {suffix}
     </span>
   );

@@ -1,13 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import type { LottieComponentProps } from "lottie-react";
 import {
   MARKETING_LOTTIE_PRESETS,
   type MarketingLottiePreset,
 } from "@/lib/constants/marketing/lottie-presets";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 import { cn } from "@/lib/utils";
 
 const Lottie = dynamic<LottieComponentProps>(
@@ -46,7 +47,7 @@ export function MarketingLottie({
   reveal = true,
   children,
 }: MarketingLottieProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
   const animationData = MARKETING_LOTTIE_PRESETS[preset];
 
   const player = (
