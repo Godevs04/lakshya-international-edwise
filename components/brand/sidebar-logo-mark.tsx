@@ -66,7 +66,7 @@ export function SidebarLogoMark({
             quality={100}
             unoptimized={isLocalStaticAsset(logoSrc)}
             priority
-            className="object-cover object-center scale-[1.14]"
+            className="object-contain object-center p-0.5"
             sizes={size === "sm" ? "40px" : "48px"}
           />
         </div>

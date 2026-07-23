@@ -10,9 +10,9 @@ const VARIANTS: Record<
   { height: number; maxWidth: number; className: string }
 > = {
   auth: {
-    height: 120,
-    maxWidth: 220,
-    className: "h-[7.5rem] max-w-[13.75rem]",
+    height: 112,
+    maxWidth: 112,
+    className: "h-28 max-w-[7rem]",
   },
   sidebar: {
     height: 48,
@@ -21,13 +21,13 @@ const VARIANTS: Record<
   },
   mobile: {
     height: 44,
-    maxWidth: 72,
-    className: "h-11 max-w-[4.5rem]",
+    maxWidth: 44,
+    className: "h-11 max-w-[2.75rem]",
   },
   settings: {
     height: 96,
-    maxWidth: 176,
-    className: "h-24 max-w-[11rem]",
+    maxWidth: 96,
+    className: "h-24 max-w-[6rem]",
   },
 };
 
@@ -81,7 +81,7 @@ export function AppLogo({
         priority={priority ?? variant === "auth"}
         className={cn(
           "h-full w-full object-contain object-center",
-          variant === "sidebar" && onDark && "rounded-full object-cover scale-110"
+          variant === "sidebar" && onDark && "rounded-full"
         )}
         sizes={`(max-width: 768px) ${Math.min(width, styles.maxWidth)}px, ${styles.maxWidth}px`}
       />

@@ -31,7 +31,7 @@ describe("marketing SEO metadata", () => {
     vi.stubEnv("AUTH_URL", "");
     expect(getAbsoluteUrl("/contact")).toBe("https://lakshyainternationaledwise.com/contact");
     expect(getDefaultOgImageUrl()).toBe(
-      "https://lakshyainternationaledwise.com/logo_model.jpeg"
+      "https://lakshyainternationaledwise.com/Lakshya-App-logo.png"
     );
   });
 

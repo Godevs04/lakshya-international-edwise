@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { connectDB } from "@/lib/db/mongoose";
 import { Settings } from "@/models/Settings";
+import { DEFAULT_APP_LOGO, isLegacyAppLogo } from "@/lib/brand/app-logo";
 import { getDefaultSettings, resolveCompanySettings } from "@/lib/config/app-defaults";
 import { isLegacySupportEmail } from "@/lib/config/site";
 import { isNextBuildPhase } from "@/lib/config/build-phase";
@@ -36,6 +37,12 @@ async function loadAppConfigFromDatabase(): Promise<AppSettings> {
     if (storedEmail && isLegacySupportEmail(storedEmail) && company.email !== storedEmail) {
       void Settings.updateOne({}, { $set: { "company.email": company.email } }).catch((error) => {
         logger.error("Failed to migrate legacy company email in settings", error);
+      });
+    }
+    const storedLogo = settings.company?.logo?.trim() ?? "";
+    if (isLegacyAppLogo(storedLogo) && company.logo === DEFAULT_APP_LOGO) {
+      void Settings.updateOne({}, { $set: { "company.logo": DEFAULT_APP_LOGO } }).catch((error) => {
+        logger.error("Failed to migrate legacy company logo in settings", error);
       });
     }
 
