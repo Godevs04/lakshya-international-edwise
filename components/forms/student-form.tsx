@@ -30,6 +30,7 @@ import {
 import { useLenderOptions } from "@/components/lenders/use-lender-options";
 import type { LenderOption } from "@/types";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/student.actions";
+import { StudentPhoneField } from "@/components/forms/student-phone-field";
 import {
   calculateExpectedCommission,
   calculateNetEarned,
@@ -228,18 +229,14 @@ export function StudentForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number *</Label>
-            <Input
+            <StudentPhoneField
               id="phone"
               name="phone"
-              type="tel"
-              inputMode="numeric"
-              maxLength={13}
-              placeholder="9363047040"
-              defaultValue={initialData?.phone as string}
+              label="Phone Number"
               required
+              defaultValue={(initialData?.phone as string) ?? ""}
+              excludeStudentId={studentId}
             />
-            <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="partnerId">Consultancy *</Label>

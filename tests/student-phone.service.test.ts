@@ -4,7 +4,10 @@ import {
   formatDuplicateStudentPhoneError,
   getStudentPhoneBatchKey,
   getStudentPhoneLookupValues,
+  getStudentPhoneMatchHref,
 } from "@/lib/services/student-phone.service";
+import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
+import { SITE_LEAD_SOURCE } from "@/lib/constants/site-leads";
 
 describe("student-phone.service", () => {
   it("normalizes phone lookup values to 10-digit and 91-prefixed forms", () => {
@@ -22,11 +25,60 @@ describe("student-phone.service", () => {
   it("formats duplicate phone error with student id and name", () => {
     expect(
       formatDuplicateStudentPhoneError({
+        id: "507f1f77bcf86cd799439011",
         studentId: "STU-0042",
         firstName: "Ravi",
         lastName: "Kumar",
+        recordType: STUDENT_RECORD_TYPE.STUDENT,
       })
-    ).toBe("This phone number is already registered to Ravi Kumar (STU-0042)");
+    ).toBe("This phone number is already registered to student Ravi Kumar (STU-0042)");
+  });
+
+  it("formats duplicate phone error for admission leads", () => {
+    expect(
+      formatDuplicateStudentPhoneError({
+        id: "507f1f77bcf86cd799439011",
+        studentId: "STU-0042",
+        firstName: "Ravi",
+        lastName: "Kumar",
+        recordType: STUDENT_RECORD_TYPE.ADMISSION,
+      })
+    ).toBe(
+      "This phone number is already registered to admission lead Ravi Kumar (STU-0042)"
+    );
+  });
+
+  it("builds detail hrefs for students, admissions, and website leads", () => {
+    expect(
+      getStudentPhoneMatchHref({
+        id: "abc",
+        studentId: "STU-1",
+        firstName: "A",
+        lastName: "B",
+        recordType: STUDENT_RECORD_TYPE.STUDENT,
+      })
+    ).toBe("/dashboard/students/abc");
+
+    expect(
+      getStudentPhoneMatchHref({
+        id: "abc",
+        studentId: "STU-1",
+        firstName: "A",
+        lastName: "B",
+        recordType: STUDENT_RECORD_TYPE.ADMISSION,
+      })
+    ).toBe("/dashboard/admissions/abc");
+
+    expect(
+      getStudentPhoneMatchHref({
+        id: "abc",
+        studentId: "STU-1",
+        firstName: "A",
+        lastName: "B",
+        recordType: STUDENT_RECORD_TYPE.ADMISSION,
+        leadSource: SITE_LEAD_SOURCE.WEBSITE,
+      })
+    ).toBe("/dashboard/site-leads?tab=students");
   });
 
   it("builds batch keys for duplicate detection within imports", () => {

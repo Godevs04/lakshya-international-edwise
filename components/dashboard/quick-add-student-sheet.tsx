@@ -23,6 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { createQuickStudentAction } from "@/lib/actions/student.actions";
+import { StudentPhoneField } from "@/components/forms/student-phone-field";
 import { AssigneeSelect } from "@/components/forms/assignee-select";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import { useLenderOptions } from "@/components/lenders/use-lender-options";
@@ -99,10 +100,11 @@ export function QuickAddStudentSheet({ assignableUsers }: QuickAddStudentSheetPr
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="quick-student-phone">Phone</Label>
-            <Input id="quick-student-phone" name="phone" type="tel" inputMode="numeric" maxLength={13} />
-          </div>
+          <StudentPhoneField
+            id="quick-student-phone"
+            name="phone"
+            label="Phone"
+          />
 
           <div className="space-y-2">
             <Label htmlFor="quick-student-targetCountry">Target Country</Label>

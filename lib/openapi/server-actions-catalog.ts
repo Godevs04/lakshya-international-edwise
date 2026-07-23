@@ -67,6 +67,7 @@ export const SERVER_ACTION_GROUPS: ServerActionGroup[] = [
       { name: "getStudentById", summary: "Get student detail by MongoDB id", requestProperties: { id: { type: "string" } }, required: ["id"] },
       { name: "getStudentForEdit", summary: "Get student record for edit form", requestProperties: { id: { type: "string" } }, required: ["id"] },
       { name: "getAssignableUsers", summary: "List users assignable to students or tasks" },
+      { name: "checkStudentPhoneAction", summary: "Live-check whether a phone number already belongs to a student/lead", requestProperties: { phone: { type: "string" }, excludeStudentId: { type: "string" } }, required: ["phone"] },
       { name: "createStudentAction", summary: "Create a student", requestProperties: { formData: { type: "object" } } },
       { name: "createQuickStudentAction", summary: "Create a student with minimal fields", requestProperties: { formData: { type: "object" } } },
       { name: "createLeadAction", summary: "Create a lead (admission pipeline entry)", requestProperties: { formData: { type: "object" } } },
