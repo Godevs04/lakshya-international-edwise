@@ -21,6 +21,7 @@ import {
   type AdmissionEditSectionKey,
 } from "@/lib/constants/admission-edit-sections";
 import { updateAdmissionAction } from "@/lib/actions/admission.actions";
+import { StudentPhoneField } from "@/components/forms/student-phone-field";
 
 interface AdmissionFormProps {
   admissionId: string;
@@ -39,8 +40,6 @@ interface AdmissionFormProps {
   };
   focusSection?: AdmissionEditSectionKey;
 }
-
-const PHONE_HINT = "10-digit Indian mobile (starts with 6-9). +91 prefix optional.";
 
 export function AdmissionForm({
   admissionId,
@@ -155,18 +154,14 @@ export function AdmissionForm({
                 required
               />
             </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="phone">Number</Label>
-              <Input
+            <div className="sm:col-span-2">
+              <StudentPhoneField
                 id="phone"
                 name="phone"
-                type="tel"
-                inputMode="numeric"
-                maxLength={13}
-                placeholder="9363047040"
-                defaultValue={initialData.phone}
+                label="Number"
+                defaultValue={initialData.phone ?? ""}
+                excludeStudentId={admissionId}
               />
-              <p className="text-xs text-muted-foreground">{PHONE_HINT}</p>
             </div>
           </div>
         </FormSection>

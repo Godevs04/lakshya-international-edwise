@@ -29,6 +29,7 @@ import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { normalizeLastName } from "@/lib/utils/person-name";
 import {
   formatAadhaarForEdit,
+  isValidIndianPhone,
   normalizeAadhaar,
   normalizeIndianPhone,
   normalizePan,
@@ -39,6 +40,7 @@ import { allocateStudentId } from "@/lib/services/student-id.service";
 import {
   findStudentWithPhone,
   formatDuplicateStudentPhoneError,
+  getStudentPhoneMatchHref,
 } from "@/lib/services/student-phone.service";
 import type { ActionResult, PaginatedResult, StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
@@ -194,6 +196,76 @@ export async function getAssignableUsers() {
       role: entry.role,
     }));
   }, []);
+}
+
+type CheckStudentPhoneData = {
+  available: boolean;
+  message: string;
+  match?: {
+    id: string;
+    studentId: string;
+    firstName: string;
+    lastName: string;
+    href: string;
+  };
+};
+
+export async function checkStudentPhoneAction(
+  phone: string,
+  excludeStudentId?: string
+): Promise<ActionResult<CheckStudentPhoneData>> {
+  return runLoggedMutation(
+    "checkStudentPhoneAction",
+    async (): Promise<ActionResult<CheckStudentPhoneData>> => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+
+      const trimmed = phone.trim();
+      if (!trimmed) {
+        return {
+          success: true,
+          data: { available: true, message: "" },
+        };
+      }
+
+      if (!isValidIndianPhone(trimmed)) {
+        return {
+          success: true,
+          data: {
+            available: false,
+            message: "Enter a valid 10-digit Indian mobile number (starts with 6–9).",
+          },
+        };
+      }
+
+      await connectDB();
+      const match = await findStudentWithPhone(trimmed, excludeStudentId);
+      if (match) {
+        return {
+          success: true,
+          data: {
+            available: false,
+            message: formatDuplicateStudentPhoneError(match),
+            match: {
+              id: match.id,
+              studentId: match.studentId,
+              firstName: match.firstName,
+              lastName: match.lastName,
+              href: getStudentPhoneMatchHref(match),
+            },
+          },
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          available: true,
+          message: "This number is available.",
+        },
+      };
+    }
+  );
 }
 
 export async function getStudents(params: {

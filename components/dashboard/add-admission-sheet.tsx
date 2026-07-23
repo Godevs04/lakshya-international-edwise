@@ -23,6 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { createLeadAction } from "@/lib/actions/student.actions";
+import { StudentPhoneField } from "@/components/forms/student-phone-field";
 import { AssigneeSelect } from "@/components/forms/assignee-select";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import { GraduationCap } from "lucide-react";
@@ -95,17 +96,11 @@ export function AddAdmissionSheet({ assignableUsers, canViewRevenue = false }: A
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="admission-phone">Number</Label>
-            <Input
-              id="admission-phone"
-              name="phone"
-              type="tel"
-              inputMode="numeric"
-              maxLength={13}
-              placeholder="9363047040"
-            />
-          </div>
+          <StudentPhoneField
+            id="admission-phone"
+            name="phone"
+            label="Number"
+          />
 
           <div className="space-y-2">
             <Label htmlFor="admission-targetCountry">Country</Label>

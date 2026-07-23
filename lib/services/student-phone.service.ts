@@ -1,11 +1,20 @@
 import { Types } from "mongoose";
 import { Student } from "@/models/Student";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/lib/validations/indian-fields";
+import {
+  isAdmissionLead,
+  STUDENT_RECORD_TYPE,
+  type StudentRecordType,
+} from "@/lib/constants/student-record-type";
+import { SITE_LEAD_SOURCE } from "@/lib/constants/site-leads";
 
 export interface StudentPhoneMatch {
+  id: string;
   studentId: string;
   firstName: string;
   lastName: string;
+  recordType?: StudentRecordType | string | null;
+  leadSource?: string | null;
 }
 
 export function getStudentPhoneLookupValues(phone: string): string[] {
@@ -29,12 +38,12 @@ export async function findStudentWithPhone(
     $or: [{ phone: { $in: values } }, { whatsapp: { $in: values } }],
   };
 
-  if (excludeStudentId) {
+  if (excludeStudentId && Types.ObjectId.isValid(excludeStudentId)) {
     filter._id = { $ne: new Types.ObjectId(excludeStudentId) };
   }
 
   const existing = await Student.findOne(filter)
-    .select("studentId firstName lastName")
+    .select("_id studentId firstName lastName recordType metadata.leadSource")
     .lean();
 
   if (!existing) {
@@ -42,10 +51,24 @@ export async function findStudentWithPhone(
   }
 
   return {
+    id: existing._id.toString(),
     studentId: existing.studentId,
     firstName: existing.firstName,
     lastName: existing.lastName,
+    recordType: existing.recordType ?? STUDENT_RECORD_TYPE.STUDENT,
+    leadSource: existing.metadata?.leadSource ?? null,
   };
+}
+
+/** Detail URL for a phone match — students vs admission leads vs website inbox. */
+export function getStudentPhoneMatchHref(match: StudentPhoneMatch): string {
+  if (isAdmissionLead(match.recordType)) {
+    if (match.leadSource === SITE_LEAD_SOURCE.WEBSITE) {
+      return "/dashboard/site-leads?tab=students";
+    }
+    return `/dashboard/admissions/${match.id}`;
+  }
+  return `/dashboard/students/${match.id}`;
 }
 
 export function getStudentPhoneBatchKey(phone: string): string | null {
@@ -59,5 +82,6 @@ export function formatDuplicateImportBatchPhoneError(firstRow: number): string {
 
 export function formatDuplicateStudentPhoneError(match: StudentPhoneMatch): string {
   const name = `${match.firstName} ${match.lastName}`.trim();
-  return `This phone number is already registered to ${name} (${match.studentId})`;
+  const kind = isAdmissionLead(match.recordType) ? "admission lead" : "student";
+  return `This phone number is already registered to ${kind} ${name} (${match.studentId})`;
 }

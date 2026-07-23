@@ -47,7 +47,7 @@ describe("email-templates", () => {
     const html = renderEmailLayout({
       company: {
         name: "Lakshya International Edwise",
-        logo: "/logo_model.jpeg",
+        logo: "/Lakshya-App-logo.png",
         email: "hello@example.com",
         phone: "",
         address: "",
@@ -55,10 +55,10 @@ describe("email-templates", () => {
       title: "Email Verification",
       bodyHtml: "<p>Hello</p>",
     });
-    expect(html).toContain('src="https://lakshyainternationaledwise.com/logo_model.jpeg"');
+    expect(html).toContain('src="https://lakshyainternationaledwise.com/Lakshya-App-logo.png"');
   });
 
-  it("falls back to public/logo_model.jpeg when company logo is empty", () => {
+  it("falls back to public/Lakshya-App-logo.png when company logo is empty", () => {
     const html = renderEmailLayout({
       company: {
         name: "Lakshya International Edwise",
@@ -70,7 +70,7 @@ describe("email-templates", () => {
       title: "Email Verification",
       bodyHtml: "<p>Hello</p>",
     });
-    expect(html).toContain('src="https://lakshyainternationaledwise.com/logo_model.jpeg"');
+    expect(html).toContain('src="https://lakshyainternationaledwise.com/Lakshya-App-logo.png"');
   });
 
   it("includes OTP block with digit cells", () => {
@@ -86,7 +86,7 @@ describe("email-templates", () => {
     const html = renderEmailLayout({
       company: {
         name: "Lakshya International Edwise",
-        logo: "/logo_model.jpeg",
+        logo: "/Lakshya-App-logo.png",
         email: "hello@example.com",
         phone: "",
         address: "",
@@ -95,11 +95,11 @@ describe("email-templates", () => {
       bodyHtml: "<p>Hello</p>",
     });
     expect(html).toContain('src="https://example.com/banner.jpg"');
-    expect(html).not.toContain('src="https://lakshyainternationaledwise.com/logo_model.jpeg"');
+    expect(html).not.toContain('src="https://lakshyainternationaledwise.com/Lakshya-App-logo.png"');
     expect(html.match(/banner\.jpg/g)?.length).toBe(1);
     expect(getEmailLogoUrl({
       name: "Lakshya International Edwise",
-      logo: "/logo_model.jpeg",
+      logo: "/Lakshya-App-logo.png",
     })).toBe("https://example.com/banner.jpg");
     if (original === undefined) delete process.env.APP_EMAIL_BANNER_URL;
     else process.env.APP_EMAIL_BANNER_URL = original;
@@ -110,8 +110,8 @@ describe("email-templates", () => {
     delete process.env.APP_EMAIL_BANNER_URL;
     expect(getEmailLogoUrl({
       name: "Lakshya International Edwise",
-      logo: "/logo_model.jpeg",
-    })).toBe("https://lakshyainternationaledwise.com/logo_model.jpeg");
+      logo: "/Lakshya-App-logo.png",
+    })).toBe("https://lakshyainternationaledwise.com/Lakshya-App-logo.png");
     if (original !== undefined) process.env.APP_EMAIL_BANNER_URL = original;
   });
 });
@@ -126,8 +126,8 @@ describe("resolveEmailAssetUrl", () => {
 
   it("prefixes relative paths with the app URL", () => {
     process.env.AUTH_URL = "https://lakshyainternationaledwise.com";
-    expect(resolveEmailAssetUrl("/logo_model.jpeg")).toBe(
-      "https://lakshyainternationaledwise.com/logo_model.jpeg"
+    expect(resolveEmailAssetUrl("/Lakshya-App-logo.png")).toBe(
+      "https://lakshyainternationaledwise.com/Lakshya-App-logo.png"
     );
   });
 

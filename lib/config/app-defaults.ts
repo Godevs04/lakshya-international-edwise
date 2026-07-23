@@ -1,5 +1,5 @@
 import type { AppModules, AppTheme, CompanySettings } from "@/types";
-import { DEFAULT_APP_LOGO } from "@/lib/brand/app-logo";
+import { DEFAULT_APP_LOGO, isLegacyAppLogo } from "@/lib/brand/app-logo";
 import {
   isProductionRuntime,
   normalizeSupportEmail,
@@ -38,9 +38,15 @@ export function resolveCompanySettings(stored?: Partial<CompanySettings>): Compa
   const defaults = getDefaultCompanySettings();
   const merged = { ...defaults, ...stored };
 
+  const storedLogo = merged.logo?.trim() || "";
+  const logo =
+    process.env.APP_COMPANY_LOGO?.trim() ||
+    (storedLogo && !isLegacyAppLogo(storedLogo) ? storedLogo : "") ||
+    defaults.logo;
+
   return {
     name: process.env.APP_COMPANY_NAME?.trim() || merged.name?.trim() || defaults.name,
-    logo: process.env.APP_COMPANY_LOGO?.trim() || merged.logo?.trim() || defaults.logo,
+    logo,
     email: normalizeSupportEmail(
       process.env.APP_COMPANY_EMAIL?.trim() || merged.email?.trim() || defaults.email
     ),

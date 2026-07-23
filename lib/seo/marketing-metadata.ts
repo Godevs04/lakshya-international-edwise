@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 
-export const DEFAULT_OG_IMAGE_PATH = "/logo_model.jpeg";
+export const DEFAULT_OG_IMAGE_PATH = "/Lakshya-App-logo.png";
 
 export const DEFAULT_MARKETING_KEYWORDS = [
   "Lakshya International Edwise",
