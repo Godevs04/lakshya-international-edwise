@@ -31,13 +31,7 @@ interface PartnersTableProps {
   actionStatus?: string;
 }
 
-export function PartnersTable({
-  data,
-  total,
-  page,
-  totalPages,
-  actionStatus,
-}: PartnersTableProps) {
+export function PartnersTable({ data, total, page, totalPages, actionStatus }: PartnersTableProps) {
   const router = useRouter();
   const currentActionStatus = actionStatus || "all";
 
@@ -102,26 +96,35 @@ export function PartnersTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length ? data.map((p) => (
-              <TableRow key={p._id}>
-                <TableCell>
-                  <Link href={`/dashboard/partners/${p._id}`} className="font-semibold text-[#E8952E] hover:underline">
-                    {p.companyName}
-                  </Link>
-                </TableCell>
-                <TableCell>{p.owner ?? "—"}</TableCell>
-                <TableCell>{p.phone ?? "—"}</TableCell>
-                <TableCell>{p.studentsCount}</TableCell>
-                <TableCell>{formatCurrency(p.totalLoanValue)}</TableCell>
-                <TableCell>{formatPercent(p.commissionPercent ?? 0)}</TableCell>
-                <TableCell>
-                  {PARTNER_ACTION_STATUS_LABELS[p.actionStatus as PartnerActionStatus]}
-                </TableCell>
-                <TableCell><StatusBadge status={p.status as PartnerStatus} type="partner" /></TableCell>
-              </TableRow>
-            )) : (
+            {data.length ? (
+              data.map((p) => (
+                <TableRow key={p._id}>
+                  <TableCell>
+                    <Link
+                      href={`/dashboard/partners/${p._id}`}
+                      className="font-semibold text-[#E8952E] hover:underline"
+                    >
+                      {p.companyName}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{p.owner ?? "—"}</TableCell>
+                  <TableCell>{p.phone ?? "—"}</TableCell>
+                  <TableCell>{p.studentsCount}</TableCell>
+                  <TableCell>{formatCurrency(p.totalLoanValue)}</TableCell>
+                  <TableCell>{formatPercent(p.commissionPercent ?? 0)}</TableCell>
+                  <TableCell>
+                    {PARTNER_ACTION_STATUS_LABELS[p.actionStatus as PartnerActionStatus]}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={p.status as PartnerStatus} type="partner" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">No partners found.</TableCell>
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  No partners found.
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -144,7 +147,9 @@ export function PartnersTable({
           >
             Previous
           </Button>
-          <span className="flex items-center px-2">Page {page} of {totalPages || 1}</span>
+          <span className="flex items-center px-2">
+            Page {page} of {totalPages || 1}
+          </span>
           <Button
             variant="outline"
             size="sm"

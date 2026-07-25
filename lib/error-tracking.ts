@@ -1,8 +1,5 @@
 import { logger } from "@/lib/logger";
-import {
-  getSentryDsn,
-  getSentryTracesSampleRate,
-} from "@/lib/config/sentry-env";
+import { getSentryDsn, getSentryTracesSampleRate } from "@/lib/config/sentry-env";
 
 let initialized = false;
 

@@ -43,8 +43,7 @@ export function getMarketingContact() {
     company.phone ||
     office?.phone ||
     MARKETING_DEFAULT_PHONE_DISPLAY;
-  const rawWhatsapp =
-    trim(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER) || MARKETING_DEFAULT_PHONE_E164;
+  const rawWhatsapp = trim(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER) || MARKETING_DEFAULT_PHONE_E164;
 
   return {
     siteUrl: getSiteUrl(),

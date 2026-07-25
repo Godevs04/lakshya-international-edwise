@@ -51,10 +51,7 @@ function LoanTypeCard({
   return (
     <article
       id={loanType.slug}
-      className={cn(
-        "loan-type-detail scroll-mt-28",
-        emphasized && "loan-type-detail-emphasized"
-      )}
+      className={cn("loan-type-detail scroll-mt-28", emphasized && "loan-type-detail-emphasized")}
     >
       <div className="loan-type-detail-hero">
         <div className="loan-type-detail-copy">

@@ -6,10 +6,7 @@ import "./load-env";
 import mongoose from "mongoose";
 import { logger } from "@/lib/logger";
 import { connectDB } from "@/lib/db/mongoose";
-import {
-  createQueryCounter,
-  summarizeOps,
-} from "./lib/mongodb-query-counter";
+import { createQueryCounter, summarizeOps } from "./lib/mongodb-query-counter";
 
 const counter = createQueryCounter();
 
@@ -37,7 +34,9 @@ async function main() {
   });
 
   const ok = summary.aggregate === 3 && summary.countDocuments === 0;
-  logger.info(ok ? "PASS — N+1 pattern resolved for core stats" : "FAIL — unexpected query pattern");
+  logger.info(
+    ok ? "PASS — N+1 pattern resolved for core stats" : "FAIL — unexpected query pattern"
+  );
 
   await mongoose.disconnect();
   process.exit(ok ? 0 : 1);

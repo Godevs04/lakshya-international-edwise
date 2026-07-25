@@ -31,7 +31,9 @@ describe("student workflow filters", () => {
     expect(buildWorkflowMongoFilter("docs_pending")).toEqual({ applicationStatus: "docs_pending" });
     expect(buildWorkflowMongoFilter("loggedin")).toEqual({ applicationStatus: "loggedin" });
     expect(buildWorkflowMongoFilter("pf_paid")).toEqual({ applicationStatus: "pf_paid" });
-    expect(buildWorkflowMongoFilter("not_interested")).toEqual({ applicationStatus: "not_interested" });
+    expect(buildWorkflowMongoFilter("not_interested")).toEqual({
+      applicationStatus: "not_interested",
+    });
     expect(buildWorkflowMongoFilter("rejected")).toEqual({
       $or: [{ applicationStatus: "rejected" }, { status: "rejected" }],
     });

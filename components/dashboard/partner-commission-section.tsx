@@ -167,11 +167,15 @@ export function PartnerCommissionSection({
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Commission Received</p>
-            <p className="text-2xl font-semibold text-[#22C55E]">{formatCurrency(commissionReceived)}</p>
+            <p className="text-2xl font-semibold text-[#22C55E]">
+              {formatCurrency(commissionReceived)}
+            </p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Pending Received</p>
-            <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(pendingReceived)}</p>
+            <p className="text-2xl font-semibold text-[#F59E0B]">
+              {formatCurrency(pendingReceived)}
+            </p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Partner Share Expected</p>
@@ -179,15 +183,21 @@ export function PartnerCommissionSection({
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Commission Shared</p>
-            <p className="text-2xl font-semibold text-[#22C55E]">{formatCurrency(commissionShared || commissionSettled)}</p>
+            <p className="text-2xl font-semibold text-[#22C55E]">
+              {formatCurrency(commissionShared || commissionSettled)}
+            </p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Pending Shared</p>
-            <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(pendingShared || commissionPending)}</p>
+            <p className="text-2xl font-semibold text-[#F59E0B]">
+              {formatCurrency(pendingShared || commissionPending)}
+            </p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Projected Net (auto)</p>
-            <p className="text-2xl font-semibold text-[#E8952E]">{formatCurrency(projectedNetEarned)}</p>
+            <p className="text-2xl font-semibold text-[#E8952E]">
+              {formatCurrency(projectedNetEarned)}
+            </p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Net Earned (after marks)</p>
@@ -208,8 +218,9 @@ export function PartnerCommissionSection({
           <GlassCard className="p-5">
             <h3 className="mb-1 text-sm font-semibold">Record Bulk Partner Share</h3>
             <p className="mb-4 text-xs text-muted-foreground">
-              Amounts are calculated automatically. Use per-student <strong>Received</strong> and <strong>Paid</strong> buttons in the Student-wise tab.
-              Bulk entry below is only for legacy lump-sum partner payments.
+              Amounts are calculated automatically. Use per-student <strong>Received</strong> and{" "}
+              <strong>Paid</strong> buttons in the Student-wise tab. Bulk entry below is only for
+              legacy lump-sum partner payments.
             </p>
             <form onSubmit={handleSettlementSubmit} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -260,9 +271,7 @@ export function PartnerCommissionSection({
               <TableBody>
                 {settlements.map((entry, index) => (
                   <TableRow key={`${entry.settledAt}-${index}`}>
-                    <TableCell>
-                      {entry.settledAt ? formatDateTime(entry.settledAt) : "—"}
-                    </TableCell>
+                    <TableCell>{entry.settledAt ? formatDateTime(entry.settledAt) : "—"}</TableCell>
                     <TableCell>{entry.studentName ?? "Bulk / partner-level"}</TableCell>
                     <TableCell className="font-medium">{formatCurrency(entry.amount)}</TableCell>
                     <TableCell className="max-w-xs truncate">{entry.note ?? "—"}</TableCell>

@@ -52,9 +52,7 @@ function AnimatedDotGrid({
       initial={false}
       animate={reducedMotion ? undefined : { x: [0, 2, 0], y: [0, -1.5, 0] }}
       transition={
-        reducedMotion
-          ? undefined
-          : { duration: 14, repeat: Infinity, ease: "easeInOut" as const }
+        reducedMotion ? undefined : { duration: 14, repeat: Infinity, ease: "easeInOut" as const }
       }
     >
       {dots.map(({ cx, cy, waveDelay, index }) => (
@@ -88,10 +86,7 @@ function AnimatedDotGrid({
   );
 }
 
-export function Design06RibbonWaves({
-  className,
-  variant = "hero",
-}: Design06RibbonWavesProps) {
+export function Design06RibbonWaves({ className, variant = "hero" }: Design06RibbonWavesProps) {
   const uid = useId().replace(/:/g, "");
   const reducedMotion = useReducedMotion();
 
@@ -143,10 +138,14 @@ export function Design06RibbonWaves({
       <div
         className={cn(
           "absolute inset-0",
-          isHero && "[mask-image:linear-gradient(to_right,transparent_0%,transparent_24%,rgba(0,0,0,0.35)_48%,black_74%,black_100%)]",
-          isFull && "[mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.2)_20%,black_58%,black_100%)]",
-          isCompact && "[mask-image:linear-gradient(to_right,transparent_0%,transparent_52%,black_88%,black_100%)]",
-          isAmbient && "[mask-image:radial-gradient(ellipse_75%_55%_at_72%_38%,black_15%,transparent_72%)]"
+          isHero &&
+            "[mask-image:linear-gradient(to_right,transparent_0%,transparent_24%,rgba(0,0,0,0.35)_48%,black_74%,black_100%)]",
+          isFull &&
+            "[mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.2)_20%,black_58%,black_100%)]",
+          isCompact &&
+            "[mask-image:linear-gradient(to_right,transparent_0%,transparent_52%,black_88%,black_100%)]",
+          isAmbient &&
+            "[mask-image:radial-gradient(ellipse_75%_55%_at_72%_38%,black_15%,transparent_72%)]"
         )}
       >
         <svg

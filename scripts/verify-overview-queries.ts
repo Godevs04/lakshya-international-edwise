@@ -6,10 +6,7 @@ import "./load-env";
 import mongoose from "mongoose";
 import { logger } from "@/lib/logger";
 import { connectDB } from "@/lib/db/mongoose";
-import {
-  createQueryCounter,
-  summarizeOps,
-} from "./lib/mongodb-query-counter";
+import { createQueryCounter, summarizeOps } from "./lib/mongodb-query-counter";
 
 const counter = createQueryCounter();
 
@@ -42,10 +39,8 @@ async function main() {
   const restOps = counter.queryOps();
   const restSummary = summarizeOps("Charts and lists", restOps);
 
-  const totalStudentAggregates =
-    coreSummary.studentAggregate + restSummary.studentAggregate;
-  const totalStudentCounts =
-    coreSummary.studentCountDocuments + restSummary.studentCountDocuments;
+  const totalStudentAggregates = coreSummary.studentAggregate + restSummary.studentAggregate;
+  const totalStudentCounts = coreSummary.studentCountDocuments + restSummary.studentCountDocuments;
 
   logger.info("Overview dashboard query verification", {
     coreDurationMs: coreElapsed,
@@ -63,8 +58,7 @@ async function main() {
     coreSummary.aggregate === 3 &&
     coreSummary.countDocuments === 0 &&
     coreSummary.studentAggregate === 1;
-  const restOk =
-    restSummary.studentCountDocuments === 0 && restSummary.studentAggregate <= 4;
+  const restOk = restSummary.studentCountDocuments === 0 && restSummary.studentAggregate <= 4;
   const ok = coreOk && restOk;
 
   logger.info(

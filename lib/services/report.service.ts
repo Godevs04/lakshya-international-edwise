@@ -4,7 +4,10 @@ import { Partner } from "@/models/Partner";
 import type { DateRangePreset } from "@/lib/utils/format";
 import { getDateRange } from "@/lib/utils/format";
 import { formatReportRows, type ReportSourceRow } from "@/lib/utils/report-format";
-import { getPartnerCommissionPayouts, type PartnerCommissionSummary } from "@/lib/services/partner-commission.service";
+import {
+  getPartnerCommissionPayouts,
+  type PartnerCommissionSummary,
+} from "@/lib/services/partner-commission.service";
 
 export type ReportType = "partner" | "student" | "loan";
 

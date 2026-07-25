@@ -1,15 +1,3 @@
-import compareBarsAnimation from "@/public/lottie/compare-bars.json";
-import businessAnalysisAnimation from "@/public/lottie/Business Analysis.json";
-import contactUsAnimation from "@/public/lottie/Contact_us.json";
-import globeOrbitAnimation from "@/public/lottie/globe-orbit.json";
-import partnerHandshakeAnimation from "@/public/lottie/Stickman and woman handshake.json";
-import liveChatbotAnimation from "@/public/lottie/Live_chatbot.json";
-import livePulseAnimation from "@/public/lottie/live-pulse.json";
-import loanApprovedAnimation from "@/public/lottie/loan-approved.json";
-import loanCalculatorAnimation from "@/public/lottie/loan-calculator.json";
-import searchEmptyAnimation from "@/public/lottie/search-empty.json";
-import pageNotFoundAnimation from "@/public/lottie/Page Not Found 404.json";
-
 export type MarketingLottiePreset =
   | "loan-calculator"
   | "loan-approved"
@@ -25,22 +13,33 @@ export type MarketingLottiePreset =
 
 export type MarketingLottieAnimation = object;
 
-export const MARKETING_LOTTIE_PRESETS: Record<
+const PRESET_LOADERS: Record<
   MarketingLottiePreset,
-  MarketingLottieAnimation
+  () => Promise<{ default: MarketingLottieAnimation }>
 > = {
-  "loan-calculator": loanCalculatorAnimation,
-  "loan-approved": loanApprovedAnimation,
-  "compare-bars": compareBarsAnimation,
-  "globe-orbit": globeOrbitAnimation,
-  "search-empty": searchEmptyAnimation,
-  "live-pulse": livePulseAnimation,
-  "live-chatbot": liveChatbotAnimation,
-  "contact-us": contactUsAnimation,
-  "partner-handshake": partnerHandshakeAnimation,
-  "business-analysis": businessAnalysisAnimation,
-  "page-not-found": pageNotFoundAnimation,
+  "loan-calculator": () => import("@/public/lottie/loan-calculator.json"),
+  "loan-approved": () => import("@/public/lottie/loan-approved.json"),
+  "compare-bars": () => import("@/public/lottie/compare-bars.json"),
+  "globe-orbit": () => import("@/public/lottie/globe-orbit.json"),
+  "search-empty": () => import("@/public/lottie/search-empty.json"),
+  "live-pulse": () => import("@/public/lottie/live-pulse.json"),
+  "live-chatbot": () => import("@/public/lottie/Live_chatbot.json"),
+  "contact-us": () => import("@/public/lottie/Contact_us.json"),
+  "partner-handshake": () => import("@/public/lottie/Stickman and woman handshake.json"),
+  "business-analysis": () => import("@/public/lottie/Business Analysis.json"),
+  "page-not-found": () => import("@/public/lottie/Page Not Found 404.json"),
 };
+
+/** Lazy-load a single Lottie JSON so pages do not ship the full ~2MB preset barrel. */
+export async function loadMarketingLottiePreset(
+  preset: MarketingLottiePreset
+): Promise<MarketingLottieAnimation> {
+  const mod = await PRESET_LOADERS[preset]();
+  if (mod && typeof mod === "object" && "default" in mod && mod.default) {
+    return mod.default as MarketingLottieAnimation;
+  }
+  return mod as unknown as MarketingLottieAnimation;
+}
 
 export interface MarketingLottiePlayerProps {
   preset: MarketingLottiePreset;

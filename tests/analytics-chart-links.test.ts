@@ -23,15 +23,11 @@ describe("analytics-chart-links", () => {
     expect(analyticsFunnelHref("documents_pending", "status")).toBe(
       "/dashboard/students?status=documents_pending"
     );
-    expect(analyticsFunnelHref("rejected", "status")).toBe(
-      "/dashboard/students?status=rejected"
-    );
+    expect(analyticsFunnelHref("rejected", "status")).toBe("/dashboard/students?status=rejected");
   });
 
   it("builds demographic and loan drill-down links", () => {
-    expect(analyticsStateHref("Tamil Nadu")).toBe(
-      "/dashboard/students?state=Tamil%20Nadu"
-    );
+    expect(analyticsStateHref("Tamil Nadu")).toBe("/dashboard/students?state=Tamil%20Nadu");
     expect(analyticsCourseHref("MBA")).toBe("/dashboard/students?course=MBA");
     expect(analyticsGenderHref("female")).toBe("/dashboard/students?gender=female");
     expect(analyticsLoanRangeHref(100000, 299999)).toBe(
@@ -48,10 +44,7 @@ describe("analytics-chart-links", () => {
       analyticsChartPointHref({ name: "Docs Pending", value: 3, key: "docs_pending" }, "workflow")
     ).toBe("/dashboard/students?workflow=docs_pending");
     expect(
-      analyticsChartPointHref(
-        { name: "1L-3L", value: 2, loanMin: 100000, loanMax: 299999 },
-        "loan"
-      )
+      analyticsChartPointHref({ name: "1L-3L", value: 2, loanMin: 100000, loanMax: 299999 }, "loan")
     ).toBe("/dashboard/students?loanMin=100000&loanMax=299999");
   });
 });

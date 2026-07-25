@@ -16,12 +16,7 @@ function isLocalStaticAsset(src: string) {
   return src.startsWith("/") && !src.startsWith("//");
 }
 
-export function SidebarLogoMark({
-  src,
-  alt,
-  className,
-  size = "md",
-}: SidebarLogoMarkProps) {
+export function SidebarLogoMark({ src, alt, className, size = "md" }: SidebarLogoMarkProps) {
   const reducedMotion = useReducedMotion();
   const logoSrc = src?.trim() || DEFAULT_APP_LOGO;
   const dimension = size === "sm" ? "h-10 w-10" : "h-12 w-12";
@@ -39,14 +34,10 @@ export function SidebarLogoMark({
           glowInset
         )}
         animate={
-          reducedMotion
-            ? undefined
-            : { opacity: [0.4, 0.72, 0.4], scale: [0.96, 1.04, 0.96] }
+          reducedMotion ? undefined : { opacity: [0.4, 0.72, 0.4], scale: [0.96, 1.04, 0.96] }
         }
         transition={
-          reducedMotion
-            ? undefined
-            : { duration: 3.6, repeat: Infinity, ease: "easeInOut" }
+          reducedMotion ? undefined : { duration: 3.6, repeat: Infinity, ease: "easeInOut" }
         }
         aria-hidden
       />

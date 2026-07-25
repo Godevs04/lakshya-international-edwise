@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Calculator, CircleAlert, Sparkles, Wallet } from "lucide-react";
-import {
-  AnimatePresence,
-  motion,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { AnimatePresence, motion, useSpring, useTransform } from "framer-motion";
 import { GlassCard } from "@/components/cards/glass-card";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { Reveal, RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
@@ -53,13 +48,7 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-function AnimatedCurrency({
-  value,
-  className,
-}: {
-  value: number;
-  className?: string;
-}) {
+function AnimatedCurrency({ value, className }: { value: number; className?: string }) {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
   const spring = useSpring(value, {
     stiffness: 90,
@@ -71,9 +60,7 @@ function AnimatedCurrency({
     spring.set(value);
   }, [spring, value]);
 
-  const display = useTransform(spring, (latest) =>
-    formatCurrency(Math.round(latest)),
-  );
+  const display = useTransform(spring, (latest) => formatCurrency(Math.round(latest)));
 
   if (prefersReducedMotion) {
     return <span className={className}>{formatCurrency(value)}</span>;
@@ -96,15 +83,7 @@ type LoanSliderProps = {
   onChange: (value: number) => void;
 };
 
-function LoanSlider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  formatValue,
-  onChange,
-}: LoanSliderProps) {
+function LoanSlider({ label, value, min, max, step, formatValue, onChange }: LoanSliderProps) {
   const percent = ((value - min) / (max - min)) * 100;
   const prefersReducedMotion = useHydrationSafeReducedMotion();
 
@@ -213,11 +192,7 @@ function LoanBreakdownDonut({
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={`${principalLength} ${circumference - principalLength}`}
-          initial={
-            prefersReducedMotion
-              ? false
-              : { strokeDashoffset: circumference, opacity: 0.4 }
-          }
+          initial={prefersReducedMotion ? false : { strokeDashoffset: circumference, opacity: 0.4 }}
           animate={{ strokeDashoffset: 0, opacity: 1 }}
           transition={{ duration: 0.55, ease: EASE }}
         />
@@ -242,10 +217,10 @@ function LoanBreakdownDonut({
         />
       </svg>
       <div className="loan-calc-donut-center" aria-hidden>
-        <span className="text-[10px] uppercase tracking-wider text-white/55">
-          Split
+        <span className="text-[10px] uppercase tracking-wider text-white/55">Split</span>
+        <span className="text-sm font-semibold text-white">
+          {principalPct}/{interestPct}
         </span>
-        <span className="text-sm font-semibold text-white">{principalPct}/{interestPct}</span>
       </div>
     </div>
   );
@@ -293,9 +268,7 @@ function LoanCalcConfetti({
             rotate: particle.spin,
           }}
           transition={{ duration: 0.95, ease: "easeOut" }}
-          onAnimationComplete={
-            particle.id === 0 ? onComplete : undefined
-          }
+          onAnimationComplete={particle.id === 0 ? onComplete : undefined}
         />
       ))}
     </div>
@@ -377,8 +350,8 @@ function LoanSummaryFooter({
         <div className="loan-calc-disclaimer">
           <CircleAlert className="loan-calc-disclaimer-icon h-3.5 w-3.5 shrink-0" aria-hidden />
           <p>
-            Indicative estimate only. Actual lender rates, moratorium, margin
-            money, and repayment terms may vary.
+            Indicative estimate only. Actual lender rates, moratorium, margin money, and repayment
+            terms may vary.
           </p>
         </div>
       </div>
@@ -401,7 +374,7 @@ export function LoanCalculatorSection() {
 
   const { emi, totalPayable, totalInterest } = useMemo(
     () => calculateEmi(amount, rate, tenure),
-    [amount, rate, tenure],
+    [amount, rate, tenure]
   );
 
   const total = amount + totalInterest;
@@ -421,7 +394,7 @@ export function LoanCalculatorSection() {
         particles: createConfettiParticles(),
       });
     },
-    [prefersReducedMotion],
+    [prefersReducedMotion]
   );
 
   return (
@@ -504,9 +477,7 @@ export function LoanCalculatorSection() {
                 <motion.div
                   className="mb-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-[0_0_24px_rgba(11,143,216,0.35)] sm:mb-5"
                   animate={
-                    prefersReducedMotion
-                      ? undefined
-                      : { y: [0, -3, 0], rotate: [0, 2, 0, -2, 0] }
+                    prefersReducedMotion ? undefined : { y: [0, -3, 0], rotate: [0, 2, 0, -2, 0] }
                   }
                   transition={{
                     duration: 5,
@@ -550,10 +521,7 @@ export function LoanCalculatorSection() {
                 </p>
 
                 <div className="loan-calc-breakdown">
-                  <LoanBreakdownDonut
-                    principal={amount}
-                    totalInterest={totalInterest}
-                  />
+                  <LoanBreakdownDonut principal={amount} totalInterest={totalInterest} />
                   <div className="loan-calc-legend">
                     <div className="loan-calc-legend-row">
                       <span className="loan-calc-legend-dot loan-calc-legend-dot--principal" />

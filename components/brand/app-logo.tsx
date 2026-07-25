@@ -54,12 +54,13 @@ interface AppLogoProps {
   surface?: AppLogoSurface;
   /** White padded frame — use for auth/settings only; navbar stays chrome-free like Epicred/Nomad. */
   framed?: boolean;
+  /**
+   * When the logo sits next to visible brand text (navbar lockup), pass empty alt
+   * so screen readers do not hear the company name twice.
+   */
+  decorative?: boolean;
   className?: string;
   priority?: boolean;
-}
-
-function isLocalStaticAsset(src: string) {
-  return src.startsWith("/") && !src.startsWith("//");
 }
 
 export function AppLogo({
@@ -68,12 +69,13 @@ export function AppLogo({
   variant = "auth",
   surface = "light",
   framed,
+  decorative = false,
   className,
   priority,
 }: AppLogoProps) {
   const styles = VARIANTS[variant];
   const logoSrc = src?.trim() || DEFAULT_APP_LOGO;
-  // Request 2× pixels so the mark stays sharp on retina at navbar sizes.
+  // 2× display pixels for retina; Next Image serves a resized WebP/AVIF.
   const width = Math.round(styles.height * APP_LOGO_ASPECT_RATIO * 2);
   const height = styles.height * 2;
   const onDark = surface === "dark";
@@ -92,18 +94,15 @@ export function AppLogo({
         className
       )}
       style={
-        showFrame || variant === "sidebar"
-          ? undefined
-          : { aspectRatio: APP_LOGO_ASPECT_RATIO }
+        showFrame || variant === "sidebar" ? undefined : { aspectRatio: APP_LOGO_ASPECT_RATIO }
       }
     >
       <Image
         src={logoSrc}
-        alt={alt}
+        alt={decorative ? "" : alt}
         width={width}
         height={height}
-        quality={100}
-        unoptimized={isLocalStaticAsset(logoSrc)}
+        quality={85}
         priority={priority ?? (variant === "auth" || variant === "navbar")}
         className="h-full w-full object-contain object-center"
         sizes={`${styles.maxWidth * 2}px`}

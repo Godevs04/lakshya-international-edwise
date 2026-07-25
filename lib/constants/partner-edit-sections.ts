@@ -21,9 +21,7 @@ export const PARTNER_EDIT_SECTIONS: Record<
   },
 };
 
-export function parsePartnerEditSection(
-  value?: string | null
-): PartnerEditSectionKey | undefined {
+export function parsePartnerEditSection(value?: string | null): PartnerEditSectionKey | undefined {
   if (!value) return undefined;
   return value in PARTNER_EDIT_SECTIONS ? (value as PartnerEditSectionKey) : undefined;
 }

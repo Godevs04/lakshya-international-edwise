@@ -125,8 +125,8 @@ export function CountryLoanTypesSection({
             <div>
               <h4>{detail.title} — Document checklist</h4>
               <p>
-                Documents required specifically for a {detail.title.toLowerCase()} for {countryName}.
-                This list is not shared with other loan types.
+                Documents required specifically for a {detail.title.toLowerCase()} for {countryName}
+                . This list is not shared with other loan types.
               </p>
             </div>
           </div>

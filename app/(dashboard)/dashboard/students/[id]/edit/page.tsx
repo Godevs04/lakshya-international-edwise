@@ -39,11 +39,7 @@ export default async function EditStudentPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title={
-          focusSection
-            ? `Edit ${STUDENT_EDIT_SECTIONS[focusSection].label}`
-            : "Edit Student"
-        }
+        title={focusSection ? `Edit ${STUDENT_EDIT_SECTIONS[focusSection].label}` : "Edit Student"}
         description={student.studentId}
       />
       <StudentForm
@@ -83,7 +79,9 @@ export default async function EditStudentPage({
                 ? String(student.assignedTo)
                 : "",
           assignedToName:
-            student.assignedTo && typeof student.assignedTo === "object" && "name" in student.assignedTo
+            student.assignedTo &&
+            typeof student.assignedTo === "object" &&
+            "name" in student.assignedTo
               ? String(student.assignedTo.name)
               : undefined,
           targetCountry: student.targetCountry,

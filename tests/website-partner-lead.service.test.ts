@@ -35,11 +35,12 @@ describe("repairLegacyWebsitePartnerLeads", () => {
   });
 
   it("returns 0 when no partner rows need repair", async () => {
-    partnerFind.mockReturnValue({ select: vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue([]) }) });
+    partnerFind.mockReturnValue({
+      select: vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue([]) }),
+    });
 
-    const { repairLegacyWebsitePartnerLeads } = await import(
-      "@/lib/services/website-partner-lead.service"
-    );
+    const { repairLegacyWebsitePartnerLeads } =
+      await import("@/lib/services/website-partner-lead.service");
     const repaired = await repairLegacyWebsitePartnerLeads();
 
     expect(repaired).toBe(0);
@@ -68,9 +69,8 @@ describe("repairLegacyWebsitePartnerLeads", () => {
       }),
     });
 
-    const { repairLegacyWebsitePartnerLeads } = await import(
-      "@/lib/services/website-partner-lead.service"
-    );
+    const { repairLegacyWebsitePartnerLeads } =
+      await import("@/lib/services/website-partner-lead.service");
     const repaired = await repairLegacyWebsitePartnerLeads();
 
     expect(repaired).toBe(1);
@@ -110,9 +110,8 @@ describe("repairLegacyWebsitePartnerLeads", () => {
       select: vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue(null) }),
     });
 
-    const { repairLegacyWebsitePartnerLeads } = await import(
-      "@/lib/services/website-partner-lead.service"
-    );
+    const { repairLegacyWebsitePartnerLeads } =
+      await import("@/lib/services/website-partner-lead.service");
     await repairLegacyWebsitePartnerLeads();
 
     expect(partnerUpdateOne).toHaveBeenCalledWith(

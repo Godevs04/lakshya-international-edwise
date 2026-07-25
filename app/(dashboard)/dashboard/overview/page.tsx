@@ -82,20 +82,116 @@ export default async function OverviewPage() {
   } = await getOverviewDashboardAction();
 
   const metricCards = [
-    withTrend("Total Students", metrics.totalStudents, "users", trends.totalStudents, "purple", "/dashboard/students"),
-    withTrend("New Students Today", metrics.newStudentsToday, "user-plus", trends.newStudentsToday, "blue", "/dashboard/students"),
-    withTrend("Partners", metrics.totalPartners, "handshake", trends.totalPartners, "cyan", "/dashboard/partners"),
-    withTrend("Pending Applications", metrics.pendingApplications, "clock", trends.pendingApplications, "amber", "/dashboard/students?workflow=docs_pending"),
-    withTrend("Sanctioned", metrics.sanctioned, "check-circle", trends.sanctioned, "orange", "/dashboard/students?workflow=sanctioned"),
-    withTrend("Disbursed", metrics.disbursed, "banknote", trends.disbursed, "green", "/dashboard/students?workflow=disbursed"),
-    withTrend("Rejected", metrics.rejected, "x-circle", trends.rejected, "red", "/dashboard/students?status=rejected"),
-    withTrend("Loan Amount", formatCurrency(metrics.totalLoanAmount), "indian-rupee", trends.totalLoanAmount, "indigo"),
-    withTrend("Today's Collection", formatCurrency(metrics.todaysCollection), "wallet", trends.todaysCollection, "pink"),
-    withTrend("Commission Received", formatCurrency(commissionTotals.commissionReceived), "wallet", { trend: "", trendUp: true }, "green", "/dashboard/partners/commissions"),
-    withTrend("Commission Shared", formatCurrency(commissionTotals.commissionShared), "handshake", { trend: "", trendUp: true }, "cyan", "/dashboard/partners/commissions"),
-    withTrend("Net Commission Earned", formatCurrency(commissionTotals.commissionEarned), "indian-rupee", { trend: "", trendUp: true }, "purple", "/dashboard/partners/commissions"),
-    withTrend("Pending Received", formatCurrency(commissionTotals.pendingReceived), "clock", { trend: "", trendUp: false }, "amber", "/dashboard/partners/commissions?status=received_pending"),
-    withTrend("Pending Shared", formatCurrency(commissionTotals.pendingShared), "clock", { trend: "", trendUp: false }, "orange", "/dashboard/partners/commissions?status=shared_pending"),
+    withTrend(
+      "Total Students",
+      metrics.totalStudents,
+      "users",
+      trends.totalStudents,
+      "purple",
+      "/dashboard/students"
+    ),
+    withTrend(
+      "New Students Today",
+      metrics.newStudentsToday,
+      "user-plus",
+      trends.newStudentsToday,
+      "blue",
+      "/dashboard/students"
+    ),
+    withTrend(
+      "Partners",
+      metrics.totalPartners,
+      "handshake",
+      trends.totalPartners,
+      "cyan",
+      "/dashboard/partners"
+    ),
+    withTrend(
+      "Pending Applications",
+      metrics.pendingApplications,
+      "clock",
+      trends.pendingApplications,
+      "amber",
+      "/dashboard/students?workflow=docs_pending"
+    ),
+    withTrend(
+      "Sanctioned",
+      metrics.sanctioned,
+      "check-circle",
+      trends.sanctioned,
+      "orange",
+      "/dashboard/students?workflow=sanctioned"
+    ),
+    withTrend(
+      "Disbursed",
+      metrics.disbursed,
+      "banknote",
+      trends.disbursed,
+      "green",
+      "/dashboard/students?workflow=disbursed"
+    ),
+    withTrend(
+      "Rejected",
+      metrics.rejected,
+      "x-circle",
+      trends.rejected,
+      "red",
+      "/dashboard/students?status=rejected"
+    ),
+    withTrend(
+      "Loan Amount",
+      formatCurrency(metrics.totalLoanAmount),
+      "indian-rupee",
+      trends.totalLoanAmount,
+      "indigo"
+    ),
+    withTrend(
+      "Today's Collection",
+      formatCurrency(metrics.todaysCollection),
+      "wallet",
+      trends.todaysCollection,
+      "pink"
+    ),
+    withTrend(
+      "Commission Received",
+      formatCurrency(commissionTotals.commissionReceived),
+      "wallet",
+      { trend: "", trendUp: true },
+      "green",
+      "/dashboard/partners/commissions"
+    ),
+    withTrend(
+      "Commission Shared",
+      formatCurrency(commissionTotals.commissionShared),
+      "handshake",
+      { trend: "", trendUp: true },
+      "cyan",
+      "/dashboard/partners/commissions"
+    ),
+    withTrend(
+      "Net Commission Earned",
+      formatCurrency(commissionTotals.commissionEarned),
+      "indian-rupee",
+      { trend: "", trendUp: true },
+      "purple",
+      "/dashboard/partners/commissions"
+    ),
+    withTrend(
+      "Pending Received",
+      formatCurrency(commissionTotals.pendingReceived),
+      "clock",
+      { trend: "", trendUp: false },
+      "amber",
+      "/dashboard/partners/commissions?status=received_pending"
+    ),
+    withTrend(
+      "Pending Shared",
+      formatCurrency(commissionTotals.pendingShared),
+      "clock",
+      { trend: "", trendUp: false },
+      "orange",
+      "/dashboard/partners/commissions?status=shared_pending"
+    ),
   ];
 
   return (
@@ -110,7 +206,8 @@ export default async function OverviewPage() {
             </div>
             <div>
               <p className="font-semibold">
-                {siteLeadCounts.total} lead{siteLeadCounts.total === 1 ? "" : "s"} awaiting review from site
+                {siteLeadCounts.total} lead{siteLeadCounts.total === 1 ? "" : "s"} awaiting review
+                from site
               </p>
               <p className="text-sm text-muted-foreground">
                 {siteLeadCounts.students} student · {siteLeadCounts.partners} partner
@@ -150,22 +247,33 @@ export default async function OverviewPage() {
         {loanStatus.length > 0 ? (
           <LoanStatusBarChart data={loanStatus} />
         ) : (
-          <GlassCard className="p-8"><EmptyState title="No loan data yet" description="Add students to see loan status distribution." /></GlassCard>
+          <GlassCard className="p-8">
+            <EmptyState
+              title="No loan data yet"
+              description="Add students to see loan status distribution."
+            />
+          </GlassCard>
         )}
         {monthlyStudents.length > 0 ? (
           <MonthlyStudentsAreaChart data={monthlyStudents} />
         ) : (
-          <GlassCard className="p-8"><EmptyState title="No student trends yet" /></GlassCard>
+          <GlassCard className="p-8">
+            <EmptyState title="No student trends yet" />
+          </GlassCard>
         )}
         {loanAmount.length > 0 ? (
           <LoanAmountBarChart data={loanAmount} />
         ) : (
-          <GlassCard className="p-8"><EmptyState title="No loan amount data yet" /></GlassCard>
+          <GlassCard className="p-8">
+            <EmptyState title="No loan amount data yet" />
+          </GlassCard>
         )}
         {topPartners.length > 0 ? (
           <TopPartnersBarChart data={topPartners} />
         ) : (
-          <GlassCard className="p-8"><EmptyState title="No partner data yet" /></GlassCard>
+          <GlassCard className="p-8">
+            <EmptyState title="No partner data yet" />
+          </GlassCard>
         )}
       </div>
 
@@ -208,7 +316,10 @@ export default async function OverviewPage() {
         <GlassCard className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-base font-bold">Latest Partners</h3>
-            <Link href="/dashboard/partners" className="text-xs font-semibold text-[#E8952E] hover:underline">
+            <Link
+              href="/dashboard/partners"
+              className="text-xs font-semibold text-[#E8952E] hover:underline"
+            >
               View all →
             </Link>
           </div>
@@ -238,13 +349,22 @@ export default async function OverviewPage() {
       {followups.length > 0 && (
         <GlassCard className="p-6">
           <FollowUpCards
-            followups={followups.map((f: { _id: string; studentId: string; firstName: string; lastName: string; note: string; dueDate: Date }) => ({
-              id: f._id,
-              firstName: f.firstName,
-              lastName: f.lastName,
-              note: f.note,
-              dueDate: f.dueDate,
-            }))}
+            followups={followups.map(
+              (f: {
+                _id: string;
+                studentId: string;
+                firstName: string;
+                lastName: string;
+                note: string;
+                dueDate: Date;
+              }) => ({
+                id: f._id,
+                firstName: f.firstName,
+                lastName: f.lastName,
+                note: f.note,
+                dueDate: f.dueDate,
+              })
+            )}
           />
         </GlassCard>
       )}

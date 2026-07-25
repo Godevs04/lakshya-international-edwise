@@ -137,7 +137,9 @@ export function ImageUploadField({
               <FileText className="h-8 w-8 text-muted-foreground/70" />
             )}
             <p className="text-xs text-muted-foreground">
-              {variant === "image" ? "Upload a photo from your device" : "Upload a file from your device"}
+              {variant === "image"
+                ? "Upload a photo from your device"
+                : "Upload a file from your device"}
             </p>
             <Button
               type="button"

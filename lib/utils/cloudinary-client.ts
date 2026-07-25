@@ -30,10 +30,10 @@ export async function uploadFileToCloudinary(
   formData.append("signature", signature);
   formData.append("folder", uploadFolder);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-    { method: "POST", body: formData }
-  );
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+    method: "POST",
+    body: formData,
+  });
 
   if (!response.ok) {
     return { success: false, error: "Upload failed. Please try again." };

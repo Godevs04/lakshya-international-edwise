@@ -17,9 +17,7 @@ describe("student contact links", () => {
 
   it("builds tel and sms urls for mobile handlers", () => {
     expect(buildTelUrl("9876543210")).toBe("tel:+919876543210");
-    expect(buildSmsUrl("9876543210", "Hi Kavin,")).toBe(
-      "sms:+919876543210?body=Hi%20Kavin%2C"
-    );
+    expect(buildSmsUrl("9876543210", "Hi Kavin,")).toBe("sms:+919876543210?body=Hi%20Kavin%2C");
   });
 
   it("builds mailto urls", () => {

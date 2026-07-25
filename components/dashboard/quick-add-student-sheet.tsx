@@ -100,11 +100,7 @@ export function QuickAddStudentSheet({ assignableUsers }: QuickAddStudentSheetPr
             </div>
           </div>
 
-          <StudentPhoneField
-            id="quick-student-phone"
-            name="phone"
-            label="Phone"
-          />
+          <StudentPhoneField id="quick-student-phone" name="phone" label="Phone" />
 
           <div className="space-y-2">
             <Label htmlFor="quick-student-targetCountry">Target Country</Label>

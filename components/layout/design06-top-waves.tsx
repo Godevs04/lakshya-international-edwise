@@ -197,7 +197,11 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
             return (
               <motion.g key={layerIndex} {...scrollAnimation} style={{ opacity: layer.opacity }}>
                 <path d={layer.d} fill={`url(#${fillId})`} />
-                <path d={layer.d} fill={`url(#${fillId})`} transform={`translate(${WAVE_WIDTH}, 0)`} />
+                <path
+                  d={layer.d}
+                  fill={`url(#${fillId})`}
+                  transform={`translate(${WAVE_WIDTH}, 0)`}
+                />
               </motion.g>
             );
           })}

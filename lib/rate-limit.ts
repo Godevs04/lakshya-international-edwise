@@ -156,8 +156,6 @@ export async function enforceUserRateLimit(
 ): Promise<void> {
   const result = await checkRateLimit(action, userId);
   if (!result.allowed) {
-    throw new Error(
-      `Too many requests. Please try again in ${result.retryAfterSeconds} seconds.`
-    );
+    throw new Error(`Too many requests. Please try again in ${result.retryAfterSeconds} seconds.`);
   }
 }

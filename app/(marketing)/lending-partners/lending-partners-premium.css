@@ -103,7 +103,9 @@
   background: linear-gradient(135deg, #0b8fd8 0%, #097bb8 50%, #0ea5e9 100%) !important;
   border: none !important;
   box-shadow: 0 8px 24px rgba(11, 143, 216, 0.35);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .marketing-site .lp-hero-primary-cta:hover {
@@ -123,7 +125,10 @@
   font-weight: 600;
   color: var(--lp-navy);
   backdrop-filter: blur(8px);
-  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s,
+    transform 0.3s;
 }
 
 .marketing-site .lp-hero-secondary-cta:hover {
@@ -137,7 +142,12 @@
   position: relative;
   padding: 1rem;
   border-radius: 1.25rem;
-  background: linear-gradient(145deg, rgba(11, 30, 72, 0.94) 0%, rgba(15, 37, 87, 0.92) 45%, rgba(11, 143, 216, 0.88) 100%);
+  background: linear-gradient(
+    145deg,
+    rgba(11, 30, 72, 0.94) 0%,
+    rgba(15, 37, 87, 0.92) 45%,
+    rgba(11, 143, 216, 0.88) 100%
+  );
   box-shadow:
     0 24px 64px rgba(11, 30, 72, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -188,8 +198,13 @@
 }
 
 @keyframes lp-pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .marketing-site .lp-hero-dashboard-grid {
@@ -362,8 +377,15 @@
 }
 
 @keyframes lp-float-particle {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-8px); opacity: 0.8; }
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-8px);
+    opacity: 0.8;
+  }
 }
 
 /* ── Marketplace section ──────────────────────────────────────────── */
@@ -515,11 +537,7 @@
   min-height: 22rem;
   padding: 0.875rem 0.875rem 0.75rem;
   border-radius: var(--lp-radius-card);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.96) 0%,
-    rgba(248, 251, 255, 0.94) 100%
-  );
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 251, 255, 0.94) 100%);
   border: 1px solid rgba(226, 232, 240, 0.75);
   box-shadow: var(--lp-shadow);
   backdrop-filter: blur(12px);
@@ -624,8 +642,13 @@
 }
 
 @keyframes lp-badge-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.88; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.88;
+  }
 }
 
 /* Logo block — fixed height for grid alignment */
@@ -662,10 +685,18 @@
   color: rgba(11, 30, 72, 0.45);
 }
 
-.marketing-site .lender-category-text-government { color: rgba(11, 30, 72, 0.55); }
-.marketing-site .lender-category-text-private { color: rgba(151, 20, 77, 0.65); }
-.marketing-site .lender-category-text-nbfc { color: rgba(9, 123, 184, 0.75); }
-.marketing-site .lender-category-text-international { color: rgba(27, 153, 139, 0.75); }
+.marketing-site .lender-category-text-government {
+  color: rgba(11, 30, 72, 0.55);
+}
+.marketing-site .lender-category-text-private {
+  color: rgba(151, 20, 77, 0.65);
+}
+.marketing-site .lender-category-text-nbfc {
+  color: rgba(9, 123, 184, 0.75);
+}
+.marketing-site .lender-category-text-international {
+  color: rgba(27, 153, 139, 0.75);
+}
 
 .marketing-site .lender-marketplace-card:hover .lender-card-logo-well {
   transform: scale(1.02);
@@ -955,11 +986,7 @@
   padding: 1rem 1.25rem 0.75rem;
   border-radius: 1.25rem;
   border: 1px solid rgba(11, 143, 216, 0.12);
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(236, 246, 255, 0.85) 100%
-  );
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95) 0%, rgba(236, 246, 255, 0.85) 100%);
   box-shadow: 0 8px 24px rgba(11, 30, 72, 0.06);
 }
 
@@ -1090,7 +1117,9 @@
   padding: 0.125rem;
   border-radius: 9999px;
   color: rgba(11, 30, 72, 0.5);
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 
 .marketing-site .lender-compare-chip-remove:hover {
@@ -1129,7 +1158,10 @@
   color: #fff;
   background: linear-gradient(135deg, #0b8fd8, #0ea5e9);
   box-shadow: 0 4px 14px rgba(11, 143, 216, 0.3);
-  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .marketing-site .lender-compare-bar-go:hover:not(:disabled) {
@@ -1211,7 +1243,9 @@
   height: 2rem;
   border-radius: 9999px;
   color: rgba(11, 30, 72, 0.55);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .marketing-site .lender-compare-close:hover {

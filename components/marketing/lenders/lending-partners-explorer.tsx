@@ -2,7 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { MARKETING_LENDERS } from "@/lib/constants/marketing/lenders";
-import { LendingPartnersFilter, type LenderFilter } from "@/components/marketing/lenders/lending-partners-filter";
+import {
+  LendingPartnersFilter,
+  type LenderFilter,
+} from "@/components/marketing/lenders/lending-partners-filter";
 import { LenderPartnerCard } from "@/components/marketing/lenders/lender-partner-card";
 import { LendingPartnersEmptyState } from "@/components/marketing/lenders/lending-partners-empty-state";
 import { LenderCompareBar } from "@/components/marketing/lenders/lender-compare-bar";
@@ -17,9 +20,7 @@ export function LendingPartnersExplorer() {
 
   const lenders = useMemo(
     () =>
-      filter === "all"
-        ? MARKETING_LENDERS
-        : MARKETING_LENDERS.filter((l) => l.category === filter),
+      filter === "all" ? MARKETING_LENDERS : MARKETING_LENDERS.filter((l) => l.category === filter),
     [filter]
   );
 
@@ -61,9 +62,7 @@ export function LendingPartnersExplorer() {
           className="lender-marketplace-grid"
           role="tabpanel"
           aria-label={
-            filter === "all"
-              ? "All lending partners"
-              : `Lending partners filtered by ${filter}`
+            filter === "all" ? "All lending partners" : `Lending partners filtered by ${filter}`
           }
         >
           {lenders.map((lender, index) => (

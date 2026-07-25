@@ -79,7 +79,9 @@ export default async function PartnerCommissionsPage({
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">Pending Received</p>
-          <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(totals.pendingReceived)}</p>
+          <p className="text-2xl font-semibold text-[#F59E0B]">
+            {formatCurrency(totals.pendingReceived)}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">Commission Shared</p>
@@ -87,7 +89,9 @@ export default async function PartnerCommissionsPage({
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">Pending Shared</p>
-          <p className="text-2xl font-semibold text-[#F59E0B]">{formatCurrency(totals.pendingShared)}</p>
+          <p className="text-2xl font-semibold text-[#F59E0B]">
+            {formatCurrency(totals.pendingShared)}
+          </p>
         </GlassCard>
         <GlassCard className="p-4 sm:col-span-2 xl:col-span-1">
           <p className="text-xs text-muted-foreground">Net Commission Earned</p>

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -9,7 +9,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
     >
       <div className="absolute inset-0 shimmer opacity-50" />
     </div>
-  )
+  );
 }
 
-export { Skeleton }
+export { Skeleton };

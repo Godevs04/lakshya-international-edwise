@@ -25,9 +25,7 @@ export function isSentryEnabled(): boolean {
 }
 
 export function isSentryBuildConfigured(): boolean {
-  return Boolean(
-    trim(process.env.SENTRY_AUTH_TOKEN) && getSentryOrg() && getSentryProject()
-  );
+  return Boolean(trim(process.env.SENTRY_AUTH_TOKEN) && getSentryOrg() && getSentryProject());
 }
 
 export function getSentryTracesSampleRate(): number {

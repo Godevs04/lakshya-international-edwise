@@ -4,10 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/models/User";
-import {
-  sendPasswordResetEmail,
-  sendOtpEmail,
-} from "@/lib/services/email.service";
+import { sendPasswordResetEmail, sendOtpEmail } from "@/lib/services/email.service";
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -38,228 +35,223 @@ async function setUserOtp(userId: string, otp: string): Promise<void> {
   });
 }
 
-export async function registerAction(
-  formData: FormData
-): Promise<ActionResult> {
+export async function registerAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("registerAction", async () => {
-  if (!isPublicRegistrationAllowed()) {
-    return { success: false, error: "Public registration is disabled. Contact your administrator." };
-  }
+    if (!isPublicRegistrationAllowed()) {
+      return {
+        success: false,
+        error: "Public registration is disabled. Contact your administrator.",
+      };
+    }
 
-  const ip = await getClientIp();
-  const rateLimit = await checkRateLimit("register", ip);
-  if (!rateLimit.allowed) {
-    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
-  }
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("register", ip);
+    if (!rateLimit.allowed) {
+      return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+    }
 
-  const parsed = registerSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword"),
-  });
+    const parsed = registerSchema.safeParse({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
+    });
 
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
 
-  await connectDB();
-  const email = parsed.data.email.toLowerCase();
-  const existing = await User.findOne({ email });
-  if (existing) {
-    return { success: false, error: "Email already registered" };
-  }
+    await connectDB();
+    const email = parsed.data.email.toLowerCase();
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return { success: false, error: "Email already registered" };
+    }
 
-  const otp = generateOtp();
-  const passwordHash = await bcrypt.hash(parsed.data.password, 12);
+    const otp = generateOtp();
+    const passwordHash = await bcrypt.hash(parsed.data.password, 12);
 
-  const user = await User.create({
-    email,
-    name: parsed.data.name,
-    passwordHash,
-    role: "staff",
-    isVerified: false,
-    status: "pending",
-  });
+    const user = await User.create({
+      email,
+      name: parsed.data.name,
+      passwordHash,
+      role: "staff",
+      isVerified: false,
+      status: "pending",
+    });
 
-  await setUserOtp(user._id.toString(), otp);
-  const sent = await sendOtpEmail(email, parsed.data.name, otp);
+    await setUserOtp(user._id.toString(), otp);
+    const sent = await sendOtpEmail(email, parsed.data.name, otp);
 
-  if (!sent) {
-    return {
-      success: false,
-      error: "Account created but OTP email could not be sent. Check SMTP settings or contact support.",
-    };
-  }
+    if (!sent) {
+      return {
+        success: false,
+        error:
+          "Account created but OTP email could not be sent. Check SMTP settings or contact support.",
+      };
+    }
 
-  const { notifyAdmins } = await import("@/lib/services/notification.service");
-  await notifyAdmins({
-    title: "New registration pending",
-    body: `${parsed.data.name} (${email}) registered and awaits approval.`,
-    link: "/dashboard/settings",
-    type: "info",
-  });
+    const { notifyAdmins } = await import("@/lib/services/notification.service");
+    await notifyAdmins({
+      title: "New registration pending",
+      body: `${parsed.data.name} (${email}) registered and awaits approval.`,
+      link: "/dashboard/settings",
+      type: "info",
+    });
 
-  await logActivity({
-    action: "user.registered",
-    description: `New registration: ${parsed.data.name} (${email})`,
-    resourceType: "user",
-    resourceId: user._id.toString(),
-    userId: user._id.toString(),
-    userName: parsed.data.name,
-    metadata: { email },
-  });
+    await logActivity({
+      action: "user.registered",
+      description: `New registration: ${parsed.data.name} (${email})`,
+      resourceType: "user",
+      resourceId: user._id.toString(),
+      userId: user._id.toString(),
+      userName: parsed.data.name,
+      metadata: { email },
+    });
 
-  return { success: true, data: undefined, code: "OTP_SENT" };
+    return { success: true, data: undefined, code: "OTP_SENT" };
   });
 }
 
-export async function verifyOtpAction(
-  email: string,
-  otp: string
-): Promise<ActionResult> {
+export async function verifyOtpAction(email: string, otp: string): Promise<ActionResult> {
   return runLoggedMutation("verifyOtpAction", async () => {
-  if (!email || !otp || otp.length !== 6) {
-    return { success: false, error: "Please enter a valid 6-digit code" };
-  }
+    if (!email || !otp || otp.length !== 6) {
+      return { success: false, error: "Please enter a valid 6-digit code" };
+    }
 
-  const rateLimit = await checkRateLimit("otp-verify", email.toLowerCase());
-  if (!rateLimit.allowed) {
-    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
-  }
+    const rateLimit = await checkRateLimit("otp-verify", email.toLowerCase());
+    if (!rateLimit.allowed) {
+      return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+    }
 
-  await connectDB();
-  const user = await User.findOne({ email: email.toLowerCase() });
-  if (!user) {
-    return { success: false, error: "Account not found" };
-  }
+    await connectDB();
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return { success: false, error: "Account not found" };
+    }
 
-  if (user.isVerified) {
-    return { success: true, code: "ALREADY_VERIFIED" };
-  }
+    if (user.isVerified) {
+      return { success: true, code: "ALREADY_VERIFIED" };
+    }
 
-  if (!user.emailOtpHash || !user.emailOtpExpiry || user.emailOtpExpiry < new Date()) {
-    return { success: false, error: "OTP expired. Please request a new code.", code: "OTP_EXPIRED" };
-  }
+    if (!user.emailOtpHash || !user.emailOtpExpiry || user.emailOtpExpiry < new Date()) {
+      return {
+        success: false,
+        error: "OTP expired. Please request a new code.",
+        code: "OTP_EXPIRED",
+      };
+    }
 
-  const valid = await bcrypt.compare(otp, user.emailOtpHash);
-  if (!valid) {
-    return { success: false, error: "Invalid verification code" };
-  }
+    const valid = await bcrypt.compare(otp, user.emailOtpHash);
+    if (!valid) {
+      return { success: false, error: "Invalid verification code" };
+    }
 
-  user.isVerified = true;
-  user.emailOtpHash = undefined;
-  user.emailOtpExpiry = undefined;
-  user.status = "pending";
-  await user.save();
+    user.isVerified = true;
+    user.emailOtpHash = undefined;
+    user.emailOtpExpiry = undefined;
+    user.status = "pending";
+    await user.save();
 
-  await logActivity({
-    action: "user.email_verified",
-    description: `Email verified for ${user.email}`,
-    resourceType: "user",
-    resourceId: user._id.toString(),
-    userId: user._id.toString(),
-    userName: user.name,
-    metadata: { email: user.email },
-  });
+    await logActivity({
+      action: "user.email_verified",
+      description: `Email verified for ${user.email}`,
+      resourceType: "user",
+      resourceId: user._id.toString(),
+      userId: user._id.toString(),
+      userName: user.name,
+      metadata: { email: user.email },
+    });
 
-  return { success: true, code: "AWAITING_APPROVAL" };
+    return { success: true, code: "AWAITING_APPROVAL" };
   });
 }
 
 export async function resendOtpAction(email: string): Promise<ActionResult> {
   return runLoggedMutation("resendOtpAction", async () => {
-  if (!email) {
-    return { success: false, error: "Email is required" };
-  }
+    if (!email) {
+      return { success: false, error: "Email is required" };
+    }
 
-  const rateLimit = await checkRateLimit("otp-resend", email.toLowerCase());
-  if (!rateLimit.allowed) {
-    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
-  }
+    const rateLimit = await checkRateLimit("otp-resend", email.toLowerCase());
+    if (!rateLimit.allowed) {
+      return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+    }
 
-  await connectDB();
-  const user = await User.findOne({ email: email.toLowerCase() });
-  if (!user) {
+    await connectDB();
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return { success: true };
+    }
+
+    if (user.isVerified) {
+      return { success: false, error: "Email is already verified" };
+    }
+
+    const otp = generateOtp();
+    await setUserOtp(user._id.toString(), otp);
+    const sent = await sendOtpEmail(user.email, user.name, otp);
+
+    if (!sent) {
+      return { success: false, error: "Could not send OTP email. Check SMTP configuration." };
+    }
+
     return { success: true };
-  }
-
-  if (user.isVerified) {
-    return { success: false, error: "Email is already verified" };
-  }
-
-  const otp = generateOtp();
-  await setUserOtp(user._id.toString(), otp);
-  const sent = await sendOtpEmail(user.email, user.name, otp);
-
-  if (!sent) {
-    return { success: false, error: "Could not send OTP email. Check SMTP configuration." };
-  }
-
-  return { success: true };
   });
 }
 
-export async function validateLoginAction(
-  email: string,
-  password: string
-): Promise<ActionResult> {
+export async function validateLoginAction(email: string, password: string): Promise<ActionResult> {
   return runLoggedMutation("validateLoginAction", async () => {
-  const ip = await getClientIp();
-  const rateLimit = await checkRateLimit("login", `${ip}:${email.toLowerCase()}`);
-  if (!rateLimit.allowed) {
-    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
-  }
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("login", `${ip}:${email.toLowerCase()}`);
+    if (!rateLimit.allowed) {
+      return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+    }
 
-  await connectDB();
-  const user = await User.findOne({ email: email.toLowerCase() });
-  if (!user) {
-    return { success: false, error: "Invalid email or password" };
-  }
+    await connectDB();
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return { success: false, error: "Invalid email or password" };
+    }
 
-  const isValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isValid) {
-    return { success: false, error: "Invalid email or password" };
-  }
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      return { success: false, error: "Invalid email or password" };
+    }
 
-  if (!user.isVerified) {
-    return {
-      success: false,
-      error: "Please verify your email with the OTP sent to your inbox.",
-      code: "UNVERIFIED",
-    };
-  }
+    if (!user.isVerified) {
+      return {
+        success: false,
+        error: "Please verify your email with the OTP sent to your inbox.",
+        code: "UNVERIFIED",
+      };
+    }
 
-  if (user.status === "pending") {
-    return {
-      success: false,
-      error: "Your account is in the approval queue. An admin will onboard you soon.",
-      code: "PENDING",
-    };
-  }
+    if (user.status === "pending") {
+      return {
+        success: false,
+        error: "Your account is in the approval queue. An admin will onboard you soon.",
+        code: "PENDING",
+      };
+    }
 
-  if (user.status !== "active") {
-    return {
-      success: false,
-      error: "Your account is not active. Please contact your administrator.",
-      code: "INACTIVE",
-    };
-  }
+    if (user.status !== "active") {
+      return {
+        success: false,
+        error: "Your account is not active. Please contact your administrator.",
+        code: "INACTIVE",
+      };
+    }
 
-  return { success: true };
+    return { success: true };
   });
 }
 
-export async function getLoginFailureReasonAction(
-  email: string
-): Promise<ActionResult> {
+export async function getLoginFailureReasonAction(email: string): Promise<ActionResult> {
   return runLoggedMutation("getLoginFailureReasonAction", async () => {
     const normalizedEmail = email.toLowerCase();
     const ip = await getClientIp();
-    const retryAfterSeconds = await getRateLimitRetryAfter(
-      "login",
-      `${ip}:${normalizedEmail}`
-    );
+    const retryAfterSeconds = await getRateLimitRetryAfter("login", `${ip}:${normalizedEmail}`);
     if (retryAfterSeconds) {
       return {
         success: false,
@@ -302,120 +294,116 @@ export async function getLoginFailureReasonAction(
   });
 }
 
-export async function forgotPasswordAction(
-  formData: FormData
-): Promise<ActionResult> {
+export async function forgotPasswordAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("forgotPasswordAction", async () => {
-  const parsed = forgotPasswordSchema.safeParse({
-    email: formData.get("email"),
-  });
+    const parsed = forgotPasswordSchema.safeParse({
+      email: formData.get("email"),
+    });
 
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
 
-  const rateLimit = await checkRateLimit("forgot-password", parsed.data.email.toLowerCase());
-  if (!rateLimit.allowed) {
-    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
-  }
+    const rateLimit = await checkRateLimit("forgot-password", parsed.data.email.toLowerCase());
+    if (!rateLimit.allowed) {
+      return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+    }
 
-  await connectDB();
-  const user = await User.findOne({ email: parsed.data.email.toLowerCase(), status: "active" });
-  if (!user) {
+    await connectDB();
+    const user = await User.findOne({ email: parsed.data.email.toLowerCase(), status: "active" });
+    if (!user) {
+      return { success: true };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetToken = hashToken(resetToken);
+    user.resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
+
+    const resetUrl = `${getPublicAuthUrl()}/reset-password?token=${resetToken}`;
+    await sendPasswordResetEmail(user.email, user.name, resetUrl);
+
     return { success: true };
-  }
-
-  const resetToken = crypto.randomBytes(32).toString("hex");
-  user.resetToken = hashToken(resetToken);
-  user.resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
-  await user.save();
-
-  const resetUrl = `${getPublicAuthUrl()}/reset-password?token=${resetToken}`;
-  await sendPasswordResetEmail(user.email, user.name, resetUrl);
-
-  return { success: true };
   });
 }
 
-export async function resetPasswordAction(
-  formData: FormData
-): Promise<ActionResult> {
+export async function resetPasswordAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("resetPasswordAction", async () => {
-  const parsed = resetPasswordSchema.safeParse({
-    token: formData.get("token"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword"),
-  });
+    const parsed = resetPasswordSchema.safeParse({
+      token: formData.get("token"),
+      password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
+    });
 
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
 
-  const ip = await getClientIp();
-  const rateLimit = await checkRateLimit("login", `reset:${ip}`);
-  if (!rateLimit.allowed) {
-    return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
-  }
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("login", `reset:${ip}`);
+    if (!rateLimit.allowed) {
+      return { success: false, error: rateLimitMessage(rateLimit.retryAfterSeconds) };
+    }
 
-  await connectDB();
-  const user = await User.findOne({
-    resetToken: hashToken(parsed.data.token),
-    resetTokenExpiry: { $gt: new Date() },
-  });
+    await connectDB();
+    const user = await User.findOne({
+      resetToken: hashToken(parsed.data.token),
+      resetTokenExpiry: { $gt: new Date() },
+    });
 
-  if (!user) {
-    return { success: false, error: "Invalid or expired reset token" };
-  }
+    if (!user) {
+      return { success: false, error: "Invalid or expired reset token" };
+    }
 
-  user.passwordHash = await bcrypt.hash(parsed.data.password, 12);
-  user.resetToken = undefined;
-  user.resetTokenExpiry = undefined;
-  await user.save();
+    user.passwordHash = await bcrypt.hash(parsed.data.password, 12);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
 
-  await logActivity({
-    action: "user.password_reset",
-    description: `Password reset for ${user.email}`,
-    resourceType: "user",
-    resourceId: user._id.toString(),
-    userId: user._id.toString(),
-    userName: user.name,
-    metadata: { email: user.email },
-  });
+    await logActivity({
+      action: "user.password_reset",
+      description: `Password reset for ${user.email}`,
+      resourceType: "user",
+      resourceId: user._id.toString(),
+      userId: user._id.toString(),
+      userName: user.name,
+      metadata: { email: user.email },
+    });
 
-  return { success: true };
+    return { success: true };
   });
 }
 
 export async function verifyEmailAction(token: string): Promise<ActionResult> {
   return runLoggedMutation("verifyEmailAction", async () => {
-  await connectDB();
-  const user = await User.findOne({
-    verifyToken: hashToken(token),
-    verifyTokenExpiry: { $gt: new Date() },
-  });
+    await connectDB();
+    const user = await User.findOne({
+      verifyToken: hashToken(token),
+      verifyTokenExpiry: { $gt: new Date() },
+    });
 
-  if (!user) {
-    return { success: false, error: "Invalid or expired verification token" };
-  }
+    if (!user) {
+      return { success: false, error: "Invalid or expired verification token" };
+    }
 
-  user.isVerified = true;
-  user.verifyToken = undefined;
-  user.verifyTokenExpiry = undefined;
-  if (user.role !== "super_admin" && user.role !== "admin") {
-    user.status = "pending";
-  }
-  await user.save();
+    user.isVerified = true;
+    user.verifyToken = undefined;
+    user.verifyTokenExpiry = undefined;
+    if (user.role !== "super_admin" && user.role !== "admin") {
+      user.status = "pending";
+    }
+    await user.save();
 
-  await logActivity({
-    action: "user.email_verified",
-    description: `Email verified for ${user.email}`,
-    resourceType: "user",
-    resourceId: user._id.toString(),
-    userId: user._id.toString(),
-    userName: user.name,
-    metadata: { email: user.email },
-  });
+    await logActivity({
+      action: "user.email_verified",
+      description: `Email verified for ${user.email}`,
+      resourceType: "user",
+      resourceId: user._id.toString(),
+      userId: user._id.toString(),
+      userName: user.name,
+      metadata: { email: user.email },
+    });
 
-  return { success: true, code: "AWAITING_APPROVAL" };
+    return { success: true, code: "AWAITING_APPROVAL" };
   });
 }

@@ -9,18 +9,27 @@ import type { SearchResult } from "@/types";
 import { enforceUserRateLimit } from "@/lib/rate-limit";
 
 export async function globalSearchAction(query: string): Promise<SearchResult[]> {
-  return runLoggedQuery("globalSearchAction", async () => {
-    const user = await getSessionUser();
-    if (!user) {
-      throw new Error("Unauthorized: insufficient permissions");
-    }
+  return runLoggedQuery(
+    "globalSearchAction",
+    async () => {
+      const user = await getSessionUser();
+      if (!user) {
+        throw new Error("Unauthorized: insufficient permissions");
+      }
 
-    await enforceUserRateLimit("search", user.id);
+      await enforceUserRateLimit("search", user.id);
 
-    return globalSearch(query, {
-      students: hasPermission(user, PERMISSIONS.STUDENTS_READ),
-      partners: hasPermission(user, PERMISSIONS.PARTNERS_READ),
-      applications: hasPermission(user, PERMISSIONS.APPLICATIONS_READ),
-    }, 10, user);
-  }, []);
+      return globalSearch(
+        query,
+        {
+          students: hasPermission(user, PERMISSIONS.STUDENTS_READ),
+          partners: hasPermission(user, PERMISSIONS.PARTNERS_READ),
+          applications: hasPermission(user, PERMISSIONS.APPLICATIONS_READ),
+        },
+        10,
+        user
+      );
+    },
+    []
+  );
 }

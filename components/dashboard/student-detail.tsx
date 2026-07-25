@@ -80,8 +80,20 @@ interface StudentDetailProps {
     };
     loanApplications?: LoanApplicationItem[];
     documents?: Array<{ _id?: string; name: string; url: string; mimeType?: string }>;
-    timeline?: Array<{ _id?: string; status: string; note?: string; createdByName?: string; createdAt?: Date }>;
-    notes?: Array<{ _id?: string; content: string; createdByName?: string; dueDate?: Date; createdAt?: Date }>;
+    timeline?: Array<{
+      _id?: string;
+      status: string;
+      note?: string;
+      createdByName?: string;
+      createdAt?: Date;
+    }>;
+    notes?: Array<{
+      _id?: string;
+      content: string;
+      createdByName?: string;
+      dueDate?: Date;
+      createdAt?: Date;
+    }>;
     partnerId?: { _id: string; companyName: string; phone?: string; email?: string } | null;
     assignedTo?: { _id: string; name: string; email?: string } | null;
     metadata?: { createdByName?: string };
@@ -190,10 +202,7 @@ export function StudentDetailView({
     [profileInput]
   );
 
-  const profileVerified = useMemo(
-    () => isStudentProfileVerified(profileInput),
-    [profileInput]
-  );
+  const profileVerified = useMemo(() => isStudentProfileVerified(profileInput), [profileInput]);
 
   const latestNote = useMemo(() => {
     const notes = [...(student.notes ?? [])];
@@ -209,7 +218,10 @@ export function StudentDetailView({
   const lenderName = student.loan?.lenderId?.name ?? student.loan?.bankName;
   const banksSummary = useMemo(() => {
     if (loanApplications.length > 0) {
-      return loanApplications.map((entry) => entry.lenderName).filter(Boolean).join(", ");
+      return loanApplications
+        .map((entry) => entry.lenderName)
+        .filter(Boolean)
+        .join(", ");
     }
     return lenderName;
   }, [loanApplications, lenderName]);
@@ -252,7 +264,9 @@ export function StudentDetailView({
           <div className="flex flex-col items-center text-center">
             <Avatar className="h-20 w-20">
               <AvatarImage src={student.photo} />
-              <AvatarFallback>{getInitials(`${student.firstName} ${student.lastName}`)}</AvatarFallback>
+              <AvatarFallback>
+                {getInitials(`${student.firstName} ${student.lastName}`)}
+              </AvatarFallback>
             </Avatar>
             <h2 className="mt-3 flex items-center justify-center gap-1.5 text-lg font-semibold">
               <span>
@@ -268,9 +282,7 @@ export function StudentDetailView({
               </Badge>
               {bankSent ? (
                 <Badge className="bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/15">
-                  {sentBanks.length > 1
-                    ? `Sent to ${sentBanks.length} banks`
-                    : "Sent to bank"}
+                  {sentBanks.length > 1 ? `Sent to ${sentBanks.length} banks` : "Sent to bank"}
                 </Badge>
               ) : null}
               {!profileVerified && (
@@ -442,12 +454,13 @@ export function StudentDetailView({
                   </Link>
                   {(student.partnerId.phone || student.partnerId.email) && (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {[student.partnerId.phone, student.partnerId.email].filter(Boolean).join(" · ")}
+                      {[student.partnerId.phone, student.partnerId.email]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   )}
                 </div>
               )}
-
             </GlassCard>
           </TabsContent>
 
@@ -526,21 +539,65 @@ export function StudentDetailView({
             <GlassCard className="p-5">
               <div className="mb-4 flex items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold">Loan summary</h3>
-                {canWrite ? (
-                  <SectionEditButton studentId={student._id} section="loan" />
-                ) : null}
+                {canWrite ? <SectionEditButton studentId={student._id} section="loan" /> : null}
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div><p className="text-xs text-muted-foreground">Requested</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.requested ?? 0, student.loan?.currency)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Sanctioned</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.sanctioned ?? 0, student.loan?.currency)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Disbursed</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.disbursed ?? 0, student.loan?.currency)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Disbursement Type</p><p className="text-lg font-semibold">{getDisbursementTypeLabel(student.loan?.disbursementType)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Currency</p><p className="text-lg font-semibold">{student.loan?.currency ?? "INR"}</p></div>
-                <div><p className="text-xs text-muted-foreground">Lender</p><p className="text-sm">{lenderName ?? "—"}</p></div>
-                <div><p className="text-xs text-muted-foreground">ROI / Interest</p><p className="text-lg font-semibold">{student.loan?.roi != null && student.loan.roi > 0 ? `${student.loan.roi}%` : student.loan?.interest != null && student.loan.interest > 0 ? `${student.loan.interest}%` : "—"}</p></div>
-                <div><p className="text-xs text-muted-foreground">Processing Fee</p><p className="text-lg font-semibold">{formatLoanAmount(student.loan?.processingFee ?? 0, student.loan?.currency)}</p></div>
-                <div><p className="text-xs text-muted-foreground">PF Paid</p><p className="text-sm">{student.loan?.pfPaid ? "Yes" : "No"}</p></div>
-                <div><p className="text-xs text-muted-foreground">Bank LAN</p><p className="text-sm font-mono">{student.loan?.applicationNumber ?? "—"}</p></div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Requested</p>
+                  <p className="text-lg font-semibold">
+                    {formatLoanAmount(student.loan?.requested ?? 0, student.loan?.currency)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Sanctioned</p>
+                  <p className="text-lg font-semibold">
+                    {formatLoanAmount(student.loan?.sanctioned ?? 0, student.loan?.currency)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Disbursed</p>
+                  <p className="text-lg font-semibold">
+                    {formatLoanAmount(student.loan?.disbursed ?? 0, student.loan?.currency)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Disbursement Type</p>
+                  <p className="text-lg font-semibold">
+                    {getDisbursementTypeLabel(student.loan?.disbursementType)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Currency</p>
+                  <p className="text-lg font-semibold">{student.loan?.currency ?? "INR"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Lender</p>
+                  <p className="text-sm">{lenderName ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">ROI / Interest</p>
+                  <p className="text-lg font-semibold">
+                    {student.loan?.roi != null && student.loan.roi > 0
+                      ? `${student.loan.roi}%`
+                      : student.loan?.interest != null && student.loan.interest > 0
+                        ? `${student.loan.interest}%`
+                        : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Processing Fee</p>
+                  <p className="text-lg font-semibold">
+                    {formatLoanAmount(student.loan?.processingFee ?? 0, student.loan?.currency)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">PF Paid</p>
+                  <p className="text-sm">{student.loan?.pfPaid ? "Yes" : "No"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Bank LAN</p>
+                  <p className="text-sm font-mono">{student.loan?.applicationNumber ?? "—"}</p>
+                </div>
               </div>
             </GlassCard>
           </TabsContent>
@@ -548,10 +605,16 @@ export function StudentDetailView({
           <TabsContent value="notes" className="mt-4 space-y-4">
             {canWrite && (
               <GlassCard className="overflow-visible p-5">
-                <form key={noteFormKey} onSubmit={handleAddNote} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                <form
+                  key={noteFormKey}
+                  onSubmit={handleAddNote}
+                  className="flex flex-col gap-2 sm:flex-row sm:items-start"
+                >
                   <NoteMentionInput teamUsers={teamUsers} required className="flex-1" />
                   <Input name="dueDate" type="date" className="w-full sm:w-40" />
-                  <Button type="submit" disabled={noteLoading}>Add</Button>
+                  <Button type="submit" disabled={noteLoading}>
+                    Add
+                  </Button>
                 </form>
               </GlassCard>
             )}

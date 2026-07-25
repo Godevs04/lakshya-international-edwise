@@ -23,23 +23,26 @@ export async function globalSearch(
 ): Promise<SearchResult[]> {
   if (!query || query.trim().length < 2) return [];
 
-  const canSearchAnything =
-    scope.students || scope.partners || scope.applications;
+  const canSearchAnything = scope.students || scope.partners || scope.applications;
   if (!canSearchAnything) return [];
 
   await connectDB();
   const trimmed = query.trim();
   const regex = toSafeRegExp(trimmed);
-  const studentFilter = mergeMongoFilter(excludeAdmissionLeadsFilter(), buildStudentVisibilityFilter(user), {
-    $or: [
-      { firstName: regex },
-      { lastName: regex },
-      { phone: regex },
-      { email: regex },
-      { studentId: regex },
-      { "loan.applicationNumber": regex },
-    ],
-  });
+  const studentFilter = mergeMongoFilter(
+    excludeAdmissionLeadsFilter(),
+    buildStudentVisibilityFilter(user),
+    {
+      $or: [
+        { firstName: regex },
+        { lastName: regex },
+        { phone: regex },
+        { email: regex },
+        { studentId: regex },
+        { "loan.applicationNumber": regex },
+      ],
+    }
+  );
 
   const [students, partners] = await Promise.all([
     scope.students

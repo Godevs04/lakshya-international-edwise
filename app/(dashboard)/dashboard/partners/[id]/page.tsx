@@ -6,7 +6,11 @@ import { PartnerCommissionSection } from "@/components/dashboard/partner-commiss
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { DemographicsBarChart } from "@/components/charts/dashboard-charts";
-import { getPartnerById, getPartnerAnalytics, getPartnerCommissionLedgerAction } from "@/lib/actions/partner.actions";
+import {
+  getPartnerById,
+  getPartnerAnalytics,
+  getPartnerCommissionLedgerAction,
+} from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getPartnerPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
@@ -92,7 +96,9 @@ export default async function PartnerDetailPage({
         </GlassCard>
       </div>
 
-      <Suspense fallback={<div className="h-48 animate-pulse rounded-xl border border-border bg-card/50" />}>
+      <Suspense
+        fallback={<div className="h-48 animate-pulse rounded-xl border border-border bg-card/50" />}
+      >
         <PartnerCommissionSection
           partnerId={id}
           canWrite={access.canWrite}
@@ -111,23 +117,25 @@ export default async function PartnerDetailPage({
           commissionPending={analytics?.commissionPending ?? 0}
           settlements={analytics?.settlements ?? []}
           studentCommissions={analytics?.studentCommissions ?? []}
-          ledger={ledger ?? {
-            entries: [],
-            expectedInMonth: 0,
-            receivedInMonth: 0,
-            sharedInMonth: 0,
-            earnedInMonth: 0,
-            settledInMonth: 0,
-            commissionExpectedTotal: analytics?.commissionExpected ?? 0,
-            commissionReceivedTotal: analytics?.commissionReceived ?? 0,
-            pendingReceivedTotal: analytics?.pendingReceived ?? 0,
-            partnerShareExpectedTotal: analytics?.partnerShareExpected ?? 0,
-            commissionSharedTotal: analytics?.commissionShared ?? 0,
-            pendingSharedTotal: analytics?.pendingShared ?? 0,
-            commissionEarnedTotal: analytics?.commissionEarned ?? 0,
-            commissionSettledTotal: analytics?.commissionShared ?? 0,
-            commissionPendingTotal: analytics?.pendingShared ?? 0,
-          }}
+          ledger={
+            ledger ?? {
+              entries: [],
+              expectedInMonth: 0,
+              receivedInMonth: 0,
+              sharedInMonth: 0,
+              earnedInMonth: 0,
+              settledInMonth: 0,
+              commissionExpectedTotal: analytics?.commissionExpected ?? 0,
+              commissionReceivedTotal: analytics?.commissionReceived ?? 0,
+              pendingReceivedTotal: analytics?.pendingReceived ?? 0,
+              partnerShareExpectedTotal: analytics?.partnerShareExpected ?? 0,
+              commissionSharedTotal: analytics?.commissionShared ?? 0,
+              pendingSharedTotal: analytics?.pendingShared ?? 0,
+              commissionEarnedTotal: analytics?.commissionEarned ?? 0,
+              commissionSettledTotal: analytics?.commissionShared ?? 0,
+              commissionPendingTotal: analytics?.pendingShared ?? 0,
+            }
+          }
           initialTab={tab === "students" ? "students" : tab === "ledger" ? "ledger" : "summary"}
           statusFilter={statusFilter}
         />
@@ -137,7 +145,8 @@ export default async function PartnerDetailPage({
         <div className="flex flex-wrap items-center gap-4">
           <StatusBadge status={partner.status as PartnerStatus} type="partner" />
           <span className="text-sm text-muted-foreground">
-            Commission is calculated from disbursed loan amounts. Use the Student-wise tab for per-student payout view.
+            Commission is calculated from disbursed loan amounts. Use the Student-wise tab for
+            per-student payout view.
           </span>
         </div>
 
@@ -147,15 +156,22 @@ export default async function PartnerDetailPage({
               <Building2 className="h-4 w-4 text-muted-foreground" />
               Company details
             </h3>
-            {access.canWrite ? (
-              <PartnerSectionEditLink partnerId={id} section="company" />
-            ) : null}
+            {access.canWrite ? <PartnerSectionEditLink partnerId={id} section="company" /> : null}
           </div>
           <div className="grid gap-2 sm:grid-cols-2 text-sm">
-            <p><span className="text-muted-foreground">Phone:</span> {partner.phone ?? "—"}</p>
-            <p><span className="text-muted-foreground">Email:</span> {partner.email ?? "—"}</p>
-            <p><span className="text-muted-foreground">GST:</span> {partner.gst ?? "—"}</p>
-            <p><span className="text-muted-foreground">Partner share:</span> {partner.commissionPercent ?? 0}%</p>
+            <p>
+              <span className="text-muted-foreground">Phone:</span> {partner.phone ?? "—"}
+            </p>
+            <p>
+              <span className="text-muted-foreground">Email:</span> {partner.email ?? "—"}
+            </p>
+            <p>
+              <span className="text-muted-foreground">GST:</span> {partner.gst ?? "—"}
+            </p>
+            <p>
+              <span className="text-muted-foreground">Partner share:</span>{" "}
+              {partner.commissionPercent ?? 0}%
+            </p>
             <p className="sm:col-span-2">
               <span className="text-muted-foreground">Address:</span> {partner.address ?? "—"}
             </p>
@@ -200,15 +216,22 @@ export default async function PartnerDetailPage({
               <Landmark className="h-4 w-4 text-muted-foreground" />
               Bank details
             </h3>
-            {access.canWrite ? (
-              <PartnerSectionEditLink partnerId={id} section="bank" />
-            ) : null}
+            {access.canWrite ? <PartnerSectionEditLink partnerId={id} section="bank" /> : null}
           </div>
           {partner.bankDetails?.accountNumber ? (
             <div className="grid gap-2 sm:grid-cols-2 text-sm">
-              <p><span className="text-muted-foreground">Bank:</span> {partner.bankDetails.bankName ?? "—"}</p>
-              <p><span className="text-muted-foreground">Account:</span> {partner.bankDetails.accountNumber}</p>
-              <p><span className="text-muted-foreground">IFSC:</span> {partner.bankDetails.ifsc ?? "—"}</p>
+              <p>
+                <span className="text-muted-foreground">Bank:</span>{" "}
+                {partner.bankDetails.bankName ?? "—"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Account:</span>{" "}
+                {partner.bankDetails.accountNumber}
+              </p>
+              <p>
+                <span className="text-muted-foreground">IFSC:</span>{" "}
+                {partner.bankDetails.ifsc ?? "—"}
+              </p>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">No bank details added yet.</p>

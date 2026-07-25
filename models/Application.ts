@@ -77,5 +77,4 @@ ApplicationSchema.index({ studentId: 1 });
 ApplicationSchema.index({ partnerId: 1, status: 1 });
 
 export const Application: Model<IApplication> =
-  mongoose.models.Application ??
-  mongoose.model<IApplication>("Application", ApplicationSchema);
+  mongoose.models.Application ?? mongoose.model<IApplication>("Application", ApplicationSchema);

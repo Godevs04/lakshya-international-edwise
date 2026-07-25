@@ -6,10 +6,20 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 const GALLERY_CATEGORIES = ["All", "Events", "Counselling", "Success", "Workshops"] as const;
 
 const GALLERY_ITEMS = [
-  { id: "1", title: "Counselling Session", category: "Counselling", color: "from-emerald-100 to-emerald-50" },
+  {
+    id: "1",
+    title: "Counselling Session",
+    category: "Counselling",
+    color: "from-emerald-100 to-emerald-50",
+  },
   { id: "2", title: "University Fair", category: "Events", color: "from-sky-100 to-sky-50" },
   { id: "3", title: "Visa Success", category: "Success", color: "from-violet-100 to-violet-50" },
-  { id: "4", title: "Student Orientation", category: "Events", color: "from-amber-100 to-amber-50" },
+  {
+    id: "4",
+    title: "Student Orientation",
+    category: "Events",
+    color: "from-amber-100 to-amber-50",
+  },
   { id: "5", title: "Loan Workshop", category: "Workshops", color: "from-rose-100 to-rose-50" },
   { id: "6", title: "Alumni Meet", category: "Success", color: "from-teal-100 to-teal-50" },
 ];
@@ -19,9 +29,7 @@ export function GalleryGrid() {
   const [category, setCategory] = useState<string>("All");
 
   const filtered =
-    category === "All"
-      ? GALLERY_ITEMS
-      : GALLERY_ITEMS.filter((item) => item.category === category);
+    category === "All" ? GALLERY_ITEMS : GALLERY_ITEMS.filter((item) => item.category === category);
 
   return (
     <>
@@ -66,7 +74,9 @@ export function GalleryGrid() {
         <DialogContent className="max-w-2xl">
           {active && (
             <div className={`aspect-video rounded-xl bg-gradient-to-br ${active.color} p-6`}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">{active.category}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                {active.category}
+              </p>
               <h3 className="mt-1 text-lg font-semibold text-secondary">{active.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Gallery media can be connected to Cloudinary assets when photos are available.

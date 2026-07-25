@@ -262,9 +262,9 @@ export const STUDENT_IMPORT_SAMPLE_ROWS: Record<StudentImportColumnKey, string>[
   },
 ];
 
-const APPLICATION_STATUS_GUIDE = APPLICATION_STATUS_OPTIONS.map(
-  (option) => option.value
-).join(", ");
+const APPLICATION_STATUS_GUIDE = APPLICATION_STATUS_OPTIONS.map((option) => option.value).join(
+  ", "
+);
 
 const LENDER_GUIDE = `${LENDER_SEEDS.map((entry) => entry.name).join(", ")} (plus any banks added on the Lenders page)`;
 
@@ -294,7 +294,9 @@ const GUIDE_LINES = [
   ["• Assignee Email: optional — must match an active team member's login email"],
   [""],
   ["Legacy imports"],
-  [`• Old "Status" column (${LEGACY_STATUS_GUIDE}) is still accepted and mapped to application status`],
+  [
+    `• Old "Status" column (${LEGACY_STATUS_GUIDE}) is still accepted and mapped to application status`,
+  ],
   ['• Old "Bank Name" column is still accepted as an alias for Lender'],
   [""],
   ["Limits"],

@@ -15,7 +15,12 @@ interface StatusBadgeProps {
   size?: "sm" | "md";
 }
 
-export function StatusBadge({ status, type = "student", className, size = "sm" }: StatusBadgeProps) {
+export function StatusBadge({
+  status,
+  type = "student",
+  className,
+  size = "sm",
+}: StatusBadgeProps) {
   const config =
     type === "user"
       ? USER_STATUS_CONFIG[status as UserStatus]

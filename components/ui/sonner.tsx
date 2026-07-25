@@ -37,10 +37,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]",
             "data-[swipe=move]:transition-none"
           ),
-          title: cn(
-            "text-[13px] font-medium leading-snug text-[#0B1F3A]",
-            "dark:text-slate-100"
-          ),
+          title: cn("text-[13px] font-medium leading-snug text-[#0B1F3A]", "dark:text-slate-100"),
           description: cn(
             "mt-0.5 text-[12px] leading-relaxed text-[#64748B]",
             "dark:text-slate-400"

@@ -29,8 +29,8 @@ export default async function VerifyEmailPage({
         <>
           <h2 className="text-xl font-semibold text-emerald-600">Email Verified!</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your email is verified. Your account is now in the admin approval queue.
-            Once an administrator approves you with the correct role, you will be onboarded to the CRM.
+            Your email is verified. Your account is now in the admin approval queue. Once an
+            administrator approves you with the correct role, you will be onboarded to the CRM.
           </p>
           <Link href="/pending-approval" className="mt-4 inline-block">
             <Button>View queue status</Button>

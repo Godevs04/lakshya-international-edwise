@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { getDocumentUrlError, getOptionalLinkUrlError, isValidDocumentUrl, normalizeDocumentUrl, normalizeOptionalLinkUrl } from "@/lib/utils/document-url";
+import {
+  getDocumentUrlError,
+  getOptionalLinkUrlError,
+  isValidDocumentUrl,
+  normalizeDocumentUrl,
+  normalizeOptionalLinkUrl,
+} from "@/lib/utils/document-url";
 
 describe("document-url", () => {
   it("accepts https google drive links", () => {

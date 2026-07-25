@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 
-export const DEFAULT_OG_IMAGE_PATH = "/Lakshya-App-logo.png";
+export const DEFAULT_OG_IMAGE_PATH = "/Lakshya-App-logo-256.png";
 
 export const DEFAULT_MARKETING_KEYWORDS = [
   "Lakshya International Edwise",
@@ -66,9 +66,7 @@ export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata 
   const canonical = getAbsoluteUrl(path);
   const imageUrl = input.image ? getAbsoluteUrl(input.image) : getDefaultOgImageUrl();
   const googleVerification = trim(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION);
-  const title = input.absoluteTitle
-    ? { absolute: input.title }
-    : input.title;
+  const title = input.absoluteTitle ? { absolute: input.title } : input.title;
 
   const metadata: Metadata = {
     metadataBase,
@@ -100,9 +98,7 @@ export function buildMarketingMetadata(input: MarketingMetadataInput): Metadata 
       description: input.description,
       images: [imageUrl],
     },
-    robots: input.noIndex
-      ? { index: false, follow: false }
-      : { index: true, follow: true },
+    robots: input.noIndex ? { index: false, follow: false } : { index: true, follow: true },
   };
 
   if (googleVerification) {

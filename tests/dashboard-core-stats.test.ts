@@ -68,9 +68,7 @@ describe("getDashboardCoreStats query count", () => {
     partnerAggregate.mockResolvedValue([
       { totalPartners: 5, partnersThisMonth: 1, partnersLastMonth: 2 },
     ]);
-    applicationAggregate.mockResolvedValue([
-      { pendingApplications: 4, pendingLastMonth: 6 },
-    ]);
+    applicationAggregate.mockResolvedValue([{ pendingApplications: 4, pendingLastMonth: 6 }]);
   });
 
   it("uses exactly 3 aggregate queries and no countDocuments", async () => {

@@ -23,5 +23,4 @@ const RoleSchema = new Schema<IRole>(
   { timestamps: true }
 );
 
-export const Role: Model<IRole> =
-  mongoose.models.Role ?? mongoose.model<IRole>("Role", RoleSchema);
+export const Role: Model<IRole> = mongoose.models.Role ?? mongoose.model<IRole>("Role", RoleSchema);

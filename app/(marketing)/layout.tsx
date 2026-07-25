@@ -9,10 +9,7 @@ import { InactivityEligibilityPrompt } from "@/components/marketing/layout/inact
 import { EligibilityModalProvider } from "@/components/marketing/eligibility/eligibility-modal-provider";
 import { JsonLd, organizationJsonLd } from "@/components/marketing/seo/json-ld";
 import { getMarketingContact, getSiteUrl, getWhatsAppLink } from "@/lib/config/marketing";
-import {
-  buildMarketingLayoutMetadata,
-  getDefaultOgImageUrl,
-} from "@/lib/seo/marketing-metadata";
+import { buildMarketingLayoutMetadata, getDefaultOgImageUrl } from "@/lib/seo/marketing-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildMarketingLayoutMetadata();

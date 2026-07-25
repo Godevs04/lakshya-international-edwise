@@ -49,12 +49,7 @@ export function LendingPartnersPreview() {
                   </p>
                 </div>
               )}
-              <div
-                className={cn(
-                  "mt-4 grid flex-1 gap-2.5",
-                  previewGridClass(lenders.length)
-                )}
-              >
+              <div className={cn("mt-4 grid flex-1 gap-2.5", previewGridClass(lenders.length))}>
                 {lenders.map((lender) => (
                   <div
                     key={lender.slug}
@@ -65,11 +60,7 @@ export function LendingPartnersPreview() {
                     )}
                     title={lender.name}
                   >
-                    <LenderLogo
-                      lender={lender}
-                      size={LENDER_LOGO_PREVIEW_SIZE}
-                      fitTile
-                    />
+                    <LenderLogo lender={lender} size={LENDER_LOGO_PREVIEW_SIZE} fitTile />
                   </div>
                 ))}
               </div>

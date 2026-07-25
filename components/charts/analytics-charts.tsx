@@ -45,7 +45,11 @@ const tooltipStyle = {
   padding: "10px 14px",
 };
 
-const CHART_ANIMATION = { isAnimationActive: true, animationDuration: 900, animationEasing: "ease-out" as const };
+const CHART_ANIMATION = {
+  isAnimationActive: true,
+  animationDuration: 900,
+  animationEasing: "ease-out" as const,
+};
 
 type DrillDownKind = "workflow" | "status" | "state" | "course" | "gender" | "loan" | "lender";
 
@@ -151,12 +155,42 @@ export function AnalyticsKpiCards({
   };
 }) {
   const cards = [
-    { title: "Total Students", value: summary.totalStudents.toLocaleString("en-IN"), icon: 0, href: "/dashboard/students" },
-    { title: "Disbursed", value: summary.disbursed.toLocaleString("en-IN"), icon: 1, href: "/dashboard/students?workflow=disbursed" },
-    { title: "Conversion Rate", value: formatPercent(summary.conversionRate * 100), icon: 2, href: "/dashboard/students?workflow=disbursed" },
-    { title: "Disbursed Volume", value: formatCurrency(summary.totalDisbursedAmount), icon: 3, href: "/dashboard/students?workflow=disbursed" },
-    { title: "Active Partners", value: summary.activePartners.toLocaleString("en-IN"), icon: 4, href: "/dashboard/partners" },
-    { title: "Rejected", value: summary.rejected.toLocaleString("en-IN"), icon: 5, href: "/dashboard/students?workflow=rejected" },
+    {
+      title: "Total Students",
+      value: summary.totalStudents.toLocaleString("en-IN"),
+      icon: 0,
+      href: "/dashboard/students",
+    },
+    {
+      title: "Disbursed",
+      value: summary.disbursed.toLocaleString("en-IN"),
+      icon: 1,
+      href: "/dashboard/students?workflow=disbursed",
+    },
+    {
+      title: "Conversion Rate",
+      value: formatPercent(summary.conversionRate * 100),
+      icon: 2,
+      href: "/dashboard/students?workflow=disbursed",
+    },
+    {
+      title: "Disbursed Volume",
+      value: formatCurrency(summary.totalDisbursedAmount),
+      icon: 3,
+      href: "/dashboard/students?workflow=disbursed",
+    },
+    {
+      title: "Active Partners",
+      value: summary.activePartners.toLocaleString("en-IN"),
+      icon: 4,
+      href: "/dashboard/partners",
+    },
+    {
+      title: "Rejected",
+      value: summary.rejected.toLocaleString("en-IN"),
+      icon: 5,
+      href: "/dashboard/students?workflow=rejected",
+    },
   ];
 
   return (
@@ -222,7 +256,16 @@ export function VisualFunnelChart({
     [linkMode, router]
   );
 
-  const funnelColors = ["#E8952E", "#F59E0B", "#3B82F6", "#06B6D4", "#22C55E", "#10B981", "#F59E0B", "#EF4444"];
+  const funnelColors = [
+    "#E8952E",
+    "#F59E0B",
+    "#3B82F6",
+    "#06B6D4",
+    "#22C55E",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+  ];
   const isClickable = Boolean(linkMode);
 
   return (
@@ -359,7 +402,10 @@ export function DemographicsBarChart({
             {...CHART_ANIMATION}
           >
             {data.map((_, index) => (
-              <Cell key={`demographics-bar-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+              <Cell
+                key={`demographics-bar-${index}`}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -394,7 +440,12 @@ export function AnalyticsTrendChart({
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis
             yAxisId="left"
             tick={{ fontSize: 11, fill: "#64748B" }}
@@ -455,7 +506,13 @@ export function AnalyticsTrendChart({
   );
 }
 
-export function AnalyticsRevenueChart({ data, delay = 0 }: { data: ChartDataPoint[]; delay?: number }) {
+export function AnalyticsRevenueChart({
+  data,
+  delay = 0,
+}: {
+  data: ChartDataPoint[];
+  delay?: number;
+}) {
   return (
     <AnimatedChartCard
       title="Monthly Disbursement"
@@ -471,7 +528,12 @@ export function AnalyticsRevenueChart({ data, delay = 0 }: { data: ChartDataPoin
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis
             tick={{ fontSize: 11, fill: "#64748B" }}
             axisLine={false}
@@ -479,14 +541,26 @@ export function AnalyticsRevenueChart({ data, delay = 0 }: { data: ChartDataPoin
             tickFormatter={formatAxisCurrency}
           />
           <Tooltip content={<CurrencyTooltip />} />
-          <Bar dataKey="value" name="Disbursed" fill="url(#revenueGradient)" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
+          <Bar
+            dataKey="value"
+            name="Disbursed"
+            fill="url(#revenueGradient)"
+            radius={[8, 8, 0, 0]}
+            {...CHART_ANIMATION}
+          />
         </BarChart>
       </ResponsiveContainer>
     </AnimatedChartCard>
   );
 }
 
-export function AnalyticsPartnersChart({ data, delay = 0 }: { data: ChartDataPoint[]; delay?: number }) {
+export function AnalyticsPartnersChart({
+  data,
+  delay = 0,
+}: {
+  data: ChartDataPoint[];
+  delay?: number;
+}) {
   return (
     <AnimatedChartCard
       title="Top Partners"
@@ -518,7 +592,13 @@ export function AnalyticsPartnersChart({ data, delay = 0 }: { data: ChartDataPoi
             tickLine={false}
           />
           <Tooltip content={<CurrencyTooltip />} />
-          <Bar dataKey="value" name="Disbursement" fill="url(#partnerGradient)" radius={[0, 8, 8, 0]} {...CHART_ANIMATION} />
+          <Bar
+            dataKey="value"
+            name="Disbursement"
+            fill="url(#partnerGradient)"
+            radius={[0, 8, 8, 0]}
+            {...CHART_ANIMATION}
+          />
         </BarChart>
       </ResponsiveContainer>
     </AnimatedChartCard>
@@ -555,8 +635,21 @@ export function CourseBarChart({
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} allowDecimals={false} />
-          <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 10, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <YAxis
+            dataKey="name"
+            type="category"
+            width={120}
+            tick={{ fontSize: 10, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <Tooltip content={<CountTooltip unit="students" />} />
           <Bar
             dataKey="value"
@@ -594,8 +687,21 @@ export function LenderBarChart({ data, delay = 0 }: { data: ChartDataPoint[]; de
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748B" }} axisLine={false} tickLine={false} angle={-20} textAnchor="end" height={56} />
-          <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 10, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            angle={-20}
+            textAnchor="end"
+            height={56}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
           <Tooltip content={<CountTooltip unit="applications" />} />
           <Bar
             dataKey="value"
@@ -623,7 +729,9 @@ export function LoanRangeChart({ data, delay = 0 }: { data: ChartDataPoint[]; de
   return (
     <AnimatedChartCard
       title="Loan Amount Range"
-      subtitle={drillSubtitle(`${total.toLocaleString("en-IN")} applications · requested loan size distribution`)}
+      subtitle={drillSubtitle(
+        `${total.toLocaleString("en-IN")} applications · requested loan size distribution`
+      )}
       delay={delay}
     >
       <ResponsiveContainer width="100%" height={280}>
@@ -677,7 +785,20 @@ export function AnalyticsHeatMap({
   delay?: number;
 }) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   const getValue = (month: number, day: string) => {
@@ -711,7 +832,10 @@ export function AnalyticsHeatMap({
                     key={`${month}-${day}`}
                     initial={{ scale: 0.6, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.35, delay: delay + (mi * 7 + days.indexOf(day)) * 0.008 }}
+                    transition={{
+                      duration: 0.35,
+                      delay: delay + (mi * 7 + days.indexOf(day)) * 0.008,
+                    }}
                     className="group relative flex h-8 w-8 items-center justify-center rounded-lg transition-transform hover:scale-110"
                     style={{
                       backgroundColor:

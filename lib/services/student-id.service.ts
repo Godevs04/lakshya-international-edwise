@@ -10,7 +10,10 @@ export function buildStudentIdPrefix(code = getStudentIdCompanyCode()): string {
   return `STU-${code}-`;
 }
 
-export function parseStudentIdSequence(studentId: string, code = getStudentIdCompanyCode()): number | null {
+export function parseStudentIdSequence(
+  studentId: string,
+  code = getStudentIdCompanyCode()
+): number | null {
   const branded = studentId.match(new RegExp(`^STU-${code}-(\\d+)$`));
   if (branded) return parseInt(branded[1], 10);
 
@@ -58,7 +61,10 @@ export function buildWebsiteLeadIdPrefix(code = getStudentIdCompanyCode()): stri
   return `LEAD-${code}-`;
 }
 
-export function parseWebsiteLeadIdSequence(leadId: string, code = getStudentIdCompanyCode()): number | null {
+export function parseWebsiteLeadIdSequence(
+  leadId: string,
+  code = getStudentIdCompanyCode()
+): number | null {
   const match = leadId.match(new RegExp(`^LEAD-${code}-(\\d+)$`));
   return match ? parseInt(match[1], 10) : null;
 }

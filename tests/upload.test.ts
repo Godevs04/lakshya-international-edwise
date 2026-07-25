@@ -19,13 +19,17 @@ describe("upload.service validation", () => {
   });
 
   it("validates public id prefix", () => {
-    expect(isValidCloudinaryPublicId("lakshya-international-edwise/students/doc1", "students")).toBe(true);
+    expect(
+      isValidCloudinaryPublicId("lakshya-international-edwise/students/doc1", "students")
+    ).toBe(true);
     expect(isValidCloudinaryPublicId("other-folder/doc1", "students")).toBe(false);
   });
 
   it("validates cloudinary url", () => {
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "demo";
-    expect(isValidCloudinaryUrl("https://res.cloudinary.com/demo/image/upload/v1/x.pdf")).toBe(true);
+    expect(isValidCloudinaryUrl("https://res.cloudinary.com/demo/image/upload/v1/x.pdf")).toBe(
+      true
+    );
     expect(isValidCloudinaryUrl("https://evil.com/file.pdf")).toBe(false);
   });
 

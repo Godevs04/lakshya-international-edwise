@@ -54,7 +54,13 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" required />
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            required
+          />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Creating..." : "Create account"}
@@ -62,7 +68,9 @@ export function RegisterForm() {
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-primary hover:underline">Sign in</Link>
+        <Link href="/login" className="text-primary hover:underline">
+          Sign in
+        </Link>
       </p>
     </GlassCard>
   );

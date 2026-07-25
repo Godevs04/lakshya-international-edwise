@@ -38,17 +38,13 @@ export interface LoanApplicationItem {
   updatedAt?: Date | string;
 }
 
-export const LOAN_APPLICATION_WINNING_STATUSES: ApplicationStatusId[] = [
-  "pf_paid",
-  "disbursed",
-];
+export const LOAN_APPLICATION_WINNING_STATUSES: ApplicationStatusId[] = ["pf_paid", "disbursed"];
 
 export function isWinningLoanApplicationStatus(
   status: ApplicationStatusId | string | undefined
 ): boolean {
   return Boolean(
-    status &&
-      LOAN_APPLICATION_WINNING_STATUSES.includes(status as ApplicationStatusId)
+    status && LOAN_APPLICATION_WINNING_STATUSES.includes(status as ApplicationStatusId)
   );
 }
 

@@ -1,4 +1,6 @@
-export const DEFAULT_APP_LOGO = "/Lakshya-App-logo.png";
+export const DEFAULT_APP_LOGO = "/Lakshya-App-logo-256.png";
+/** Full-resolution mark for email / print when needed. */
+export const DEFAULT_APP_LOGO_FULL = "/Lakshya-App-logo.png";
 
 /** Near-square logo intrinsic ratio (4096×4100 source). */
 export const APP_LOGO_ASPECT_RATIO = 4096 / 4100;

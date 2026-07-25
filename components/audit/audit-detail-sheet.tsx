@@ -91,7 +91,9 @@ export function AuditDetailSheet({ log, open, onOpenChange }: AuditDetailSheetPr
               <div className="space-y-1">
                 <p className="capitalize">{log.resourceType}</p>
                 {log.resourceId && (
-                  <p className="font-mono text-xs text-muted-foreground break-all">{log.resourceId}</p>
+                  <p className="font-mono text-xs text-muted-foreground break-all">
+                    {log.resourceId}
+                  </p>
                 )}
                 {resourceHref && (
                   <Button
@@ -135,7 +137,9 @@ export function AuditDetailSheet({ log, open, onOpenChange }: AuditDetailSheetPr
           {log.userAgent && (
             <DetailRow
               label="Full user agent"
-              value={<p className="break-all font-mono text-xs text-muted-foreground">{log.userAgent}</p>}
+              value={
+                <p className="break-all font-mono text-xs text-muted-foreground">{log.userAgent}</p>
+              }
             />
           )}
 

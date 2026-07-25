@@ -65,10 +65,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
 
 export async function getRecentActivities(limit = 10) {
   await connectDB();
-  return Activity.find()
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .lean();
+  return Activity.find().sort({ createdAt: -1 }).limit(limit).lean();
 }
 
 export async function getActivitiesForResource(
@@ -77,8 +74,5 @@ export async function getActivitiesForResource(
   limit = 20
 ) {
   await connectDB();
-  return Activity.find({ resourceType, resourceId })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .lean();
+  return Activity.find({ resourceType, resourceId }).sort({ createdAt: -1 }).limit(limit).lean();
 }

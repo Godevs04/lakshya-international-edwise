@@ -1,17 +1,19 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  eslintConfigPrettier,
   {
     rules: {
       "no-console": "error",
     },
   },
   {
-    files: ["lib/logger.ts"],
+    files: ["lib/logger.ts", "scripts/**/*.{ts,js}"],
     rules: {
       "no-console": "off",
     },

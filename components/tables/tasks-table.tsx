@@ -23,15 +23,7 @@ import {
   updateTaskStatusAction,
 } from "@/lib/actions/task.actions";
 import type { TaskListItem } from "@/types";
-import {
-  Ban,
-  Bell,
-  CheckCircle2,
-  Pencil,
-  RotateCcw,
-  Trash2,
-  UserPlus,
-} from "lucide-react";
+import { Ban, Bell, CheckCircle2, Pencil, RotateCcw, Trash2, UserPlus } from "lucide-react";
 
 interface AssigneeOption {
   _id: string;
@@ -196,8 +188,7 @@ export function TasksTable({
         </div>
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
           {STATUS_TABS.map((tab) => {
-            const isActive =
-              !view && (currentStatus === tab.id || (tab.id === "open" && !status));
+            const isActive = !view && (currentStatus === tab.id || (tab.id === "open" && !status));
             return (
               <button
                 key={tab.id}
@@ -234,7 +225,10 @@ export function TasksTable({
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canWrite ? 8 : 7} className="py-10 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={canWrite ? 8 : 7}
+                  className="py-10 text-center text-muted-foreground"
+                >
                   No tasks found
                 </TableCell>
               </TableRow>
@@ -242,7 +236,10 @@ export function TasksTable({
               data.map((task) => {
                 const isAssignedToMe = currentUserId && task.assignedToId === currentUserId;
                 return (
-                  <TableRow key={task._id} className={task.isOverdue ? "bg-[#F59E0B]/5" : undefined}>
+                  <TableRow
+                    key={task._id}
+                    className={task.isOverdue ? "bg-[#F59E0B]/5" : undefined}
+                  >
                     <TableCell className="py-4 align-top">
                       <div className="min-w-0">
                         <p className="font-medium leading-snug">{task.title}</p>
@@ -261,7 +258,9 @@ export function TasksTable({
                     >
                       {formatDateTime(task.dueAt)}
                       {task.isOverdue ? (
-                        <span className="mt-1 block text-xs font-medium text-[#D97706]">Overdue</span>
+                        <span className="mt-1 block text-xs font-medium text-[#D97706]">
+                          Overdue
+                        </span>
                       ) : null}
                     </TableCell>
                     <TableCell className="whitespace-nowrap py-4 align-top text-sm text-muted-foreground">
@@ -338,7 +337,9 @@ export function TasksTable({
                                 variant="ghost"
                                 size="icon"
                                 aria-label="Cancel task"
-                                onClick={() => updateStatus(task._id, "cancelled", "Task cancelled")}
+                                onClick={() =>
+                                  updateStatus(task._id, "cancelled", "Task cancelled")
+                                }
                               >
                                 <Ban className="h-4 w-4 text-[#F59E0B]" />
                               </Button>

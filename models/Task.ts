@@ -47,5 +47,4 @@ if (process.env.NODE_ENV !== "production" && mongoose.models.Task) {
   delete mongoose.models.Task;
 }
 
-export const Task: Model<ITask> =
-  mongoose.models.Task ?? mongoose.model<ITask>("Task", TaskSchema);
+export const Task: Model<ITask> = mongoose.models.Task ?? mongoose.model<ITask>("Task", TaskSchema);

@@ -35,9 +35,7 @@ export function PromotePartnerLeadSheet({
 }: PromotePartnerLeadSheetProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [commissionPercent, setCommissionPercent] = useState(
-    String(lead.commissionPercent ?? 0)
-  );
+  const [commissionPercent, setCommissionPercent] = useState(String(lead.commissionPercent ?? 0));
 
   async function handlePromote() {
     setLoading(true);
@@ -57,7 +55,10 @@ export function PromotePartnerLeadSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
+      >
         <SheetHeader className="border-b border-border/60 px-4 py-4 pr-12">
           <SheetTitle>Promote to partner</SheetTitle>
           <SheetDescription>
@@ -92,7 +93,12 @@ export function PromotePartnerLeadSheet({
           >
             Cancel
           </Button>
-          <Button type="button" onClick={handlePromote} disabled={loading} className="min-w-[112px]">
+          <Button
+            type="button"
+            onClick={handlePromote}
+            disabled={loading}
+            className="min-w-[112px]"
+          >
             <ArrowUpRight className="mr-1.5 h-4 w-4" />
             {loading ? "Promoting..." : "Promote"}
           </Button>

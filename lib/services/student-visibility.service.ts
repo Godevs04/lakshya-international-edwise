@@ -20,8 +20,7 @@ export function isWebsiteInboundLead(student: StudentAccessRecord | null | undef
   if (!student?.metadata) return false;
   if (student.metadata.leadSource === "website") return true;
   return (
-    student.metadata.createdByName === "Website" &&
-    !resolveObjectId(student.metadata.createdBy)
+    student.metadata.createdByName === "Website" && !resolveObjectId(student.metadata.createdBy)
   );
 }
 

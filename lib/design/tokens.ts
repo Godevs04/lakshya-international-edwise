@@ -36,11 +36,8 @@ export const CHART_COLORS = [
   "#EF4444",
 ] as const;
 
-export const HERO_GRADIENT =
-  "linear-gradient(90deg, #E8952E, #F59E0B, #FBBF24)";
+export const HERO_GRADIENT = "linear-gradient(90deg, #E8952E, #F59E0B, #FBBF24)";
 
-export const CARD_GRADIENT =
-  "linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,251,245,.9))";
+export const CARD_GRADIENT = "linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,251,245,.9))";
 
-export const SIDEBAR_GRADIENT =
-  "linear-gradient(180deg, #FFFBF5 0%, #FFF7ED 45%, #FFEDD5 100%)";
+export const SIDEBAR_GRADIENT = "linear-gradient(180deg, #FFFBF5 0%, #FFF7ED 45%, #FFEDD5 100%)";

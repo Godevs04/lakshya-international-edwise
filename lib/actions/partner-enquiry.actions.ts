@@ -106,7 +106,12 @@ export async function submitPartnerEnquiryAction(
       resourceType: "partner",
       resourceId: partner._id.toString(),
       userName: "Website",
-      metadata: { leadSource: SITE_LEAD_SOURCE.WEBSITE, city: data.city, isOwner: data.isOwner, whatsapp },
+      metadata: {
+        leadSource: SITE_LEAD_SOURCE.WEBSITE,
+        city: data.city,
+        isOwner: data.isOwner,
+        whatsapp,
+      },
     });
 
     revalidatePath("/dashboard/site-leads");

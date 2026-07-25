@@ -21,7 +21,10 @@ export function ProcessTimelineSection() {
     >
       <div className="relative">
         <ProcessTimelineLine />
-        <div className="absolute left-5 top-0 h-full w-px bg-border md:left-1/2 md:-translate-x-1/2" aria-hidden />
+        <div
+          className="absolute left-5 top-0 h-full w-px bg-border md:left-1/2 md:-translate-x-1/2"
+          aria-hidden
+        />
         <div className="space-y-5 md:space-y-8">
           {MARKETING_PROCESS_STEPS.map((step, index) => {
             const isEven = index % 2 === 0;
@@ -37,9 +40,7 @@ export function ProcessTimelineSection() {
                   <StepIcon icon={step.icon} />
                 </div>
 
-                <div
-                  className={`min-w-0 flex-1 ${isEven ? "md:text-right md:pr-12" : "md:pl-12"}`}
-                >
+                <div className={`min-w-0 flex-1 ${isEven ? "md:text-right md:pr-12" : "md:pl-12"}`}>
                   <div
                     className={`card-premium p-4 sm:p-5 ${
                       isEven ? "md:ml-auto md:max-w-md" : "md:max-w-md"

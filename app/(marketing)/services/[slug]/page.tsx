@@ -54,11 +54,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function ServiceDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const service = getMarketingService(slug);
   if (!service) notFound();
@@ -151,7 +147,10 @@ export default async function ServiceDetailPage({
       >
         <ul className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2">
           {service.highlights.map((item) => (
-            <li key={item} className="card-premium flex items-center gap-3 px-4 py-3 text-sm text-foreground">
+            <li
+              key={item}
+              className="card-premium flex items-center gap-3 px-4 py-3 text-sm text-foreground"
+            >
               <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
               {item}
             </li>

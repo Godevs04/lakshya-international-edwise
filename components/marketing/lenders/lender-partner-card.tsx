@@ -19,26 +19,24 @@ import {
   LENDER_CARD_LOGO_WELL_CLASS,
 } from "@/components/marketing/lenders/lender-logo";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
-import { LENDER_CATEGORY_LABELS, getLenderCollateralLabel } from "@/lib/constants/marketing/lenders";
+import {
+  LENDER_CATEGORY_LABELS,
+  getLenderCollateralLabel,
+} from "@/lib/constants/marketing/lenders";
 import type { MarketingLender } from "@/types/marketing";
 import { cn } from "@/lib/utils";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
 export type LenderFeaturedBadge = "top" | "popular" | "fast" | "roi";
 
-const BADGE_CONFIG: Record<
-  LenderFeaturedBadge,
-  { label: string; className: string }
-> = {
+const BADGE_CONFIG: Record<LenderFeaturedBadge, { label: string; className: string }> = {
   top: { label: "Recommended", className: "lender-badge-top" },
   popular: { label: "Most Popular", className: "lender-badge-popular" },
   fast: { label: "Fastest", className: "lender-badge-fast" },
   roi: { label: "Lowest ROI", className: "lender-badge-roi" },
 };
 
-export function getLenderFeaturedBadge(
-  lender: MarketingLender
-): LenderFeaturedBadge | null {
+export function getLenderFeaturedBadge(lender: MarketingLender): LenderFeaturedBadge | null {
   const map: Partial<Record<string, LenderFeaturedBadge>> = {
     credila: "top",
     "prodigy-finance": "top",
@@ -108,12 +106,7 @@ function LenderPartnerCardInner({
 
       <div className="lender-marketplace-card-inner flex h-full flex-col">
         <div className="lender-card-logo-block">
-          <div
-            className={cn(
-              LENDER_CARD_LOGO_WELL_CLASS,
-              `lender-card-logo-well-${lender.slug}`
-            )}
-          >
+          <div className={cn(LENDER_CARD_LOGO_WELL_CLASS, `lender-card-logo-well-${lender.slug}`)}>
             {badgeMeta ? (
               <span className={cn("lender-featured-ribbon", badgeMeta.className)}>
                 {badgeMeta.label}
@@ -121,12 +114,7 @@ function LenderPartnerCardInner({
             ) : null}
             <LenderLogo lender={lender} size={LENDER_LOGO_CARD_SIZE} fitTile />
           </div>
-          <p
-            className={cn(
-              "lender-card-logo-category",
-              `lender-category-text-${lender.category}`
-            )}
-          >
+          <p className={cn("lender-card-logo-category", `lender-category-text-${lender.category}`)}>
             {LENDER_CATEGORY_LABELS[lender.category]}
           </p>
         </div>

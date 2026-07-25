@@ -1,0 +1,46 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "app/**/{page,layout,loading,error,not-found,template,default,route,sitemap,robots,manifest,icon,apple-icon,opengraph-image}.{ts,tsx,js,jsx}",
+    "middleware.{ts,js}",
+    "instrumentation.{ts,js}",
+    "scripts/**/*.{ts,js,mjs}",
+    "e2e/**/*.{ts,js}",
+    "tests/**/*.{ts,tsx}",
+    "vitest.config.{ts,mts,js}",
+    "playwright.config.{ts,js}",
+    "lighthouserc.cjs"
+  ],
+  "project": ["**/*.{ts,tsx,js,jsx,mjs,cjs}"],
+  "ignore": [
+    ".husky/**",
+    "scripts/webNotes/**",
+    "scripts/Notes/**",
+    "**/*.canvas.tsx",
+    "public/**",
+    "components/ui/**"
+  ],
+  "ignoreDependencies": [
+    "@tailwindcss/postcss",
+    "tailwindcss",
+    "tw-animate-css",
+    "eslint-config-next",
+    "eslint-config-prettier",
+    "husky",
+    "lint-staged",
+    "prettier",
+    "@lhci/cli",
+    "knip",
+    "shadcn",
+    "gray-matter",
+    "next-mdx-remote",
+    "next-cloudinary",
+    "react-day-picker",
+    "uuid",
+    "@types/bcryptjs",
+    "@types/uuid"
+  ],
+  "ignoreBinaries": ["bash"],
+  "ignoreExportsUsedInFile": true,
+  "next": true
+}

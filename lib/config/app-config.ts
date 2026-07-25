@@ -69,11 +69,10 @@ async function loadAppConfigFromDatabase(): Promise<AppSettings> {
   }
 }
 
-const getCachedAppConfig = unstable_cache(
-  loadAppConfigFromDatabase,
-  ["app-config"],
-  { revalidate: 120, tags: [APP_CONFIG_CACHE_TAG] }
-);
+const getCachedAppConfig = unstable_cache(loadAppConfigFromDatabase, ["app-config"], {
+  revalidate: 120,
+  tags: [APP_CONFIG_CACHE_TAG],
+});
 
 export async function getAppConfig(): Promise<AppSettings> {
   return getCachedAppConfig();

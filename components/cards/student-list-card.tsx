@@ -23,7 +23,10 @@ interface StudentListCardProps {
   viewAllHref?: string;
 }
 
-export function StudentListCard({ students, viewAllHref = "/dashboard/students" }: StudentListCardProps) {
+export function StudentListCard({
+  students,
+  viewAllHref = "/dashboard/students",
+}: StudentListCardProps) {
   return (
     <div className="space-y-3">
       <div className="mb-4 flex items-center justify-between">
@@ -47,7 +50,9 @@ export function StudentListCard({ students, viewAllHref = "/dashboard/students" 
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{s.firstName} {s.lastName}</p>
+              <p className="truncate text-sm font-semibold">
+                {s.firstName} {s.lastName}
+              </p>
               <p className="truncate text-xs text-muted-foreground">
                 {s.course ?? s.studentId}
                 {s.partner && ` · ${s.partner}`}

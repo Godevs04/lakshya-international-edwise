@@ -5,10 +5,7 @@ export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue
 function isObjectId(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
   const obj = value as Record<string, unknown>;
-  return (
-    obj._bsontype === "ObjectId" ||
-    (typeof obj.toHexString === "function" && "buffer" in obj)
-  );
+  return obj._bsontype === "ObjectId" || (typeof obj.toHexString === "function" && "buffer" in obj);
 }
 
 export function serializeForClient(input: unknown): JsonValue {
@@ -53,8 +50,6 @@ export function serializeForClient(input: unknown): JsonValue {
   return String(input);
 }
 
-export function serializeRowsForClient(
-  rows: unknown[]
-): Record<string, JsonValue>[] {
+export function serializeRowsForClient(rows: unknown[]): Record<string, JsonValue>[] {
   return rows.map((row) => serializeForClient(row) as Record<string, JsonValue>);
 }

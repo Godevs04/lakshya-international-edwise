@@ -77,7 +77,8 @@ export function SiteStudentLeadDetail({ lead }: SiteStudentLeadDetailProps) {
         </h3>
         <div className="mt-3 space-y-2 text-sm">
           <p>
-            <span className="text-muted-foreground">Type:</span> {formatEnquiryType(lead.enquiryType)}
+            <span className="text-muted-foreground">Type:</span>{" "}
+            {formatEnquiryType(lead.enquiryType)}
           </p>
           <p>
             <span className="text-muted-foreground">Form page:</span> {lead.formPage ?? "—"}
@@ -144,7 +145,10 @@ export function SiteStudentLeadDetail({ lead }: SiteStudentLeadDetailProps) {
           </h3>
           <div className="mt-3 space-y-3">
             {lead.activities.map((activity, index) => (
-              <div key={`${activity.action}-${index}`} className="rounded-xl bg-muted/40 p-3 text-sm">
+              <div
+                key={`${activity.action}-${index}`}
+                className="rounded-xl bg-muted/40 p-3 text-sm"
+              >
                 <p className="font-medium">{activity.description}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {[activity.userName, activity.createdAt ? formatDate(activity.createdAt) : null]

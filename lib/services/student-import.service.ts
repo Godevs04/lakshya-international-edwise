@@ -20,10 +20,7 @@ import {
   getStudentPhoneBatchKey,
 } from "@/lib/services/student-phone.service";
 import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
-import {
-  resolveLenderIdBySlug,
-  resolveLenderNameBySlug,
-} from "@/lib/services/lender.service";
+import { resolveLenderIdBySlug, resolveLenderNameBySlug } from "@/lib/services/lender.service";
 import { findLenderSlugByName } from "@/lib/constants/lenders";
 import { applyApplicationStatus } from "@/lib/constants/application-status";
 import { mapRowToStudentInput, parseImportDate } from "@/lib/utils/student-import-parse";
@@ -193,8 +190,7 @@ export async function importStudentsFromRows(
     }
 
     const studentId = await allocateStudentId();
-    const lenderSlug =
-      findLenderSlugByName(data.lenderId) ?? data.lenderId?.trim().toLowerCase();
+    const lenderSlug = findLenderSlugByName(data.lenderId) ?? data.lenderId?.trim().toLowerCase();
     const lenderObjectId = lenderSlug ? await resolveLenderObjectId(lenderSlug) : undefined;
     const lenderName = lenderSlug ? await resolveLenderNameBySlug(lenderSlug) : undefined;
     const appFields = applyApplicationStatus(data.applicationStatus ?? "docs_pending");

@@ -53,12 +53,7 @@ function resolveAssignee(assigneeRaw: unknown) {
 }
 
 function resolveLender(lenderRaw: unknown) {
-  if (
-    lenderRaw &&
-    typeof lenderRaw === "object" &&
-    lenderRaw !== null &&
-    "name" in lenderRaw
-  ) {
+  if (lenderRaw && typeof lenderRaw === "object" && lenderRaw !== null && "name" in lenderRaw) {
     const lender = lenderRaw as {
       _id: { toString(): string };
       name: string;
@@ -73,11 +68,7 @@ function resolveLender(lenderRaw: unknown) {
   return null;
 }
 
-export default async function StudentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireModuleEnabled("students");
   await requirePagePermission(PERMISSIONS.STUDENTS_READ);
 

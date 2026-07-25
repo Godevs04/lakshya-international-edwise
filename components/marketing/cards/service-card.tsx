@@ -10,7 +10,9 @@ export function ServiceCard({ service }: { service: MarketingService }) {
         <MarketingIcon name={service.icon} className="h-6 w-6" />
       </div>
       <h3 className="text-lg font-semibold text-secondary">{service.title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.shortDescription}</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        {service.shortDescription}
+      </p>
       <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
         Learn more
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

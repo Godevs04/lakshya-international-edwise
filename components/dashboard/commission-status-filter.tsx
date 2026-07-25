@@ -15,7 +15,9 @@ interface CommissionStatusFilterProps {
   label?: string;
 }
 
-export function CommissionStatusFilter({ label = "Commission status" }: CommissionStatusFilterProps) {
+export function CommissionStatusFilter({
+  label = "Commission status",
+}: CommissionStatusFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const current = searchParams.get("status") ?? "all";

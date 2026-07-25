@@ -88,7 +88,9 @@ describe("matchesCommissionStatusFilter", () => {
 
   it("filters received pending", () => {
     expect(matchesCommissionStatusFilter(row, "received_pending")).toBe(true);
-    expect(matchesCommissionStatusFilter({ ...row, pendingReceived: 0 }, "received_pending")).toBe(false);
+    expect(matchesCommissionStatusFilter({ ...row, pendingReceived: 0 }, "received_pending")).toBe(
+      false
+    );
     expect(
       matchesCommissionStatusFilter(
         { ...row, commissionReceived: 500, pendingReceived: 100 },
@@ -119,7 +121,13 @@ describe("matchesCommissionStatusFilter", () => {
   it("filters fully complete", () => {
     expect(
       matchesCommissionStatusFilter(
-        { commissionExpected: 100, commissionReceived: 100, pendingReceived: 0, commissionShared: 50, pendingShared: 0 },
+        {
+          commissionExpected: 100,
+          commissionReceived: 100,
+          pendingReceived: 0,
+          commissionShared: 50,
+          pendingShared: 0,
+        },
         "fully_complete"
       )
     ).toBe(true);

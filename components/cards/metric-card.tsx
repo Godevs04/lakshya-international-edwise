@@ -100,21 +100,28 @@ export function MetricCard({
   const Icon: LucideIcon = METRIC_ICONS[icon];
   const palette = theme ? METRIC_THEMES[theme] : null;
   const gradient = palette?.gradient ?? KPI_GRADIENTS[index % KPI_GRADIENTS.length];
-  const formatted =
-    typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
-  const sparkColor = palette?.spark ?? (
-    gradient.includes("#E8952E") ? "#E8952E" :
-    gradient.includes("#3B82F6") ? "#3B82F6" :
-    gradient.includes("#22C55E") ? "#22C55E" :
-    gradient.includes("#F59E0B") ? "#F59E0B" :
-    gradient.includes("#EC4899") ? "#EC4899" : "#06B6D4"
-  );
+  const formatted = typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
+  const sparkColor =
+    palette?.spark ??
+    (gradient.includes("#E8952E")
+      ? "#E8952E"
+      : gradient.includes("#3B82F6")
+        ? "#3B82F6"
+        : gradient.includes("#22C55E")
+          ? "#22C55E"
+          : gradient.includes("#F59E0B")
+            ? "#F59E0B"
+            : gradient.includes("#EC4899")
+              ? "#EC4899"
+              : "#06B6D4");
 
   const card = (
     <GlassCard hover className={cn("p-5", href && "cursor-pointer", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-3">
-          <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}>
+          <div
+            className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}
+          >
             <Icon className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -128,7 +135,12 @@ export function MetricCard({
               ) : (
                 <TrendingDown className="h-3.5 w-3.5 text-[#EF4444]" />
               )}
-              <span className={cn("text-xs font-semibold", trendUp ? "text-[#22C55E]" : "text-[#EF4444]")}>
+              <span
+                className={cn(
+                  "text-xs font-semibold",
+                  trendUp ? "text-[#22C55E]" : "text-[#EF4444]"
+                )}
+              >
                 {trend}
               </span>
               <span className="text-xs text-muted-foreground">This month</span>
@@ -144,7 +156,10 @@ export function MetricCard({
 
   if (href) {
     return (
-      <Link href={href} className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8952E]">
+      <Link
+        href={href}
+        className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8952E]"
+      >
         {card}
       </Link>
     );

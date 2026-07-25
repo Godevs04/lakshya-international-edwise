@@ -13,10 +13,7 @@ import "./load-env";
 import { connectDB } from "@/lib/db/mongoose";
 import { getMongoUri } from "@/lib/config/env";
 import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
-import {
-  SITE_LEAD_PROMOTION_STATUS,
-  SITE_LEAD_SOURCE,
-} from "@/lib/constants/site-leads";
+import { SITE_LEAD_PROMOTION_STATUS, SITE_LEAD_SOURCE } from "@/lib/constants/site-leads";
 import {
   buildWebsiteLeadIdPrefix,
   parseWebsiteLeadIdSequence,

@@ -21,26 +21,28 @@ export interface ClientNotification {
 }
 
 export async function getNotificationsAction(): Promise<ClientNotification[]> {
-  return runLoggedQuery("getNotificationsAction", async () => {
-    const user = await getSessionUser();
-    if (!user) return [];
+  return runLoggedQuery(
+    "getNotificationsAction",
+    async () => {
+      const user = await getSessionUser();
+      if (!user) return [];
 
-    const notifications = await getUserNotifications(user.id, 20);
-    return notifications.map((n) => ({
-      id: n._id.toString(),
-      type: n.type,
-      title: n.title,
-      body: n.body,
-      link: n.link,
-      read: n.read,
-      createdAt: n.createdAt.toISOString(),
-    }));
-  }, []);
+      const notifications = await getUserNotifications(user.id, 20);
+      return notifications.map((n) => ({
+        id: n._id.toString(),
+        type: n.type,
+        title: n.title,
+        body: n.body,
+        link: n.link,
+        read: n.read,
+        createdAt: n.createdAt.toISOString(),
+      }));
+    },
+    []
+  );
 }
 
-export async function markNotificationReadAction(
-  notificationId: string
-): Promise<ActionResult> {
+export async function markNotificationReadAction(notificationId: string): Promise<ActionResult> {
   return runLoggedMutation("markNotificationReadAction", async () => {
     const user = await getSessionUser();
     if (!user) {

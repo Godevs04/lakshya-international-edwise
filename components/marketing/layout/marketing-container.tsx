@@ -19,8 +19,6 @@ export function MarketingContainer({
   size = "default",
 }: MarketingContainerProps) {
   return (
-    <div className={cn("container mx-auto px-4", sizeClasses[size], className)}>
-      {children}
-    </div>
+    <div className={cn("container mx-auto px-4", sizeClasses[size], className)}>{children}</div>
   );
 }

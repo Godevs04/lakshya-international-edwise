@@ -103,9 +103,7 @@ export function Topbar({
       if (!notification.read) {
         await markNotificationReadAction(notification.id);
         setNotifications((prev) =>
-          prev.map((item) =>
-            item.id === notification.id ? { ...item, read: true } : item
-          )
+          prev.map((item) => (item.id === notification.id ? { ...item, read: true } : item))
         );
       }
       if (notification.link) {
@@ -253,9 +251,7 @@ export function Topbar({
                 <DropdownMenuLabel className="text-foreground">
                   <div className="flex flex-col">
                     <span className="font-semibold">{user?.name}</span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {user?.email}
-                    </span>
+                    <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
                   </div>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
@@ -292,9 +288,7 @@ export function Topbar({
         modules={modules}
       />
 
-      {searchOpen ? (
-        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-      ) : null}
+      {searchOpen ? <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} /> : null}
     </>
   );
 }

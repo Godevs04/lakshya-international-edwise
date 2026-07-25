@@ -30,8 +30,8 @@ export function CountryLoanMetricsBand({
             {countryName} Education Loan
           </h2>
           <p className="country-loan-metrics-sub">
-            Get the best education loan to study in {countryName} with Lakshya International Edwise —
-            transparent ROI, zero Lakshya service charge, and clear processing guidance.
+            Get the best education loan to study in {countryName} with Lakshya International Edwise
+            — transparent ROI, zero Lakshya service charge, and clear processing guidance.
           </p>
         </div>
 

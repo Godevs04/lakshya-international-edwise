@@ -25,7 +25,9 @@ export function TestimonialCard({ testimonial }: { testimonial: MarketingTestimo
           type="button"
           disabled={!testimonial.videoUrl}
           className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10 disabled:cursor-default"
-          aria-label={testimonial.videoUrl ? "Watch video testimonial" : "Video testimonial coming soon"}
+          aria-label={
+            testimonial.videoUrl ? "Watch video testimonial" : "Video testimonial coming soon"
+          }
         >
           <span className="flex h-12 w-12 scale-90 items-center justify-center rounded-full bg-white/90 text-primary opacity-0 shadow-lg transition-all group-hover:scale-100 group-hover:opacity-100">
             <Play className="ml-0.5 h-5 w-5 fill-primary" />

@@ -1,20 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import type { LottieComponentProps } from "lottie-react";
 import {
-  MARKETING_LOTTIE_PRESETS,
+  loadMarketingLottiePreset,
+  type MarketingLottieAnimation,
   type MarketingLottiePreset,
 } from "@/lib/constants/marketing/lottie-presets";
 import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 import { cn } from "@/lib/utils";
 
-const Lottie = dynamic<LottieComponentProps>(
-  () => import("lottie-react"),
-  { ssr: false }
-);
+const Lottie = dynamic<LottieComponentProps>(() => import("lottie-react"), { ssr: false });
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -48,7 +47,17 @@ export function MarketingLottie({
   children,
 }: MarketingLottieProps) {
   const prefersReducedMotion = useHydrationSafeReducedMotion();
-  const animationData = MARKETING_LOTTIE_PRESETS[preset];
+  const [animationData, setAnimationData] = useState<MarketingLottieAnimation | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadMarketingLottiePreset(preset).then((data) => {
+      if (!cancelled) setAnimationData(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [preset]);
 
   const player = (
     <div
@@ -61,22 +70,21 @@ export function MarketingLottie({
         <div className="marketing-lottie-fallback" aria-hidden={ariaHidden}>
           <FallbackIcon className="h-10 w-10 text-primary/70" />
         </div>
-      ) : (
+      ) : animationData ? (
         <Lottie
           animationData={animationData}
           loop={loop}
           className={cn("marketing-lottie-player", playerClassName)}
         />
+      ) : (
+        <div className={cn("marketing-lottie-player", playerClassName)} aria-hidden />
       )}
     </div>
   );
 
   if (variant === "inline") {
     return (
-      <div
-        className={cn("marketing-lottie-inline-wrap", className)}
-        aria-hidden={ariaHidden}
-      >
+      <div className={cn("marketing-lottie-inline-wrap", className)} aria-hidden={ariaHidden}>
         {player}
       </div>
     );

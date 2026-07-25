@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  canViewAllOverdueTasks,
-  resolveOverdueTaskCount,
-} from "@/lib/utils/task-overdue";
+import { canViewAllOverdueTasks, resolveOverdueTaskCount } from "@/lib/utils/task-overdue";
 
 describe("task overdue visibility", () => {
   it("lets admin and super admin view all overdue tasks", () => {

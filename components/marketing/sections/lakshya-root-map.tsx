@@ -72,7 +72,9 @@ function ConnectorPaths() {
           stroke="url(#why-lakshya-line)"
           strokeWidth="2"
           strokeLinecap="round"
-          initial={prefersReducedMotion ? { pathLength: 1, opacity: 0.5 } : { pathLength: 0, opacity: 0 }}
+          initial={
+            prefersReducedMotion ? { pathLength: 1, opacity: 0.5 } : { pathLength: 0, opacity: 0 }
+          }
           whileInView={{ pathLength: 1, opacity: 0.55 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, delay: 0.15 + i * 0.12, ease: EASE }}
@@ -138,13 +140,7 @@ function TrustMetricPills() {
   );
 }
 
-function BranchCard({
-  branch,
-  index,
-}: {
-  branch: (typeof BRANCHES)[number];
-  index: number;
-}) {
+function BranchCard({ branch, index }: { branch: (typeof BRANCHES)[number]; index: number }) {
   const { prefersReducedMotion } = useMarketingMotion();
 
   return (

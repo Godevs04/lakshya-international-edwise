@@ -12,26 +12,19 @@ export async function createAppLogoIconResponse(size: number): Promise<ImageResp
   const inner = size - pad * 2;
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#ffffff",
-        }}
-      >
-        <img
-          src={src}
-          width={inner}
-          height={inner}
-          alt=""
-          style={{ objectFit: "contain" }}
-        />
-      </div>
-    ),
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#ffffff",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse (OG) only supports raw <img> */}
+      <img src={src} width={inner} height={inner} alt="" style={{ objectFit: "contain" }} />
+    </div>,
     { width: size, height: size }
   );
 }

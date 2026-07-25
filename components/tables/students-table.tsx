@@ -32,10 +32,7 @@ import { StudentImportDialog } from "@/components/dashboard/student-import-dialo
 import { StudentStageTabs } from "@/components/dashboard/student-stage-tabs";
 import { StudentAdvancedSearch } from "@/components/dashboard/student-advanced-search";
 import { ProfileCompleteBadge } from "@/components/dashboard/profile-complete-badge";
-import {
-  buildStudentListQuery,
-  type StudentListFilters,
-} from "@/lib/utils/student-list-filters";
+import { buildStudentListQuery, type StudentListFilters } from "@/lib/utils/student-list-filters";
 import { QuickAddStudentSheet } from "@/components/dashboard/quick-add-student-sheet";
 import { StudentBulkActionsBar } from "@/components/dashboard/student-bulk-actions-bar";
 import { Download } from "lucide-react";
@@ -99,7 +96,7 @@ export function StudentsTable({
   const columns: ColumnDef<StudentListItem>[] = [
     {
       id: "select",
-      header: ({ table }) => (
+      header: ({ table }) =>
         canSelect ? (
           <input
             type="checkbox"
@@ -107,9 +104,8 @@ export function StudentsTable({
             onChange={table.getToggleAllPageRowsSelectedHandler()}
             aria-label="Select all students on this page"
           />
-        ) : null
-      ),
-      cell: ({ row }) => (
+        ) : null,
+      cell: ({ row }) =>
         canSelect ? (
           <input
             type="checkbox"
@@ -117,14 +113,16 @@ export function StudentsTable({
             onChange={row.getToggleSelectedHandler()}
             aria-label={`Select ${row.original.firstName} ${row.original.lastName}`}
           />
-        ) : null
-      ),
+        ) : null,
     },
     {
       accessorKey: "studentId",
       header: "Student ID",
       cell: ({ row }) => (
-        <Link href={`/dashboard/students/${row.original._id}`} className="font-medium text-primary hover:underline">
+        <Link
+          href={`/dashboard/students/${row.original._id}`}
+          className="font-medium text-primary hover:underline"
+        >
           {row.original.studentId}
         </Link>
       ),
@@ -134,7 +132,9 @@ export function StudentsTable({
       header: "Name",
       cell: ({ row }) => (
         <span className="inline-flex items-center gap-1.5">
-          <span>{row.original.firstName} {row.original.lastName}</span>
+          <span>
+            {row.original.firstName} {row.original.lastName}
+          </span>
           <ProfileCompleteBadge verified={Boolean(row.original.profileVerified)} />
         </span>
       ),
@@ -153,7 +153,11 @@ export function StudentsTable({
       ),
     },
     { accessorKey: "partnerName", header: "Partner" },
-    { accessorKey: "assigneeName", header: "Assignee", cell: ({ row }) => row.original.assigneeName ?? "—" },
+    {
+      accessorKey: "assigneeName",
+      header: "Assignee",
+      cell: ({ row }) => row.original.assigneeName ?? "—",
+    },
     {
       id: "studyAbroad",
       header: "Target",
@@ -189,9 +193,10 @@ export function StudentsTable({
     state: { sorting, rowSelection: Object.fromEntries(selected.map((id) => [id, true])) },
     getRowId: (row) => row._id,
     onRowSelectionChange: (updater) => {
-      const newSelection = typeof updater === "function"
-        ? updater(Object.fromEntries(selected.map((id) => [id, true])))
-        : updater;
+      const newSelection =
+        typeof updater === "function"
+          ? updater(Object.fromEntries(selected.map((id) => [id, true])))
+          : updater;
       setSelected(Object.keys(newSelection).filter((k) => newSelection[k]));
     },
   });
@@ -202,7 +207,17 @@ export function StudentsTable({
   }
 
   function handleExportCSV() {
-    const headers = ["Student ID", "Name", "Phone", "Partner", "Assignee", "Target", "Loan", "Status", "Created"];
+    const headers = [
+      "Student ID",
+      "Name",
+      "Phone",
+      "Partner",
+      "Assignee",
+      "Target",
+      "Loan",
+      "Status",
+      "Created",
+    ];
     const rows = data.map((s) => [
       s.studentId,
       `${s.firstName} ${s.lastName}`,
@@ -267,12 +282,7 @@ export function StudentsTable({
     <div className="flex flex-col gap-3 rounded-2xl bg-white/50 px-3 py-3 text-sm text-muted-foreground backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-4 dark:bg-white/5">
       <span>{total} total students</span>
       <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={page <= 1}
-          onClick={() => goToPage(page - 1)}
-        >
+        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
           Previous
         </Button>
         <span className="flex items-center px-2">
@@ -307,7 +317,9 @@ export function StudentsTable({
               onKeyDown={(e) => e.key === "Enter" && applySearch()}
               className="w-full min-w-0 sm:max-w-xs"
             />
-            <Button variant="outline" onClick={applySearch}>Search</Button>
+            <Button variant="outline" onClick={applySearch}>
+              Search
+            </Button>
             <StudentAdvancedSearch
               filters={filters}
               partners={partners}
@@ -320,9 +332,7 @@ export function StudentsTable({
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {canWrite && (
-              <QuickAddStudentSheet assignableUsers={assignableUsers} />
-            )}
+            {canWrite && <QuickAddStudentSheet assignableUsers={assignableUsers} />}
             {canWrite && <StudentImportDialog canWrite={canWrite} />}
             {canExport && (
               <Button variant="outline" size="sm" onClick={handleExportCSV}>
@@ -407,7 +417,8 @@ export function StudentsTable({
                   <div>
                     <p className="font-medium text-foreground">Target</p>
                     <p className="truncate">
-                      {[student.targetCountry, student.targetDegree].filter(Boolean).join(" · ") || "—"}
+                      {[student.targetCountry, student.targetDegree].filter(Boolean).join(" · ") ||
+                        "—"}
                     </p>
                   </div>
                   <div>
@@ -460,7 +471,10 @@ export function StudentsTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   No students found.
                 </TableCell>
               </TableRow>

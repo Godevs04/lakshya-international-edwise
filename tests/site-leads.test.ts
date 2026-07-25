@@ -62,26 +62,24 @@ describe("site-leads filters", () => {
 
 describe("site-leads route access", () => {
   it("allows admissions or partners read permission", () => {
-    expect(
-      canAccessRoute(mockUser("viewer", ["admissions:read"]), "/dashboard/site-leads")
-    ).toBe(true);
-    expect(
-      canAccessRoute(mockUser("viewer", ["partners:read"]), "/dashboard/site-leads")
-    ).toBe(true);
-    expect(
-      canAccessRoute(mockUser("viewer", ["students:read"]), "/dashboard/site-leads")
-    ).toBe(false);
+    expect(canAccessRoute(mockUser("viewer", ["admissions:read"]), "/dashboard/site-leads")).toBe(
+      true
+    );
+    expect(canAccessRoute(mockUser("viewer", ["partners:read"]), "/dashboard/site-leads")).toBe(
+      true
+    );
+    expect(canAccessRoute(mockUser("viewer", ["students:read"]), "/dashboard/site-leads")).toBe(
+      false
+    );
   });
 });
 
 describe("student and partner ID prefixes", () => {
   it("uses distinct prefixes for website leads vs official records", async () => {
-    const { buildWebsiteLeadIdPrefix, buildStudentIdPrefix } = await import(
-      "@/lib/services/student-id.service"
-    );
-    const { buildPartnerCodePrefix, buildWebsitePartnerLeadCodePrefix } = await import(
-      "@/lib/services/partner-id.service"
-    );
+    const { buildWebsiteLeadIdPrefix, buildStudentIdPrefix } =
+      await import("@/lib/services/student-id.service");
+    const { buildPartnerCodePrefix, buildWebsitePartnerLeadCodePrefix } =
+      await import("@/lib/services/partner-id.service");
 
     expect(buildWebsiteLeadIdPrefix()).toMatch(/^LEAD-/);
     expect(buildStudentIdPrefix()).toMatch(/^STU-/);

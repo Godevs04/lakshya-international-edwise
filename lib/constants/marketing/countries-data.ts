@@ -8,8 +8,17 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
     shortDescription: "World-class universities and flexible programs.",
     description:
       "The United States offers diverse programs, strong research opportunities, and post-study work pathways for international students.",
-    benefits: ["Top-ranked universities", "OPT opportunities", "Flexible majors", "Strong alumni networks"],
-    universities: ["Arizona State University", "Northeastern University", "University of Texas at Arlington"],
+    benefits: [
+      "Top-ranked universities",
+      "OPT opportunities",
+      "Flexible majors",
+      "Strong alumni networks",
+    ],
+    universities: [
+      "Arizona State University",
+      "Northeastern University",
+      "University of Texas at Arlington",
+    ],
     costOfStudy: "USD 20,000 - 55,000 per year (tuition varies by program and state)",
     visaInfo: "F-1 student visa with financial proof, SEVIS fee, and consular interview.",
     careerOutlook: "STEM graduates may access extended OPT and employer-sponsored pathways.",
@@ -84,7 +93,12 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
     shortDescription: "High living standards and strong employability.",
     description:
       "Australia is known for practical courses, vibrant student cities, and post-study work rights.",
-    benefits: ["Post-study work rights", "Quality of life", "Research universities", "Part-time work options"],
+    benefits: [
+      "Post-study work rights",
+      "Quality of life",
+      "Research universities",
+      "Part-time work options",
+    ],
     universities: ["Monash University", "Deakin University", "University of South Australia"],
     costOfStudy: "AUD 22,000 - 40,000 per year",
     visaInfo: "Subclass 500 student visa with OSHC and financial capacity proof.",
@@ -174,7 +188,11 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
     description:
       "New Zealand provides quality education, outdoor lifestyle, and post-study work visas for skilled graduates.",
     benefits: ["Safe campuses", "Practical learning", "Post-study visa", "Smaller class sizes"],
-    universities: ["University of Auckland", "Victoria University of Wellington", "Auckland University of Technology"],
+    universities: [
+      "University of Auckland",
+      "Victoria University of Wellington",
+      "Auckland University of Technology",
+    ],
     costOfStudy: "NZD 22,000 - 35,000 per year",
     visaInfo: "Fee Paying Student Visa with funds and health insurance.",
     careerOutlook: "Post-study work visa supports local employment experience.",
@@ -187,7 +205,11 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
     description:
       "Dubai and the wider UAE host international university branches with strong business, hospitality, and management pathways. Lakshya International Edwise helps Indian students and expats explore education finance and student loan options for studying in Dubai, UAE.",
     benefits: ["Branch campuses", "Tax-free earnings", "Global hub", "Industry exposure"],
-    universities: ["Heriot-Watt University Dubai", "Middlesex University Dubai", "University of Birmingham Dubai"],
+    universities: [
+      "Heriot-Watt University Dubai",
+      "Middlesex University Dubai",
+      "University of Birmingham Dubai",
+    ],
     costOfStudy: "AED 40,000 - 90,000 per year",
     visaInfo: "Student residence permit sponsored by the institution.",
     careerOutlook: "Regional employment in finance, hospitality, and logistics.",
@@ -237,8 +259,17 @@ export const MARKETING_COUNTRIES_RAW: MarketingCountry[] = [
     shortDescription: "Multi-country pathways across the Schengen region.",
     description:
       "Explore programs in the Netherlands, Spain, Italy, and more with guidance on EU mobility and admissions.",
-    benefits: ["Multi-country options", "English programs", "Erasmus opportunities", "Affordable cities"],
-    universities: ["University of Amsterdam", "Bocconi University", "Eindhoven University of Technology"],
+    benefits: [
+      "Multi-country options",
+      "English programs",
+      "Erasmus opportunities",
+      "Affordable cities",
+    ],
+    universities: [
+      "University of Amsterdam",
+      "Bocconi University",
+      "Eindhoven University of Technology",
+    ],
     costOfStudy: "EUR 8,000 - 24,000 per year (country dependent)",
     visaInfo: "Schengen or national student visas depending on destination.",
     careerOutlook: "Graduates benefit from EU mobility and multilingual workplaces.",

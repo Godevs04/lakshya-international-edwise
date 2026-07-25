@@ -40,10 +40,14 @@ const cachedLoanStatusChart = unstable_cache(getLoanStatusChart, ["dashboard-loa
   tags: [CACHE_TAGS.dashboard],
 });
 
-const cachedMonthlyStudentsChart = unstable_cache(getMonthlyStudentsChart, ["dashboard-monthly-students"], {
-  revalidate: CACHE_SECONDS,
-  tags: [CACHE_TAGS.dashboard],
-});
+const cachedMonthlyStudentsChart = unstable_cache(
+  getMonthlyStudentsChart,
+  ["dashboard-monthly-students"],
+  {
+    revalidate: CACHE_SECONDS,
+    tags: [CACHE_TAGS.dashboard],
+  }
+);
 
 const cachedLoanAmountChart = unstable_cache(getLoanAmountChart, ["dashboard-loan-amount"], {
   revalidate: CACHE_SECONDS,
@@ -73,11 +77,10 @@ const cachedLatestPartners = unstable_cache(
   { revalidate: CACHE_SECONDS, tags: [CACHE_TAGS.dashboard] }
 );
 
-const cachedFollowups = unstable_cache(
-  () => getUpcomingFollowups(5),
-  ["dashboard-followups"],
-  { revalidate: CACHE_SECONDS, tags: [CACHE_TAGS.dashboard] }
-);
+const cachedFollowups = unstable_cache(() => getUpcomingFollowups(5), ["dashboard-followups"], {
+  revalidate: CACHE_SECONDS,
+  tags: [CACHE_TAGS.dashboard],
+});
 
 export async function getOverviewDashboardAction() {
   return runLogged("getOverviewDashboardAction", async () => {

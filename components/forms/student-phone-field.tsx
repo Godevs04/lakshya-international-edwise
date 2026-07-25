@@ -88,15 +88,11 @@ export function StudentPhoneField({
     return "";
   }, [status, remote, checkPhone]);
 
-  const matchHref =
-    status === "taken" && remote?.phone === checkPhone ? remote.matchHref : null;
-  const matchLabel =
-    status === "taken" && remote?.phone === checkPhone ? remote.matchLabel : null;
+  const matchHref = status === "taken" && remote?.phone === checkPhone ? remote.matchHref : null;
+  const matchLabel = status === "taken" && remote?.phone === checkPhone ? remote.matchLabel : null;
 
   useEffect(() => {
-    onAvailabilityChangeRef.current?.(
-      status === "idle" || status === "available"
-    );
+    onAvailabilityChangeRef.current?.(status === "idle" || status === "available");
   }, [status]);
 
   useEffect(() => {

@@ -18,10 +18,5 @@ interface PremiumSectionBgProps {
 export function PremiumSectionBg({ variant = "none", className }: PremiumSectionBgProps) {
   if (variant === "none") return null;
 
-  return (
-    <div
-      className={cn("section-bg-layer", bgClasses[variant], className)}
-      aria-hidden
-    />
-  );
+  return <div className={cn("section-bg-layer", bgClasses[variant], className)} aria-hidden />;
 }

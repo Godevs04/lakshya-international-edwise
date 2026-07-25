@@ -4,10 +4,7 @@ import type { Types } from "mongoose";
 
 export async function getUserNotifications(userId: string, limit = 20) {
   await connectDB();
-  return Notification.find({ userId })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .lean();
+  return Notification.find({ userId }).sort({ createdAt: -1 }).limit(limit).lean();
 }
 
 export async function getUnreadCount(userId: string): Promise<number> {
@@ -28,10 +25,7 @@ export async function createNotification(params: {
 
 export async function markAsRead(notificationId: string, userId: string) {
   await connectDB();
-  return Notification.updateOne(
-    { _id: notificationId, userId },
-    { read: true }
-  );
+  return Notification.updateOne({ _id: notificationId, userId }, { read: true });
 }
 
 export async function markAllAsRead(userId: string) {

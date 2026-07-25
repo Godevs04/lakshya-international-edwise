@@ -8,9 +8,7 @@ import {
 
 function buildServiceNavChildren(): MarketingNavItem[] {
   return MARKETING_SERVICES.flatMap((service) => {
-    const items: MarketingNavItem[] = [
-      { label: service.title, href: `/services/${service.slug}` },
-    ];
+    const items: MarketingNavItem[] = [{ label: service.title, href: `/services/${service.slug}` }];
     if (service.slug === "education-loan") {
       items.push(
         ...EDUCATION_LOAN_OPTIONS.map((option) => ({

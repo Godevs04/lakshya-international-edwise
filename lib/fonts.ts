@@ -12,7 +12,14 @@ export const fontSans = localFont({
   weight: "200 900",
   preload: true,
   adjustFontFallback: "Arial",
-  fallback: ["ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+  fallback: [
+    "ui-sans-serif",
+    "system-ui",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "Segoe UI",
+    "sans-serif",
+  ],
 });
 
 export const fontMono = JetBrains_Mono({

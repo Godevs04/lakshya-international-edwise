@@ -4,7 +4,12 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/lib/auth/auth.config";
 import { authorizeCredentials } from "@/lib/auth/authorize";
 
-const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
+const {
+  handlers,
+  auth: nextAuth,
+  signIn,
+  signOut,
+} = NextAuth({
   ...authConfig,
   providers: [
     Credentials({

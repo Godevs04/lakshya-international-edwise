@@ -78,7 +78,9 @@ export function ContactForm({ embedded = false }: ContactFormProps) {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className={embedded ? "contact-form-success" : "consultation-card rounded-2xl p-8 text-center"}
+        className={
+          embedded ? "contact-form-success" : "consultation-card rounded-2xl p-8 text-center"
+        }
       >
         <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-primary" />
         <h3 className="text-xl font-semibold text-foreground">Message sent!</h3>
@@ -98,8 +100,8 @@ export function ContactForm({ embedded = false }: ContactFormProps) {
         <>
           <h2 className="text-lg font-semibold text-foreground">Send us a message</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Have a question about education loans, forex, or blocked accounts? Fill in the form
-            and we will get back to you shortly.
+            Have a question about education loans, forex, or blocked accounts? Fill in the form and
+            we will get back to you shortly.
           </p>
         </>
       ) : null}
@@ -175,7 +177,13 @@ export function ContactForm({ embedded = false }: ContactFormProps) {
           )}
         </div>
 
-        <input type="text" tabIndex={-1} autoComplete="off" className="hidden" {...form.register("website")} />
+        <input
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          className="hidden"
+          {...form.register("website")}
+        />
       </div>
 
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}

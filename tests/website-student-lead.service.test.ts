@@ -37,9 +37,8 @@ describe("website student lead resubmission", () => {
       }),
     });
 
-    const { findPendingWebsiteStudentLeadByPhone } = await import(
-      "@/lib/services/website-student-lead.service"
-    );
+    const { findPendingWebsiteStudentLeadByPhone } =
+      await import("@/lib/services/website-student-lead.service");
     const lead = await findPendingWebsiteStudentLeadByPhone("9876543210");
 
     expect(lead?.studentId).toBe("LEAD-LIE-000001");
@@ -66,9 +65,8 @@ describe("website student lead resubmission", () => {
     };
     studentFindById.mockResolvedValue(studentDoc);
 
-    const { updatePendingWebsiteStudentLead } = await import(
-      "@/lib/services/website-student-lead.service"
-    );
+    const { updatePendingWebsiteStudentLead } =
+      await import("@/lib/services/website-student-lead.service");
 
     const updated = await updatePendingWebsiteStudentLead("lead-1", {
       name: "Priya Sharma",
@@ -103,9 +101,8 @@ describe("website student lead resubmission", () => {
     };
     studentFindById.mockResolvedValue(studentDoc);
 
-    const { updatePendingWebsiteStudentLead } = await import(
-      "@/lib/services/website-student-lead.service"
-    );
+    const { updatePendingWebsiteStudentLead } =
+      await import("@/lib/services/website-student-lead.service");
 
     const updated = await updatePendingWebsiteStudentLead("lead-1", {
       name: "GOWTHAM",

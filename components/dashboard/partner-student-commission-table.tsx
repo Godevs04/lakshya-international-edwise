@@ -96,10 +96,7 @@ export function PartnerStudentCommissionTable({
     setMarkDialog({ open: true, type, student });
   }
 
-  async function handleSaveRate(
-    student: PartnerStudentCommissionRow,
-    field: "our" | "partner"
-  ) {
+  async function handleSaveRate(student: PartnerStudentCommissionRow, field: "our" | "partner") {
     setPendingStudentId(student.studentDbId);
     const formData = new FormData();
     if (field === "our") {
@@ -126,10 +123,7 @@ export function PartnerStudentCommissionTable({
     setPendingStudentId(null);
   }
 
-  function renderRateEditor(
-    student: PartnerStudentCommissionRow,
-    field: "our" | "partner"
-  ) {
+  function renderRateEditor(student: PartnerStudentCommissionRow, field: "our" | "partner") {
     const isEditing =
       editingField?.studentId === student.studentDbId && editingField.field === field;
 
@@ -266,10 +260,18 @@ export function PartnerStudentCommissionTable({
                   <TableCell className="text-[#E8952E]">
                     {formatCurrency(row.projectedNetEarned)}
                   </TableCell>
-                  <TableCell className="text-[#22C55E]">{formatCurrency(row.commissionReceived)}</TableCell>
-                  <TableCell className="text-[#22C55E]">{formatCurrency(row.commissionShared)}</TableCell>
-                  <TableCell className="text-[#F59E0B]">{formatCurrency(row.pendingReceived)}</TableCell>
-                  <TableCell className="text-[#F59E0B]">{formatCurrency(row.pendingShared)}</TableCell>
+                  <TableCell className="text-[#22C55E]">
+                    {formatCurrency(row.commissionReceived)}
+                  </TableCell>
+                  <TableCell className="text-[#22C55E]">
+                    {formatCurrency(row.commissionShared)}
+                  </TableCell>
+                  <TableCell className="text-[#F59E0B]">
+                    {formatCurrency(row.pendingReceived)}
+                  </TableCell>
+                  <TableCell className="text-[#F59E0B]">
+                    {formatCurrency(row.pendingShared)}
+                  </TableCell>
                   <TableCell className="font-medium">
                     {formatCurrency(row.commissionEarned)}
                   </TableCell>
@@ -290,9 +292,7 @@ export function PartnerStudentCommissionTable({
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={
-                            row.pendingShared <= 0 || pendingStudentId === row.studentDbId
-                          }
+                          disabled={row.pendingShared <= 0 || pendingStudentId === row.studentDbId}
                           onClick={() => openMarkDialog("paid", row)}
                         >
                           <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
@@ -359,17 +359,17 @@ function GlassHelp() {
       <p className="font-medium text-[#E8952E]">Where to mark received & paid</p>
       <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
         <li>
-          <strong>Received</strong> — money from lender/bank (use Actions → Received; full or partial amount)
+          <strong>Received</strong> — money from lender/bank (use Actions → Received; full or
+          partial amount)
         </li>
         <li>
           <strong>Paid</strong> — money paid to partner (use Actions → Paid; full or partial amount)
         </li>
         <li>
-          Click the pencil on <strong>Our %</strong> or <strong>Partner %</strong> to update rates per student
+          Click the pencil on <strong>Our %</strong> or <strong>Partner %</strong> to update rates
+          per student
         </li>
-        <li>
-          Expected, share, and pending columns update automatically from disbursement + rates
-        </li>
+        <li>Expected, share, and pending columns update automatically from disbursement + rates</li>
         <li>
           All-partner filter:{" "}
           <Link href="/dashboard/partners/commissions" className="text-primary underline">

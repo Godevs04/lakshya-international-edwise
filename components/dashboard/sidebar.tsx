@@ -4,11 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,7 +31,13 @@ interface SidebarProps {
   pendingSiteLeadCount?: number;
 }
 
-export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0, pendingSiteLeadCount = 0 }: SidebarProps) {
+export function Sidebar({
+  companyName,
+  logo,
+  modules,
+  overdueTaskCount = 0,
+  pendingSiteLeadCount = 0,
+}: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -47,11 +49,7 @@ export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0, pend
       className="fixed left-0 top-0 bottom-0 z-50 hidden flex-col overflow-hidden rounded-none sidebar-solid transition-[width] duration-300 ease-out lg:flex lg:rounded-r-[28px]"
     >
       <div className="shrink-0 border-b border-sidebar-border px-4 py-3.5">
-        <SidebarBrand
-          companyName={companyName}
-          logo={logo}
-          collapsed={collapsed}
-        />
+        <SidebarBrand companyName={companyName} logo={logo} collapsed={collapsed} />
       </div>
 
       <ScrollArea className="flex-1 px-3">
@@ -84,7 +82,9 @@ export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0, pend
                       isActive ? "bg-white/25" : "bg-primary/10 group-hover:bg-primary/15"
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-primary")} />
+                    <item.icon
+                      className={cn("h-4 w-4", isActive ? "text-white" : "text-primary")}
+                    />
                     {item.href === TASKS_HREF || item.href === SITE_LEADS_HREF ? (
                       <NavBadge count={badgeCount} collapsed={collapsed} />
                     ) : null}
@@ -129,8 +129,12 @@ export function Sidebar({ companyName, logo, modules, overdueTaskCount = 0, pend
             </Avatar>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-sidebar-foreground">{session?.user?.name}</p>
-                <p className="truncate text-[11px] text-sidebar-foreground/60">{session?.user?.email}</p>
+                <p className="truncate text-sm font-semibold text-sidebar-foreground">
+                  {session?.user?.name}
+                </p>
+                <p className="truncate text-[11px] text-sidebar-foreground/60">
+                  {session?.user?.email}
+                </p>
               </div>
             )}
           </div>
@@ -205,8 +209,7 @@ export function MobileNav({
     MOBILE_PRIMARY_HREFS.includes(item.href as (typeof MOBILE_PRIMARY_HREFS)[number])
   );
   const secondaryNav = filteredNav.filter(
-    (item) =>
-      !MOBILE_PRIMARY_HREFS.includes(item.href as (typeof MOBILE_PRIMARY_HREFS)[number])
+    (item) => !MOBILE_PRIMARY_HREFS.includes(item.href as (typeof MOBILE_PRIMARY_HREFS)[number])
   );
   const moreActive = secondaryNav.some((item) => isNavItemActive(pathname, item.href));
   const tasksInSecondary = secondaryNav.some((item) => item.href === TASKS_HREF);

@@ -2,9 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Student } from "@/models/Student";
 import { Partner } from "@/models/Partner";
 import { subMonths, startOfDay, format } from "date-fns";
-import {
-  APPLICATION_STATUS_OPTIONS,
-} from "@/lib/constants/application-status";
+import { APPLICATION_STATUS_OPTIONS } from "@/lib/constants/application-status";
 import { STUDENT_STATUS_CONFIG, type StudentStatus } from "@/lib/constants/statuses";
 
 const STUDENT_PIPELINE: StudentStatus[] = [
@@ -19,9 +17,7 @@ const STUDENT_PIPELINE: StudentStatus[] = [
 ];
 
 function titleCase(value: string): string {
-  return value
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export async function getAnalyticsSummary() {
@@ -66,9 +62,7 @@ export async function getApplicationPipelineFunnel() {
 
 export async function getConversionFunnel() {
   await connectDB();
-  const results = await Student.aggregate([
-    { $group: { _id: "$status", count: { $sum: 1 } } },
-  ]);
+  const results = await Student.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]);
   const map = new Map(results.map((r) => [r._id, r.count]));
 
   const pipeline = STUDENT_PIPELINE.map((status) => ({

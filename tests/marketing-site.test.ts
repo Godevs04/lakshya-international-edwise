@@ -7,7 +7,10 @@ import {
 import { COUNTRY_IMAGE_MAP, getCountryImage } from "@/lib/constants/marketing/country-images";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 import { TRUST_METRICS_SOURCE } from "@/lib/constants/marketing/lakshya-value-props";
-import { PRIVACY_POLICY_SECTIONS, TERMS_OF_SERVICE_SECTIONS } from "@/lib/constants/marketing/legal-content";
+import {
+  PRIVACY_POLICY_SECTIONS,
+  TERMS_OF_SERVICE_SECTIONS,
+} from "@/lib/constants/marketing/legal-content";
 import { websiteJsonLd } from "@/components/marketing/seo/json-ld";
 
 describe("marketing site configuration", () => {
@@ -65,9 +68,7 @@ describe("structured data", () => {
     expect(data["@type"]).toBe("WebSite");
     expect(data.alternateName).toContain("Lakshya Edwise");
     expect(data.potentialAction).toBeUndefined();
-    expect(data.publisher?.["@id"]).toBe(
-      "https://lakshyainternationaledwise.com/#organization"
-    );
+    expect(data.publisher?.["@id"]).toBe("https://lakshyainternationaledwise.com/#organization");
   });
 });
 

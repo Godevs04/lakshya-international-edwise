@@ -1,0 +1,24 @@
+# Build / deps
+.next
+out
+build
+coverage
+node_modules
+package-lock.json
+
+# Generated / binary
+*.min.js
+*.min.css
+public/**/*.svg
+public/lenders/**
+public/fonts/**
+
+# Env & local
+.env
+.env.*
+!.env.example
+
+# Misc
+*.md
+pnpm-lock.yaml
+yarn.lock

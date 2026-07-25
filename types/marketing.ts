@@ -1,10 +1,4 @@
-export type EnquiryType =
-  | "consultation"
-  | "quick"
-  | "contact"
-  | "loan"
-  | "country"
-  | "eligibility";
+export type EnquiryType = "consultation" | "quick" | "contact" | "loan" | "country" | "eligibility";
 
 export type MegaMenuType = "services" | "countries" | "resources" | "none";
 
@@ -19,11 +13,7 @@ export interface MarketingNavItem {
   children?: MarketingNavItem[];
 }
 
-export type LenderCategory =
-  | "government"
-  | "private"
-  | "nbfc"
-  | "international";
+export type LenderCategory = "government" | "private" | "nbfc" | "international";
 
 export interface MarketingLender {
   name: string;

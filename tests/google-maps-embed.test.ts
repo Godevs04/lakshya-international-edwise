@@ -7,8 +7,7 @@ import {
 
 describe("google maps embed utils", () => {
   it("parses a raw Google Maps embed URL", () => {
-    const url =
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d124445!2d77.57!3d12.91";
+    const url = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d124445!2d77.57!3d12.91";
     expect(parseGoogleMapsEmbedUrl(url)).toBe(url);
   });
 

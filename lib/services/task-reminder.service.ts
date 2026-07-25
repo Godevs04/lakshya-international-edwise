@@ -122,9 +122,7 @@ export async function sendTaskReminders(): Promise<TaskReminderSummary> {
         dueAt: task.dueAt,
         studentName: task.studentName,
         studentCode: task.studentCode,
-        taskUrl: task.studentId
-          ? `${authUrl}/dashboard/students/${task.studentId}`
-          : taskUrl,
+        taskUrl: task.studentId ? `${authUrl}/dashboard/students/${task.studentId}` : taskUrl,
       });
       if (emailed) summary.emailed++;
     }

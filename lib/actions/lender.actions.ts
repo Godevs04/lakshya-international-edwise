@@ -32,19 +32,27 @@ function parseLenderFormData(formData: FormData) {
 }
 
 export async function getLendersAction(): Promise<LenderListItem[]> {
-  return runLoggedQuery("getLendersAction", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_READ);
-    return getLendersWithCounts();
-  }, []);
+  return runLoggedQuery(
+    "getLendersAction",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      return getLendersWithCounts();
+    },
+    []
+  );
 }
 
 export async function getLenderOptionsAction(): Promise<LenderOption[]> {
-  return runLoggedQuery("getLenderOptionsAction", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_READ);
-    return getLenderOptions();
-  }, []);
+  return runLoggedQuery(
+    "getLenderOptionsAction",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      return getLenderOptions();
+    },
+    []
+  );
 }
 
 export async function createLenderAction(

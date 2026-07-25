@@ -28,11 +28,7 @@ export function matchesCommissionStatusFilter(
     case "shared_complete":
       return row.commissionExpected > 0 && row.pendingShared <= 0;
     case "fully_complete":
-      return (
-        row.commissionExpected > 0 &&
-        row.pendingReceived <= 0 &&
-        row.pendingShared <= 0
-      );
+      return row.commissionExpected > 0 && row.pendingReceived <= 0 && row.pendingShared <= 0;
     default:
       return true;
   }

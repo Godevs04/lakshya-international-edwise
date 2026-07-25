@@ -67,11 +67,7 @@ export default async function SiteLeadsPage({
       <PageHeader
         title="From Site"
         description="Review website student and partner enquiries before promoting them to the CRM"
-        badge={
-          counts.total > 0
-            ? `${counts.total} awaiting review`
-            : "Site leads"
-        }
+        badge={counts.total > 0 ? `${counts.total} awaiting review` : "Site leads"}
       />
 
       <Suspense fallback={<Skeleton className="h-12 w-full rounded-2xl" />}>

@@ -36,7 +36,10 @@ export function FinanceHero() {
             <RevealItem>
               <p className="hero-premium-subcopy mt-5">
                 Lakshya International Edwise makes global education
-                <span className="hero-value-triad" aria-label="Affordable, Accessible, and Achievable">
+                <span
+                  className="hero-value-triad"
+                  aria-label="Affordable, Accessible, and Achievable"
+                >
                   {["Affordable", "Accessible", "Achievable"].map((word, index) => (
                     <span key={word} className="hero-value-word">
                       {index > 0 && (

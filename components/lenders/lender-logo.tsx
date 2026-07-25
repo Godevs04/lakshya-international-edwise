@@ -46,14 +46,7 @@ const ICON_GLYPH: Record<LenderLogoSize, string> = {
   xl: "h-10 w-10",
 };
 
-export function LenderLogo({
-  slug,
-  name,
-  logo,
-  accent,
-  size = "md",
-  className,
-}: LenderLogoProps) {
+export function LenderLogo({ slug, name, logo, accent, size = "md", className }: LenderLogoProps) {
   const seedBrand = getLenderBrand(slug, name);
   const brand = logo
     ? {

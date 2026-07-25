@@ -20,7 +20,9 @@ describe("validate-env", () => {
     vi.stubEnv("AUTH_URL", "");
     vi.stubEnv("APP_ENCRYPTION_KEY", "");
 
-    expect(() => validateProductionEnv()).toThrow(/Missing required production environment variables/);
+    expect(() => validateProductionEnv()).toThrow(
+      /Missing required production environment variables/
+    );
   });
 
   it("passes when production variables are present", () => {

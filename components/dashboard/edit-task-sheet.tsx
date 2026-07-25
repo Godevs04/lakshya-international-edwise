@@ -32,12 +32,7 @@ interface EditTaskSheetProps {
   assignableUsers: AssigneeOption[];
 }
 
-export function EditTaskSheet({
-  task,
-  open,
-  onOpenChange,
-  assignableUsers,
-}: EditTaskSheetProps) {
+export function EditTaskSheet({ task, open, onOpenChange, assignableUsers }: EditTaskSheetProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [assignedToId, setAssignedToId] = useState(task.assignedToId ?? "");
@@ -80,7 +75,10 @@ export function EditTaskSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
+      >
         <SheetHeader className="border-b border-[#E8952E]/10">
           <SheetTitle>Edit Task</SheetTitle>
           <SheetDescription>

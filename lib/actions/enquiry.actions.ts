@@ -6,10 +6,7 @@ import { Student } from "@/models/Student";
 import { Application } from "@/models/Application";
 import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
 import { allocateWebsiteLeadId } from "@/lib/services/student-id.service";
-import {
-  SITE_LEAD_PROMOTION_STATUS,
-  SITE_LEAD_SOURCE,
-} from "@/lib/constants/site-leads";
+import { SITE_LEAD_PROMOTION_STATUS, SITE_LEAD_SOURCE } from "@/lib/constants/site-leads";
 import { logActivity } from "@/lib/services/activity.service";
 import { sendWebsiteEnquiryNotification } from "@/lib/services/email.service";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -65,11 +62,7 @@ export async function submitWebsiteEnquiryAction(
     if (data.phone?.trim()) {
       const pendingLead = await findPendingWebsiteStudentLeadByPhone(data.phone);
       if (pendingLead) {
-        const updated = await updatePendingWebsiteStudentLead(
-          pendingLead._id.toString(),
-          data,
-          ip
-        );
+        const updated = await updatePendingWebsiteStudentLead(pendingLead._id.toString(), data, ip);
         if (!updated) {
           return { success: false, error: "Unable to submit your enquiry. Please try again." };
         }
@@ -117,8 +110,7 @@ export async function submitWebsiteEnquiryAction(
       if (phoneDuplicate) {
         return {
           success: false,
-          error:
-            "We already have your enquiry on file. Our team will contact you shortly.",
+          error: "We already have your enquiry on file. Our team will contact you shortly.",
         };
       }
     }

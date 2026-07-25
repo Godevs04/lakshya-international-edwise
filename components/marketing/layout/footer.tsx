@@ -4,7 +4,16 @@ import { getMarketingContact, getWhatsAppLink } from "@/lib/config/marketing";
 import { MARKETING_OFFICES } from "@/lib/constants/marketing/offices";
 import { AppLogo } from "@/components/brand/app-logo";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
-import { Mail, Phone, MapPin, Clock, Share2, ExternalLink, Star, MessageCircle } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Share2,
+  ExternalLink,
+  Star,
+  MessageCircle,
+} from "lucide-react";
 import { MARKETING_OFFICE_HOURS } from "@/lib/constants/marketing/offices";
 import { toMarketingTelHref } from "@/lib/constants/marketing/contact";
 
@@ -37,7 +46,9 @@ export function MarketingFooter() {
           <div className="space-y-4 lg:col-span-2">
             <div className="flex items-center gap-3">
               <AppLogo alt={contact.companyName} variant="footer" surface="dark" framed={false} />
-              <p className="text-base font-semibold leading-snug text-white">{contact.companyName}</p>
+              <p className="text-base font-semibold leading-snug text-white">
+                {contact.companyName}
+              </p>
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-white/70">
               Lakshya International Edwise is your trusted overseas education financial partner —
@@ -66,7 +77,9 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Company</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">
+              Company
+            </h3>
             <ul className="space-y-2.5 text-sm text-white/75">
               {MARKETING_FOOTER_LINKS.company.map((link) => (
                 <li key={link.href}>
@@ -79,7 +92,9 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Services</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">
+              Services
+            </h3>
             <ul className="space-y-2.5 text-sm text-white/75">
               {MARKETING_FOOTER_LINKS.services.slice(0, 6).map((link) => (
                 <li key={link.href}>
@@ -92,7 +107,9 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Countries</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">
+              Countries
+            </h3>
             <ul className="space-y-2.5 text-sm text-white/75">
               {MARKETING_FOOTER_LINKS.countries.slice(0, 6).map((link) => (
                 <li key={link.href}>
@@ -105,7 +122,9 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">Contact</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-sky-300">
+              Contact
+            </h3>
             <ul className="space-y-3 text-sm text-white/75">
               {contact.phone && telHref && (
                 <li className="flex items-start gap-2">
@@ -137,7 +156,9 @@ export function MarketingFooter() {
               )}
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
-                <span>{primaryOffice?.name ?? "India"} — {primaryOffice?.address ?? "India"}</span>
+                <span>
+                  {primaryOffice?.name ?? "India"} — {primaryOffice?.address ?? "India"}
+                </span>
               </li>
             </ul>
 

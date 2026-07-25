@@ -76,14 +76,14 @@ export function LenderLogo({
           alt={`${lender.name} education loan partner logo`}
           width={lender.logoWidth ?? 220}
           height={lender.logoHeight ?? 60}
-          quality={95}
+          quality={75}
           className={cn(
             "h-auto w-auto max-h-full max-w-full object-contain object-center",
             useTileFit && tileFitClass,
             className
           )}
           style={useTileFit ? undefined : { maxHeight: displayHeight, maxWidth }}
-          sizes={imageSizes ?? (useTileFit ? "120px" : `${Math.round(maxWidth * 2)}px`)}
+          sizes={imageSizes ?? (useTileFit ? "120px" : `${maxWidth}px`)}
         />
       </div>
     );
@@ -91,10 +91,7 @@ export function LenderLogo({
 
   return (
     <span
-      className={cn(
-        "text-lg font-extrabold tracking-tight whitespace-nowrap",
-        className
-      )}
+      className={cn("text-lg font-extrabold tracking-tight whitespace-nowrap", className)}
       style={{ color: lender.accent ?? "#0f172a", fontSize: displayHeight * 0.55 }}
     >
       {lender.name}

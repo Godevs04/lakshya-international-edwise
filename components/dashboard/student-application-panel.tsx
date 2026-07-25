@@ -79,9 +79,7 @@ function BankApplicationCard({
   const isClosedByWinner = Boolean(winningApplication && !isWinner);
   const canEdit = canWrite && !isClosedByWinner;
   const winnerName = winningApplication?.lenderName ?? "another bank";
-  const winnerStatusLabel = getApplicationStatusLabel(
-    winningApplication?.applicationStatus
-  );
+  const winnerStatusLabel = getApplicationStatusLabel(winningApplication?.applicationStatus);
 
   const statusItems = APPLICATION_STATUS_OPTIONS.map((option) => ({
     value: option.value,
@@ -243,7 +241,12 @@ function BankApplicationCard({
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline">LAN not assigned</Badge>
                   {canEdit ? (
-                    <Button type="button" size="sm" variant="outline" onClick={() => setEditingLan(true)}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditingLan(true)}
+                    >
                       Add LAN
                     </Button>
                   ) : null}
@@ -298,8 +301,7 @@ function BankApplicationCard({
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
           <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
           <span>
-            Closed automatically because <strong>{winnerName}</strong> reached{" "}
-            {winnerStatusLabel}.
+            Closed automatically because <strong>{winnerName}</strong> reached {winnerStatusLabel}.
           </span>
         </div>
       ) : null}
@@ -321,7 +323,12 @@ function BankApplicationCard({
             >
               {rejectLoading ? "Saving..." : "Confirm rejection"}
             </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowRejectForm(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowRejectForm(false)}
+            >
               Cancel
             </Button>
           </div>

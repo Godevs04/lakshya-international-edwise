@@ -11,9 +11,9 @@ export default function PendingApprovalPage() {
       </div>
       <h2 className="text-2xl font-bold tracking-tight">You&apos;re in the queue</h2>
       <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
-        Your email has been verified. Your account is now waiting for admin approval.
-        Once an administrator or super admin reviews and approves your request with the
-        correct role, you will be onboarded to the CRM.
+        Your email has been verified. Your account is now waiting for admin approval. Once an
+        administrator or super admin reviews and approves your request with the correct role, you
+        will be onboarded to the CRM.
       </p>
       <div className="mx-auto mt-6 max-w-md rounded-2xl border border-[#E8952E]/15 bg-[#E8952E]/5 p-4 text-left text-sm">
         <p className="font-semibold text-[#E8952E]">What happens next?</p>

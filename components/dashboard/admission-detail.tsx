@@ -161,7 +161,9 @@ export function AdmissionDetailView({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Captured by</p>
-                <p className="text-sm">{admission.createdByName?.trim() ? admission.createdByName : "Website"}</p>
+                <p className="text-sm">
+                  {admission.createdByName?.trim() ? admission.createdByName : "Website"}
+                </p>
               </div>
               {admission.course ? (
                 <div>
@@ -194,11 +196,15 @@ export function AdmissionDetailView({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-xs text-muted-foreground">Country</p>
-              <p className="text-sm">{admission.targetCountry?.trim() ? admission.targetCountry : "-"}</p>
+              <p className="text-sm">
+                {admission.targetCountry?.trim() ? admission.targetCountry : "-"}
+              </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Intake</p>
-              <p className="text-sm">{admission.targetIntake?.trim() ? admission.targetIntake : "-"}</p>
+              <p className="text-sm">
+                {admission.targetIntake?.trim() ? admission.targetIntake : "-"}
+              </p>
             </div>
             <div className="sm:col-span-2">
               <p className="text-xs text-muted-foreground">University</p>

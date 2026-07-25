@@ -139,11 +139,7 @@ export async function sendVerificationEmail(
   });
 }
 
-export async function sendOtpEmail(
-  email: string,
-  name: string,
-  otp: string
-): Promise<boolean> {
+export async function sendOtpEmail(email: string, name: string, otp: string): Promise<boolean> {
   const company = await getEmailBranding();
   const bodyHtml = `
     ${renderGreeting(name)}
@@ -417,7 +413,9 @@ export async function sendWebsiteEnquiryNotification(params: {
     params.course ? `<strong>Course:</strong> ${escapeHtml(params.course)}` : null,
     params.loanRequired ? "<strong>Loan required:</strong> Yes" : null,
     params.loanAmount ? `<strong>Loan amount:</strong> ${escapeHtml(params.loanAmount)}` : null,
-    params.currentStatus ? `<strong>Current status:</strong> ${escapeHtml(params.currentStatus)}` : null,
+    params.currentStatus
+      ? `<strong>Current status:</strong> ${escapeHtml(params.currentStatus)}`
+      : null,
     params.preferredLender
       ? `<strong>Preferred lender:</strong> ${escapeHtml(params.preferredLender)}`
       : null,

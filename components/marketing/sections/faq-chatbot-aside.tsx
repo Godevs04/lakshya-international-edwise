@@ -10,13 +10,15 @@ export function FaqChatbotAside() {
 
   return (
     <aside className="faq-section-aside" aria-label="Get help">
-      <MarketingLottie
-        preset="live-chatbot"
-        variant="panel"
-        panelClassName="faq-chatbot-lottie-panel"
-        stageClassName="faq-chatbot-lottie-stage"
-        playerClassName="faq-chatbot-lottie-player"
-      >
+      {/* Decorative animation stays aria-hidden; interactive copy sits outside it. */}
+      <div className="faq-chatbot-lottie-panel">
+        <MarketingLottie
+          preset="live-chatbot"
+          variant="inline"
+          stageClassName="faq-chatbot-lottie-stage"
+          playerClassName="faq-chatbot-lottie-player"
+          ariaHidden
+        />
         <div className="faq-chatbot-copy">
           <p className="faq-chatbot-eyebrow">Need a quick answer?</p>
           <p className="faq-chatbot-title">Our advisors are here to help</p>
@@ -31,7 +33,7 @@ export function FaqChatbotAside() {
             </Link>
           ) : null}
         </div>
-      </MarketingLottie>
+      </div>
     </aside>
   );
 }

@@ -48,18 +48,14 @@ export function AssigneeSelect({
   return (
     <Select
       value={selectValue}
-      onValueChange={(next) =>
-        onValueChange(next === UNASSIGNED_ASSIGNEE ? "" : (next ?? ""))
-      }
+      onValueChange={(next) => onValueChange(next === UNASSIGNED_ASSIGNEE ? "" : (next ?? ""))}
       items={items}
     >
       <SelectTrigger id={id} className={cn("w-full", triggerClassName)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        {allowUnassigned ? (
-          <SelectItem value={UNASSIGNED_ASSIGNEE}>Unassigned</SelectItem>
-        ) : null}
+        {allowUnassigned ? <SelectItem value={UNASSIGNED_ASSIGNEE}>Unassigned</SelectItem> : null}
         {users.map((user) => (
           <SelectItem key={user._id} value={user._id}>
             {user.name}

@@ -42,10 +42,7 @@ export async function getFollowUpsNeedingReminder(): Promise<DueFollowUp[]> {
     {
       $match: {
         "notes.dueDate": { $lte: cutoff, $ne: null },
-        $or: [
-          { "notes.reminderSentAt": { $exists: false } },
-          { "notes.reminderSentAt": null },
-        ],
+        $or: [{ "notes.reminderSentAt": { $exists: false } }, { "notes.reminderSentAt": null }],
       },
     },
     {
@@ -77,7 +74,9 @@ export async function getFollowUpsNeedingReminder(): Promise<DueFollowUp[]> {
   }));
 }
 
-async function resolveRecipients(assigneeId?: string): Promise<Array<{ _id: string; email: string; name: string }>> {
+async function resolveRecipients(
+  assigneeId?: string
+): Promise<Array<{ _id: string; email: string; name: string }>> {
   await connectDB();
 
   if (assigneeId) {

@@ -151,14 +151,16 @@ export async function getAuditLogStats(): Promise<AuditLogStats> {
   );
 }
 
-export async function getAuditLogs(params: {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  resourceType?: string;
-  actionGroup?: string;
-  period?: AuditPeriod;
-} = {}): Promise<PaginatedResult<AuditLogItem>> {
+export async function getAuditLogs(
+  params: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    resourceType?: string;
+    actionGroup?: string;
+    period?: AuditPeriod;
+  } = {}
+): Promise<PaginatedResult<AuditLogItem>> {
   return runLoggedQuery(
     "getAuditLogs",
     async () => {
@@ -188,12 +190,14 @@ export async function getAuditLogs(params: {
   );
 }
 
-export async function exportAuditLogsAction(params: {
-  search?: string;
-  resourceType?: string;
-  actionGroup?: string;
-  period?: AuditPeriod;
-} = {}): Promise<string> {
+export async function exportAuditLogsAction(
+  params: {
+    search?: string;
+    resourceType?: string;
+    actionGroup?: string;
+    period?: AuditPeriod;
+  } = {}
+): Promise<string> {
   const user = await getSessionUser();
   requirePermission(user, PERMISSIONS.AUDIT_READ);
   await connectDB();

@@ -39,12 +39,7 @@ export function HomepageJourneyPath() {
       className="pointer-events-none fixed inset-0 z-[1] opacity-40 sm:opacity-60 lg:opacity-100"
       aria-hidden
     >
-      <svg
-        className="h-full w-full"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        fill="none"
-      >
+      <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
         <path
           d="M 8 12 Q 25 25 35 35 T 55 50 T 75 65 T 92 88"
           stroke="rgba(11, 143, 216, 0.15)"

@@ -23,7 +23,12 @@ export function FaqAnswer({ answer, className }: FaqAnswerProps) {
     .filter(Boolean);
 
   return (
-    <div className={cn("faq-answer space-y-3 text-sm leading-relaxed text-muted-foreground", className)}>
+    <div
+      className={cn(
+        "faq-answer space-y-3 text-sm leading-relaxed text-muted-foreground",
+        className
+      )}
+    >
       {blocks.map((block, index) => {
         if (isBulletBlock(block)) {
           const items = block

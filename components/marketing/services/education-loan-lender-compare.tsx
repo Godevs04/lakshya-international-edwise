@@ -10,10 +10,7 @@ import {
   getLenderCollateralLabel,
 } from "@/lib/constants/marketing/lenders";
 import type { LenderCategory, MarketingLender } from "@/types/marketing";
-import {
-  LenderLogo,
-  LENDER_LOGO_PREVIEW_SIZE,
-} from "@/components/marketing/lenders/lender-logo";
+import { LenderLogo, LENDER_LOGO_PREVIEW_SIZE } from "@/components/marketing/lenders/lender-logo";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { cn } from "@/lib/utils";
 

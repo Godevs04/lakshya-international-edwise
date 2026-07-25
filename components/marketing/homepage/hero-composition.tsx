@@ -3,18 +3,13 @@
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useCallback } from "react";
-import {
-  BookOpen,
-  GraduationCap,
-  Stamp,
-  TrendingUp,
-} from "lucide-react";
+import { BookOpen, GraduationCap, Stamp, TrendingUp } from "lucide-react";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
 
 const ASSETS = {
-  landmarks: "/assets/hero/Multiple.png",
-  globe: "/assets/icons/global-network-digital-earth-visualization.png",
+  landmarks: "/assets/hero/Multiple.jpg",
+  globe: "/assets/icons/global-network-digital-earth-visualization.jpg",
   lenders: [
     "/assets/partners/sbi.png",
     "/assets/partners/credila.png",
@@ -67,20 +62,18 @@ export function HeroComposition() {
   }, [globe, landmarks, cards]);
 
   return (
-    <div
-      className="hero-composition"
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      aria-hidden
-    >
+    <div className="hero-composition" onMouseMove={onMove} onMouseLeave={onLeave} aria-hidden>
+      {/* Sole priority image — LCP element */}
       <motion.div className="hero-comp-globe" style={{ x: globe.x, y: globe.y }}>
         <Image
           src={ASSETS.globe}
           alt=""
-          width={420}
-          height={420}
+          width={340}
+          height={340}
           className="hero-comp-globe-img"
           priority
+          quality={70}
+          sizes="(max-width: 1024px) 70vw, 340px"
         />
       </motion.div>
 
@@ -119,11 +112,13 @@ export function HeroComposition() {
         <motion.div style={{ x: landmarks.x, y: landmarks.y }}>
           <Image
             src={ASSETS.landmarks}
-            alt="Global landmarks representing study abroad destinations"
-            width={680}
-            height={280}
-            priority
+            alt=""
+            width={520}
+            height={214}
             className="hero-comp-landmarks-img"
+            quality={70}
+            sizes="(max-width: 1024px) 90vw, 520px"
+            loading="lazy"
           />
         </motion.div>
       </div>
@@ -212,7 +207,16 @@ export function HeroComposition() {
             transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
             whileHover={prefersReducedMotion ? undefined : { y: -4, scale: 1.04 }}
           >
-            <Image src={logo} alt="" width={64} height={32} className="hero-comp-lender-img" />
+            <Image
+              src={logo}
+              alt=""
+              width={64}
+              height={32}
+              className="hero-comp-lender-img"
+              loading="lazy"
+              quality={70}
+              sizes="64px"
+            />
           </motion.div>
         ))}
       </div>

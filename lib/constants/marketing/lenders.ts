@@ -206,8 +206,8 @@ export const HERO_SHOWCASE_LENDER_SLUGS = [
 ] as const;
 
 export function getHeroShowcaseLenders(): MarketingLender[] {
-  return HERO_SHOWCASE_LENDER_SLUGS.map(
-    (slug) => MARKETING_LENDERS.find((lender) => lender.slug === slug)!
+  return HERO_SHOWCASE_LENDER_SLUGS.map((slug) =>
+    MARKETING_LENDERS.find((lender) => lender.slug === slug)!
   ).filter(Boolean);
 }
 
@@ -229,18 +229,11 @@ export function getLendersByCategory(category: LenderCategory): MarketingLender[
   return MARKETING_LENDERS.filter((lender) => lender.category === category);
 }
 
-const NON_MANDATORY_COLLATERAL_SLUGS = new Set([
-  "credila",
-  "avanse",
-  "auxilo",
-]);
+const NON_MANDATORY_COLLATERAL_SLUGS = new Set(["credila", "avanse", "auxilo"]);
 
 export function getLenderCollateralLabel(lender: MarketingLender): string {
   if (lender.collateralLabel) return lender.collateralLabel;
-  if (
-    lender.category === "private" ||
-    NON_MANDATORY_COLLATERAL_SLUGS.has(lender.slug)
-  ) {
+  if (lender.category === "private" || NON_MANDATORY_COLLATERAL_SLUGS.has(lender.slug)) {
     return "Not mandatory";
   }
   return lender.unsecured ? "No collateral" : "May be required";

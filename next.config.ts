@@ -1,11 +1,7 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
-import {
-  getSentryOrg,
-  getSentryProject,
-  isSentryBuildConfigured,
-} from "@/lib/config/sentry-env";
+import { getSentryOrg, getSentryProject, isSentryBuildConfigured } from "@/lib/config/sentry-env";
 import {
   getPostHogAppHost,
   getPostHogEnvId,
@@ -46,10 +42,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    qualities: [100, 75],
-    remotePatterns: [
-      { protocol: "https", hostname: "res.cloudinary.com" },
-    ],
+    formats: ["image/avif", "image/webp"],
+    qualities: [100, 85, 75, 70],
+    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
   },
   async headers() {
     return [
@@ -83,11 +78,31 @@ const nextConfig: NextConfig = {
       { source: "/blog/:slug*", destination: "/", permanent: true },
       { source: "/success-stories", destination: "/#testimonials", permanent: true },
       { source: "/gallery", destination: "/", permanent: true },
-      { source: "/services/study-abroad", destination: "/services/education-loan", permanent: true },
-      { source: "/services/visa-assistance", destination: "/services/education-loan", permanent: true },
-      { source: "/services/scholarships", destination: "/services/education-loan", permanent: true },
-      { source: "/services/documentation", destination: "/services/education-loan", permanent: true },
-      { source: "/services/travel-insurance", destination: "/services/education-loan", permanent: true },
+      {
+        source: "/services/study-abroad",
+        destination: "/services/education-loan",
+        permanent: true,
+      },
+      {
+        source: "/services/visa-assistance",
+        destination: "/services/education-loan",
+        permanent: true,
+      },
+      {
+        source: "/services/scholarships",
+        destination: "/services/education-loan",
+        permanent: true,
+      },
+      {
+        source: "/services/documentation",
+        destination: "/services/education-loan",
+        permanent: true,
+      },
+      {
+        source: "/services/travel-insurance",
+        destination: "/services/education-loan",
+        permanent: true,
+      },
       { source: "/services/forex", destination: "/services/forex-transfers", permanent: true },
     ];
   },

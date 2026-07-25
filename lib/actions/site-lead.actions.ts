@@ -72,52 +72,63 @@ function buildCsv(rows: unknown[][]) {
 }
 
 export async function getSiteLeadCounts(): Promise<SiteLeadCounts> {
-  return runLoggedQuery("getSiteLeadCounts", async () => {
-    const user = await getSessionUser();
-    const canStudents = hasPermission(user, PERMISSIONS.ADMISSIONS_READ);
-    const canPartners = hasPermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getSiteLeadCounts",
+    async () => {
+      const user = await getSessionUser();
+      const canStudents = hasPermission(user, PERMISSIONS.ADMISSIONS_READ);
+      const canPartners = hasPermission(user, PERMISSIONS.PARTNERS_READ);
 
-    if (!canStudents && !canPartners) {
-      return { students: 0, partners: 0, total: 0 };
-    }
+      if (!canStudents && !canPartners) {
+        return { students: 0, partners: 0, total: 0 };
+      }
 
-    await connectDB();
-    await repairLegacyWebsitePartnerLeads();
+      await connectDB();
+      await repairLegacyWebsitePartnerLeads();
 
-    const [students, partners] = await Promise.all([
-      canStudents
-        ? Student.countDocuments(
-            mergeMongoFilter(
-              websitePendingStudentLeadsFilter(),
-              buildAdmissionVisibilityFilter(user)
+      const [students, partners] = await Promise.all([
+        canStudents
+          ? Student.countDocuments(
+              mergeMongoFilter(
+                websitePendingStudentLeadsFilter(),
+                buildAdmissionVisibilityFilter(user)
+              )
             )
-          )
-        : Promise.resolve(0),
-      canPartners
-        ? Partner.countDocuments(websitePendingPartnerLeadsFilter())
-        : Promise.resolve(0),
-    ]);
+          : Promise.resolve(0),
+        canPartners
+          ? Partner.countDocuments(websitePendingPartnerLeadsFilter())
+          : Promise.resolve(0),
+      ]);
 
-    return { students, partners, total: students + partners };
-  }, { students: 0, partners: 0, total: 0 });
+      return { students, partners, total: students + partners };
+    },
+    { students: 0, partners: 0, total: 0 }
+  );
 }
 
 export async function getSiteLeadAssignableUsers() {
-  return runLoggedQuery("getSiteLeadAssignableUsers", async () => {
-    const user = await getSessionUser();
-    const canAssignStudents = hasPermission(user, PERMISSIONS.ADMISSIONS_WRITE);
-    const canAssignPartners = hasPermission(user, PERMISSIONS.PARTNERS_WRITE);
-    if (!canAssignStudents && !canAssignPartners) return [];
+  return runLoggedQuery(
+    "getSiteLeadAssignableUsers",
+    async () => {
+      const user = await getSessionUser();
+      const canAssignStudents = hasPermission(user, PERMISSIONS.ADMISSIONS_WRITE);
+      const canAssignPartners = hasPermission(user, PERMISSIONS.PARTNERS_WRITE);
+      if (!canAssignStudents && !canAssignPartners) return [];
 
-    await connectDB();
-    const users = await User.find({ status: "active" }).select("name email role").sort({ name: 1 }).lean();
-    return users.map((entry) => ({
-      _id: entry._id.toString(),
-      name: entry.name,
-      email: entry.email,
-      role: entry.role,
-    }));
-  }, []);
+      await connectDB();
+      const users = await User.find({ status: "active" })
+        .select("name email role")
+        .sort({ name: 1 })
+        .lean();
+      return users.map((entry) => ({
+        _id: entry._id.toString(),
+        name: entry.name,
+        email: entry.email,
+        role: entry.role,
+      }));
+    },
+    []
+  );
 }
 
 export async function getSiteStudentLeads(params: {
@@ -125,68 +136,72 @@ export async function getSiteStudentLeads(params: {
   pageSize?: number;
   search?: string;
 }): Promise<PaginatedResult<SiteStudentLeadListItem>> {
-  return runLoggedQuery("getSiteStudentLeads", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+  return runLoggedQuery(
+    "getSiteStudentLeads",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
 
-    await connectDB();
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
-    const skip = (page - 1) * pageSize;
+      await connectDB();
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-    const baseFilter = websitePendingStudentLeadsFilter();
-    let mongoFilter = mergeMongoFilter(baseFilter, buildAdmissionVisibilityFilter(user));
+      const baseFilter = websitePendingStudentLeadsFilter();
+      let mongoFilter = mergeMongoFilter(baseFilter, buildAdmissionVisibilityFilter(user));
 
-    if (params.search) {
-      const regex = toSafeRegExp(params.search);
-      mongoFilter = mergeMongoFilter(mongoFilter, {
-        $or: [
-          { firstName: regex },
-          { lastName: regex },
-          { phone: regex },
-          { email: regex },
-          { studentId: regex },
-          { "metadata.contactSubject": regex },
-          { "metadata.preferredLender": regex },
-          { "metadata.loanAmountText": regex },
-        ],
-      });
-    }
+      if (params.search) {
+        const regex = toSafeRegExp(params.search);
+        mongoFilter = mergeMongoFilter(mongoFilter, {
+          $or: [
+            { firstName: regex },
+            { lastName: regex },
+            { phone: regex },
+            { email: regex },
+            { studentId: regex },
+            { "metadata.contactSubject": regex },
+            { "metadata.preferredLender": regex },
+            { "metadata.loanAmountText": regex },
+          ],
+        });
+      }
 
-    const [data, total] = await Promise.all([
-      Student.find(mongoFilter)
-        .select(
-          "studentId firstName lastName phone email targetCountry metadata.enquiryType metadata.formPage metadata.loanAmountText metadata.preferredLender metadata.promotionStatus createdAt notes"
-        )
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize)
-        .lean(),
-      Student.countDocuments(mongoFilter),
-    ]);
+      const [data, total] = await Promise.all([
+        Student.find(mongoFilter)
+          .select(
+            "studentId firstName lastName phone email targetCountry metadata.enquiryType metadata.formPage metadata.loanAmountText metadata.preferredLender metadata.promotionStatus createdAt notes"
+          )
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Student.countDocuments(mongoFilter),
+      ]);
 
-    return {
-      data: data.map((entry) => ({
-        _id: entry._id.toString(),
-        studentId: entry.studentId,
-        firstName: entry.firstName,
-        lastName: entry.lastName,
-        phone: entry.phone,
-        email: entry.email,
-        targetCountry: entry.targetCountry,
-        enquiryType: entry.metadata?.enquiryType,
-        formPage: entry.metadata?.formPage,
-        loanAmountText: entry.metadata?.loanAmountText,
-        preferredLender: entry.metadata?.preferredLender,
-        promotionStatus: entry.metadata?.promotionStatus,
-        createdAt: entry.createdAt,
-      })),
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize) || 1,
-    };
-  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
+      return {
+        data: data.map((entry) => ({
+          _id: entry._id.toString(),
+          studentId: entry.studentId,
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          phone: entry.phone,
+          email: entry.email,
+          targetCountry: entry.targetCountry,
+          enquiryType: entry.metadata?.enquiryType,
+          formPage: entry.metadata?.formPage,
+          loanAmountText: entry.metadata?.loanAmountText,
+          preferredLender: entry.metadata?.preferredLender,
+          promotionStatus: entry.metadata?.promotionStatus,
+          createdAt: entry.createdAt,
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize) || 1,
+      };
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 10)
+  );
 }
 
 export async function getSitePartnerLeads(params: {
@@ -194,148 +209,158 @@ export async function getSitePartnerLeads(params: {
   pageSize?: number;
   search?: string;
 }): Promise<PaginatedResult<SitePartnerLeadListItem>> {
-  return runLoggedQuery("getSitePartnerLeads", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getSitePartnerLeads",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-    await connectDB();
-    await repairLegacyWebsitePartnerLeads();
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
-    const skip = (page - 1) * pageSize;
+      await connectDB();
+      await repairLegacyWebsitePartnerLeads();
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-    const baseFilter = websitePendingPartnerLeadsFilter();
-    let mongoFilter: Record<string, unknown> = { ...baseFilter };
+      const baseFilter = websitePendingPartnerLeadsFilter();
+      let mongoFilter: Record<string, unknown> = { ...baseFilter };
 
-    if (params.search) {
-      const regex = toSafeRegExp(params.search);
-      mongoFilter = mergeMongoFilter(baseFilter, {
-        $or: [
-          { companyName: regex },
-          { owner: regex },
-          { phone: regex },
-          { email: regex },
-          { partnerCode: regex },
-        ],
-      });
-    }
+      if (params.search) {
+        const regex = toSafeRegExp(params.search);
+        mongoFilter = mergeMongoFilter(baseFilter, {
+          $or: [
+            { companyName: regex },
+            { owner: regex },
+            { phone: regex },
+            { email: regex },
+            { partnerCode: regex },
+          ],
+        });
+      }
 
-    const [data, total] = await Promise.all([
-      Partner.find(mongoFilter)
-        .select(
-          "partnerCode companyName owner phone email location.city metadata.isOwner metadata.formCity metadata.whatsapp metadata.possibleDuplicate metadata.promotionStatus createdAt"
-        )
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize)
-        .lean(),
-      Partner.countDocuments(mongoFilter),
-    ]);
+      const [data, total] = await Promise.all([
+        Partner.find(mongoFilter)
+          .select(
+            "partnerCode companyName owner phone email location.city metadata.isOwner metadata.formCity metadata.whatsapp metadata.possibleDuplicate metadata.promotionStatus createdAt"
+          )
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Partner.countDocuments(mongoFilter),
+      ]);
 
-    return {
-      data: data.map((entry) => ({
-        _id: entry._id.toString(),
-        partnerCode: entry.partnerCode,
-        companyName: entry.companyName,
-        owner: entry.owner,
-        phone: entry.phone,
-        email: entry.email,
-        city: entry.metadata?.formCity ?? entry.location?.city,
-        isOwner: entry.metadata?.isOwner,
-        whatsapp: entry.metadata?.whatsapp,
-        possibleDuplicate: entry.metadata?.possibleDuplicate,
-        promotionStatus: entry.metadata?.promotionStatus,
-        createdAt: entry.createdAt,
-      })),
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize) || 1,
-    };
-  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
+      return {
+        data: data.map((entry) => ({
+          _id: entry._id.toString(),
+          partnerCode: entry.partnerCode,
+          companyName: entry.companyName,
+          owner: entry.owner,
+          phone: entry.phone,
+          email: entry.email,
+          city: entry.metadata?.formCity ?? entry.location?.city,
+          isOwner: entry.metadata?.isOwner,
+          whatsapp: entry.metadata?.whatsapp,
+          possibleDuplicate: entry.metadata?.possibleDuplicate,
+          promotionStatus: entry.metadata?.promotionStatus,
+          createdAt: entry.createdAt,
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize) || 1,
+      };
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 10)
+  );
 }
 
 export async function getSiteStudentLeadById(id: string) {
-  return runLoggedQuery("getSiteStudentLeadById", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
-    await connectDB();
+  return runLoggedQuery(
+    "getSiteStudentLeadById",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+      await connectDB();
 
-    const student = await Student.findOne(
-      mergeMongoFilter({ _id: id }, websitePendingStudentLeadsFilter())
-    )
-      .populate("assignedTo", "name")
-      .lean();
+      const student = await Student.findOne(
+        mergeMongoFilter({ _id: id }, websitePendingStudentLeadsFilter())
+      )
+        .populate("assignedTo", "name")
+        .lean();
 
-    if (!student) return null;
+      if (!student) return null;
 
-    const assignedTo = student.assignedTo as
-      | { _id?: { toString(): string }; name?: string }
-      | { toString(): string }
-      | undefined;
+      const assignedTo = student.assignedTo as
+        { _id?: { toString(): string }; name?: string } | { toString(): string } | undefined;
 
-    return {
-      _id: student._id.toString(),
-      studentId: student.studentId,
-      firstName: student.firstName,
-      lastName: student.lastName,
-      phone: student.phone,
-      email: student.email,
-      targetCountry: student.targetCountry,
-      enquiryType: student.metadata?.enquiryType,
-      formPage: student.metadata?.formPage,
-      loanAmountText: student.metadata?.loanAmountText,
-      currentStatus: student.metadata?.currentStatus,
-      preferredLender: student.metadata?.preferredLender,
-      contactSubject: student.metadata?.contactSubject,
-      assignedTo:
-        assignedTo && "_id" in assignedTo ? assignedTo._id?.toString() : assignedTo?.toString(),
-      assignedToName: assignedTo && "name" in assignedTo ? String(assignedTo.name) : undefined,
-      notes: (student.notes ?? []).map((note) => ({
-        content: note.content,
-        createdByName: note.createdByName,
-        createdAt: note.createdAt ? new Date(note.createdAt).toISOString() : undefined,
-      })),
-      activities: (await getActivitiesForResource("student", student._id.toString(), 12)).map(
-        serializeActivity
-      ),
-      createdAt: new Date(student.createdAt).toISOString(),
-    };
-  }, null);
+      return {
+        _id: student._id.toString(),
+        studentId: student.studentId,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        phone: student.phone,
+        email: student.email,
+        targetCountry: student.targetCountry,
+        enquiryType: student.metadata?.enquiryType,
+        formPage: student.metadata?.formPage,
+        loanAmountText: student.metadata?.loanAmountText,
+        currentStatus: student.metadata?.currentStatus,
+        preferredLender: student.metadata?.preferredLender,
+        contactSubject: student.metadata?.contactSubject,
+        assignedTo:
+          assignedTo && "_id" in assignedTo ? assignedTo._id?.toString() : assignedTo?.toString(),
+        assignedToName: assignedTo && "name" in assignedTo ? String(assignedTo.name) : undefined,
+        notes: (student.notes ?? []).map((note) => ({
+          content: note.content,
+          createdByName: note.createdByName,
+          createdAt: note.createdAt ? new Date(note.createdAt).toISOString() : undefined,
+        })),
+        activities: (await getActivitiesForResource("student", student._id.toString(), 12)).map(
+          serializeActivity
+        ),
+        createdAt: new Date(student.createdAt).toISOString(),
+      };
+    },
+    null
+  );
 }
 
 export async function getSitePartnerLeadById(id: string) {
-  return runLoggedQuery("getSitePartnerLeadById", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.PARTNERS_READ);
-    await connectDB();
-    await repairLegacyWebsitePartnerLeads();
+  return runLoggedQuery(
+    "getSitePartnerLeadById",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
+      await connectDB();
+      await repairLegacyWebsitePartnerLeads();
 
-    const partner = await Partner.findOne(
-      mergeMongoFilter({ _id: id }, websitePendingPartnerLeadsFilter())
-    ).lean();
+      const partner = await Partner.findOne(
+        mergeMongoFilter({ _id: id }, websitePendingPartnerLeadsFilter())
+      ).lean();
 
-    if (!partner) return null;
+      if (!partner) return null;
 
-    return {
-      _id: partner._id.toString(),
-      partnerCode: partner.partnerCode,
-      companyName: partner.companyName,
-      owner: partner.owner,
-      phone: partner.phone,
-      email: partner.email,
-      city: partner.metadata?.formCity ?? partner.location?.city,
-      isOwner: partner.metadata?.isOwner,
-      whatsapp: partner.metadata?.whatsapp,
-      possibleDuplicate: partner.metadata?.possibleDuplicate,
-      assignedTo: partner.metadata?.assignedTo?.toString(),
-      assignedToName: partner.metadata?.assignedToName,
-      activities: (await getActivitiesForResource("partner", partner._id.toString(), 12)).map(
-        serializeActivity
-      ),
-      createdAt: new Date(partner.createdAt).toISOString(),
-    };
-  }, null);
+      return {
+        _id: partner._id.toString(),
+        partnerCode: partner.partnerCode,
+        companyName: partner.companyName,
+        owner: partner.owner,
+        phone: partner.phone,
+        email: partner.email,
+        city: partner.metadata?.formCity ?? partner.location?.city,
+        isOwner: partner.metadata?.isOwner,
+        whatsapp: partner.metadata?.whatsapp,
+        possibleDuplicate: partner.metadata?.possibleDuplicate,
+        assignedTo: partner.metadata?.assignedTo?.toString(),
+        assignedToName: partner.metadata?.assignedToName,
+        activities: (await getActivitiesForResource("partner", partner._id.toString(), 12)).map(
+          serializeActivity
+        ),
+        createdAt: new Date(partner.createdAt).toISOString(),
+      };
+    },
+    null
+  );
 }
 
 export async function assignSiteStudentLeadAction(
@@ -418,32 +443,36 @@ export async function assignSitePartnerLeadAction(
 }
 
 export async function getSiteStudentLeadApplication(studentLeadId: string) {
-  return runLoggedQuery("getSiteStudentLeadApplication", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
-    await connectDB();
+  return runLoggedQuery(
+    "getSiteStudentLeadApplication",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+      await connectDB();
 
-    const student = await Student.findOne(
-      mergeMongoFilter({ _id: studentLeadId }, websitePendingStudentLeadsFilter())
-    )
-      .select("_id")
-      .lean();
+      const student = await Student.findOne(
+        mergeMongoFilter({ _id: studentLeadId }, websitePendingStudentLeadsFilter())
+      )
+        .select("_id")
+        .lean();
 
-    if (!student) return null;
+      if (!student) return null;
 
-    const application = await Application.findOne({ studentId: student._id })
-      .select("loanAmount status pipelineStage createdAt")
-      .lean();
+      const application = await Application.findOne({ studentId: student._id })
+        .select("loanAmount status pipelineStage createdAt")
+        .lean();
 
-    if (!application) return null;
+      if (!application) return null;
 
-    return {
-      loanAmount: application.loanAmount,
-      status: application.status,
-      pipelineStage: application.pipelineStage,
-      createdAt: new Date(application.createdAt).toISOString(),
-    };
-  }, null);
+      return {
+        loanAmount: application.loanAmount,
+        status: application.status,
+        pipelineStage: application.pipelineStage,
+        createdAt: new Date(application.createdAt).toISOString(),
+      };
+    },
+    null
+  );
 }
 
 export async function deleteSiteStudentLeadAction(id: string): Promise<ActionResult> {
@@ -705,7 +734,9 @@ export async function bulkDeleteSitePartnerLeadsAction(
   });
 }
 
-export async function exportSiteStudentLeadsCsvAction(search?: string): Promise<ActionResult<string>> {
+export async function exportSiteStudentLeadsCsvAction(
+  search?: string
+): Promise<ActionResult<string>> {
   return runLoggedMutation("exportSiteStudentLeadsCsvAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
@@ -753,7 +784,9 @@ export async function exportSiteStudentLeadsCsvAction(search?: string): Promise<
   });
 }
 
-export async function exportSitePartnerLeadsCsvAction(search?: string): Promise<ActionResult<string>> {
+export async function exportSitePartnerLeadsCsvAction(
+  search?: string
+): Promise<ActionResult<string>> {
   return runLoggedMutation("exportSitePartnerLeadsCsvAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.PARTNERS_READ);

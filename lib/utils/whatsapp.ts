@@ -1,7 +1,4 @@
-import {
-  getStudentWhatsAppNumber,
-  normalizeIndianMobileDigits,
-} from "@/lib/utils/student-contact";
+import { getStudentWhatsAppNumber, normalizeIndianMobileDigits } from "@/lib/utils/student-contact";
 
 export { getStudentWhatsAppNumber };
 

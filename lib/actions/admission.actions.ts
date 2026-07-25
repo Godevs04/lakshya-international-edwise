@@ -22,9 +22,7 @@ import {
   findStudentWithPhone,
   formatDuplicateStudentPhoneError,
 } from "@/lib/services/student-phone.service";
-import {
-  buildAdmissionVisibilityFilter,
-} from "@/lib/services/student-visibility.service";
+import { buildAdmissionVisibilityFilter } from "@/lib/services/student-visibility.service";
 import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
 import type { ActionResult, AdmissionListItem, PaginatedResult } from "@/types";
 
@@ -52,78 +50,77 @@ export async function getAdmissions(params: {
   targetCountry?: string;
   targetIntake?: string;
 }): Promise<PaginatedResult<AdmissionListItem>> {
-  return runLoggedQuery("getAdmissions", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+  return runLoggedQuery(
+    "getAdmissions",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
 
-    await connectDB();
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
-    const skip = (page - 1) * pageSize;
+      await connectDB();
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-    const filter: Record<string, unknown> = {
-      ...manualAdmissionLeadsFilter(),
-    };
+      const filter: Record<string, unknown> = {
+        ...manualAdmissionLeadsFilter(),
+      };
 
-    if (params.search) {
-      const regex = toSafeRegExp(params.search);
-      filter.$or = [
-        { firstName: regex },
-        { lastName: regex },
-        { phone: regex },
-        { studentId: regex },
-        { targetUniversity: regex },
-      ];
-    }
-    if (params.targetCountry) filter.targetCountry = params.targetCountry;
-    if (params.targetIntake) filter.targetIntake = params.targetIntake;
+      if (params.search) {
+        const regex = toSafeRegExp(params.search);
+        filter.$or = [
+          { firstName: regex },
+          { lastName: regex },
+          { phone: regex },
+          { studentId: regex },
+          { targetUniversity: regex },
+        ];
+      }
+      if (params.targetCountry) filter.targetCountry = params.targetCountry;
+      if (params.targetIntake) filter.targetIntake = params.targetIntake;
 
-    const visibilityFilter = buildAdmissionVisibilityFilter(user);
-    const mongoFilter = mergeMongoFilter(
-      filter,
-      visibilityFilter
-    );
+      const visibilityFilter = buildAdmissionVisibilityFilter(user);
+      const mongoFilter = mergeMongoFilter(filter, visibilityFilter);
 
-    const [data, total] = await Promise.all([
-      Student.find(mongoFilter)
-        .select(
-          "studentId firstName lastName phone targetCountry targetIntake targetUniversity admissionRevenue recordType createdAt metadata.leadSource metadata.formPage metadata.enquiryType"
-        )
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize)
-        .lean(),
-      Student.countDocuments(mongoFilter),
-    ]);
+      const [data, total] = await Promise.all([
+        Student.find(mongoFilter)
+          .select(
+            "studentId firstName lastName phone targetCountry targetIntake targetUniversity admissionRevenue recordType createdAt metadata.leadSource metadata.formPage metadata.enquiryType"
+          )
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Student.countDocuments(mongoFilter),
+      ]);
 
-    return {
-      data: data.map((entry) => ({
-        _id: entry._id.toString(),
-        studentId: entry.studentId,
-        firstName: entry.firstName,
-        lastName: entry.lastName,
-        phone: entry.phone,
-        targetCountry: entry.targetCountry,
-        targetIntake: entry.targetIntake,
-        targetUniversity: entry.targetUniversity,
-        admissionRevenue: entry.admissionRevenue,
-        recordType: entry.recordType,
-        leadSource: entry.metadata?.leadSource,
-        enquiryType: entry.metadata?.enquiryType,
-        formPage: entry.metadata?.formPage,
-        createdAt: entry.createdAt,
-      })),
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
-  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
+      return {
+        data: data.map((entry) => ({
+          _id: entry._id.toString(),
+          studentId: entry.studentId,
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          phone: entry.phone,
+          targetCountry: entry.targetCountry,
+          targetIntake: entry.targetIntake,
+          targetUniversity: entry.targetUniversity,
+          admissionRevenue: entry.admissionRevenue,
+          recordType: entry.recordType,
+          leadSource: entry.metadata?.leadSource,
+          enquiryType: entry.metadata?.enquiryType,
+          formPage: entry.metadata?.formPage,
+          createdAt: entry.createdAt,
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 10)
+  );
 }
 
-export async function updateAdmissionRevenueAction(
-  formData: FormData
-): Promise<ActionResult> {
+export async function updateAdmissionRevenueAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("updateAdmissionRevenueAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
@@ -177,92 +174,99 @@ export async function updateAdmissionRevenueAction(
 }
 
 export async function getAdmissionById(id: string) {
-  return runLoggedQuery("getAdmissionById", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
+  return runLoggedQuery(
+    "getAdmissionById",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.ADMISSIONS_READ);
 
-    await connectDB();
-    const mongoFilter = mergeMongoFilter(
-      { _id: id, ...manualAdmissionLeadsFilter() },
-      buildAdmissionVisibilityFilter(user)
-    );
-    const admission = await Student.findOne(mongoFilter)
-      .populate("assignedTo", "name")
-      .lean();
-    if (!admission) return null;
+      await connectDB();
+      const mongoFilter = mergeMongoFilter(
+        { _id: id, ...manualAdmissionLeadsFilter() },
+        buildAdmissionVisibilityFilter(user)
+      );
+      const admission = await Student.findOne(mongoFilter).populate("assignedTo", "name").lean();
+      if (!admission) return null;
 
-    return {
-      _id: admission._id.toString(),
-      studentId: admission.studentId,
-      firstName: admission.firstName,
-      lastName: normalizeLastName(admission.lastName),
-      phone: admission.phone,
-      email: admission.email,
-      targetCountry: admission.targetCountry,
-      targetIntake: admission.targetIntake,
-      targetUniversity: admission.targetUniversity,
-      course: admission.education?.course,
-      admissionRevenue: admission.admissionRevenue,
-      leadSource: admission.metadata?.leadSource,
-      enquiryType: admission.metadata?.enquiryType,
-      formPage: admission.metadata?.formPage,
-      createdByName: admission.metadata?.createdByName,
-      initialNote: admission.notes?.[0]?.content,
-      loanRequired: Boolean(admission.loan?.requested && admission.loan.requested > 0),
-      assignedTo:
-        admission.assignedTo && typeof admission.assignedTo === "object" && "name" in admission.assignedTo
-          ? { _id: String(admission.assignedTo._id), name: String(admission.assignedTo.name) }
-          : null,
-      createdAt: admission.createdAt,
-    };
-  }, null);
+      return {
+        _id: admission._id.toString(),
+        studentId: admission.studentId,
+        firstName: admission.firstName,
+        lastName: normalizeLastName(admission.lastName),
+        phone: admission.phone,
+        email: admission.email,
+        targetCountry: admission.targetCountry,
+        targetIntake: admission.targetIntake,
+        targetUniversity: admission.targetUniversity,
+        course: admission.education?.course,
+        admissionRevenue: admission.admissionRevenue,
+        leadSource: admission.metadata?.leadSource,
+        enquiryType: admission.metadata?.enquiryType,
+        formPage: admission.metadata?.formPage,
+        createdByName: admission.metadata?.createdByName,
+        initialNote: admission.notes?.[0]?.content,
+        loanRequired: Boolean(admission.loan?.requested && admission.loan.requested > 0),
+        assignedTo:
+          admission.assignedTo &&
+          typeof admission.assignedTo === "object" &&
+          "name" in admission.assignedTo
+            ? { _id: String(admission.assignedTo._id), name: String(admission.assignedTo.name) }
+            : null,
+        createdAt: admission.createdAt,
+      };
+    },
+    null
+  );
 }
 
 export async function getAdmissionForEdit(id: string) {
-  return runLoggedQuery("getAdmissionForEdit", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
+  return runLoggedQuery(
+    "getAdmissionForEdit",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
 
-    await connectDB();
-    const mongoFilter = mergeMongoFilter(
-      { _id: id, ...manualAdmissionLeadsFilter() },
-      buildAdmissionVisibilityFilter(user)
-    );
-    const admission = await Student.findOne(mongoFilter)
-      .populate("assignedTo", "name")
-      .lean();
-    if (!admission) return null;
+      await connectDB();
+      const mongoFilter = mergeMongoFilter(
+        { _id: id, ...manualAdmissionLeadsFilter() },
+        buildAdmissionVisibilityFilter(user)
+      );
+      const admission = await Student.findOne(mongoFilter).populate("assignedTo", "name").lean();
+      if (!admission) return null;
 
-    const assignedToId =
-      admission.assignedTo && typeof admission.assignedTo === "object" && "_id" in admission.assignedTo
-        ? String(admission.assignedTo._id)
-        : admission.assignedTo
-          ? String(admission.assignedTo)
-          : "";
+      const assignedToId =
+        admission.assignedTo &&
+        typeof admission.assignedTo === "object" &&
+        "_id" in admission.assignedTo
+          ? String(admission.assignedTo._id)
+          : admission.assignedTo
+            ? String(admission.assignedTo)
+            : "";
 
-    return {
-      _id: admission._id.toString(),
-      studentId: admission.studentId,
-      firstName: admission.firstName,
-      lastName: normalizeLastName(admission.lastName),
-      phone: admission.phone,
-      targetCountry: admission.targetCountry ?? "",
-      targetIntake: admission.targetIntake ?? "",
-      targetUniversity: admission.targetUniversity ?? "",
-      admissionRevenue: admission.admissionRevenue,
-      assignedToId,
-      assignedToName:
-        admission.assignedTo && typeof admission.assignedTo === "object" && "name" in admission.assignedTo
-          ? String(admission.assignedTo.name)
-          : undefined,
-    };
-  }, null);
+      return {
+        _id: admission._id.toString(),
+        studentId: admission.studentId,
+        firstName: admission.firstName,
+        lastName: normalizeLastName(admission.lastName),
+        phone: admission.phone,
+        targetCountry: admission.targetCountry ?? "",
+        targetIntake: admission.targetIntake ?? "",
+        targetUniversity: admission.targetUniversity ?? "",
+        admissionRevenue: admission.admissionRevenue,
+        assignedToId,
+        assignedToName:
+          admission.assignedTo &&
+          typeof admission.assignedTo === "object" &&
+          "name" in admission.assignedTo
+            ? String(admission.assignedTo.name)
+            : undefined,
+      };
+    },
+    null
+  );
 }
 
-export async function updateAdmissionAction(
-  id: string,
-  formData: FormData
-): Promise<ActionResult> {
+export async function updateAdmissionAction(id: string, formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("updateAdmissionAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
@@ -302,9 +306,7 @@ export async function updateAdmissionAction(
       $set: {
         firstName: sanitizeText(parsed.data.firstName),
         lastName: normalizeLastName(sanitizeText(parsed.data.lastName ?? "")),
-        phone: parsed.data.phone?.trim()
-          ? normalizeIndianPhone(parsed.data.phone)
-          : undefined,
+        phone: parsed.data.phone?.trim() ? normalizeIndianPhone(parsed.data.phone) : undefined,
         targetCountry: parsed.data.targetCountry?.trim() || undefined,
         targetIntake: parsed.data.targetIntake?.trim() || undefined,
         targetUniversity: parsed.data.targetUniversity?.trim() || undefined,

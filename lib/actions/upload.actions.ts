@@ -2,10 +2,7 @@
 
 import { getSessionUser } from "@/lib/auth/auth";
 import { requirePermission } from "@/lib/auth/permissions";
-import {
-  isUploadFolder,
-  UPLOAD_FOLDER_PERMISSIONS,
-} from "@/lib/constants/upload-folders";
+import { isUploadFolder, UPLOAD_FOLDER_PERMISSIONS } from "@/lib/constants/upload-folders";
 import { getSignedUploadParams, type SignedUploadParams } from "@/lib/services/upload.service";
 import { runLoggedMutation } from "@/lib/action-utils";
 import type { ActionResult } from "@/types";

@@ -41,9 +41,7 @@ export async function ensureLenderSeeds() {
   }
 }
 
-export async function resolveLenderNameBySlug(
-  slug?: string
-): Promise<string | undefined> {
+export async function resolveLenderNameBySlug(slug?: string): Promise<string | undefined> {
   if (!slug?.trim()) return undefined;
 
   const normalized = normalizeLenderSlug(slug);
@@ -60,9 +58,7 @@ export async function resolveLenderNameBySlug(
   return seed?.name;
 }
 
-export async function resolveLenderIdBySlug(
-  slug?: string
-): Promise<Types.ObjectId | undefined> {
+export async function resolveLenderIdBySlug(slug?: string): Promise<Types.ObjectId | undefined> {
   if (!slug?.trim()) return undefined;
 
   const normalized = normalizeLenderSlug(slug);

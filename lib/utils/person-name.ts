@@ -17,10 +17,7 @@ export function isPlaceholderLastName(lastName?: string | null): boolean {
   return PLACEHOLDER_LAST_NAMES.has(trimmed.toLowerCase());
 }
 
-export function formatPersonName(
-  firstName?: string | null,
-  lastName?: string | null
-): string {
+export function formatPersonName(firstName?: string | null, lastName?: string | null): string {
   const first = firstName?.trim() ?? "";
   const last = lastName?.trim() ?? "";
   if (!first) return last;
