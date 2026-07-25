@@ -35,8 +35,10 @@ export function MarketingFooter() {
       <div className="container relative mx-auto max-w-6xl px-4 py-14">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6">
           <div className="space-y-4 lg:col-span-2">
-            <AppLogo alt={contact.companyName} variant="mobile" surface="dark" />
-            <p className="text-sm font-semibold text-white">{contact.companyName}</p>
+            <div className="flex items-center gap-3">
+              <AppLogo alt={contact.companyName} variant="footer" surface="dark" framed={false} />
+              <p className="text-base font-semibold leading-snug text-white">{contact.companyName}</p>
+            </div>
             <p className="max-w-sm text-sm leading-relaxed text-white/70">
               Lakshya International Edwise is your trusted overseas education financial partner —
               education loans from 20+ lenders for USA, UK, Canada, Ireland, Germany, Australia, and
