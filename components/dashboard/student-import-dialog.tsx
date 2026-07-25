@@ -116,7 +116,8 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
         <DialogHeader>
           <DialogTitle>Bulk import students</DialogTitle>
           <DialogDescription>
-            Upload a CSV or Excel file (max 500 rows). Download the Excel template with sample records and field guide.
+            Upload a CSV or Excel file (max 500 rows). Download the Excel template with sample
+            records and field guide.
           </DialogDescription>
         </DialogHeader>
 
@@ -160,7 +161,9 @@ export function StudentImportDialog({ canWrite = false }: StudentImportDialogPro
               <>
                 <FileSpreadsheet className="h-8 w-8 text-[#E8952E]" />
                 <span className="text-sm font-medium">Choose CSV or Excel file</span>
-                <span className="text-xs text-muted-foreground">.csv, .xlsx, .xls — up to 5 MB</span>
+                <span className="text-xs text-muted-foreground">
+                  .csv, .xlsx, .xls — up to 5 MB
+                </span>
               </>
             )}
             <input

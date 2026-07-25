@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import {
-  getSearchShortcutLabel,
-  isSearchShortcut,
-} from "@/lib/utils/search-shortcut";
+import { getSearchShortcutLabel, isSearchShortcut } from "@/lib/utils/search-shortcut";
 
 const SERVER_SEARCH_SHORTCUT_LABEL = "Ctrl+K";
 

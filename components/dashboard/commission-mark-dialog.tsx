@@ -106,7 +106,8 @@ function CommissionMarkForm({
         <div className="rounded-lg border bg-muted/40 p-3 text-sm">
           <p className="font-medium">{studentName}</p>
           <p className="mt-1 text-muted-foreground">
-            Pending: <span className="font-semibold text-foreground">{formatCurrency(pendingAmount)}</span>
+            Pending:{" "}
+            <span className="font-semibold text-foreground">{formatCurrency(pendingAmount)}</span>
           </p>
         </div>
         <div className="space-y-2">

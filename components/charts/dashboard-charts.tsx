@@ -129,7 +129,12 @@ export function MonthlyStudentsAreaChart({ data }: { data: ChartDataPoint[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
           <Area
@@ -157,10 +162,20 @@ export function LoanAmountBarChart({ data }: { data: ChartDataPoint[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill="url(#barGradient)" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
+          <Bar
+            dataKey="value"
+            fill="url(#barGradient)"
+            radius={[8, 8, 0, 0]}
+            {...CHART_ANIMATION}
+          />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -179,10 +194,27 @@ export function TopPartnersBarChart({ data }: { data: ChartDataPoint[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
-          <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            dataKey="name"
+            type="category"
+            width={100}
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill="url(#partnerGradient)" radius={[0, 8, 8, 0]} {...CHART_ANIMATION} />
+          <Bar
+            dataKey="value"
+            fill="url(#partnerGradient)"
+            radius={[0, 8, 8, 0]}
+            {...CHART_ANIMATION}
+          />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -195,7 +227,15 @@ export function ConversionFunnelChart({ data }: { data: ChartDataPoint[] }) {
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} angle={-30} textAnchor="end" height={70} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+            angle={-30}
+            textAnchor="end"
+            height={70}
+          />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
           <Bar dataKey="value" fill="#06B6D4" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
@@ -225,30 +265,44 @@ export function TrendLineChart({
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
           <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "12px" }} />
-          <Area type="monotone" dataKey="students" stroke="#E8952E" fill="url(#trendStudents)" strokeWidth={2} />
-          <Area type="monotone" dataKey="loans" stroke="#22C55E" fill="url(#trendLoans)" strokeWidth={2} />
+          <Area
+            type="monotone"
+            dataKey="students"
+            stroke="#E8952E"
+            fill="url(#trendStudents)"
+            strokeWidth={2}
+          />
+          <Area
+            type="monotone"
+            dataKey="loans"
+            stroke="#22C55E"
+            fill="url(#trendLoans)"
+            strokeWidth={2}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </ChartCard>
   );
 }
 
-export function DemographicsBarChart({
-  data,
-  title,
-}: {
-  data: ChartDataPoint[];
-  title: string;
-}) {
+export function DemographicsBarChart({ data, title }: { data: ChartDataPoint[]; title: string }) {
   const total = data.reduce((sum, entry) => sum + entry.value, 0);
   const enriched = data.map((entry) => ({ ...entry, total }));
 
   return (
-    <ChartCard title={title} subtitle={`${total.toLocaleString("en-IN")} total · hover bars for share`}>
+    <ChartCard
+      title={title}
+      subtitle={`${total.toLocaleString("en-IN")} total · hover bars for share`}
+    >
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={enriched} layout="vertical" margin={{ left: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" horizontal={false} />
@@ -285,7 +339,10 @@ export function DemographicsBarChart({
           />
           <Bar dataKey="value" radius={[0, 8, 8, 0]} {...CHART_ANIMATION}>
             {data.map((_, index) => (
-              <Cell key={`demographics-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+              <Cell
+                key={`demographics-${index}`}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -300,7 +357,12 @@ export function RevenueBarChart({ data }: { data: ChartDataPoint[] }) {
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: "#64748B" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={tooltipStyle} />
           <Bar dataKey="value" fill="#22C55E" radius={[8, 8, 0, 0]} {...CHART_ANIMATION} />
@@ -316,7 +378,20 @@ export function HeatMapGrid({
   data: Array<{ month: number; day: string; value: number }>;
 }) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   const getValue = (month: number, day: string) => {

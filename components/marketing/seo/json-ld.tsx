@@ -4,10 +4,7 @@ interface JsonLdProps {
 
 export function JsonLd({ data }: JsonLdProps) {
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
@@ -131,9 +128,7 @@ export function serviceJsonLd(params: {
   areaServed?: string | string[];
 }) {
   const providerUrl = (params.providerUrl ?? "").replace(/\/$/, "");
-  const areas = Array.isArray(params.areaServed)
-    ? params.areaServed
-    : [params.areaServed ?? "IN"];
+  const areas = Array.isArray(params.areaServed) ? params.areaServed : [params.areaServed ?? "IN"];
 
   return {
     "@context": "https://schema.org",
@@ -149,9 +144,7 @@ export function serviceJsonLd(params: {
           name: params.provider,
         },
     areaServed: areas.map((area) =>
-      area.length === 2
-        ? { "@type": "Country", name: area }
-        : { "@type": "Place", name: area }
+      area.length === 2 ? { "@type": "Country", name: area } : { "@type": "Place", name: area }
     ),
     audience: {
       "@type": "Audience",

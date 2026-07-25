@@ -10,7 +10,11 @@ export default async function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Reports" description="Generate and export business reports" badge="Export" />
+      <PageHeader
+        title="Reports"
+        description="Generate and export business reports"
+        badge="Export"
+      />
       <ReportsView />
     </div>
   );

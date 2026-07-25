@@ -4,9 +4,7 @@ import {
   APPLICATION_STATUS_VALUES,
   type ApplicationStatusId,
 } from "@/lib/constants/application-status";
-import {
-  normalizeDisbursementType,
-} from "@/lib/constants/disbursement";
+import { normalizeDisbursementType } from "@/lib/constants/disbursement";
 import type { StudentStatus } from "@/lib/constants/statuses";
 import {
   buildImportTemplateLabelAliases,
@@ -125,9 +123,7 @@ function normalizeApplicationStatus(value?: string): ApplicationStatusId | undef
   return undefined;
 }
 
-export function resolveImportApplicationStatus(
-  row: Record<string, string>
-): ApplicationStatusId {
+export function resolveImportApplicationStatus(row: Record<string, string>): ApplicationStatusId {
   const fromColumn = normalizeApplicationStatus(row.applicationStatus);
   if (fromColumn) return fromColumn;
 
@@ -213,10 +209,7 @@ function readImportWorkbook(buffer: ArrayBuffer, filename: string): XLSX.WorkBoo
   return XLSX.read(buffer, { ...readOptions, type: "array" });
 }
 
-export function parseImportFile(
-  buffer: ArrayBuffer,
-  filename: string
-): Record<string, string>[] {
+export function parseImportFile(buffer: ArrayBuffer, filename: string): Record<string, string>[] {
   const workbook = readImportWorkbook(buffer, filename);
   const sheet = workbook.Sheets[workbook.SheetNames[0] ?? ""];
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });

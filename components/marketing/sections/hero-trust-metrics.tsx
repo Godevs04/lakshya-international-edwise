@@ -2,10 +2,7 @@
 
 import { Clock, Landmark, TrendingUp, Users } from "lucide-react";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
-import {
-  TRUST_METRICS,
-  TRUST_METRICS_SOURCE,
-} from "@/lib/constants/marketing/lakshya-value-props";
+import { TRUST_METRICS, TRUST_METRICS_SOURCE } from "@/lib/constants/marketing/lakshya-value-props";
 import { cn } from "@/lib/utils";
 
 const METRIC_ICONS = [Users, Landmark, Clock, TrendingUp];

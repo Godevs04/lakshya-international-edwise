@@ -39,7 +39,10 @@ export function AboutPreviewSection() {
             { value: 20, suffix: "+", label: "Lending partners" },
             { value: 500, suffix: "+ Cr", label: "Disbursed" },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-border/60 bg-accent/30 p-5 text-center">
+            <div
+              key={stat.label}
+              className="rounded-2xl border border-border/60 bg-accent/30 p-5 text-center"
+            >
               <p className="text-2xl font-bold text-primary">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} />
               </p>

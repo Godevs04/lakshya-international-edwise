@@ -6,7 +6,7 @@ import { useHeroMotion } from "@/hooks/use-hero-motion";
 
 const ASSETS = {
   airplane: "/assets/icons/Aeroplane_1.png",
-  landmarks: "/assets/hero/Multiple.png",
+  landmarks: "/assets/hero/Multiple.jpg",
 } as const;
 
 export function HeroVisualCollage() {

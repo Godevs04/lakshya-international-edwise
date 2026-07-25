@@ -11,10 +11,7 @@ import { SITE_LEAD_SOURCE } from "@/lib/constants/site-leads";
 
 describe("student-phone.service", () => {
   it("normalizes phone lookup values to 10-digit and 91-prefixed forms", () => {
-    expect(getStudentPhoneLookupValues("+91 98765 43210")).toEqual([
-      "9876543210",
-      "919876543210",
-    ]);
+    expect(getStudentPhoneLookupValues("+91 98765 43210")).toEqual(["9876543210", "919876543210"]);
   });
 
   it("returns empty lookup values for invalid phones", () => {
@@ -43,9 +40,7 @@ describe("student-phone.service", () => {
         lastName: "Kumar",
         recordType: STUDENT_RECORD_TYPE.ADMISSION,
       })
-    ).toBe(
-      "This phone number is already registered to admission lead Ravi Kumar (STU-0042)"
-    );
+    ).toBe("This phone number is already registered to admission lead Ravi Kumar (STU-0042)");
   });
 
   it("builds detail hrefs for students, admissions, and website leads", () => {

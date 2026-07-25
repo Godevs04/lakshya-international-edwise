@@ -40,9 +40,7 @@ export default async function EditAdmissionPage({
     <div className="space-y-6">
       <PageHeader
         title={
-          focusSection
-            ? `Edit ${ADMISSION_EDIT_SECTIONS[focusSection].label}`
-            : "Edit Admission"
+          focusSection ? `Edit ${ADMISSION_EDIT_SECTIONS[focusSection].label}` : "Edit Admission"
         }
         description={admission.studentId}
         action={

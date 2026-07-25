@@ -14,5 +14,4 @@ export interface EligibilityModalContextValue {
   isOpen: boolean;
 }
 
-export const EligibilityModalContext =
-  createContext<EligibilityModalContextValue | null>(null);
+export const EligibilityModalContext = createContext<EligibilityModalContextValue | null>(null);

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Map,
-  MapControls,
-  MapMarker,
-  MarkerContent,
-  MarkerLabel,
-} from "@/components/ui/map";
+import { Map, MapControls, MapMarker, MarkerContent, MarkerLabel } from "@/components/ui/map";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MapCenter } from "@/lib/utils/google-maps-embed";

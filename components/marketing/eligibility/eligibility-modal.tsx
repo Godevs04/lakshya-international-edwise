@@ -189,8 +189,8 @@ export function EligibilityModal({
             <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-primary" />
             <h3 className="text-xl font-semibold text-foreground">You&apos;re all set!</h3>
             <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              Our loan experts will review your details and contact you within one
-              business day with the best lender options.
+              Our loan experts will review your details and contact you within one business day with
+              the best lender options.
             </p>
             <Button
               onClick={() => handleOpenChange(false)}
@@ -236,25 +236,47 @@ export function EligibilityModal({
                 >
                   <div className="space-y-2">
                     <Label htmlFor="elig-name">Full name</Label>
-                    <Input id="elig-name" {...step1.register("name")} placeholder="Your name" className={fieldClass} />
+                    <Input
+                      id="elig-name"
+                      {...step1.register("name")}
+                      placeholder="Your name"
+                      className={fieldClass}
+                    />
                     {step1.formState.errors.name && (
-                      <p className="text-xs text-destructive">{step1.formState.errors.name.message}</p>
+                      <p className="text-xs text-destructive">
+                        {step1.formState.errors.name.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="elig-phone">Phone</Label>
-                    <Input id="elig-phone" {...step1.register("phone")} placeholder="10-digit mobile" className={fieldClass} />
+                    <Input
+                      id="elig-phone"
+                      {...step1.register("phone")}
+                      placeholder="10-digit mobile"
+                      className={fieldClass}
+                    />
                     {step1.formState.errors.phone && (
-                      <p className="text-xs text-destructive">{step1.formState.errors.phone.message}</p>
+                      <p className="text-xs text-destructive">
+                        {step1.formState.errors.phone.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="elig-email">
                       Email <span className="font-normal text-muted-foreground">(optional)</span>
                     </Label>
-                    <Input id="elig-email" type="email" {...step1.register("email")} placeholder="you@email.com" className={fieldClass} />
+                    <Input
+                      id="elig-email"
+                      type="email"
+                      {...step1.register("email")}
+                      placeholder="you@email.com"
+                      className={fieldClass}
+                    />
                     {step1.formState.errors.email && (
-                      <p className="text-xs text-destructive">{step1.formState.errors.email.message}</p>
+                      <p className="text-xs text-destructive">
+                        {step1.formState.errors.email.message}
+                      </p>
                     )}
                   </div>
                   <input
@@ -264,7 +286,11 @@ export function EligibilityModal({
                     className="hidden"
                     {...step1.register("website")}
                   />
-                  <Button type="submit" variant="ghost" className="btn-marketing w-full rounded-full hover:bg-transparent">
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    className="btn-marketing w-full rounded-full hover:bg-transparent"
+                  >
                     Continue
                     <ArrowRight className="ml-1.5 h-4 w-4" />
                   </Button>
@@ -282,32 +308,55 @@ export function EligibilityModal({
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="elig-destination">Destination</Label>
-                      <select id="elig-destination" {...step2.register("destination")} className={cn(fieldClass, "w-full px-3")}>
+                      <select
+                        id="elig-destination"
+                        {...step2.register("destination")}
+                        className={cn(fieldClass, "w-full px-3")}
+                      >
                         <option value="">Select country</option>
                         {DESTINATIONS.map((c) => (
-                          <option key={c} value={c}>{c}</option>
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="elig-amount">Loan amount</Label>
-                      <Input id="elig-amount" {...step2.register("loanAmount")} placeholder="e.g. ₹40 Lakh" className={fieldClass} />
+                      <Input
+                        id="elig-amount"
+                        {...step2.register("loanAmount")}
+                        placeholder="e.g. ₹40 Lakh"
+                        className={fieldClass}
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="elig-status">Current status</Label>
-                    <select id="elig-status" {...step2.register("currentStatus")} className={cn(fieldClass, "w-full px-3")}>
+                    <select
+                      id="elig-status"
+                      {...step2.register("currentStatus")}
+                      className={cn(fieldClass, "w-full px-3")}
+                    >
                       <option value="">Select status</option>
                       {CURRENT_STATUS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="elig-lender">
-                      Preferred bank <span className="font-normal text-muted-foreground">(optional)</span>
+                      Preferred bank{" "}
+                      <span className="font-normal text-muted-foreground">(optional)</span>
                     </Label>
-                    <Input id="elig-lender" {...step2.register("preferredLender")} placeholder="e.g. SBI, Avanse" className={fieldClass} />
+                    <Input
+                      id="elig-lender"
+                      {...step2.register("preferredLender")}
+                      placeholder="e.g. SBI, Avanse"
+                      className={fieldClass}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="elig-message">

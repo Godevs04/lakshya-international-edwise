@@ -39,7 +39,9 @@ export function GoogleReviewsSection() {
                 ))}
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">&quot;{review.text}&quot;</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              &quot;{review.text}&quot;
+            </p>
             <p className="mt-3 text-xs text-muted-foreground">{review.date}</p>
           </div>
         ))}

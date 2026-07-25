@@ -33,14 +33,8 @@ import { getAppConfig } from "@/lib/config/app-config";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { sanitizeText, toSafeRegExp } from "@/lib/utils/sanitize";
 import { encryptSensitiveField, maskBankAccount, safeDecrypt } from "@/lib/utils/pii";
-import {
-  getOptionalLinkUrlError,
-  normalizeOptionalLinkUrl,
-} from "@/lib/utils/document-url";
-import {
-  normalizeIfsc,
-  normalizeIndianPhone,
-} from "@/lib/validations/indian-fields";
+import { getOptionalLinkUrlError, normalizeOptionalLinkUrl } from "@/lib/utils/document-url";
+import { normalizeIfsc, normalizeIndianPhone } from "@/lib/validations/indian-fields";
 import type { ActionResult, PaginatedResult, PartnerListItem } from "@/types";
 import type { PartnerStatus } from "@/lib/constants/statuses";
 import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
@@ -81,222 +75,162 @@ export async function getPartners(params: {
   status?: string;
   actionStatus?: string;
 }): Promise<PaginatedResult<PartnerListItem>> {
-  return runLoggedQuery("getPartners", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getPartners",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-  await connectDB();
-  const page = params.page ?? 1;
-  const pageSize = params.pageSize ?? 10;
-  const skip = (page - 1) * pageSize;
+      await connectDB();
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-  const baseFilter = officialPartnersFilter();
-  let filter: Record<string, unknown> = { ...baseFilter };
-  if (params.search) {
-    const regex = toSafeRegExp(params.search);
-    filter = mergeMongoFilter(baseFilter, {
-      $or: [
-        { companyName: regex },
-        { owner: regex },
-        { phone: regex },
-        { email: regex },
-      ],
-    });
-  }
-  if (params.status) filter = mergeMongoFilter(filter, { status: params.status });
-  if (params.actionStatus) filter = mergeMongoFilter(filter, { actionStatus: params.actionStatus });
+      const baseFilter = officialPartnersFilter();
+      let filter: Record<string, unknown> = { ...baseFilter };
+      if (params.search) {
+        const regex = toSafeRegExp(params.search);
+        filter = mergeMongoFilter(baseFilter, {
+          $or: [{ companyName: regex }, { owner: regex }, { phone: regex }, { email: regex }],
+        });
+      }
+      if (params.status) filter = mergeMongoFilter(filter, { status: params.status });
+      if (params.actionStatus)
+        filter = mergeMongoFilter(filter, { actionStatus: params.actionStatus });
 
-  const [data, total] = await Promise.all([
-    Partner.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),
-    Partner.countDocuments(filter),
-  ]);
+      const [data, total] = await Promise.all([
+        Partner.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),
+        Partner.countDocuments(filter),
+      ]);
 
-  return {
-    data: data.map((p) => ({
-      _id: p._id.toString(),
-      companyName: p.companyName,
-      owner: p.owner,
-      phone: p.phone,
-      email: p.email,
-      status: p.status as PartnerStatus,
-      actionStatus: p.actionStatus as PartnerActionStatus,
-      studentsCount: p.studentsCount,
-      totalLoanValue: p.totalLoanValue,
-      commissionPercent: p.commissionPercent,
-    })),
-    total,
-    page,
-    pageSize,
-    totalPages: Math.ceil(total / pageSize),
-  };
-  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
+      return {
+        data: data.map((p) => ({
+          _id: p._id.toString(),
+          companyName: p.companyName,
+          owner: p.owner,
+          phone: p.phone,
+          email: p.email,
+          status: p.status as PartnerStatus,
+          actionStatus: p.actionStatus as PartnerActionStatus,
+          studentsCount: p.studentsCount,
+          totalLoanValue: p.totalLoanValue,
+          commissionPercent: p.commissionPercent,
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 10)
+  );
 }
 
 export async function getPartnerById(id: string) {
-  return runLoggedQuery("getPartnerById", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getPartnerById",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-  await connectDB();
-  const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
-  if (!partner) return null;
+      await connectDB();
+      const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
+      if (!partner) return null;
 
-  return {
-    ...partner,
-    bankDetails: partner.bankDetails
-      ? {
-          ...partner.bankDetails,
-          accountNumber: maskBankAccount(partner.bankDetails.accountNumber),
-        }
-      : partner.bankDetails,
-  };
-  }, null);
+      return {
+        ...partner,
+        bankDetails: partner.bankDetails
+          ? {
+              ...partner.bankDetails,
+              accountNumber: maskBankAccount(partner.bankDetails.accountNumber),
+            }
+          : partner.bankDetails,
+      };
+    },
+    null
+  );
 }
 
 export async function getPartnerForEdit(id: string) {
-  return runLoggedQuery("getPartnerForEdit", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+  return runLoggedQuery(
+    "getPartnerForEdit",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
-  await connectDB();
-  const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
-  if (!partner) return null;
+      await connectDB();
+      const partner = await Partner.findOne(officialPartnerByIdFilter(id)).lean();
+      if (!partner) return null;
 
-  return {
-    ...partner,
-    bankDetails: partner.bankDetails
-      ? {
-          ...partner.bankDetails,
-          accountNumber: safeDecrypt(partner.bankDetails.accountNumber) || undefined,
-          ifsc: partner.bankDetails.ifsc
-            ? normalizeIfsc(partner.bankDetails.ifsc)
-            : undefined,
-        }
-      : partner.bankDetails,
-  };
-  }, null);
+      return {
+        ...partner,
+        bankDetails: partner.bankDetails
+          ? {
+              ...partner.bankDetails,
+              accountNumber: safeDecrypt(partner.bankDetails.accountNumber) || undefined,
+              ifsc: partner.bankDetails.ifsc ? normalizeIfsc(partner.bankDetails.ifsc) : undefined,
+            }
+          : partner.bankDetails,
+      };
+    },
+    null
+  );
 }
 
 export async function getPartnerStudents(partnerId: string) {
-  return runLoggedQuery("getPartnerStudents", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getPartnerStudents",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-  await connectDB();
-  const filter = mergeMongoFilter(
-    { partnerId },
-    buildStudentVisibilityFilter(user)
+      await connectDB();
+      const filter = mergeMongoFilter({ partnerId }, buildStudentVisibilityFilter(user));
+      return Student.find(filter).sort({ createdAt: -1 }).limit(20).lean();
+    },
+    []
   );
-  return Student.find(filter).sort({ createdAt: -1 }).limit(20).lean();
-  }, []);
 }
 
 export async function getPartnersList() {
-  return runLoggedQuery("getPartnersList", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getPartnersList",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-  await connectDB();
-  return Partner.find({ status: "active" })
-    .select("companyName commissionPercent")
-    .sort({ companyName: 1 })
-    .lean();
-  }, []);
+      await connectDB();
+      return Partner.find({ status: "active" })
+        .select("companyName commissionPercent")
+        .sort({ companyName: 1 })
+        .lean();
+    },
+    []
+  );
 }
 
 export async function createPartnerAction(
   formData: FormData
 ): Promise<ActionResult<{ id: string }>> {
   return runLoggedMutation("createPartnerAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
-  const raw = Object.fromEntries(formData.entries());
-  const parsed = partnerSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = partnerSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
 
-  await connectDB();
-  const data = parsed.data;
+    await connectDB();
+    const data = parsed.data;
 
-  const logoError = getOptionalLinkUrlError(data.companyLogo);
-  if (logoError) {
-    return { success: false, error: `Company logo link: ${logoError}` };
-  }
+    const logoError = getOptionalLinkUrlError(data.companyLogo);
+    if (logoError) {
+      return { success: false, error: `Company logo link: ${logoError}` };
+    }
 
-  const partner = await Partner.create({
-    companyName: sanitizeText(data.companyName),
-    owner: data.owner ? sanitizeText(data.owner) : undefined,
-    phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
-    email: data.email,
-    address: data.address ? sanitizeText(data.address) : undefined,
-    location: {
-      address: data.locationAddress ? sanitizeText(data.locationAddress) : undefined,
-      city: data.locationCity?.trim() || undefined,
-      state: data.locationState?.trim() || undefined,
-    },
-    contacts: buildPartnerContacts(data),
-    actionStatus: data.actionStatus ?? "active",
-    gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
-    commissionPercent: data.commissionPercent ?? 0,
-    bankDetails: {
-      accountName: data.accountName,
-      accountNumber: data.accountNumber?.trim()
-        ? encryptSensitiveField(data.accountNumber.trim())
-        : undefined,
-      ifsc: data.ifsc?.trim() ? normalizeIfsc(data.ifsc) : undefined,
-      bankName: data.bankName,
-    },
-    status: data.status ?? "active",
-    photo: normalizeOptionalLinkUrl(data.photo),
-    companyLogo: normalizeOptionalLinkUrl(data.companyLogo),
-    agreementUrl: normalizeOptionalLinkUrl(data.agreementUrl),
-    metadata: { createdBy: user?.id, createdByName: user?.name },
-  });
-
-  await logActivity({
-    action: "partner.created",
-    description: `Partner ${data.companyName} was created`,
-    resourceType: "partner",
-    resourceId: partner._id.toString(),
-    userId: user?.id,
-    userName: user?.name,
-  });
-
-  revalidatePath("/dashboard/partners");
-  revalidateInsightCaches();
-  return { success: true, data: { id: partner._id.toString() } };
-  });
-}
-
-export async function updatePartnerAction(
-  id: string,
-  formData: FormData
-): Promise<ActionResult> {
-  return runLoggedMutation("updatePartnerAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
-
-  const raw = Object.fromEntries(formData.entries());
-  const parsed = partnerSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
-
-  await connectDB();
-  const data = parsed.data;
-  const existing = await Partner.findOne(officialPartnerByIdFilter(id));
-  if (!existing) return { success: false, error: "Partner not found" };
-
-  const logoError = getOptionalLinkUrlError(data.companyLogo);
-  if (logoError) {
-    return { success: false, error: `Company logo link: ${logoError}` };
-  }
-
-  const partner = await Partner.findOneAndUpdate(
-    officialPartnerByIdFilter(id),
-    {
+    const partner = await Partner.create({
       companyName: sanitizeText(data.companyName),
       owner: data.owner ? sanitizeText(data.owner) : undefined,
       phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
@@ -308,133 +242,211 @@ export async function updatePartnerAction(
         state: data.locationState?.trim() || undefined,
       },
       contacts: buildPartnerContacts(data),
-      actionStatus: data.actionStatus ?? existing.actionStatus,
+      actionStatus: data.actionStatus ?? "active",
       gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
       commissionPercent: data.commissionPercent ?? 0,
       bankDetails: {
         accountName: data.accountName,
         accountNumber: data.accountNumber?.trim()
           ? encryptSensitiveField(data.accountNumber.trim())
-          : raw.accountNumber === ""
-            ? undefined
-            : encryptSensitiveField(data.accountNumber, existing.bankDetails?.accountNumber) ??
-              existing.bankDetails?.accountNumber,
+          : undefined,
         ifsc: data.ifsc?.trim() ? normalizeIfsc(data.ifsc) : undefined,
         bankName: data.bankName,
       },
-      status: data.status,
+      status: data.status ?? "active",
       photo: normalizeOptionalLinkUrl(data.photo),
       companyLogo: normalizeOptionalLinkUrl(data.companyLogo),
       agreementUrl: normalizeOptionalLinkUrl(data.agreementUrl),
-    },
-    { new: true }
-  );
+      metadata: { createdBy: user?.id, createdByName: user?.name },
+    });
 
-  if (!partner) return { success: false, error: "Partner not found" };
+    await logActivity({
+      action: "partner.created",
+      description: `Partner ${data.companyName} was created`,
+      resourceType: "partner",
+      resourceId: partner._id.toString(),
+      userId: user?.id,
+      userName: user?.name,
+    });
 
-  await logActivity({
-    action: "partner.updated",
-    description: `Partner ${data.companyName} was updated`,
-    resourceType: "partner",
-    resourceId: id,
-    userId: user?.id,
-    userName: user?.name,
+    revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    return { success: true, data: { id: partner._id.toString() } };
   });
+}
 
-  revalidatePath("/dashboard/partners");
-  revalidateInsightCaches();
-  revalidatePath(`/dashboard/partners/${id}`);
-  return { success: true };
+export async function updatePartnerAction(id: string, formData: FormData): Promise<ActionResult> {
+  return runLoggedMutation("updatePartnerAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = partnerSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const data = parsed.data;
+    const existing = await Partner.findOne(officialPartnerByIdFilter(id));
+    if (!existing) return { success: false, error: "Partner not found" };
+
+    const logoError = getOptionalLinkUrlError(data.companyLogo);
+    if (logoError) {
+      return { success: false, error: `Company logo link: ${logoError}` };
+    }
+
+    const partner = await Partner.findOneAndUpdate(
+      officialPartnerByIdFilter(id),
+      {
+        companyName: sanitizeText(data.companyName),
+        owner: data.owner ? sanitizeText(data.owner) : undefined,
+        phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
+        email: data.email,
+        address: data.address ? sanitizeText(data.address) : undefined,
+        location: {
+          address: data.locationAddress ? sanitizeText(data.locationAddress) : undefined,
+          city: data.locationCity?.trim() || undefined,
+          state: data.locationState?.trim() || undefined,
+        },
+        contacts: buildPartnerContacts(data),
+        actionStatus: data.actionStatus ?? existing.actionStatus,
+        gst: data.gst?.trim() ? data.gst.toUpperCase() : undefined,
+        commissionPercent: data.commissionPercent ?? 0,
+        bankDetails: {
+          accountName: data.accountName,
+          accountNumber: data.accountNumber?.trim()
+            ? encryptSensitiveField(data.accountNumber.trim())
+            : raw.accountNumber === ""
+              ? undefined
+              : (encryptSensitiveField(data.accountNumber, existing.bankDetails?.accountNumber) ??
+                existing.bankDetails?.accountNumber),
+          ifsc: data.ifsc?.trim() ? normalizeIfsc(data.ifsc) : undefined,
+          bankName: data.bankName,
+        },
+        status: data.status,
+        photo: normalizeOptionalLinkUrl(data.photo),
+        companyLogo: normalizeOptionalLinkUrl(data.companyLogo),
+        agreementUrl: normalizeOptionalLinkUrl(data.agreementUrl),
+      },
+      { new: true }
+    );
+
+    if (!partner) return { success: false, error: "Partner not found" };
+
+    await logActivity({
+      action: "partner.updated",
+      description: `Partner ${data.companyName} was updated`,
+      resourceType: "partner",
+      resourceId: id,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    revalidatePath(`/dashboard/partners/${id}`);
+    return { success: true };
   });
 }
 
 export async function deletePartnerAction(id: string): Promise<ActionResult> {
   return runLoggedMutation("deletePartnerAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_DELETE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_DELETE);
 
-  await connectDB();
-  const partner = await Partner.findOneAndDelete(officialPartnerByIdFilter(id));
-  if (!partner) return { success: false, error: "Partner not found" };
+    await connectDB();
+    const partner = await Partner.findOneAndDelete(officialPartnerByIdFilter(id));
+    if (!partner) return { success: false, error: "Partner not found" };
 
-  await logActivity({
-    action: "partner.deleted",
-    description: `Partner ${partner.companyName} was deleted`,
-    resourceType: "partner",
-    resourceId: id,
-    userId: user?.id,
-    userName: user?.name,
-  });
+    await logActivity({
+      action: "partner.deleted",
+      description: `Partner ${partner.companyName} was deleted`,
+      resourceType: "partner",
+      resourceId: id,
+      userId: user?.id,
+      userName: user?.name,
+    });
 
-  revalidatePath("/dashboard/partners");
-  revalidateInsightCaches();
-  return { success: true };
+    revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    return { success: true };
   });
 }
 
 export async function getPartnerAnalytics(partnerId: string) {
-  return runLoggedQuery("getPartnerAnalytics", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.PARTNERS_READ);
+  return runLoggedQuery(
+    "getPartnerAnalytics",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-  await connectDB();
-  const partner = await Partner.findById(partnerId).lean();
-  if (!partner) return null;
+      await connectDB();
+      const partner = await Partner.findById(partnerId).lean();
+      if (!partner) return null;
 
-  const statusCounts = await Student.aggregate([
-    { $match: { partnerId: partner._id } },
-    { $group: { _id: "$status", count: { $sum: 1 } } },
-  ]);
+      const statusCounts = await Student.aggregate([
+        { $match: { partnerId: partner._id } },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]);
 
-  const total = statusCounts.reduce((acc, s) => acc + s.count, 0);
-  const sanctioned = statusCounts.find((s) => s._id === "sanctioned")?.count ?? 0;
-  const disbursed = statusCounts.find((s) => s._id === "disbursed")?.count ?? 0;
+      const total = statusCounts.reduce((acc, s) => acc + s.count, 0);
+      const sanctioned = statusCounts.find((s) => s._id === "sanctioned")?.count ?? 0;
+      const disbursed = statusCounts.find((s) => s._id === "disbursed")?.count ?? 0;
 
-  const commission = await getPartnerCommissionSummary(partnerId);
+      const commission = await getPartnerCommissionSummary(partnerId);
 
-  return {
-    monthlyLeads: partner.performance.monthlyLeads,
-    sanctionRate: total > 0 ? Math.round((sanctioned / total) * 100) : 0,
-    disbursementTotal: commission.totalDisbursed,
-    partnerSharePercent: commission.partnerSharePercent,
-    commissionExpected: commission.commissionExpected,
-    commissionReceived: commission.commissionReceived,
-    pendingReceived: commission.pendingReceived,
-    partnerShareExpected: commission.partnerShareExpected,
-    commissionShared: commission.commissionShared,
-    pendingShared: commission.pendingShared,
-    projectedNetEarned: commission.projectedNetEarned,
-    commissionEarned: commission.commissionEarned,
-    commissionPercent: commission.commissionPercent,
-    commissionSettled: commission.commissionSettled,
-    commissionPending: commission.commissionPending,
-    disbursedStudentCount: commission.disbursedStudentCount,
-    statusCounts,
-    disbursed,
-    settlements: (partner.commissionSettlements ?? [])
-      .slice()
-      .sort((a, b) => new Date(b.settledAt ?? 0).getTime() - new Date(a.settledAt ?? 0).getTime())
-      .slice(0, 20)
-      .map((entry) => ({
-        amount: entry.amount,
-        note: entry.note,
-        settledAt: entry.settledAt,
-        settledByName: entry.settledByName,
-        studentId: entry.studentId?.toString(),
-        studentName: entry.studentName,
-      })),
-    studentCommissions: await getPartnerStudentCommissions(partnerId),
-  };
-  }, null);
+      return {
+        monthlyLeads: partner.performance.monthlyLeads,
+        sanctionRate: total > 0 ? Math.round((sanctioned / total) * 100) : 0,
+        disbursementTotal: commission.totalDisbursed,
+        partnerSharePercent: commission.partnerSharePercent,
+        commissionExpected: commission.commissionExpected,
+        commissionReceived: commission.commissionReceived,
+        pendingReceived: commission.pendingReceived,
+        partnerShareExpected: commission.partnerShareExpected,
+        commissionShared: commission.commissionShared,
+        pendingShared: commission.pendingShared,
+        projectedNetEarned: commission.projectedNetEarned,
+        commissionEarned: commission.commissionEarned,
+        commissionPercent: commission.commissionPercent,
+        commissionSettled: commission.commissionSettled,
+        commissionPending: commission.commissionPending,
+        disbursedStudentCount: commission.disbursedStudentCount,
+        statusCounts,
+        disbursed,
+        settlements: (partner.commissionSettlements ?? [])
+          .slice()
+          .sort(
+            (a, b) => new Date(b.settledAt ?? 0).getTime() - new Date(a.settledAt ?? 0).getTime()
+          )
+          .slice(0, 20)
+          .map((entry) => ({
+            amount: entry.amount,
+            note: entry.note,
+            settledAt: entry.settledAt,
+            settledByName: entry.settledByName,
+            studentId: entry.studentId?.toString(),
+            studentName: entry.studentName,
+          })),
+        studentCommissions: await getPartnerStudentCommissions(partnerId),
+      };
+    },
+    null
+  );
 }
 
 export async function getPartnersCommissionOverviewAction(status?: string) {
-  return runLoggedQuery("getPartnersCommissionOverviewAction", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.PARTNERS_READ);
-    const parsed = commissionStatusFilterSchema.safeParse(status ?? "all");
-    return getPartnersCommissionOverview(parsed.success ? parsed.data : "all");
-  }, []);
+  return runLoggedQuery(
+    "getPartnersCommissionOverviewAction",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
+      const parsed = commissionStatusFilterSchema.safeParse(status ?? "all");
+      return getPartnersCommissionOverview(parsed.success ? parsed.data : "all");
+    },
+    []
+  );
 }
 
 export async function recordPartnerCommissionSettlementAction(
@@ -501,21 +513,22 @@ export async function recordPartnerCommissionSettlementAction(
   });
 }
 
-export async function getPartnerCommissionLedgerAction(
-  partnerId: string,
-  month?: string
-) {
-  return runLoggedQuery("getPartnerCommissionLedgerAction", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.PARTNERS_READ);
+export async function getPartnerCommissionLedgerAction(partnerId: string, month?: string) {
+  return runLoggedQuery(
+    "getPartnerCommissionLedgerAction",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
-    const parsed = commissionLedgerFilterSchema.safeParse({ month: month ?? "" });
-    if (!parsed.success) {
-      return null;
-    }
+      const parsed = commissionLedgerFilterSchema.safeParse({ month: month ?? "" });
+      if (!parsed.success) {
+        return null;
+      }
 
-    return getPartnerCommissionLedger(partnerId, parsed.data.month || undefined);
-  }, null);
+      return getPartnerCommissionLedger(partnerId, parsed.data.month || undefined);
+    },
+    null
+  );
 }
 
 export async function recordStudentCommissionSettlementAction(
@@ -677,9 +690,7 @@ export async function recordStudentCommissionReceivedAction(
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
-    const parsed = commissionReceiptSchema.safeParse(
-      Object.fromEntries(formData.entries())
-    );
+    const parsed = commissionReceiptSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
     }
@@ -746,9 +757,7 @@ export async function updateStudentCommissionRateAction(
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
-    const parsed = studentCommissionRateSchema.safeParse(
-      Object.fromEntries(formData.entries())
-    );
+    const parsed = studentCommissionRateSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
     }
@@ -815,7 +824,8 @@ export async function updateStudentCommissionRateAction(
         before,
         after: {
           ourCommissionPercent:
-            $set.ourCommissionPercent ?? ($unset.ourCommissionPercent ? null : before.ourCommissionPercent),
+            $set.ourCommissionPercent ??
+            ($unset.ourCommissionPercent ? null : before.ourCommissionPercent),
           commissionPercentOverride:
             $set.commissionPercentOverride ??
             ($unset.commissionPercentOverride ? null : before.commissionPercentOverride),
@@ -840,7 +850,9 @@ export async function exportPartnerCommissionAction(
     requirePermission(user, PERMISSIONS.PARTNERS_READ);
 
     await connectDB();
-    const partner = await Partner.findById(partnerId).select("companyName commissionPercent").lean();
+    const partner = await Partner.findById(partnerId)
+      .select("companyName commissionPercent")
+      .lean();
     if (!partner) return { success: false, error: "Partner not found" };
 
     const parsed = commissionLedgerFilterSchema.safeParse({ month: month ?? "" });

@@ -1,10 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  LENDER_CATEGORY_LABELS,
-  LENDER_CATEGORY_ORDER,
-} from "@/lib/constants/marketing/lenders";
+import { LENDER_CATEGORY_LABELS, LENDER_CATEGORY_ORDER } from "@/lib/constants/marketing/lenders";
 import type { LenderCategory } from "@/types/marketing";
 import { cn } from "@/lib/utils";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
@@ -43,10 +40,7 @@ export function LendingPartnersFilter({ value, onChange }: LendingPartnersFilter
               role="tab"
               aria-selected={active}
               onClick={() => onChange(item.value)}
-              className={cn(
-                "lender-segmented-tab",
-                active && "lender-segmented-tab-active"
-              )}
+              className={cn("lender-segmented-tab", active && "lender-segmented-tab-active")}
             >
               {active && !prefersReducedMotion && (
                 <motion.span

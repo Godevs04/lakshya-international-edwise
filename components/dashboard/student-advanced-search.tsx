@@ -5,11 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -151,10 +147,7 @@ function StatusMultiSelect({
                   checked && "bg-[#E8952E]/12"
                 )}
               >
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={() => toggleStatus(status)}
-                />
+                <Checkbox checked={checked} onCheckedChange={() => toggleStatus(status)} />
                 <span className="capitalize">{formatStatusLabel(status)}</span>
               </label>
             );
@@ -279,7 +272,9 @@ export function StudentAdvancedSearch({
             <Label>Partner</Label>
             <Select
               value={toSelectValue(draft.partnerId)}
-              onValueChange={(value) => updateDraft("partnerId", fromSelectValue(value ?? ANY_OPTION))}
+              onValueChange={(value) =>
+                updateDraft("partnerId", fromSelectValue(value ?? ANY_OPTION))
+              }
               items={partnerItems}
             >
               <SelectTrigger className="w-full">
@@ -300,7 +295,9 @@ export function StudentAdvancedSearch({
             <Label>Assignee</Label>
             <Select
               value={toSelectValue(draft.assignedToId)}
-              onValueChange={(value) => updateDraft("assignedToId", fromSelectValue(value ?? ANY_OPTION))}
+              onValueChange={(value) =>
+                updateDraft("assignedToId", fromSelectValue(value ?? ANY_OPTION))
+              }
               items={assigneeItems}
             >
               <SelectTrigger className="w-full">
@@ -330,7 +327,9 @@ export function StudentAdvancedSearch({
               <Label>Target country</Label>
               <Select
                 value={toSelectValue(draft.targetCountry)}
-                onValueChange={(value) => updateDraft("targetCountry", fromSelectValue(value ?? ANY_OPTION))}
+                onValueChange={(value) =>
+                  updateDraft("targetCountry", fromSelectValue(value ?? ANY_OPTION))
+                }
                 items={targetCountryItems}
               >
                 <SelectTrigger className="w-full">
@@ -350,7 +349,9 @@ export function StudentAdvancedSearch({
               <Label>Target intake</Label>
               <Select
                 value={toSelectValue(draft.targetIntake)}
-                onValueChange={(value) => updateDraft("targetIntake", fromSelectValue(value ?? ANY_OPTION))}
+                onValueChange={(value) =>
+                  updateDraft("targetIntake", fromSelectValue(value ?? ANY_OPTION))
+                }
                 items={targetIntakeItems}
               >
                 <SelectTrigger className="w-full">
@@ -422,7 +423,9 @@ export function StudentAdvancedSearch({
             <Label htmlFor="lenderId">Lender</Label>
             <Select
               value={toSelectValue(draft.lenderId)}
-              onValueChange={(value) => updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))}
+              onValueChange={(value) =>
+                updateDraft("lenderId", fromSelectValue(value ?? ANY_OPTION))
+              }
               items={lenderItems}
             >
               <SelectTrigger id="lenderId" className="w-full">

@@ -1,7 +1,4 @@
-const PRODUCTION_REQUIRED = [
-  "MONGODB_URI",
-  "APP_ENCRYPTION_KEY",
-] as const;
+const PRODUCTION_REQUIRED = ["MONGODB_URI", "APP_ENCRYPTION_KEY"] as const;
 
 const PRODUCTION_AUTH_KEYS = ["AUTH_SECRET", "NEXTAUTH_SECRET"] as const;
 
@@ -16,9 +13,9 @@ function hasAuthSecret(): boolean {
 function hasAuthUrl(): boolean {
   return Boolean(
     trim(process.env.AUTH_URL) ??
-      trim(process.env.NEXTAUTH_URL) ??
-      trim(process.env.APP_URL) ??
-      trim(process.env.NEXT_PUBLIC_APP_URL)
+    trim(process.env.NEXTAUTH_URL) ??
+    trim(process.env.APP_URL) ??
+    trim(process.env.NEXT_PUBLIC_APP_URL)
   );
 }
 

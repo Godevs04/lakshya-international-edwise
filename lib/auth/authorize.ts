@@ -22,10 +22,7 @@ export async function authorizeCredentials(credentials: Record<string, unknown>)
 
   if (!user) return null;
 
-  const isValid = await bcrypt.compare(
-    credentials.password as string,
-    user.passwordHash
-  );
+  const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
   if (!isValid) return null;
 
   if (!user.isVerified || user.status !== "active") {
@@ -42,11 +39,7 @@ export async function authorizeCredentials(credentials: Record<string, unknown>)
     email: user.email,
     name: user.name,
     role,
-    permissions: resolveUserPermissions(
-      role,
-      user.useCustomPermissions,
-      user.customPermissions
-    ),
+    permissions: resolveUserPermissions(role, user.useCustomPermissions, user.customPermissions),
     avatar: user.avatar,
     rememberMe: credentials.rememberMe === "true",
   };

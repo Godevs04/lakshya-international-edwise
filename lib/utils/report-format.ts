@@ -23,7 +23,12 @@ function joinAddress(address: unknown): string {
   return [line, city, state, pincode].filter(Boolean).join(", ");
 }
 
-function latestTimelineEntry(timeline: unknown): { status: string; note: string; by: string; on: string } {
+function latestTimelineEntry(timeline: unknown): {
+  status: string;
+  note: string;
+  by: string;
+  on: string;
+} {
   if (!Array.isArray(timeline) || timeline.length === 0) {
     return { status: "", note: "", by: "", on: "" };
   }
@@ -36,7 +41,9 @@ function latestTimelineEntry(timeline: unknown): { status: string; note: string;
   };
 }
 
-export function formatStudentReportRows(students: LooseRecord[]): Record<string, string | number>[] {
+export function formatStudentReportRows(
+  students: LooseRecord[]
+): Record<string, string | number>[] {
   return students.map((student) => {
     const education = student.education as LooseRecord | undefined;
     const loan = student.loan as LooseRecord | undefined;
@@ -85,12 +92,15 @@ export function formatStudentReportRows(students: LooseRecord[]): Record<string,
   });
 }
 
-export function formatPartnerReportRows(partners: LooseRecord[]): Record<string, string | number>[] {
+export function formatPartnerReportRows(
+  partners: LooseRecord[]
+): Record<string, string | number>[] {
   return partners.map((partner) => ({
     Company: String(partner.companyName ?? ""),
     Students: Number(partner.studentsCount ?? 0),
     "Total Loan Value": formatCurrency(Number(partner.totalLoanValue ?? 0)),
-    "Partner Share %": partner.commissionPercent != null ? formatPercent(Number(partner.commissionPercent)) : "",
+    "Partner Share %":
+      partner.commissionPercent != null ? formatPercent(Number(partner.commissionPercent)) : "",
     Expected: formatCurrency(Number(partner.commissionExpected ?? 0)),
     Received: formatCurrency(Number(partner.commissionReceived ?? 0)),
     "Pending Received": formatCurrency(Number(partner.pendingReceived ?? 0)),

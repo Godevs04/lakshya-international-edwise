@@ -10,7 +10,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     id: "introduction",
     title: "Introduction",
     paragraphs: [
-      "Lakshya International Edwise (\"we\", \"us\", or \"our\") operates lakshyainternationaledwise.com and related digital channels. This Privacy Policy explains how we collect, use, store, and protect personal information when you enquire about overseas education loans, ancillary student services, or partner programmes.",
+      'Lakshya International Edwise ("we", "us", or "our") operates lakshyainternationaledwise.com and related digital channels. This Privacy Policy explains how we collect, use, store, and protect personal information when you enquire about overseas education loans, ancillary student services, or partner programmes.',
       "By submitting a form, contacting us, or using our website, you consent to the practices described in this policy. If you do not agree, please do not use our services.",
     ],
   },

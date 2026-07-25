@@ -50,7 +50,9 @@ export function PageHero({
   }
 
   return (
-    <section className={cn("hero-gradient section-padding pb-12 pt-16 md:pb-16 md:pt-20", className)}>
+    <section
+      className={cn("hero-gradient section-padding pb-12 pt-16 md:pb-16 md:pt-20", className)}
+    >
       <MarketingContainer>
         <div className="max-w-3xl">
           {eyebrow ? (

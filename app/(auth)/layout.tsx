@@ -15,11 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center p-4">
       <PremiumBackground />
@@ -37,7 +33,7 @@ async function AuthLayoutInner({ children }: { children: React.ReactNode }) {
           src={config.company.logo}
           alt={config.company.name}
           variant="auth"
-          className="mx-auto mb-4 shadow-xl shadow-[#E8952E]/20"
+          className="mx-auto mb-4 shadow-xl shadow-slate-900/10"
           priority
         />
         <h1 className="text-2xl font-bold tracking-tight">{config.company.name}</h1>

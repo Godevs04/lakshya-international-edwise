@@ -4,7 +4,10 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, Scale } from "lucide-react";
 import type { MarketingLender } from "@/types/marketing";
-import { LENDER_CATEGORY_LABELS, getLenderCollateralLabel } from "@/lib/constants/marketing/lenders";
+import {
+  LENDER_CATEGORY_LABELS,
+  getLenderCollateralLabel,
+} from "@/lib/constants/marketing/lenders";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 
@@ -67,64 +70,64 @@ export function LenderCompareDrawer({ lenders, open, onClose }: LenderCompareDra
               exit={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
-            <div className="lender-compare-drawer-header">
-              <div className="flex items-center gap-2">
-                <Scale className="h-5 w-5 text-primary" aria-hidden />
-                <h2 id="lender-compare-title" className="text-lg font-bold text-secondary">
-                  Compare lenders
-                </h2>
+              <div className="lender-compare-drawer-header">
+                <div className="flex items-center gap-2">
+                  <Scale className="h-5 w-5 text-primary" aria-hidden />
+                  <h2 id="lender-compare-title" className="text-lg font-bold text-secondary">
+                    Compare lenders
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  className="lender-compare-close"
+                  onClick={onClose}
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                className="lender-compare-close"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
 
-            <div className="lender-compare-table-wrap">
-              <table className="lender-compare-table">
-                <thead>
-                  <tr>
-                    <th scope="col" className="lender-compare-th-feature">
-                      Feature
-                    </th>
-                    {lenders.map((lender) => (
-                      <th key={lender.slug} scope="col" className="lender-compare-th-lender">
-                        {lender.name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {ROWS.map((row) => (
-                    <tr key={row.key}>
-                      <th scope="row" className="lender-compare-td-label">
-                        {row.label}
+              <div className="lender-compare-table-wrap">
+                <table className="lender-compare-table">
+                  <thead>
+                    <tr>
+                      <th scope="col" className="lender-compare-th-feature">
+                        Feature
                       </th>
                       {lenders.map((lender) => (
-                        <td key={lender.slug} className="lender-compare-td-value">
-                          {row.get(lender)}
-                        </td>
+                        <th key={lender.slug} scope="col" className="lender-compare-th-lender">
+                          {lender.name}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {ROWS.map((row) => (
+                      <tr key={row.key}>
+                        <th scope="row" className="lender-compare-td-label">
+                          {row.label}
+                        </th>
+                        {lenders.map((lender) => (
+                          <td key={lender.slug} className="lender-compare-td-value">
+                            {row.get(lender)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            <div className="lender-compare-drawer-footer">
-              <p className="text-xs text-muted-foreground">
-                Comparing {lenders.length} lender{lenders.length > 1 ? "s" : ""} side by side
-              </p>
-              <EligibilityCta source="lending-partners-compare" className="lender-compare-cta">
-                Check best match
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </EligibilityCta>
-            </div>
-          </motion.div>
+              <div className="lender-compare-drawer-footer">
+                <p className="text-xs text-muted-foreground">
+                  Comparing {lenders.length} lender{lenders.length > 1 ? "s" : ""} side by side
+                </p>
+                <EligibilityCta source="lending-partners-compare" className="lender-compare-cta">
+                  Check best match
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </EligibilityCta>
+              </div>
+            </motion.div>
           </div>
         </>
       ) : null}

@@ -67,7 +67,13 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<GlassCard className="p-8"><p>Loading...</p></GlassCard>}>
+    <Suspense
+      fallback={
+        <GlassCard className="p-8">
+          <p>Loading...</p>
+        </GlassCard>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

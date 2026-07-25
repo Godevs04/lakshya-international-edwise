@@ -4,10 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 import { MessageCircle, Phone, X } from "lucide-react";
-import {
-  formatMarketingPhoneDisplay,
-  toMarketingTelHref,
-} from "@/lib/constants/marketing/contact";
+import { formatMarketingPhoneDisplay, toMarketingTelHref } from "@/lib/constants/marketing/contact";
 import { cn } from "@/lib/utils";
 
 interface FloatingContactBarProps {

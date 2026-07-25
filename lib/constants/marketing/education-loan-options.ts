@@ -152,8 +152,7 @@ export const EDUCATION_LOAN_TYPE_DETAILS: EducationLoanTypeDetail[] = [
         ],
       },
     ],
-    closingLine:
-      "No property security. Trusted financial support. Endless global opportunities.",
+    closingLine: "No property security. Trusted financial support. Endless global opportunities.",
   },
   {
     slug: "collateral",
@@ -233,20 +232,19 @@ export const EDUCATION_LOAN_TYPE_DETAILS: EducationLoanTypeDetail[] = [
   },
 ];
 
-export const EDUCATION_LOAN_OPTIONS: MarketingServiceSubOption[] =
-  EDUCATION_LOAN_TYPE_DETAILS.map(({ slug, title, shortDescription, icon }) => ({
+export const EDUCATION_LOAN_OPTIONS: MarketingServiceSubOption[] = EDUCATION_LOAN_TYPE_DETAILS.map(
+  ({ slug, title, shortDescription, icon }) => ({
     slug,
     title,
     shortDescription,
     icon,
-  }));
+  })
+);
 
 export function getEducationLoanOptionHref(slug: string): string {
   return `/services/education-loan#${slug}`;
 }
 
-export function getEducationLoanTypeDetail(
-  slug: string
-): EducationLoanTypeDetail | undefined {
+export function getEducationLoanTypeDetail(slug: string): EducationLoanTypeDetail | undefined {
   return EDUCATION_LOAN_TYPE_DETAILS.find((entry) => entry.slug === slug);
 }

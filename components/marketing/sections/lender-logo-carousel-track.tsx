@@ -6,10 +6,7 @@ import {
   LENDER_LOGO_MARKETING_SIZE,
   LENDER_LOGO_TILE_CLASS,
 } from "@/components/marketing/lenders/lender-logo";
-import {
-  MARKETING_LENDERS,
-  LENDER_CATEGORY_LABELS,
-} from "@/lib/constants/marketing/lenders";
+import { MARKETING_LENDERS, LENDER_CATEGORY_LABELS } from "@/lib/constants/marketing/lenders";
 import { useEligibilityModal } from "@/hooks/use-eligibility-modal";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +20,10 @@ interface LenderLogoCarouselTrackProps {
   premium?: boolean;
 }
 
-export function LenderLogoCarouselTrack({ className, premium = false }: LenderLogoCarouselTrackProps) {
+export function LenderLogoCarouselTrack({
+  className,
+  premium = false,
+}: LenderLogoCarouselTrackProps) {
   const { open } = useEligibilityModal();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
@@ -90,7 +90,13 @@ export function LenderLogoCarouselTrack({ className, premium = false }: LenderLo
   };
 
   return (
-    <div className={cn("lender-carousel relative overflow-hidden", premium && "lender-carousel-premium", className)}>
+    <div
+      className={cn(
+        "lender-carousel relative overflow-hidden",
+        premium && "lender-carousel-premium",
+        className
+      )}
+    >
       <div
         className={cn(
           "pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r to-transparent",

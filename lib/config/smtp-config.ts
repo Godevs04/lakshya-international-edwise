@@ -6,9 +6,7 @@ function trim(value: string | undefined): string | undefined {
 
 export function isSmtpConfigured(): boolean {
   return Boolean(
-    trim(process.env.SMTP_HOST) &&
-      trim(process.env.SMTP_USER) &&
-      trim(process.env.SMTP_PASS)
+    trim(process.env.SMTP_HOST) && trim(process.env.SMTP_USER) && trim(process.env.SMTP_PASS)
   );
 }
 

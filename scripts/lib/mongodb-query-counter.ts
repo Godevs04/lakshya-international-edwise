@@ -22,11 +22,7 @@ export function createQueryCounter() {
   };
 }
 
-export function countByCollectionMethod(
-  slice: DbOp[],
-  collection: string,
-  method: string
-): number {
+export function countByCollectionMethod(slice: DbOp[], collection: string, method: string): number {
   return slice.filter((op) => op.collection === collection && op.method === method).length;
 }
 

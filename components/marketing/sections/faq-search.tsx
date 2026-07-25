@@ -63,10 +63,7 @@ function FaqSearchContent({ items }: { items: MarketingFaq[] }) {
             type="button"
             role="tab"
             aria-selected={category === item}
-            className={cn(
-              "faq-category-chip",
-              category === item && "faq-category-chip-active"
-            )}
+            className={cn("faq-category-chip", category === item && "faq-category-chip-active")}
             onClick={() => {
               setCategory(item);
               setOpenIndex(null);

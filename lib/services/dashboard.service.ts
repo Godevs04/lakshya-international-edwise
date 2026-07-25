@@ -69,13 +69,7 @@ interface ApplicationDashboardAggregateRow {
 }
 
 function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
-  const {
-    todayStart,
-    yesterdayStart,
-    monthStart,
-    lastMonthStart,
-    lastMonthEnd,
-  } = bounds;
+  const { todayStart, yesterdayStart, monthStart, lastMonthStart, lastMonthEnd } = bounds;
 
   return [
     { $match: excludeAdmissionLeadsFilter() },
@@ -100,10 +94,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: {
             $cond: [
               {
-                $and: [
-                  { $eq: ["$status", "disbursed"] },
-                  { $gte: ["$updatedAt", todayStart] },
-                ],
+                $and: [{ $eq: ["$status", "disbursed"] }, { $gte: ["$updatedAt", todayStart] }],
               },
               { $ifNull: ["$loan.disbursed", 0] },
               0,
@@ -148,10 +139,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: {
             $cond: [
               {
-                $and: [
-                  { $eq: ["$status", "sanctioned"] },
-                  { $gte: ["$updatedAt", monthStart] },
-                ],
+                $and: [{ $eq: ["$status", "sanctioned"] }, { $gte: ["$updatedAt", monthStart] }],
               },
               1,
               0,
@@ -177,10 +165,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: {
             $cond: [
               {
-                $and: [
-                  { $eq: ["$status", "disbursed"] },
-                  { $gte: ["$updatedAt", monthStart] },
-                ],
+                $and: [{ $eq: ["$status", "disbursed"] }, { $gte: ["$updatedAt", monthStart] }],
               },
               1,
               0,
@@ -206,10 +191,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: {
             $cond: [
               {
-                $and: [
-                  { $eq: ["$status", "rejected"] },
-                  { $gte: ["$updatedAt", monthStart] },
-                ],
+                $and: [{ $eq: ["$status", "rejected"] }, { $gte: ["$updatedAt", monthStart] }],
               },
               1,
               0,
@@ -233,11 +215,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
         },
         loanThisMonth: {
           $sum: {
-            $cond: [
-              { $gte: ["$updatedAt", monthStart] },
-              { $ifNull: ["$loan.sanctioned", 0] },
-              0,
-            ],
+            $cond: [{ $gte: ["$updatedAt", monthStart] }, { $ifNull: ["$loan.sanctioned", 0] }, 0],
           },
         },
         loanLastMonth: {
@@ -258,10 +236,7 @@ function buildStudentDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: {
             $cond: [
               {
-                $and: [
-                  { $eq: ["$status", "disbursed"] },
-                  { $gte: ["$updatedAt", todayStart] },
-                ],
+                $and: [{ $eq: ["$status", "disbursed"] }, { $gte: ["$updatedAt", todayStart] }],
               },
               { $ifNull: ["$loan.disbursed", 0] },
               0,
@@ -302,10 +277,7 @@ function buildPartnerDashboardPipeline(bounds: DashboardDateBounds) {
           $sum: {
             $cond: [
               {
-                $and: [
-                  { $eq: ["$status", "active"] },
-                  { $gte: ["$createdAt", monthStart] },
-                ],
+                $and: [{ $eq: ["$status", "active"] }, { $gte: ["$createdAt", monthStart] }],
               },
               1,
               0,
@@ -404,18 +376,36 @@ function mapDashboardCoreStats(
   };
 
   const trends: DashboardMetricTrends = {
-    totalStudents: formatMetricTrend(students.studentsThisMonth ?? 0, students.studentsLastMonth ?? 0),
-    newStudentsToday: formatMetricTrend(students.studentsToday ?? 0, students.studentsYesterday ?? 0),
-    totalPartners: formatMetricTrend(partners.partnersThisMonth ?? 0, partners.partnersLastMonth ?? 0),
+    totalStudents: formatMetricTrend(
+      students.studentsThisMonth ?? 0,
+      students.studentsLastMonth ?? 0
+    ),
+    newStudentsToday: formatMetricTrend(
+      students.studentsToday ?? 0,
+      students.studentsYesterday ?? 0
+    ),
+    totalPartners: formatMetricTrend(
+      partners.partnersThisMonth ?? 0,
+      partners.partnersLastMonth ?? 0
+    ),
     pendingApplications: formatMetricTrend(
       applications.pendingApplications ?? 0,
       applications.pendingLastMonth ?? 0
     ),
-    sanctioned: formatMetricTrend(students.sanctionedThisMonth ?? 0, students.sanctionedLastMonth ?? 0),
-    disbursed: formatMetricTrend(students.disbursedThisMonth ?? 0, students.disbursedLastMonth ?? 0),
+    sanctioned: formatMetricTrend(
+      students.sanctionedThisMonth ?? 0,
+      students.sanctionedLastMonth ?? 0
+    ),
+    disbursed: formatMetricTrend(
+      students.disbursedThisMonth ?? 0,
+      students.disbursedLastMonth ?? 0
+    ),
     rejected: formatMetricTrend(students.rejectedThisMonth ?? 0, students.rejectedLastMonth ?? 0),
     totalLoanAmount: formatMetricTrend(students.loanThisMonth ?? 0, students.loanLastMonth ?? 0),
-    todaysCollection: formatMetricTrend(students.collectionToday ?? 0, students.collectionYesterday ?? 0),
+    todaysCollection: formatMetricTrend(
+      students.collectionToday ?? 0,
+      students.collectionYesterday ?? 0
+    ),
   };
 
   return { metrics, trends };
@@ -433,7 +423,9 @@ export async function getDashboardCoreStats(): Promise<DashboardCoreStats> {
   const [studentRows, partnerRows, applicationRows] = await Promise.all([
     Student.aggregate<StudentDashboardAggregateRow>(buildStudentDashboardPipeline(bounds)),
     Partner.aggregate<PartnerDashboardAggregateRow>(buildPartnerDashboardPipeline(bounds)),
-    Application.aggregate<ApplicationDashboardAggregateRow>(buildApplicationDashboardPipeline(bounds)),
+    Application.aggregate<ApplicationDashboardAggregateRow>(
+      buildApplicationDashboardPipeline(bounds)
+    ),
   ]);
 
   return mapDashboardCoreStats(studentRows[0], partnerRows[0], applicationRows[0]);
@@ -550,10 +542,7 @@ export async function getLatestStudents(limit = 5, user?: SessionUser | null) {
 
 export async function getLatestPartners(limit = 5) {
   await connectDB();
-  return Partner.find(officialPartnersFilter())
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .lean();
+  return Partner.find(officialPartnersFilter()).sort({ createdAt: -1 }).limit(limit).lean();
 }
 
 export async function getUpcomingFollowups(limit = 5, user?: SessionUser | null) {

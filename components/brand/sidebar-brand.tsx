@@ -57,14 +57,10 @@ export function SidebarBrand({
             <motion.span
               className="mt-0.5 inline-flex shrink-0"
               animate={
-                reducedMotion
-                  ? undefined
-                  : { opacity: [0.45, 1, 0.45], scale: [0.95, 1.05, 0.95] }
+                reducedMotion ? undefined : { opacity: [0.45, 1, 0.45], scale: [0.95, 1.05, 0.95] }
               }
               transition={
-                reducedMotion
-                  ? undefined
-                  : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+                reducedMotion ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
               }
             >
               <Sparkles className="h-3 w-3 text-primary" aria-hidden />

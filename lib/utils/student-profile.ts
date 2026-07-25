@@ -21,7 +21,10 @@ export interface StudentProfileCompleteness {
   missingFields: string[];
 }
 
-const PROFILE_FIELD_CHECKS: Array<{ label: string; check: (student: StudentProfileInput) => boolean }> = [
+const PROFILE_FIELD_CHECKS: Array<{
+  label: string;
+  check: (student: StudentProfileInput) => boolean;
+}> = [
   { label: "Phone", check: (s) => Boolean(s.phone?.trim() || s.whatsapp?.trim()) },
   { label: "Email", check: (s) => Boolean(s.email?.trim()) },
   { label: "Target country", check: (s) => Boolean(s.targetCountry?.trim()) },

@@ -1,10 +1,7 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { Partner } from "@/models/Partner";
 import { Activity } from "@/models/Activity";
-import {
-  SITE_LEAD_PROMOTION_STATUS,
-  SITE_LEAD_SOURCE,
-} from "@/lib/constants/site-leads";
+import { SITE_LEAD_PROMOTION_STATUS, SITE_LEAD_SOURCE } from "@/lib/constants/site-leads";
 import { allocateWebsitePartnerLeadCode } from "@/lib/services/partner-id.service";
 
 /** Pending website partner rows missing inbox metadata or owner/WhatsApp fields. */

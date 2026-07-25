@@ -219,7 +219,7 @@ export function AdmissionsTable({
             <Label htmlFor="admission-filter-country">Country</Label>
             <Select
               value={countryFilter || "all"}
-              onValueChange={(value) => setCountryFilter(value === "all" ? "" : value ?? "")}
+              onValueChange={(value) => setCountryFilter(value === "all" ? "" : (value ?? ""))}
             >
               <SelectTrigger id="admission-filter-country" className="w-full">
                 <SelectValue placeholder="All countries" />
@@ -239,7 +239,7 @@ export function AdmissionsTable({
             <Label htmlFor="admission-filter-intake">Intake</Label>
             <Select
               value={intakeFilter || "all"}
-              onValueChange={(value) => setIntakeFilter(value === "all" ? "" : value ?? "")}
+              onValueChange={(value) => setIntakeFilter(value === "all" ? "" : (value ?? ""))}
             >
               <SelectTrigger id="admission-filter-intake" className="w-full">
                 <SelectValue placeholder="All intakes" />
@@ -349,7 +349,10 @@ export function AdmissionsTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={canWrite ? (canViewRevenue ? 7 : 6) : canViewRevenue ? 6 : 5} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={canWrite ? (canViewRevenue ? 7 : 6) : canViewRevenue ? 6 : 5}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   No admission records found.
                 </TableCell>
               </TableRow>
@@ -363,7 +366,12 @@ export function AdmissionsTable({
           {total} admission record{total === 1 ? "" : "s"}
         </span>
         <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => goToPage(page - 1)}
+          >
             Previous
           </Button>
           <span className="flex items-center px-2">

@@ -7,11 +7,7 @@ import {
 } from "@/components/marketing/eligibility/eligibility-modal-context";
 import { EligibilityModal } from "@/components/marketing/eligibility/eligibility-modal";
 
-export function EligibilityModalProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function EligibilityModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<EligibilityModalOptions>({});
   const optionsRef = useRef<EligibilityModalOptions>({});

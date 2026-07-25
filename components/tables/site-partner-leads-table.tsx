@@ -16,12 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,7 +96,8 @@ export function SitePartnerLeadsTable({
   const [promoteOpen, setPromoteOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeLead, setActiveLead] = useState<SitePartnerLeadListItem | null>(null);
-  const [detailLead, setDetailLead] = useState<Awaited<ReturnType<typeof getSitePartnerLeadById>>>(null);
+  const [detailLead, setDetailLead] =
+    useState<Awaited<ReturnType<typeof getSitePartnerLeadById>>>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
@@ -314,7 +310,12 @@ export function SitePartnerLeadsTable({
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
-                      <Button type="button" variant="ghost" size="sm" onClick={() => openView(lead)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openView(lead)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                       {canWrite ? (
@@ -381,7 +382,10 @@ export function SitePartnerLeadsTable({
       </div>
 
       <Sheet open={viewOpen} onOpenChange={setViewOpen}>
-        <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg">
+        <SheetContent
+          side="right"
+          className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg"
+        >
           <SheetHeader className="border-b border-border/60 px-4 py-4 pr-12">
             <SheetTitle>Partner lead details</SheetTitle>
           </SheetHeader>

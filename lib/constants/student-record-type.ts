@@ -3,8 +3,7 @@ export const STUDENT_RECORD_TYPE = {
   ADMISSION: "lead",
 } as const;
 
-export type StudentRecordType =
-  (typeof STUDENT_RECORD_TYPE)[keyof typeof STUDENT_RECORD_TYPE];
+export type StudentRecordType = (typeof STUDENT_RECORD_TYPE)[keyof typeof STUDENT_RECORD_TYPE];
 
 /** Mongo filter for full student profiles (excludes admission leads). */
 export function excludeAdmissionLeadsFilter() {
@@ -20,4 +19,7 @@ export function isAdmissionLead(recordType?: string | null): boolean {
   return recordType === STUDENT_RECORD_TYPE.ADMISSION;
 }
 
-export { websitePendingStudentLeadsFilter, manualAdmissionLeadsFilter } from "@/lib/constants/site-leads";
+export {
+  websitePendingStudentLeadsFilter,
+  manualAdmissionLeadsFilter,
+} from "@/lib/constants/site-leads";

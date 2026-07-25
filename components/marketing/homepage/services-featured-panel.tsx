@@ -63,7 +63,11 @@ export function ServicesFeaturedPanel() {
       <FloatingIcon className="services-bento-float-icon services-bento-float-icon-2" delay={0.8}>
         <svg viewBox="0 0 24 24" fill="none" className="h-full w-full">
           <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="currentColor" strokeWidth="1.5" />
+          <path
+            d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
         </svg>
       </FloatingIcon>
       <FloatingIcon className="services-bento-float-icon services-bento-float-icon-3" delay={1.4}>
@@ -112,9 +116,7 @@ export function ServicesFeaturedPanel() {
                 </div>
                 <div className="services-bento-dashboard-lender-copy">
                   <span className="services-bento-dashboard-name">{lender.name}</span>
-                  <span className="services-bento-dashboard-roi">
-                    ROI from {lender.roiFrom}%
-                  </span>
+                  <span className="services-bento-dashboard-roi">ROI from {lender.roiFrom}%</span>
                 </div>
               </div>
               <span className="services-bento-dashboard-status">Matched</span>

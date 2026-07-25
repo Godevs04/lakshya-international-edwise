@@ -77,357 +77,368 @@ async function notifyPermissionRefresh(targetUserId: string, title: string, body
 }
 
 export async function getSettings(): Promise<AppSettings> {
-  return runLoggedQuery("getSettings", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.SETTINGS_READ);
+  return runLoggedQuery(
+    "getSettings",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.SETTINGS_READ);
 
-  await connectDB();
-  const defaults = getDefaultSettings();
-  let settings = await Settings.findOne().lean();
-  if (!settings) {
-    const created = await Settings.create(defaults);
-    settings = created.toObject();
-  }
+      await connectDB();
+      const defaults = getDefaultSettings();
+      let settings = await Settings.findOne().lean();
+      if (!settings) {
+        const created = await Settings.create(defaults);
+        settings = created.toObject();
+      }
 
-  const modules = settings.modules ?? defaults.modules;
-  const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
+      const modules = settings.modules ?? defaults.modules;
+      const allModulesDisabled = Object.values(modules).every((enabled) => !enabled);
 
-  return {
-    company: resolveCompanySettings(settings.company),
-    theme: {
-      ...defaults.theme,
-      ...settings.theme,
-      primary: settings.theme?.primary?.trim() || defaults.theme.primary,
-      accent: settings.theme?.accent?.trim() || defaults.theme.accent,
-      radius: settings.theme?.radius?.trim() || defaults.theme.radius,
+      return {
+        company: resolveCompanySettings(settings.company),
+        theme: {
+          ...defaults.theme,
+          ...settings.theme,
+          primary: settings.theme?.primary?.trim() || defaults.theme.primary,
+          accent: settings.theme?.accent?.trim() || defaults.theme.accent,
+          radius: settings.theme?.radius?.trim() || defaults.theme.radius,
+        },
+        modules: allModulesDisabled ? defaults.modules : { ...defaults.modules, ...modules },
+        sessionExpiryHours: settings.sessionExpiryHours ?? defaults.sessionExpiryHours,
+      };
     },
-    modules: allModulesDisabled ? defaults.modules : { ...defaults.modules, ...modules },
-    sessionExpiryHours: settings.sessionExpiryHours ?? defaults.sessionExpiryHours,
-  };
-  }, getDefaultSettings());
+    getDefaultSettings()
+  );
 }
 
 function parseModuleFlag(value: FormDataEntryValue | null): boolean {
   return value === "true" || value === "on";
 }
 
-export async function updateSettingsAction(
-  formData: FormData
-): Promise<ActionResult> {
+export async function updateSettingsAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("updateSettingsAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.SETTINGS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.SETTINGS_WRITE);
 
-  const section = (formData.get("settingsSection") as string) || "company";
-  const raw = Object.fromEntries(formData.entries());
+    const section = (formData.get("settingsSection") as string) || "company";
+    const raw = Object.fromEntries(formData.entries());
 
-  await connectDB();
-  const defaults = getDefaultSettings();
+    await connectDB();
+    const defaults = getDefaultSettings();
 
-  if (section === "company") {
-    const parsed = settingsSchema.safeParse({
-      companyName: raw.companyName,
-      companyEmail: raw.companyEmail,
-      companyPhone: raw.companyPhone,
-      companyAddress: raw.companyAddress,
-      companyLogo: raw.companyLogo,
-    });
-    if (!parsed.success) {
-      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-    }
-    const data = parsed.data;
+    if (section === "company") {
+      const parsed = settingsSchema.safeParse({
+        companyName: raw.companyName,
+        companyEmail: raw.companyEmail,
+        companyPhone: raw.companyPhone,
+        companyAddress: raw.companyAddress,
+        companyLogo: raw.companyLogo,
+      });
+      if (!parsed.success) {
+        return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+      }
+      const data = parsed.data;
 
-    const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "settings");
-    if (!logoCheck.valid) {
-      return { success: false, error: logoCheck.error };
-    }
+      const logoCheck = validateOptionalCloudinaryUrl(data.companyLogo, "settings");
+      if (!logoCheck.valid) {
+        return { success: false, error: logoCheck.error };
+      }
 
-    await Settings.findOneAndUpdate(
-      {},
-      {
-        $set: {
-          company: {
-            name: data.companyName,
-            email: normalizeSupportEmail(data.companyEmail ?? ""),
-            phone: data.companyPhone ?? "",
-            address: data.companyAddress ?? "",
-            logo: data.companyLogo ?? "",
+      await Settings.findOneAndUpdate(
+        {},
+        {
+          $set: {
+            company: {
+              name: data.companyName,
+              email: normalizeSupportEmail(data.companyEmail ?? ""),
+              phone: data.companyPhone ?? "",
+              address: data.companyAddress ?? "",
+              logo: data.companyLogo ?? "",
+            },
           },
         },
-      },
-      { upsert: true }
-    );
-  } else if (section === "modules") {
-    await Settings.findOneAndUpdate(
-      {},
-      {
-        $set: {
-          modules: {
-            students: parseModuleFlag(formData.get("modulesStudents")),
-            partners: parseModuleFlag(formData.get("modulesPartners")),
-            applications: parseModuleFlag(formData.get("modulesApplications")),
-            lenders: parseModuleFlag(formData.get("modulesLenders")),
-            tasks: parseModuleFlag(formData.get("modulesTasks")),
-            reports: parseModuleFlag(formData.get("modulesReports")),
-            analytics: parseModuleFlag(formData.get("modulesAnalytics")),
+        { upsert: true }
+      );
+    } else if (section === "modules") {
+      await Settings.findOneAndUpdate(
+        {},
+        {
+          $set: {
+            modules: {
+              students: parseModuleFlag(formData.get("modulesStudents")),
+              partners: parseModuleFlag(formData.get("modulesPartners")),
+              applications: parseModuleFlag(formData.get("modulesApplications")),
+              lenders: parseModuleFlag(formData.get("modulesLenders")),
+              tasks: parseModuleFlag(formData.get("modulesTasks")),
+              reports: parseModuleFlag(formData.get("modulesReports")),
+              analytics: parseModuleFlag(formData.get("modulesAnalytics")),
+            },
           },
         },
-      },
-      { upsert: true }
-    );
-  } else if (section === "security") {
-    const parsed = settingsSchema.safeParse({
-      sessionExpiryHours: raw.sessionExpiryHours,
-    });
-    if (!parsed.success) {
-      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+        { upsert: true }
+      );
+    } else if (section === "security") {
+      const parsed = settingsSchema.safeParse({
+        sessionExpiryHours: raw.sessionExpiryHours,
+      });
+      if (!parsed.success) {
+        return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+      }
+      await Settings.findOneAndUpdate(
+        {},
+        {
+          $set: {
+            sessionExpiryHours: parsed.data.sessionExpiryHours ?? defaults.sessionExpiryHours,
+          },
+        },
+        { upsert: true }
+      );
+    } else {
+      return { success: false, error: "Invalid settings section" };
     }
-    await Settings.findOneAndUpdate(
-      {},
-      { $set: { sessionExpiryHours: parsed.data.sessionExpiryHours ?? defaults.sessionExpiryHours } },
-      { upsert: true }
-    );
-  } else {
-    return { success: false, error: "Invalid settings section" };
-  }
 
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard");
-  updateTag(APP_CONFIG_CACHE_TAG);
-  await logSettingsActivity(user!, `Updated ${section} settings`, section, { section });
-  return { success: true };
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard");
+    updateTag(APP_CONFIG_CACHE_TAG);
+    await logSettingsActivity(user!, `Updated ${section} settings`, section, { section });
+    return { success: true };
   });
 }
 
 export async function getUsers() {
-  return runLoggedQuery("getUsers", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_READ);
+  return runLoggedQuery(
+    "getUsers",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.USERS_READ);
 
-  await connectDB();
-  return User.find().select("-passwordHash -resetToken -verifyToken -emailOtpHash").sort({ createdAt: -1 }).lean();
-  }, []);
+      await connectDB();
+      return User.find()
+        .select("-passwordHash -resetToken -verifyToken -emailOtpHash")
+        .sort({ createdAt: -1 })
+        .lean();
+    },
+    []
+  );
 }
 
 export async function getPendingUsers() {
-  return runLoggedQuery("getPendingUsers", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_READ);
+  return runLoggedQuery(
+    "getPendingUsers",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.USERS_READ);
 
-  await connectDB();
-  return User.find({ status: "pending", isVerified: true })
-    .select("-passwordHash -resetToken -verifyToken -emailOtpHash")
-    .sort({ createdAt: 1 })
-    .lean();
-  }, []);
+      await connectDB();
+      return User.find({ status: "pending", isVerified: true })
+        .select("-passwordHash -resetToken -verifyToken -emailOtpHash")
+        .sort({ createdAt: 1 })
+        .lean();
+    },
+    []
+  );
 }
 
-export async function approveUserAction(
-  userId: string,
-  role: UserRole
-): Promise<ActionResult> {
+export async function approveUserAction(userId: string, role: UserRole): Promise<ActionResult> {
   return runLoggedMutation("approveUserAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.USERS_WRITE);
 
-  if (role === "super_admin") {
-    return { success: false, error: "Cannot assign super admin role via approval" };
-  }
+    if (role === "super_admin") {
+      return { success: false, error: "Cannot assign super admin role via approval" };
+    }
 
-  await connectDB();
-  const pendingUser = await User.findById(userId);
-  if (!pendingUser) {
-    return { success: false, error: "User not found" };
-  }
-  if (pendingUser.status !== "pending" || !pendingUser.isVerified) {
-    return { success: false, error: "User is not eligible for approval" };
-  }
+    await connectDB();
+    const pendingUser = await User.findById(userId);
+    if (!pendingUser) {
+      return { success: false, error: "User not found" };
+    }
+    if (pendingUser.status !== "pending" || !pendingUser.isVerified) {
+      return { success: false, error: "User is not eligible for approval" };
+    }
 
-  pendingUser.status = "active";
-  pendingUser.role = role;
-  await pendingUser.save();
+    pendingUser.status = "active";
+    pendingUser.role = role;
+    await pendingUser.save();
 
-  const { sendApprovalEmail } = await import("@/lib/services/email.service");
-  const { ROLE_LABELS } = await import("@/lib/constants/permissions");
-  await sendApprovalEmail(pendingUser.email, pendingUser.name, ROLE_LABELS[role]);
+    const { sendApprovalEmail } = await import("@/lib/services/email.service");
+    const { ROLE_LABELS } = await import("@/lib/constants/permissions");
+    await sendApprovalEmail(pendingUser.email, pendingUser.name, ROLE_LABELS[role]);
 
-  await createNotification({
-    userId: pendingUser._id,
-    type: "success",
-    title: "Account approved",
-    body: `Your account has been approved with the ${ROLE_LABELS[role]} role.`,
-    link: "/login",
-  });
+    await createNotification({
+      userId: pendingUser._id,
+      type: "success",
+      title: "Account approved",
+      body: `Your account has been approved with the ${ROLE_LABELS[role]} role.`,
+      link: "/login",
+    });
 
-  await logUserActivity(
-    user!,
-    "user.approved",
-    `Approved user ${pendingUser.email} as ${role}`,
-    pendingUser._id.toString(),
-    { role, email: pendingUser.email }
-  );
+    await logUserActivity(
+      user!,
+      "user.approved",
+      `Approved user ${pendingUser.email} as ${role}`,
+      pendingUser._id.toString(),
+      { role, email: pendingUser.email }
+    );
 
-  revalidatePath("/dashboard/settings");
-  return { success: true };
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
 }
 
 export async function rejectUserAction(userId: string): Promise<ActionResult> {
   return runLoggedMutation("rejectUserAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.USERS_WRITE);
 
-  if (user?.id === userId) {
-    return { success: false, error: "Cannot reject your own account" };
-  }
+    if (user?.id === userId) {
+      return { success: false, error: "Cannot reject your own account" };
+    }
 
-  await connectDB();
-  const pendingUser = await User.findById(userId);
-  if (!pendingUser) {
-    return { success: false, error: "User not found" };
-  }
+    await connectDB();
+    const pendingUser = await User.findById(userId);
+    if (!pendingUser) {
+      return { success: false, error: "User not found" };
+    }
 
-  pendingUser.status = "inactive";
-  await pendingUser.save();
+    pendingUser.status = "inactive";
+    await pendingUser.save();
 
-  await createNotification({
-    userId: pendingUser._id,
-    type: "warning",
-    title: "Registration declined",
-    body: "Your registration request was not approved. Contact your administrator for details.",
-  });
+    await createNotification({
+      userId: pendingUser._id,
+      type: "warning",
+      title: "Registration declined",
+      body: "Your registration request was not approved. Contact your administrator for details.",
+    });
 
-  await logUserActivity(
-    user!,
-    "user.rejected",
-    `Rejected user ${pendingUser.email}`,
-    pendingUser._id.toString(),
-    { email: pendingUser.email }
-  );
+    await logUserActivity(
+      user!,
+      "user.rejected",
+      `Rejected user ${pendingUser.email}`,
+      pendingUser._id.toString(),
+      { email: pendingUser.email }
+    );
 
-  revalidatePath("/dashboard/settings");
-  return { success: true };
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
 }
 
 export async function createUserAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("createUserAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.USERS_WRITE);
 
-  const email = formData.get("email") as string;
-  const name = formData.get("name") as string;
-  const password = formData.get("password") as string;
-  const role = formData.get("role") as UserRole;
+    const email = formData.get("email") as string;
+    const name = formData.get("name") as string;
+    const password = formData.get("password") as string;
+    const role = formData.get("role") as UserRole;
 
-  if (!email || !name || !password) {
-    return { success: false, error: "All fields are required" };
-  }
+    if (!email || !name || !password) {
+      return { success: false, error: "All fields are required" };
+    }
 
-  if (role === "super_admin") {
-    return { success: false, error: "Cannot assign super admin role" };
-  }
+    if (role === "super_admin") {
+      return { success: false, error: "Cannot assign super admin role" };
+    }
 
-  if (role === "admin" && user?.role !== "super_admin") {
-    return { success: false, error: "Only super admin can create admin users" };
-  }
+    if (role === "admin" && user?.role !== "super_admin") {
+      return { success: false, error: "Only super admin can create admin users" };
+    }
 
-  await connectDB();
-  const existing = await User.findOne({ email: email.toLowerCase() });
-  if (existing) return { success: false, error: "Email already exists" };
+    await connectDB();
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) return { success: false, error: "Email already exists" };
 
-  const passwordHash = await bcrypt.hash(password, 12);
-  const permissionFields = parsePermissionFieldsFromForm(formData);
-  await User.create({
-    email: email.toLowerCase(),
-    name,
-    passwordHash,
-    role: role ?? "staff",
-    isVerified: true,
-    status: "active",
-    useCustomPermissions: permissionFields.useCustomPermissions,
-    customPermissions: permissionFields.customPermissions,
-  });
+    const passwordHash = await bcrypt.hash(password, 12);
+    const permissionFields = parsePermissionFieldsFromForm(formData);
+    await User.create({
+      email: email.toLowerCase(),
+      name,
+      passwordHash,
+      role: role ?? "staff",
+      isVerified: true,
+      status: "active",
+      useCustomPermissions: permissionFields.useCustomPermissions,
+      customPermissions: permissionFields.customPermissions,
+    });
 
-  await logUserActivity(
-    user!,
-    "user.created",
-    `Created user ${email.toLowerCase()} with role ${role ?? "staff"}`,
-    email.toLowerCase(),
-    { role: role ?? "staff", email: email.toLowerCase() }
-  );
+    await logUserActivity(
+      user!,
+      "user.created",
+      `Created user ${email.toLowerCase()} with role ${role ?? "staff"}`,
+      email.toLowerCase(),
+      { role: role ?? "staff", email: email.toLowerCase() }
+    );
 
-  revalidatePath("/dashboard/settings");
-  return { success: true };
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
 }
 
-export async function updateUserRoleAction(
-  userId: string,
-  role: UserRole
-): Promise<ActionResult> {
+export async function updateUserRoleAction(userId: string, role: UserRole): Promise<ActionResult> {
   return runLoggedMutation("updateUserRoleAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.USERS_WRITE);
 
-  if (role === "super_admin") {
-    return { success: false, error: "Cannot assign super admin role" };
-  }
+    if (role === "super_admin") {
+      return { success: false, error: "Cannot assign super admin role" };
+    }
 
-  if (role === "admin" && user?.role !== "super_admin") {
-    return { success: false, error: "Only super admin can assign admin role" };
-  }
+    if (role === "admin" && user?.role !== "super_admin") {
+      return { success: false, error: "Only super admin can assign admin role" };
+    }
 
-  await connectDB();
-  const targetUser = await User.findById(userId);
-  if (!targetUser) {
-    return { success: false, error: "User not found" };
-  }
+    await connectDB();
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      return { success: false, error: "User not found" };
+    }
 
-  await User.findByIdAndUpdate(userId, { role });
+    await User.findByIdAndUpdate(userId, { role });
 
-  const { ROLE_LABELS } = await import("@/lib/constants/permissions");
-  await createNotification({
-    userId: targetUser._id,
-    type: "system",
-    title: "Role updated",
-    body: `Your role was changed to ${ROLE_LABELS[role]}. Sign in again for permissions to take full effect.`,
-    link: "/dashboard/profile",
-  });
+    const { ROLE_LABELS } = await import("@/lib/constants/permissions");
+    await createNotification({
+      userId: targetUser._id,
+      type: "system",
+      title: "Role updated",
+      body: `Your role was changed to ${ROLE_LABELS[role]}. Sign in again for permissions to take full effect.`,
+      link: "/dashboard/profile",
+    });
 
-  await logUserActivity(
-    user!,
-    "user.role_updated",
-    `Updated role for ${targetUser.email} to ${role}`,
-    userId,
-    { role, email: targetUser.email }
-  );
-  revalidatePath("/dashboard/settings");
-  return { success: true };
+    await logUserActivity(
+      user!,
+      "user.role_updated",
+      `Updated role for ${targetUser.email} to ${role}`,
+      userId,
+      { role, email: targetUser.email }
+    );
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
 }
 
 export async function deleteUserAction(userId: string): Promise<ActionResult> {
   return runLoggedMutation("deleteUserAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_DELETE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.USERS_DELETE);
 
-  if (user?.id === userId) {
-    return { success: false, error: "Cannot delete your own account" };
-  }
+    if (user?.id === userId) {
+      return { success: false, error: "Cannot delete your own account" };
+    }
 
-  await connectDB();
-  const target = await User.findById(userId).select("email").lean();
-  await User.findByIdAndDelete(userId);
-  await logUserActivity(
-    user!,
-    "user.deleted",
-    `Deleted user ${target?.email ?? userId}`,
-    userId,
-    { email: target?.email }
-  );
-  revalidatePath("/dashboard/settings");
-  return { success: true };
+    await connectDB();
+    const target = await User.findById(userId).select("email").lean();
+    await User.findByIdAndDelete(userId);
+    await logUserActivity(
+      user!,
+      "user.deleted",
+      `Deleted user ${target?.email ?? userId}`,
+      userId,
+      { email: target?.email }
+    );
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
 }
 
@@ -483,13 +494,17 @@ export async function updateUserMenuPermissionsAction(
 }
 
 export async function getRoles() {
-  return runLoggedQuery("getRoles", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.USERS_READ);
+  return runLoggedQuery(
+    "getRoles",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.USERS_READ);
 
-  await connectDB();
-  return Role.find().lean();
-  }, []);
+      await connectDB();
+      return Role.find().lean();
+    },
+    []
+  );
 }
 
 export async function getCurrentUserProfile(): Promise<{
@@ -499,96 +514,104 @@ export async function getCurrentUserProfile(): Promise<{
   avatar?: string;
   role: UserRole;
 } | null> {
-  return runLoggedQuery("getCurrentUserProfile", async () => {
-    const sessionUser = await getSessionUser();
-    if (!sessionUser) return null;
+  return runLoggedQuery(
+    "getCurrentUserProfile",
+    async () => {
+      const sessionUser = await getSessionUser();
+      if (!sessionUser) return null;
 
-    await connectDB();
-    const user = await User.findById(sessionUser.id).select("name email avatar role").lean();
-    if (!user) return null;
+      await connectDB();
+      const user = await User.findById(sessionUser.id).select("name email avatar role").lean();
+      if (!user) return null;
 
-    return {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      role: user.role as UserRole,
-    };
-  }, null);
+      return {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role as UserRole,
+      };
+    },
+    null
+  );
 }
 
 export async function updateProfileAction(
   formData: FormData
 ): Promise<ActionResult<{ name: string; email: string; avatar?: string }>> {
   return runLoggedMutation("updateProfileAction", async () => {
-  const sessionUser = await getSessionUser();
-  if (!sessionUser) return { success: false, error: "Not authenticated" };
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) return { success: false, error: "Not authenticated" };
 
-  const parsed = profileSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    currentPassword: formData.get("currentPassword"),
-    newPassword: formData.get("newPassword"),
-    confirmPassword: formData.get("confirmPassword"),
-  });
+    const parsed = profileSchema.safeParse({
+      name: formData.get("name"),
+      email: formData.get("email"),
+      currentPassword: formData.get("currentPassword"),
+      newPassword: formData.get("newPassword"),
+      confirmPassword: formData.get("confirmPassword"),
+    });
 
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
-
-  await connectDB();
-  const user = await User.findById(sessionUser.id);
-  if (!user) return { success: false, error: "User not found" };
-
-  user.name = parsed.data.name.trim();
-  const nextEmail = parsed.data.email.toLowerCase();
-  if (nextEmail !== user.email) {
-    const emailTaken = await User.findOne({ email: nextEmail, _id: { $ne: user._id } }).lean();
-    if (emailTaken) {
-      return { success: false, error: "Email is already in use" };
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
     }
-  }
-  user.email = nextEmail;
 
-  if (parsed.data.newPassword) {
-    if (!parsed.data.currentPassword) {
-      return { success: false, error: "Current password is required" };
+    await connectDB();
+    const user = await User.findById(sessionUser.id);
+    if (!user) return { success: false, error: "User not found" };
+
+    user.name = parsed.data.name.trim();
+    const nextEmail = parsed.data.email.toLowerCase();
+    if (nextEmail !== user.email) {
+      const emailTaken = await User.findOne({ email: nextEmail, _id: { $ne: user._id } }).lean();
+      if (emailTaken) {
+        return { success: false, error: "Email is already in use" };
+      }
     }
-    const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
-    if (!valid) return { success: false, error: "Current password is incorrect" };
-    if (parsed.data.newPassword !== parsed.data.confirmPassword) {
-      return { success: false, error: "Passwords don't match" };
+    user.email = nextEmail;
+
+    if (parsed.data.newPassword) {
+      if (!parsed.data.currentPassword) {
+        return { success: false, error: "Current password is required" };
+      }
+      const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
+      if (!valid) return { success: false, error: "Current password is incorrect" };
+      if (parsed.data.newPassword !== parsed.data.confirmPassword) {
+        return { success: false, error: "Passwords don't match" };
+      }
+      user.passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
     }
-    user.passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
-  }
 
-  await user.save();
+    await user.save();
 
-  await logUserActivity(
-    sessionUser,
-    "user.profile_updated",
-    `Profile updated for ${user.email}`,
-    user._id.toString(),
-    { passwordChanged: Boolean(parsed.data.newPassword), email: user.email }
-  );
+    await logUserActivity(
+      sessionUser,
+      "user.profile_updated",
+      `Profile updated for ${user.email}`,
+      user._id.toString(),
+      { passwordChanged: Boolean(parsed.data.newPassword), email: user.email }
+    );
 
-  revalidatePath("/dashboard/profile");
-  return {
-    success: true,
-    data: {
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-    },
-  };
+    revalidatePath("/dashboard/profile");
+    return {
+      success: true,
+      data: {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    };
   });
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
-  return runLoggedQuery("getUnreadNotificationCount", async () => {
-  const user = await getSessionUser();
-  if (!user) return 0;
-  const { getUnreadCount } = await import("@/lib/services/notification.service");
-  return getUnreadCount(user.id);
-  }, 0);
+  return runLoggedQuery(
+    "getUnreadNotificationCount",
+    async () => {
+      const user = await getSessionUser();
+      if (!user) return 0;
+      const { getUnreadCount } = await import("@/lib/services/notification.service");
+      return getUnreadCount(user.id);
+    },
+    0
+  );
 }

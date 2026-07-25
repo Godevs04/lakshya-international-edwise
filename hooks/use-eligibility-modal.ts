@@ -6,9 +6,7 @@ import { EligibilityModalContext } from "@/components/marketing/eligibility/elig
 export function useEligibilityModal() {
   const context = useContext(EligibilityModalContext);
   if (!context) {
-    throw new Error(
-      "useEligibilityModal must be used within an EligibilityModalProvider"
-    );
+    throw new Error("useEligibilityModal must be used within an EligibilityModalProvider");
   }
   return context;
 }

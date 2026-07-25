@@ -64,7 +64,11 @@ import {
 import type { DisbursementType } from "@/lib/constants/disbursement";
 import { getWinningLoanApplication } from "@/lib/constants/loan-application";
 import { isStudentProfileVerified } from "@/lib/utils/student-profile";
-import { resolveLenderIdBySlug, resolveLenderNameBySlug, getLenderSlugById } from "@/lib/services/lender.service";
+import {
+  resolveLenderIdBySlug,
+  resolveLenderNameBySlug,
+  getLenderSlugById,
+} from "@/lib/services/lender.service";
 import {
   addStudentLoanApplication,
   buildInitialLoanApplications,
@@ -109,15 +113,17 @@ function inaccessibleStudentResult(): ActionResult<never> {
 }
 
 type StudentAccessGuard<T extends StudentAccessRecord> =
-  | { allowed: false; error: ActionResult<never> }
-  | { allowed: true; student: T };
+  { allowed: false; error: ActionResult<never> } | { allowed: true; student: T };
 
 function guardStudentAccess<T extends StudentAccessRecord>(
   user: Awaited<ReturnType<typeof getSessionUser>>,
   student: T | null | undefined
 ): StudentAccessGuard<T> {
   if (!student) {
-    return { allowed: false, error: { success: false, error: "Student not found" } as ActionResult<never> };
+    return {
+      allowed: false,
+      error: { success: false, error: "Student not found" } as ActionResult<never>,
+    };
   }
   if (!canAccessStudent(user, student)) {
     return { allowed: false, error: inaccessibleStudentResult() };
@@ -162,10 +168,7 @@ async function buildLoanFields(
     requested: data.loanRequested ?? 0,
     sanctioned: data.loanSanctioned ?? 0,
     disbursed: nextDisbursed,
-    disbursedAt:
-      nextDisbursed > 0
-        ? existing?.disbursedAt ?? new Date()
-        : undefined,
+    disbursedAt: nextDisbursed > 0 ? (existing?.disbursedAt ?? new Date()) : undefined,
     disbursementType: nextDisbursed > 0 ? disbursementType : undefined,
     currency: data.loanCurrency ?? "INR",
     lenderId: lenderObjectId,
@@ -179,23 +182,27 @@ async function buildLoanFields(
 }
 
 export async function getAssignableUsers() {
-  return runLoggedQuery("getAssignableUsers", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_READ);
+  return runLoggedQuery(
+    "getAssignableUsers",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
-    await connectDB();
-    const users = await User.find({ status: "active" })
-      .select("name email role")
-      .sort({ name: 1 })
-      .lean();
+      await connectDB();
+      const users = await User.find({ status: "active" })
+        .select("name email role")
+        .sort({ name: 1 })
+        .lean();
 
-    return users.map((entry) => ({
-      _id: entry._id.toString(),
-      name: entry.name,
-      email: entry.email,
-      role: entry.role,
-    }));
-  }, []);
+      return users.map((entry) => ({
+        _id: entry._id.toString(),
+        name: entry.name,
+        email: entry.email,
+        role: entry.role,
+      }));
+    },
+    []
+  );
 }
 
 type CheckStudentPhoneData = {
@@ -290,351 +297,377 @@ export async function getStudents(params: {
   bank?: string;
   mine?: boolean;
 }): Promise<PaginatedResult<StudentListItem>> {
-  return runLoggedQuery("getStudents", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_READ);
+  return runLoggedQuery(
+    "getStudents",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
-  await connectDB();
-  const page = params.page ?? 1;
-  const pageSize = params.pageSize ?? 10;
-  const skip = (page - 1) * pageSize;
+      await connectDB();
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-  const filter: Record<string, unknown> = {
-    ...excludeAdmissionLeadsFilter(),
-  };
-
-  const andClauses: Record<string, unknown>[] = [];
-
-  if (params.search) {
-    const regex = toSafeRegExp(params.search);
-    andClauses.push({
-      $or: [
-        { firstName: regex },
-        { lastName: regex },
-        { phone: regex },
-        { email: regex },
-        { studentId: regex },
-      ],
-    });
-  }
-  const statusFilter = parseStatusFilter(params.status);
-  if (statusFilter.length === 1) {
-    filter.status = statusFilter[0];
-  } else if (statusFilter.length > 1) {
-    filter.status = { $in: statusFilter };
-  } else {
-    const workflowFilter = buildWorkflowMongoFilter(params.workflow);
-    if (workflowFilter) {
-      Object.assign(filter, workflowFilter);
-    }
-  }
-  if (params.lenderId) {
-    const resolvedLenderId = await resolveLenderIdBySlug(params.lenderId);
-    if (resolvedLenderId) {
-      filter["loan.lenderId"] = resolvedLenderId;
-    }
-  }
-  if (params.partnerId) filter.partnerId = new Types.ObjectId(params.partnerId);
-  if (params.assignedToId) filter.assignedTo = new Types.ObjectId(params.assignedToId);
-  if (params.targetCountry) filter.targetCountry = params.targetCountry;
-  if (params.targetIntake) filter.targetIntake = params.targetIntake;
-  if (params.state) filter["address.state"] = toSafeRegExp(params.state);
-  if (params.college) filter["education.college"] = toSafeRegExp(params.college);
-  if (params.course) filter["education.course"] = toSafeRegExp(params.course);
-  if (params.gender) filter.gender = params.gender;
-  if (params.bank) filter["loan.bankName"] = toSafeRegExp(params.bank);
-  if (params.dateFrom || params.dateTo) {
-    const createdAt: Record<string, Date> = {};
-    if (params.dateFrom) {
-      const parsed = new Date(params.dateFrom);
-      if (!Number.isNaN(parsed.getTime())) {
-        createdAt.$gte = startOfDay(parsed);
-      }
-    }
-    if (params.dateTo) {
-      const parsed = new Date(params.dateTo);
-      if (!Number.isNaN(parsed.getTime())) {
-        createdAt.$lte = endOfDay(parsed);
-      }
-    }
-    if (Object.keys(createdAt).length) filter.createdAt = createdAt;
-  }
-  if (params.loanMin != null || params.loanMax != null) {
-    const loanRequested: Record<string, number> = {};
-    if (params.loanMin != null && !Number.isNaN(params.loanMin)) {
-      loanRequested.$gte = params.loanMin;
-    }
-    if (params.loanMax != null && !Number.isNaN(params.loanMax)) {
-      loanRequested.$lte = params.loanMax;
-    }
-    if (Object.keys(loanRequested).length) filter["loan.requested"] = loanRequested;
-  }
-  if (params.mine && user?.id) {
-    andClauses.push({ assignedTo: new Types.ObjectId(user.id) });
-  }
-
-  const visibilityFilter = buildStudentVisibilityFilter(user);
-  if (visibilityFilter) {
-    andClauses.push(visibilityFilter);
-  }
-
-  const mongoFilter = mergeMongoFilter(filter, ...andClauses);
-
-  const [data, total] = await Promise.all([
-    Student.find(mongoFilter)
-      .populate("partnerId", "companyName")
-      .populate("assignedTo", "name")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(pageSize)
-      .lean(),
-    Student.countDocuments(mongoFilter),
-  ]);
-
-  return {
-    data: data.map((s) => {
-      const profileInput = {
-        phone: s.phone,
-        whatsapp: s.whatsapp,
-        email: s.email,
-        gender: s.gender,
-        dob: s.dob,
-        targetCountry: s.targetCountry,
-        targetIntake: s.targetIntake,
-        targetDegree: s.targetDegree,
-        targetUniversity: s.targetUniversity,
-        address: s.address,
-        education: s.education,
-        loan: s.loan,
-        partnerId: s.partnerId,
-        partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
+      const filter: Record<string, unknown> = {
+        ...excludeAdmissionLeadsFilter(),
       };
+
+      const andClauses: Record<string, unknown>[] = [];
+
+      if (params.search) {
+        const regex = toSafeRegExp(params.search);
+        andClauses.push({
+          $or: [
+            { firstName: regex },
+            { lastName: regex },
+            { phone: regex },
+            { email: regex },
+            { studentId: regex },
+          ],
+        });
+      }
+      const statusFilter = parseStatusFilter(params.status);
+      if (statusFilter.length === 1) {
+        filter.status = statusFilter[0];
+      } else if (statusFilter.length > 1) {
+        filter.status = { $in: statusFilter };
+      } else {
+        const workflowFilter = buildWorkflowMongoFilter(params.workflow);
+        if (workflowFilter) {
+          Object.assign(filter, workflowFilter);
+        }
+      }
+      if (params.lenderId) {
+        const resolvedLenderId = await resolveLenderIdBySlug(params.lenderId);
+        if (resolvedLenderId) {
+          filter["loan.lenderId"] = resolvedLenderId;
+        }
+      }
+      if (params.partnerId) filter.partnerId = new Types.ObjectId(params.partnerId);
+      if (params.assignedToId) filter.assignedTo = new Types.ObjectId(params.assignedToId);
+      if (params.targetCountry) filter.targetCountry = params.targetCountry;
+      if (params.targetIntake) filter.targetIntake = params.targetIntake;
+      if (params.state) filter["address.state"] = toSafeRegExp(params.state);
+      if (params.college) filter["education.college"] = toSafeRegExp(params.college);
+      if (params.course) filter["education.course"] = toSafeRegExp(params.course);
+      if (params.gender) filter.gender = params.gender;
+      if (params.bank) filter["loan.bankName"] = toSafeRegExp(params.bank);
+      if (params.dateFrom || params.dateTo) {
+        const createdAt: Record<string, Date> = {};
+        if (params.dateFrom) {
+          const parsed = new Date(params.dateFrom);
+          if (!Number.isNaN(parsed.getTime())) {
+            createdAt.$gte = startOfDay(parsed);
+          }
+        }
+        if (params.dateTo) {
+          const parsed = new Date(params.dateTo);
+          if (!Number.isNaN(parsed.getTime())) {
+            createdAt.$lte = endOfDay(parsed);
+          }
+        }
+        if (Object.keys(createdAt).length) filter.createdAt = createdAt;
+      }
+      if (params.loanMin != null || params.loanMax != null) {
+        const loanRequested: Record<string, number> = {};
+        if (params.loanMin != null && !Number.isNaN(params.loanMin)) {
+          loanRequested.$gte = params.loanMin;
+        }
+        if (params.loanMax != null && !Number.isNaN(params.loanMax)) {
+          loanRequested.$lte = params.loanMax;
+        }
+        if (Object.keys(loanRequested).length) filter["loan.requested"] = loanRequested;
+      }
+      if (params.mine && user?.id) {
+        andClauses.push({ assignedTo: new Types.ObjectId(user.id) });
+      }
+
+      const visibilityFilter = buildStudentVisibilityFilter(user);
+      if (visibilityFilter) {
+        andClauses.push(visibilityFilter);
+      }
+
+      const mongoFilter = mergeMongoFilter(filter, ...andClauses);
+
+      const [data, total] = await Promise.all([
+        Student.find(mongoFilter)
+          .populate("partnerId", "companyName")
+          .populate("assignedTo", "name")
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Student.countDocuments(mongoFilter),
+      ]);
 
       return {
-        _id: s._id.toString(),
-        studentId: s.studentId,
-        firstName: s.firstName,
-        lastName: s.lastName,
-        phone: s.phone,
-        whatsapp: s.whatsapp,
-        email: s.email,
-        status: s.status as StudentStatus,
-        partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
-        assigneeName: (s.assignedTo as { name?: string } | null)?.name,
-        targetCountry: s.targetCountry,
-        targetIntake: s.targetIntake,
-        targetDegree: s.targetDegree,
-        loanRequested: s.loan?.requested,
-        profileVerified: isStudentProfileVerified(profileInput),
-        createdAt: s.createdAt,
+        data: data.map((s) => {
+          const profileInput = {
+            phone: s.phone,
+            whatsapp: s.whatsapp,
+            email: s.email,
+            gender: s.gender,
+            dob: s.dob,
+            targetCountry: s.targetCountry,
+            targetIntake: s.targetIntake,
+            targetDegree: s.targetDegree,
+            targetUniversity: s.targetUniversity,
+            address: s.address,
+            education: s.education,
+            loan: s.loan,
+            partnerId: s.partnerId,
+            partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
+          };
+
+          return {
+            _id: s._id.toString(),
+            studentId: s.studentId,
+            firstName: s.firstName,
+            lastName: s.lastName,
+            phone: s.phone,
+            whatsapp: s.whatsapp,
+            email: s.email,
+            status: s.status as StudentStatus,
+            partnerName: (s.partnerId as { companyName?: string } | null)?.companyName,
+            assigneeName: (s.assignedTo as { name?: string } | null)?.name,
+            targetCountry: s.targetCountry,
+            targetIntake: s.targetIntake,
+            targetDegree: s.targetDegree,
+            loanRequested: s.loan?.requested,
+            profileVerified: isStudentProfileVerified(profileInput),
+            createdAt: s.createdAt,
+          };
+        }),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
       };
-    }),
-    total,
-    page,
-    pageSize,
-    totalPages: Math.ceil(total / pageSize),
-  };
-  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 10)
+  );
 }
 
 export async function getStudentById(id: string) {
-  return runLoggedQuery("getStudentById", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_READ);
+  return runLoggedQuery(
+    "getStudentById",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
-  await connectDB();
-  const studentDoc = await Student.findById(id)
-    .populate("partnerId")
-    .populate("assignedTo", "name email")
-    .populate("loan.lenderId", "name slug")
-    .populate("loanApplications.lenderId", "name slug");
+      await connectDB();
+      const studentDoc = await Student.findById(id)
+        .populate("partnerId")
+        .populate("assignedTo", "name email")
+        .populate("loan.lenderId", "name slug")
+        .populate("loanApplications.lenderId", "name slug");
 
-  if (!studentDoc) return null;
-  if (isAdmissionLead(studentDoc.recordType)) return null;
-  if (!canAccessStudent(user, studentDoc)) return null;
+      if (!studentDoc) return null;
+      if (isAdmissionLead(studentDoc.recordType)) return null;
+      if (!canAccessStudent(user, studentDoc)) return null;
 
-  const { ensureStudentLoanApplications } = await import("@/lib/services/loan-application.service");
-  await ensureStudentLoanApplications(studentDoc);
+      const { ensureStudentLoanApplications } =
+        await import("@/lib/services/loan-application.service");
+      await ensureStudentLoanApplications(studentDoc);
 
-  const student = await Student.findById(id)
-    .populate("partnerId")
-    .populate("assignedTo", "name email")
-    .populate("loan.lenderId", "name slug")
-    .populate("loanApplications.lenderId", "name slug")
-    .lean();
-  if (!student) return null;
-  if (isAdmissionLead(student.recordType)) return null;
-  if (!canAccessStudent(user, student)) return null;
+      const student = await Student.findById(id)
+        .populate("partnerId")
+        .populate("assignedTo", "name email")
+        .populate("loan.lenderId", "name slug")
+        .populate("loanApplications.lenderId", "name slug")
+        .lean();
+      if (!student) return null;
+      if (isAdmissionLead(student.recordType)) return null;
+      if (!canAccessStudent(user, student)) return null;
 
-  return {
-    ...student,
-    aadhaar: maskAadhaar(student.aadhaar),
-    pan: maskPan(student.pan),
-  };
-  }, null);
+      return {
+        ...student,
+        aadhaar: maskAadhaar(student.aadhaar),
+        pan: maskPan(student.pan),
+      };
+    },
+    null
+  );
 }
 
 export async function getStudentForEdit(id: string) {
-  return runLoggedQuery("getStudentForEdit", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+  return runLoggedQuery(
+    "getStudentForEdit",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  await connectDB();
-  const student = await Student.findById(id)
-    .populate("loan.lenderId", "slug")
-    .populate("assignedTo", "name")
-    .populate("partnerId", "companyName commissionPercent")
-    .lean();
-  if (!student) return null;
-  if (isAdmissionLead(student.recordType)) return null;
-  if (!canAccessStudent(user, student)) return null;
+      await connectDB();
+      const student = await Student.findById(id)
+        .populate("loan.lenderId", "slug")
+        .populate("assignedTo", "name")
+        .populate("partnerId", "companyName commissionPercent")
+        .lean();
+      if (!student) return null;
+      if (isAdmissionLead(student.recordType)) return null;
+      if (!canAccessStudent(user, student)) return null;
 
-  const lenderSlug = await getLenderSlugById(student.loan?.lenderId as Types.ObjectId | undefined);
-  const partnerId =
-    student.partnerId && typeof student.partnerId === "object" && "_id" in student.partnerId
-      ? String(student.partnerId._id)
-      : student.partnerId
-        ? String(student.partnerId)
-        : undefined;
+      const lenderSlug = await getLenderSlugById(
+        student.loan?.lenderId as Types.ObjectId | undefined
+      );
+      const partnerId =
+        student.partnerId && typeof student.partnerId === "object" && "_id" in student.partnerId
+          ? String(student.partnerId._id)
+          : student.partnerId
+            ? String(student.partnerId)
+            : undefined;
 
-  return {
-    ...student,
-    partnerId,
-    aadhaar: formatAadhaarForEdit(safeDecrypt(student.aadhaar)),
-    pan: normalizePan(safeDecrypt(student.pan)),
-    lenderId: lenderSlug,
-    loanCurrency: student.loan?.currency,
-    roi: student.loan?.roi ?? student.loan?.interest,
-    processingFee: student.loan?.processingFee,
-    pfPaid: student.loan?.pfPaid,
-    targetUniversity: student.targetUniversity,
-    loggedIn: student.loggedIn,
-    applicationStatus: deriveApplicationStatus(student),
-    sentToBank: student.sentToBank,
-    sentToBankAt: student.sentToBankAt,
-    sentToBankByName: student.sentToBankByName,
-  };
-  }, null);
+      return {
+        ...student,
+        partnerId,
+        aadhaar: formatAadhaarForEdit(safeDecrypt(student.aadhaar)),
+        pan: normalizePan(safeDecrypt(student.pan)),
+        lenderId: lenderSlug,
+        loanCurrency: student.loan?.currency,
+        roi: student.loan?.roi ?? student.loan?.interest,
+        processingFee: student.loan?.processingFee,
+        pfPaid: student.loan?.pfPaid,
+        targetUniversity: student.targetUniversity,
+        loggedIn: student.loggedIn,
+        applicationStatus: deriveApplicationStatus(student),
+        sentToBank: student.sentToBank,
+        sentToBankAt: student.sentToBankAt,
+        sentToBankByName: student.sentToBankByName,
+      };
+    },
+    null
+  );
 }
 
 export async function createStudentAction(
   formData: FormData
 ): Promise<ActionResult<{ id: string }>> {
   return runLoggedMutation("createStudentAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  const raw = Object.fromEntries(formData.entries());
-  const parsed = studentSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = studentSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
 
-  await connectDB();
-  const data = parsed.data;
+    await connectDB();
+    const data = parsed.data;
 
-  const photoError = getOptionalLinkUrlError(data.photo);
-  if (photoError) {
-    return { success: false, error: `Photo link: ${photoError}` };
-  }
+    const photoError = getOptionalLinkUrlError(data.photo);
+    if (photoError) {
+      return { success: false, error: `Photo link: ${photoError}` };
+    }
 
-  const phoneDuplicate = await findStudentWithPhone(data.phone);
-  if (phoneDuplicate) {
-    return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
-  }
+    const phoneDuplicate = await findStudentWithPhone(data.phone);
+    if (phoneDuplicate) {
+      return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+    }
 
-  const studentId = await allocateStudentId();
-  const applicationStatus = (data.applicationStatus ?? "docs_pending") as ApplicationStatusId;
-  const appFields = applyApplicationStatus(applicationStatus);
-  const loan = await buildLoanFields(data, undefined, appFields.pfPaid);
-  const sessionUser = toSessionUser(user);
+    const studentId = await allocateStudentId();
+    const applicationStatus = (data.applicationStatus ?? "docs_pending") as ApplicationStatusId;
+    const appFields = applyApplicationStatus(applicationStatus);
+    const loan = await buildLoanFields(data, undefined, appFields.pfPaid);
+    const sessionUser = toSessionUser(user);
 
-  const student = await Student.create({
-    studentId,
-    firstName: sanitizeText(data.firstName),
-    lastName: sanitizeText(data.lastName),
-    gender: data.gender,
-    dob: data.dob ? new Date(data.dob) : undefined,
-    phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
-    whatsapp: data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined,
-    email: data.email,
-    photo: normalizeOptionalLinkUrl(data.photo),
-    address: {
-      line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
-      city: data.city,
-      state: data.state,
-      pincode: data.pincode?.trim() ? normalizePincode(data.pincode) : undefined,
-    },
-    aadhaar: data.aadhaar?.trim()
-      ? encryptSensitiveField(normalizeAadhaar(data.aadhaar))
-      : undefined,
-    pan: data.pan?.trim() ? encryptSensitiveField(normalizePan(data.pan)) : undefined,
-    education: {
-      college: data.college,
-      course: data.course,
-      year: data.year,
-    },
-    loan,
-    loanApplications: buildInitialLoanApplications(loan, appFields.applicationStatus, sessionUser),
-    partnerId: data.partnerId || undefined,
-    ...resolveAssignedTo(data.assignedToId),
-    targetCountry: data.targetCountry?.trim() || undefined,
-    targetIntake: data.targetIntake?.trim() || undefined,
-    targetDegree: data.targetDegree?.trim() || undefined,
-    targetUniversity: data.targetUniversity?.trim() || undefined,
-    recordType: STUDENT_RECORD_TYPE.STUDENT,
-    applicationStatus: appFields.applicationStatus,
-    loggedIn: appFields.loggedIn,
-    commissionPercentOverride:
-      data.commissionPercentOverride === "" || data.commissionPercentOverride == null
-        ? undefined
-        : data.commissionPercentOverride,
-    ourCommissionPercent:
-      data.ourCommissionPercent === "" || data.ourCommissionPercent == null
-        ? undefined
-        : data.ourCommissionPercent,
-    status: appFields.status,
-    remarks: data.remarks ? sanitizeText(data.remarks) : undefined,
-    timeline: [{ status: appFields.status, note: `Application status: ${getApplicationStatusLabel(appFields.applicationStatus)}`, createdByName: user?.name, createdAt: new Date() }],
-    metadata: { createdBy: user?.id, createdByName: user?.name },
-  });
-
-  await Application.create({
-    studentId: student._id,
-    partnerId: data.partnerId || undefined,
-    loanAmount: data.loanRequested ?? 0,
-    status: appFields.status,
-    pipelineStage: appFields.status,
-    metadata: { createdBy: user?.id, createdByName: user?.name },
-  });
-
-  if (data.partnerId) {
-    await Partner.findByIdAndUpdate(data.partnerId, {
-      $inc: { studentsCount: 1, totalLoanValue: data.loanRequested ?? 0 },
+    const student = await Student.create({
+      studentId,
+      firstName: sanitizeText(data.firstName),
+      lastName: sanitizeText(data.lastName),
+      gender: data.gender,
+      dob: data.dob ? new Date(data.dob) : undefined,
+      phone: data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined,
+      whatsapp: data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined,
+      email: data.email,
+      photo: normalizeOptionalLinkUrl(data.photo),
+      address: {
+        line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode?.trim() ? normalizePincode(data.pincode) : undefined,
+      },
+      aadhaar: data.aadhaar?.trim()
+        ? encryptSensitiveField(normalizeAadhaar(data.aadhaar))
+        : undefined,
+      pan: data.pan?.trim() ? encryptSensitiveField(normalizePan(data.pan)) : undefined,
+      education: {
+        college: data.college,
+        course: data.course,
+        year: data.year,
+      },
+      loan,
+      loanApplications: buildInitialLoanApplications(
+        loan,
+        appFields.applicationStatus,
+        sessionUser
+      ),
+      partnerId: data.partnerId || undefined,
+      ...resolveAssignedTo(data.assignedToId),
+      targetCountry: data.targetCountry?.trim() || undefined,
+      targetIntake: data.targetIntake?.trim() || undefined,
+      targetDegree: data.targetDegree?.trim() || undefined,
+      targetUniversity: data.targetUniversity?.trim() || undefined,
+      recordType: STUDENT_RECORD_TYPE.STUDENT,
+      applicationStatus: appFields.applicationStatus,
+      loggedIn: appFields.loggedIn,
+      commissionPercentOverride:
+        data.commissionPercentOverride === "" || data.commissionPercentOverride == null
+          ? undefined
+          : data.commissionPercentOverride,
+      ourCommissionPercent:
+        data.ourCommissionPercent === "" || data.ourCommissionPercent == null
+          ? undefined
+          : data.ourCommissionPercent,
+      status: appFields.status,
+      remarks: data.remarks ? sanitizeText(data.remarks) : undefined,
+      timeline: [
+        {
+          status: appFields.status,
+          note: `Application status: ${getApplicationStatusLabel(appFields.applicationStatus)}`,
+          createdByName: user?.name,
+          createdAt: new Date(),
+        },
+      ],
+      metadata: { createdBy: user?.id, createdByName: user?.name },
     });
-  }
 
-  await logActivity({
-    action: "student.created",
-    description: `Student ${data.firstName} ${data.lastName} (${studentId}) was created`,
-    resourceType: "student",
-    resourceId: student._id.toString(),
-    userId: user?.id,
-    userName: user?.name,
-  });
+    await Application.create({
+      studentId: student._id,
+      partnerId: data.partnerId || undefined,
+      loanAmount: data.loanRequested ?? 0,
+      status: appFields.status,
+      pipelineStage: appFields.status,
+      metadata: { createdBy: user?.id, createdByName: user?.name },
+    });
 
-  await captureServerPostHogEvent("student_created", user?.id ?? "anonymous", {
-    student_id: studentId,
-    target_country: data.targetCountry,
-    loan_requested: data.loanRequested,
-    has_partner: !!data.partnerId,
-    application_status: data.applicationStatus ?? "docs_pending",
-  });
+    if (data.partnerId) {
+      await Partner.findByIdAndUpdate(data.partnerId, {
+        $inc: { studentsCount: 1, totalLoanValue: data.loanRequested ?? 0 },
+      });
+    }
 
-  revalidatePath("/dashboard/students");
-  revalidatePath("/dashboard/overview");
-  revalidateInsightCaches();
-  return { success: true, data: { id: student._id.toString() } };
+    await logActivity({
+      action: "student.created",
+      description: `Student ${data.firstName} ${data.lastName} (${studentId}) was created`,
+      resourceType: "student",
+      resourceId: student._id.toString(),
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    await captureServerPostHogEvent("student_created", user?.id ?? "anonymous", {
+      student_id: studentId,
+      target_country: data.targetCountry,
+      loan_requested: data.loanRequested,
+      has_partner: !!data.partnerId,
+      application_status: data.applicationStatus ?? "docs_pending",
+    });
+
+    revalidatePath("/dashboard/students");
+    revalidatePath("/dashboard/overview");
+    revalidateInsightCaches();
+    return { success: true, data: { id: student._id.toString() } };
   });
 }
 
@@ -724,9 +757,7 @@ export async function createQuickStudentAction(
   });
 }
 
-export async function createLeadAction(
-  formData: FormData
-): Promise<ActionResult<{ id: string }>> {
+export async function createLeadAction(formData: FormData): Promise<ActionResult<{ id: string }>> {
   return runLoggedMutation("createLeadAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.ADMISSIONS_WRITE);
@@ -808,171 +839,173 @@ export async function createLeadAction(
   });
 }
 
-export async function updateStudentAction(
-  id: string,
-  formData: FormData
-): Promise<ActionResult> {
+export async function updateStudentAction(id: string, formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("updateStudentAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  const raw = Object.fromEntries(formData.entries());
-  const parsed = studentSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
-
-  await connectDB();
-  const data = parsed.data;
-  const existing = await Student.findById(id);
-  if (!existing) return { success: false, error: "Student not found" };
-  if (!canAccessStudent(user, existing)) return inaccessibleStudentResult();
-
-  await ensureStudentLoanApplications(existing);
-
-  const previousLenderId = existing.loan?.lenderId;
-  const previousApplicationStatus = deriveApplicationStatus(existing);
-  const previousApplicationNumber = existing.loan?.applicationNumber;
-
-  const photoError = getOptionalLinkUrlError(data.photo);
-  if (photoError) {
-    return { success: false, error: `Photo link: ${photoError}` };
-  }
-
-  if (data.phone?.trim()) {
-    const phoneDuplicate = await findStudentWithPhone(data.phone, id);
-    if (phoneDuplicate) {
-      return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+    const raw = Object.fromEntries(formData.entries());
+    const parsed = studentSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
     }
-  }
 
-  const oldStatus = existing.status;
-  const oldApplicationStatus = deriveApplicationStatus(existing);
-  const applicationStatus = (data.applicationStatus ?? oldApplicationStatus) as ApplicationStatusId;
-  const appFields = applyApplicationStatus(applicationStatus);
-  existing.firstName = sanitizeText(data.firstName);
-  existing.lastName = sanitizeText(data.lastName);
-  existing.gender = data.gender;
-  existing.dob = data.dob ? new Date(data.dob) : existing.dob;
-  existing.phone = data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined;
-  existing.whatsapp = data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined;
-  existing.email = data.email;
-  if (data.photo) existing.photo = normalizeOptionalLinkUrl(data.photo);
-  else if (raw.photo === "") existing.photo = undefined;
-  existing.address = {
-    line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
-    city: data.city,
-    state: data.state,
-    pincode: data.pincode?.trim() ? normalizePincode(data.pincode) : undefined,
-  };
-  if (data.aadhaar?.trim()) {
-    existing.aadhaar = encryptSensitiveField(normalizeAadhaar(data.aadhaar));
-  } else if (raw.aadhaar === "") {
-    existing.aadhaar = undefined;
-  }
-  if (data.pan?.trim()) {
-    existing.pan = encryptSensitiveField(normalizePan(data.pan));
-  } else if (raw.pan === "") {
-    existing.pan = undefined;
-  }
-  existing.education = { college: data.college, course: data.course, year: data.year };
-  existing.loan = await buildLoanFields(data, {
-    disbursed: existing.loan?.disbursed,
-    disbursedAt: existing.loan?.disbursedAt,
-    disbursementType: existing.loan?.disbursementType,
-  }, appFields.pfPaid);
-  if (data.commissionPercentOverride === "" || data.commissionPercentOverride == null) {
-    existing.commissionPercentOverride = undefined;
-  } else {
-    existing.commissionPercentOverride = data.commissionPercentOverride;
-  }
-  if (data.ourCommissionPercent === "" || data.ourCommissionPercent == null) {
-    existing.ourCommissionPercent = undefined;
-  } else {
-    existing.ourCommissionPercent = data.ourCommissionPercent;
-  }
-  const assignment = resolveAssignedTo(
-    data.assignedToId,
-    existing.assignedTo,
-    existing.assignedAt
-  );
-  existing.assignedTo = assignment.assignedTo;
-  existing.assignedAt = assignment.assignedAt;
-  existing.targetCountry = data.targetCountry?.trim() || undefined;
-  existing.targetIntake = data.targetIntake?.trim() || undefined;
-  existing.targetDegree = data.targetDegree?.trim() || undefined;
-  existing.targetUniversity = data.targetUniversity?.trim() || undefined;
-  existing.applicationStatus = appFields.applicationStatus;
-  existing.loggedIn = appFields.loggedIn;
-  existing.partnerId = data.partnerId ? new Types.ObjectId(data.partnerId) : existing.partnerId;
-  existing.status = appFields.status;
-  existing.remarks = data.remarks ? sanitizeText(data.remarks) : existing.remarks;
-  existing.metadata.updatedBy = user?.id ? new Types.ObjectId(user.id) : undefined;
+    await connectDB();
+    const data = parsed.data;
+    const existing = await Student.findById(id);
+    if (!existing) return { success: false, error: "Student not found" };
+    if (!canAccessStudent(user, existing)) return inaccessibleStudentResult();
 
-  if (appFields.status !== oldStatus || appFields.applicationStatus !== oldApplicationStatus) {
-    existing.timeline.push({
-      status: appFields.status,
-      note: `Application status changed to ${getApplicationStatusLabel(appFields.applicationStatus)}`,
-      createdBy: user?.id ? new Types.ObjectId(user.id) : undefined,
-      createdByName: user?.name,
-      createdAt: new Date(),
-    });
-    await Application.updateMany(
-      { studentId: existing._id },
-      { status: appFields.status, pipelineStage: appFields.status }
+    await ensureStudentLoanApplications(existing);
+
+    const previousLenderId = existing.loan?.lenderId;
+    const previousApplicationStatus = deriveApplicationStatus(existing);
+    const previousApplicationNumber = existing.loan?.applicationNumber;
+
+    const photoError = getOptionalLinkUrlError(data.photo);
+    if (photoError) {
+      return { success: false, error: `Photo link: ${photoError}` };
+    }
+
+    if (data.phone?.trim()) {
+      const phoneDuplicate = await findStudentWithPhone(data.phone, id);
+      if (phoneDuplicate) {
+        return { success: false, error: formatDuplicateStudentPhoneError(phoneDuplicate) };
+      }
+    }
+
+    const oldStatus = existing.status;
+    const oldApplicationStatus = deriveApplicationStatus(existing);
+    const applicationStatus = (data.applicationStatus ??
+      oldApplicationStatus) as ApplicationStatusId;
+    const appFields = applyApplicationStatus(applicationStatus);
+    existing.firstName = sanitizeText(data.firstName);
+    existing.lastName = sanitizeText(data.lastName);
+    existing.gender = data.gender;
+    existing.dob = data.dob ? new Date(data.dob) : existing.dob;
+    existing.phone = data.phone?.trim() ? normalizeIndianPhone(data.phone) : undefined;
+    existing.whatsapp = data.whatsapp?.trim() ? normalizeIndianPhone(data.whatsapp) : undefined;
+    existing.email = data.email;
+    if (data.photo) existing.photo = normalizeOptionalLinkUrl(data.photo);
+    else if (raw.photo === "") existing.photo = undefined;
+    existing.address = {
+      line: data.addressLine ? sanitizeText(data.addressLine) : undefined,
+      city: data.city,
+      state: data.state,
+      pincode: data.pincode?.trim() ? normalizePincode(data.pincode) : undefined,
+    };
+    if (data.aadhaar?.trim()) {
+      existing.aadhaar = encryptSensitiveField(normalizeAadhaar(data.aadhaar));
+    } else if (raw.aadhaar === "") {
+      existing.aadhaar = undefined;
+    }
+    if (data.pan?.trim()) {
+      existing.pan = encryptSensitiveField(normalizePan(data.pan));
+    } else if (raw.pan === "") {
+      existing.pan = undefined;
+    }
+    existing.education = { college: data.college, course: data.course, year: data.year };
+    existing.loan = await buildLoanFields(
+      data,
+      {
+        disbursed: existing.loan?.disbursed,
+        disbursedAt: existing.loan?.disbursedAt,
+        disbursementType: existing.loan?.disbursementType,
+      },
+      appFields.pfPaid
     );
-  }
+    if (data.commissionPercentOverride === "" || data.commissionPercentOverride == null) {
+      existing.commissionPercentOverride = undefined;
+    } else {
+      existing.commissionPercentOverride = data.commissionPercentOverride;
+    }
+    if (data.ourCommissionPercent === "" || data.ourCommissionPercent == null) {
+      existing.ourCommissionPercent = undefined;
+    } else {
+      existing.ourCommissionPercent = data.ourCommissionPercent;
+    }
+    const assignment = resolveAssignedTo(
+      data.assignedToId,
+      existing.assignedTo,
+      existing.assignedAt
+    );
+    existing.assignedTo = assignment.assignedTo;
+    existing.assignedAt = assignment.assignedAt;
+    existing.targetCountry = data.targetCountry?.trim() || undefined;
+    existing.targetIntake = data.targetIntake?.trim() || undefined;
+    existing.targetDegree = data.targetDegree?.trim() || undefined;
+    existing.targetUniversity = data.targetUniversity?.trim() || undefined;
+    existing.applicationStatus = appFields.applicationStatus;
+    existing.loggedIn = appFields.loggedIn;
+    existing.partnerId = data.partnerId ? new Types.ObjectId(data.partnerId) : existing.partnerId;
+    existing.status = appFields.status;
+    existing.remarks = data.remarks ? sanitizeText(data.remarks) : existing.remarks;
+    existing.metadata.updatedBy = user?.id ? new Types.ObjectId(user.id) : undefined;
 
-  await syncPrimaryLoanApplicationFromStudentEdit(existing, {
-    previousLenderId,
-    previousApplicationStatus,
-    previousApplicationNumber,
-    user: toSessionUser(user),
-  });
+    if (appFields.status !== oldStatus || appFields.applicationStatus !== oldApplicationStatus) {
+      existing.timeline.push({
+        status: appFields.status,
+        note: `Application status changed to ${getApplicationStatusLabel(appFields.applicationStatus)}`,
+        createdBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+        createdByName: user?.name,
+        createdAt: new Date(),
+      });
+      await Application.updateMany(
+        { studentId: existing._id },
+        { status: appFields.status, pipelineStage: appFields.status }
+      );
+    }
 
-  await existing.save();
+    await syncPrimaryLoanApplicationFromStudentEdit(existing, {
+      previousLenderId,
+      previousApplicationStatus,
+      previousApplicationNumber,
+      user: toSessionUser(user),
+    });
 
-  await logActivity({
-    action: "student.updated",
-    description: `Student ${existing.studentId} was updated`,
-    resourceType: "student",
-    resourceId: id,
-    userId: user?.id,
-    userName: user?.name,
-  });
+    await existing.save();
 
-  revalidatePath("/dashboard/students");
-  revalidatePath("/dashboard/admissions");
-  revalidatePath(`/dashboard/students/${id}`);
-  return { success: true };
+    await logActivity({
+      action: "student.updated",
+      description: `Student ${existing.studentId} was updated`,
+      resourceType: "student",
+      resourceId: id,
+      userId: user?.id,
+      userName: user?.name,
+    });
+
+    revalidatePath("/dashboard/students");
+    revalidatePath("/dashboard/admissions");
+    revalidatePath(`/dashboard/students/${id}`);
+    return { success: true };
   });
 }
 
 export async function deleteStudentAction(id: string): Promise<ActionResult> {
   return runLoggedMutation("deleteStudentAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
 
-  await connectDB();
-  const student = await Student.findById(id);
-  if (!student) return { success: false, error: "Student not found" };
-  if (!canAccessStudent(user, student)) return inaccessibleStudentResult();
+    await connectDB();
+    const student = await Student.findById(id);
+    if (!student) return { success: false, error: "Student not found" };
+    if (!canAccessStudent(user, student)) return inaccessibleStudentResult();
 
-  await Student.findByIdAndDelete(id);
+    await Student.findByIdAndDelete(id);
 
-  await Application.deleteMany({ studentId: id });
+    await Application.deleteMany({ studentId: id });
 
-  await logActivity({
-    action: "student.deleted",
-    description: `Student ${student.studentId} was deleted`,
-    resourceType: "student",
-    resourceId: id,
-    userId: user?.id,
-    userName: user?.name,
-  });
+    await logActivity({
+      action: "student.deleted",
+      description: `Student ${student.studentId} was deleted`,
+      resourceType: "student",
+      resourceId: id,
+      userId: user?.id,
+      userName: user?.name,
+    });
 
-  revalidatePath("/dashboard/students");
-  return { success: true };
+    revalidatePath("/dashboard/students");
+    return { success: true };
   });
 }
 
@@ -982,155 +1015,154 @@ export async function bulkUpdateStudentsAction(
   value?: string
 ): Promise<ActionResult> {
   return runLoggedMutation("bulkUpdateStudentsAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  await connectDB();
+    await connectDB();
 
-  const accessibleIds =
-    user && !canBypassStudentVisibility(user.role)
-      ? (
-          await Student.find({ _id: { $in: ids } })
-            .select("metadata assignedTo recordType")
-            .lean()
-        )
-          .filter(
-            (student) =>
-              !isAdmissionLead(student.recordType) && canAccessStudent(user, student)
+    const accessibleIds =
+      user && !canBypassStudentVisibility(user.role)
+        ? (
+            await Student.find({ _id: { $in: ids } })
+              .select("metadata assignedTo recordType")
+              .lean()
           )
-          .map((student) => student._id.toString())
-      : ids;
+            .filter(
+              (student) => !isAdmissionLead(student.recordType) && canAccessStudent(user, student)
+            )
+            .map((student) => student._id.toString())
+        : ids;
 
-  if (accessibleIds.length === 0) {
-    return inaccessibleStudentResult();
-  }
-
-  if (action === "delete") {
-    requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
-    await Student.deleteMany({ _id: { $in: accessibleIds } });
-    await Application.deleteMany({ studentId: { $in: accessibleIds } });
-    await logActivity({
-      action: "students.bulk_deleted",
-      description: `Deleted ${accessibleIds.length} student record(s)`,
-      resourceType: "student",
-      userId: user?.id,
-      userName: user?.name,
-      metadata: { count: accessibleIds.length, studentIds: accessibleIds },
-    });
-  } else if (action === "assign_partner" && value) {
-    await Student.updateMany(
-      { _id: { $in: accessibleIds } },
-      { partnerId: new Types.ObjectId(value) }
-    );
-    await logActivity({
-      action: "students.bulk_partner_assigned",
-      description: `Assigned ${accessibleIds.length} student(s) to partner ${value}`,
-      resourceType: "partner",
-      resourceId: value,
-      userId: user?.id,
-      userName: user?.name,
-      metadata: { count: accessibleIds.length, studentIds: accessibleIds },
-    });
-  } else if (action === "assign_assignee") {
-    if (value === undefined) {
-      return { success: false, error: "Assignee is required" };
+    if (accessibleIds.length === 0) {
+      return inaccessibleStudentResult();
     }
 
-    if (value === "") {
-      await Student.updateMany(
-        { _id: { $in: accessibleIds } },
-        { $unset: { assignedTo: "", assignedAt: "" } }
-      );
+    if (action === "delete") {
+      requirePermission(user, PERMISSIONS.STUDENTS_DELETE);
+      await Student.deleteMany({ _id: { $in: accessibleIds } });
+      await Application.deleteMany({ studentId: { $in: accessibleIds } });
       await logActivity({
-        action: "students.bulk_assignee_cleared",
-        description: `Unassigned ${accessibleIds.length} student(s)`,
+        action: "students.bulk_deleted",
+        description: `Deleted ${accessibleIds.length} student record(s)`,
         resourceType: "student",
         userId: user?.id,
         userName: user?.name,
         metadata: { count: accessibleIds.length, studentIds: accessibleIds },
       });
-    } else {
-      const assignee = await User.findById(value).select("name").lean();
-      if (!assignee) {
-        return { success: false, error: "Assignee not found" };
-      }
-
+    } else if (action === "assign_partner" && value) {
       await Student.updateMany(
         { _id: { $in: accessibleIds } },
-        { assignedTo: new Types.ObjectId(value), assignedAt: new Date() }
+        { partnerId: new Types.ObjectId(value) }
       );
       await logActivity({
-        action: "students.bulk_assignee_assigned",
-        description: `Assigned ${accessibleIds.length} student(s) to ${assignee.name}`,
-        resourceType: "user",
+        action: "students.bulk_partner_assigned",
+        description: `Assigned ${accessibleIds.length} student(s) to partner ${value}`,
+        resourceType: "partner",
         resourceId: value,
+        userId: user?.id,
+        userName: user?.name,
+        metadata: { count: accessibleIds.length, studentIds: accessibleIds },
+      });
+    } else if (action === "assign_assignee") {
+      if (value === undefined) {
+        return { success: false, error: "Assignee is required" };
+      }
+
+      if (value === "") {
+        await Student.updateMany(
+          { _id: { $in: accessibleIds } },
+          { $unset: { assignedTo: "", assignedAt: "" } }
+        );
+        await logActivity({
+          action: "students.bulk_assignee_cleared",
+          description: `Unassigned ${accessibleIds.length} student(s)`,
+          resourceType: "student",
+          userId: user?.id,
+          userName: user?.name,
+          metadata: { count: accessibleIds.length, studentIds: accessibleIds },
+        });
+      } else {
+        const assignee = await User.findById(value).select("name").lean();
+        if (!assignee) {
+          return { success: false, error: "Assignee not found" };
+        }
+
+        await Student.updateMany(
+          { _id: { $in: accessibleIds } },
+          { assignedTo: new Types.ObjectId(value), assignedAt: new Date() }
+        );
+        await logActivity({
+          action: "students.bulk_assignee_assigned",
+          description: `Assigned ${accessibleIds.length} student(s) to ${assignee.name}`,
+          resourceType: "user",
+          resourceId: value,
+          userId: user?.id,
+          userName: user?.name,
+          metadata: {
+            count: accessibleIds.length,
+            studentIds: accessibleIds,
+            assigneeName: assignee.name,
+          },
+        });
+      }
+    } else if (action === "change_status" && value) {
+      if (!APPLICATION_STATUS_VALUES.includes(value as ApplicationStatusId)) {
+        return { success: false, error: "Invalid application status" };
+      }
+
+      const applicationStatus = value as ApplicationStatusId;
+      const appFields = applyApplicationStatus(applicationStatus);
+      const sessionUser = toSessionUser(user);
+      const students = await Student.find({ _id: { $in: accessibleIds } }).populate(
+        "loanApplications.lenderId",
+        "name slug"
+      );
+
+      for (const student of students) {
+        await ensureStudentLoanApplications(student);
+        const primaryApplication =
+          student.loanApplications?.find((entry) => entry.isPrimary) ??
+          student.loanApplications?.[0];
+
+        if (primaryApplication?._id) {
+          if (primaryApplication.applicationStatus !== applicationStatus) {
+            await updateLoanApplicationStatus(
+              student,
+              primaryApplication._id.toString(),
+              applicationStatus,
+              sessionUser
+            );
+          }
+        } else {
+          student.applicationStatus = appFields.applicationStatus;
+          student.status = appFields.status;
+          student.loggedIn = appFields.loggedIn;
+          if (!student.loan) student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
+          student.loan.pfPaid = appFields.pfPaid;
+          await student.save();
+        }
+      }
+
+      await Application.updateMany(
+        { studentId: { $in: accessibleIds } },
+        { status: appFields.status, pipelineStage: appFields.status }
+      );
+      await logActivity({
+        action: "students.bulk_status_changed",
+        description: `Changed application status to ${getApplicationStatusLabel(applicationStatus)} for ${accessibleIds.length} student(s)`,
+        resourceType: "student",
         userId: user?.id,
         userName: user?.name,
         metadata: {
           count: accessibleIds.length,
+          applicationStatus,
           studentIds: accessibleIds,
-          assigneeName: assignee.name,
         },
       });
     }
-  } else if (action === "change_status" && value) {
-    if (!APPLICATION_STATUS_VALUES.includes(value as ApplicationStatusId)) {
-      return { success: false, error: "Invalid application status" };
-    }
 
-    const applicationStatus = value as ApplicationStatusId;
-    const appFields = applyApplicationStatus(applicationStatus);
-    const sessionUser = toSessionUser(user);
-    const students = await Student.find({ _id: { $in: accessibleIds } }).populate(
-      "loanApplications.lenderId",
-      "name slug"
-    );
-
-    for (const student of students) {
-      await ensureStudentLoanApplications(student);
-      const primaryApplication =
-        student.loanApplications?.find((entry) => entry.isPrimary) ??
-        student.loanApplications?.[0];
-
-      if (primaryApplication?._id) {
-        if (primaryApplication.applicationStatus !== applicationStatus) {
-          await updateLoanApplicationStatus(
-            student,
-            primaryApplication._id.toString(),
-            applicationStatus,
-            sessionUser
-          );
-        }
-      } else {
-        student.applicationStatus = appFields.applicationStatus;
-        student.status = appFields.status;
-        student.loggedIn = appFields.loggedIn;
-        if (!student.loan) student.loan = { requested: 0, sanctioned: 0, disbursed: 0 };
-        student.loan.pfPaid = appFields.pfPaid;
-        await student.save();
-      }
-    }
-
-    await Application.updateMany(
-      { studentId: { $in: accessibleIds } },
-      { status: appFields.status, pipelineStage: appFields.status }
-    );
-    await logActivity({
-      action: "students.bulk_status_changed",
-      description: `Changed application status to ${getApplicationStatusLabel(applicationStatus)} for ${accessibleIds.length} student(s)`,
-      resourceType: "student",
-      userId: user?.id,
-      userName: user?.name,
-      metadata: {
-        count: accessibleIds.length,
-        applicationStatus,
-        studentIds: accessibleIds,
-      },
-    });
-  }
-
-  revalidatePath("/dashboard/students");
-  return { success: true };
+    revalidatePath("/dashboard/students");
+    return { success: true };
   });
 }
 
@@ -1139,129 +1171,127 @@ export async function addStudentNoteAction(
   formData: FormData
 ): Promise<ActionResult> {
   return runLoggedMutation("addStudentNoteAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  const mentionedRaw = formData.get("mentionedUserIds");
-  let mentionedUserIds: string[] = [];
-  if (typeof mentionedRaw === "string" && mentionedRaw.trim()) {
-    try {
-      const parsedIds = JSON.parse(mentionedRaw);
-      if (Array.isArray(parsedIds)) {
-        mentionedUserIds = parsedIds.filter((id): id is string => typeof id === "string");
-      }
-    } catch {
-      mentionedUserIds = [];
-    }
-  }
-
-  const parsed = noteSchema.safeParse({
-    content: formData.get("content"),
-    dueDate: formData.get("dueDate"),
-    mentionedUserIds,
-  });
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
-  }
-
-  await connectDB();
-  const student = await Student.findById(studentId)
-    .select("firstName lastName studentId recordType metadata assignedTo")
-    .lean();
-  if (!student) {
-    return { success: false, error: "Student not found" };
-  }
-  if (isAdmissionLead(student.recordType)) {
-    return { success: false, error: "Student not found" };
-  }
-  if (!canAccessStudent(user, student)) {
-    return inaccessibleStudentResult();
-  }
-
-  const teamUsers = await User.find({ status: "active" })
-    .select("_id name")
-    .lean();
-  const { resolveMentionedUserIds } = await import("@/lib/utils/note-mentions");
-  const resolvedMentionIds = resolveMentionedUserIds(
-    parsed.data.content,
-    teamUsers.map((entry) => ({ _id: entry._id.toString(), name: entry.name })),
-    parsed.data.mentionedUserIds ?? []
-  );
-
-  const mentionObjectIds = resolvedMentionIds
-    .filter((id) => id !== user?.id)
-    .map((id) => new Types.ObjectId(id));
-
-  const studentName = `${student.firstName} ${student.lastName}`.trim();
-
-  await Student.findByIdAndUpdate(studentId, {
-    $push: {
-      notes: {
-        content: sanitizeText(parsed.data.content),
-        createdBy: user?.id,
-        createdByName: user?.name,
-        mentionedUserIds: mentionObjectIds,
-        dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : undefined,
-        createdAt: new Date(),
-      },
-    },
-  });
-
-  if (mentionObjectIds.length > 0) {
-    const { createNotification } = await import("@/lib/services/notification.service");
-    const { sendNoteMentionEmail } = await import("@/lib/services/email.service");
-    const { getPublicAuthUrl } = await import("@/lib/config/env");
-
-    const link = `/dashboard/students/${studentId}`;
-    const studentUrl = `${getPublicAuthUrl()}${link}`;
-
-    const mentionedUsers = await User.find({
-      _id: { $in: mentionObjectIds },
-      status: "active",
-    })
-      .select("_id email name")
-      .lean();
-
-    await Promise.all(
-      mentionedUsers.map(async (mentionedUser) => {
-        await createNotification({
-          userId: mentionedUser._id,
-          type: "info",
-          title: `You were tagged on ${studentName}`,
-          body: parsed.data.content,
-          link,
-        });
-
-        if (mentionedUser.email) {
-          await sendNoteMentionEmail({
-            email: mentionedUser.email,
-            name: mentionedUser.name,
-            mentionedByName: user?.name,
-            studentName,
-            studentCode: student.studentId,
-            noteContent: parsed.data.content,
-            studentUrl,
-          });
+    const mentionedRaw = formData.get("mentionedUserIds");
+    let mentionedUserIds: string[] = [];
+    if (typeof mentionedRaw === "string" && mentionedRaw.trim()) {
+      try {
+        const parsedIds = JSON.parse(mentionedRaw);
+        if (Array.isArray(parsedIds)) {
+          mentionedUserIds = parsedIds.filter((id): id is string => typeof id === "string");
         }
-      })
+      } catch {
+        mentionedUserIds = [];
+      }
+    }
+
+    const parsed = noteSchema.safeParse({
+      content: formData.get("content"),
+      dueDate: formData.get("dueDate"),
+      mentionedUserIds,
+    });
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const student = await Student.findById(studentId)
+      .select("firstName lastName studentId recordType metadata assignedTo")
+      .lean();
+    if (!student) {
+      return { success: false, error: "Student not found" };
+    }
+    if (isAdmissionLead(student.recordType)) {
+      return { success: false, error: "Student not found" };
+    }
+    if (!canAccessStudent(user, student)) {
+      return inaccessibleStudentResult();
+    }
+
+    const teamUsers = await User.find({ status: "active" }).select("_id name").lean();
+    const { resolveMentionedUserIds } = await import("@/lib/utils/note-mentions");
+    const resolvedMentionIds = resolveMentionedUserIds(
+      parsed.data.content,
+      teamUsers.map((entry) => ({ _id: entry._id.toString(), name: entry.name })),
+      parsed.data.mentionedUserIds ?? []
     );
-  }
 
-  await logActivity({
-    action: "student.note_added",
-    description: `Note added on ${student.studentId} (${studentName})`,
-    resourceType: "student",
-    resourceId: studentId,
-    userId: user?.id,
-    userName: user?.name,
-    metadata: {
-      preview: parsed.data.content.slice(0, 120),
-      mentionCount: mentionObjectIds.length,
-    },
-  });
+    const mentionObjectIds = resolvedMentionIds
+      .filter((id) => id !== user?.id)
+      .map((id) => new Types.ObjectId(id));
 
-  revalidatePath(`/dashboard/students/${studentId}`);
-  return { success: true };
+    const studentName = `${student.firstName} ${student.lastName}`.trim();
+
+    await Student.findByIdAndUpdate(studentId, {
+      $push: {
+        notes: {
+          content: sanitizeText(parsed.data.content),
+          createdBy: user?.id,
+          createdByName: user?.name,
+          mentionedUserIds: mentionObjectIds,
+          dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : undefined,
+          createdAt: new Date(),
+        },
+      },
+    });
+
+    if (mentionObjectIds.length > 0) {
+      const { createNotification } = await import("@/lib/services/notification.service");
+      const { sendNoteMentionEmail } = await import("@/lib/services/email.service");
+      const { getPublicAuthUrl } = await import("@/lib/config/env");
+
+      const link = `/dashboard/students/${studentId}`;
+      const studentUrl = `${getPublicAuthUrl()}${link}`;
+
+      const mentionedUsers = await User.find({
+        _id: { $in: mentionObjectIds },
+        status: "active",
+      })
+        .select("_id email name")
+        .lean();
+
+      await Promise.all(
+        mentionedUsers.map(async (mentionedUser) => {
+          await createNotification({
+            userId: mentionedUser._id,
+            type: "info",
+            title: `You were tagged on ${studentName}`,
+            body: parsed.data.content,
+            link,
+          });
+
+          if (mentionedUser.email) {
+            await sendNoteMentionEmail({
+              email: mentionedUser.email,
+              name: mentionedUser.name,
+              mentionedByName: user?.name,
+              studentName,
+              studentCode: student.studentId,
+              noteContent: parsed.data.content,
+              studentUrl,
+            });
+          }
+        })
+      );
+    }
+
+    await logActivity({
+      action: "student.note_added",
+      description: `Note added on ${student.studentId} (${studentName})`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: {
+        preview: parsed.data.content.slice(0, 120),
+        mentionCount: mentionObjectIds.length,
+      },
+    });
+
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
   });
 }
 
@@ -1270,51 +1300,51 @@ export async function addStudentDocumentAction(
   doc: { name: string; url: string }
 ): Promise<ActionResult> {
   return runLoggedMutation("addStudentDocumentAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  const name = sanitizeText(doc.name);
-  if (!name) {
-    return { success: false, error: "Document name is required" };
-  }
+    const name = sanitizeText(doc.name);
+    if (!name) {
+      return { success: false, error: "Document name is required" };
+    }
 
-  const url = normalizeDocumentUrl(doc.url);
-  const urlError = getDocumentUrlError(url);
-  if (urlError) {
-    return { success: false, error: urlError };
-  }
+    const url = normalizeDocumentUrl(doc.url);
+    const urlError = getDocumentUrlError(url);
+    if (urlError) {
+      return { success: false, error: urlError };
+    }
 
-  await connectDB();
-  const studentLookup = await Student.findById(studentId)
-    .select("studentId firstName lastName metadata assignedTo")
-    .lean();
-  const access = guardStudentAccess(user, studentLookup);
-  if (!access.allowed) return access.error;
-  const student = access.student;
+    await connectDB();
+    const studentLookup = await Student.findById(studentId)
+      .select("studentId firstName lastName metadata assignedTo")
+      .lean();
+    const access = guardStudentAccess(user, studentLookup);
+    if (!access.allowed) return access.error;
+    const student = access.student;
 
-  await Student.findByIdAndUpdate(studentId, {
-    $push: {
-      documents: {
-        name,
-        url,
-        uploadedBy: user?.id,
-        uploadedAt: new Date(),
+    await Student.findByIdAndUpdate(studentId, {
+      $push: {
+        documents: {
+          name,
+          url,
+          uploadedBy: user?.id,
+          uploadedAt: new Date(),
+        },
       },
-    },
-  });
+    });
 
-  await logActivity({
-    action: "student.document_added",
-    description: `Document "${name}" added for ${student.studentId}`,
-    resourceType: "student",
-    resourceId: studentId,
-    userId: user?.id,
-    userName: user?.name,
-    metadata: { documentName: name },
-  });
+    await logActivity({
+      action: "student.document_added",
+      description: `Document "${name}" added for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { documentName: name },
+    });
 
-  revalidatePath(`/dashboard/students/${studentId}`);
-  return { success: true };
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
   });
 }
 
@@ -1323,36 +1353,38 @@ export async function removeStudentDocumentAction(
   documentId: string
 ): Promise<ActionResult> {
   return runLoggedMutation("removeStudentDocumentAction", async () => {
-  const user = await getSessionUser();
-  requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-  await connectDB();
-  const studentLookup = await Student.findById(studentId).select("metadata assignedTo studentId").lean();
-  const access = guardStudentAccess(user, studentLookup);
-  if (!access.allowed) return access.error;
+    await connectDB();
+    const studentLookup = await Student.findById(studentId)
+      .select("metadata assignedTo studentId")
+      .lean();
+    const access = guardStudentAccess(user, studentLookup);
+    if (!access.allowed) return access.error;
 
-  const result = await Student.findByIdAndUpdate(
-    studentId,
-    { $pull: { documents: { _id: new Types.ObjectId(documentId) } } },
-    { new: true }
-  );
+    const result = await Student.findByIdAndUpdate(
+      studentId,
+      { $pull: { documents: { _id: new Types.ObjectId(documentId) } } },
+      { new: true }
+    );
 
-  if (!result) {
-    return { success: false, error: "Student not found" };
-  }
+    if (!result) {
+      return { success: false, error: "Student not found" };
+    }
 
-  await logActivity({
-    action: "student.document_removed",
-    description: `Document removed from ${result.studentId}`,
-    resourceType: "student",
-    resourceId: studentId,
-    userId: user?.id,
-    userName: user?.name,
-    metadata: { documentId },
-  });
+    await logActivity({
+      action: "student.document_removed",
+      description: `Document removed from ${result.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { documentId },
+    });
 
-  revalidatePath(`/dashboard/students/${studentId}`);
-  return { success: true };
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
   });
 }
 
@@ -1379,13 +1411,9 @@ export async function updateStudentApplicationStatusAction(
 
     await ensureStudentLoanApplications(student);
     const primaryApplication =
-      student.loanApplications?.find((entry) => entry.isPrimary) ??
-      student.loanApplications?.[0];
+      student.loanApplications?.find((entry) => entry.isPrimary) ?? student.loanApplications?.[0];
 
-    if (
-      primaryApplication?._id &&
-      primaryApplication.applicationStatus !== applicationStatus
-    ) {
+    if (primaryApplication?._id && primaryApplication.applicationStatus !== applicationStatus) {
       try {
         await updateLoanApplicationStatus(
           student,
@@ -1444,50 +1472,58 @@ export async function markStudentSentToBankAction(
   return runLoggedMutation<{ sentToBank: true; sentToBankAt: string; sentToBankByName?: string }>(
     "markStudentSentToBankAction",
     async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
-    await connectDB();
-    const studentLookup = await Student.findById(studentId).populate("loanApplications.lenderId", "name slug");
-    const access = guardStudentAccess(user, studentLookup);
-    if (!access.allowed) return access.error;
-    const student = access.student;
+      await connectDB();
+      const studentLookup = await Student.findById(studentId).populate(
+        "loanApplications.lenderId",
+        "name slug"
+      );
+      const access = guardStudentAccess(user, studentLookup);
+      if (!access.allowed) return access.error;
+      const student = access.student;
 
-    await ensureStudentLoanApplications(student);
+      await ensureStudentLoanApplications(student);
 
-    const primary =
-      student.loanApplications?.find((entry) => entry.isPrimary) ?? student.loanApplications?.[0];
-    if (!primary?._id) {
-      return { success: false, error: "Assign a lender before sending to bank" };
+      const primary =
+        student.loanApplications?.find((entry) => entry.isPrimary) ?? student.loanApplications?.[0];
+      if (!primary?._id) {
+        return { success: false, error: "Assign a lender before sending to bank" };
+      }
+
+      const result = await sendLoanApplicationToBank(
+        student,
+        primary._id.toString(),
+        toSessionUser(user)
+      );
+
+      await logActivity({
+        action: "student.sent_to_bank",
+        description: `Student ${student.studentId} marked as sent to bank`,
+        resourceType: "student",
+        resourceId: studentId,
+        userId: user?.id,
+        userName: user?.name,
+      });
+
+      await captureServerPostHogEvent("student_sent_to_bank", user?.id ?? "anonymous", {
+        student_id: student.studentId,
+        sent_to_bank_at: result.sentToBankAt.toISOString(),
+      });
+
+      revalidatePath("/dashboard/students");
+      revalidatePath(`/dashboard/students/${studentId}`);
+      return {
+        success: true,
+        data: {
+          sentToBank: true,
+          sentToBankAt: result.sentToBankAt.toISOString(),
+          sentToBankByName: result.sentToBankByName,
+        },
+      };
     }
-
-    const result = await sendLoanApplicationToBank(student, primary._id.toString(), toSessionUser(user));
-
-    await logActivity({
-      action: "student.sent_to_bank",
-      description: `Student ${student.studentId} marked as sent to bank`,
-      resourceType: "student",
-      resourceId: studentId,
-      userId: user?.id,
-      userName: user?.name,
-    });
-
-    await captureServerPostHogEvent("student_sent_to_bank", user?.id ?? "anonymous", {
-      student_id: student.studentId,
-      sent_to_bank_at: result.sentToBankAt.toISOString(),
-    });
-
-    revalidatePath("/dashboard/students");
-    revalidatePath(`/dashboard/students/${studentId}`);
-    return {
-      success: true,
-      data: {
-        sentToBank: true,
-        sentToBankAt: result.sentToBankAt.toISOString(),
-        sentToBankByName: result.sentToBankByName,
-      },
-    };
-  });
+  );
 }
 
 export async function setStudentPrimaryLenderAction(
@@ -1570,14 +1606,19 @@ export async function sendLoanApplicationToBankAction(
   studentId: string,
   applicationId: string
 ): Promise<ActionResult<{ sentToBankAt: string; sentToBankByName?: string; lenderName?: string }>> {
-  return runLoggedMutation<{ sentToBankAt: string; sentToBankByName?: string; lenderName?: string }>(
-    "sendLoanApplicationToBankAction",
-    async () => {
+  return runLoggedMutation<{
+    sentToBankAt: string;
+    sentToBankByName?: string;
+    lenderName?: string;
+  }>("sendLoanApplicationToBankAction", async () => {
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
 
     await connectDB();
-    const studentLookup = await Student.findById(studentId).populate("loanApplications.lenderId", "name slug");
+    const studentLookup = await Student.findById(studentId).populate(
+      "loanApplications.lenderId",
+      "name slug"
+    );
     const access = guardStudentAccess(user, studentLookup);
     if (!access.allowed) return access.error;
     const student = access.student;
@@ -1635,7 +1676,12 @@ export async function updateLoanApplicationStatusAction(
     await ensureStudentLoanApplications(student);
 
     try {
-      await updateLoanApplicationStatus(student, applicationId, applicationStatus, toSessionUser(user));
+      await updateLoanApplicationStatus(
+        student,
+        applicationId,
+        applicationStatus,
+        toSessionUser(user)
+      );
     } catch (error) {
       return {
         success: false,

@@ -225,10 +225,7 @@ function buildStudentCommissionBaseRows(
       student.commissionPercentOverride
     );
     const commissionExpected = calculateExpectedCommission(disbursed, ourCommissionPercent);
-    const partnerShareExpected = calculatePartnerShareExpected(
-      disbursed,
-      effectivePartnerShare
-    );
+    const partnerShareExpected = calculatePartnerShareExpected(disbursed, effectivePartnerShare);
     const commissionReceived = Math.max(0, student.commissionReceived ?? 0);
 
     return {
@@ -254,12 +251,8 @@ function applyStudentSettlements(
   baseRows: ReturnType<typeof buildStudentCommissionBaseRows>,
   partnerSettledFallback: number
 ): StudentCommissionRow[] {
-  const studentSettledTotal = baseRows.reduce(
-    (sum, row) => sum + row.commissionSharedStored,
-    0
-  );
-  const useLegacyAllocation =
-    studentSettledTotal <= 0 && partnerSettledFallback > 0;
+  const studentSettledTotal = baseRows.reduce((sum, row) => sum + row.commissionSharedStored, 0);
+  const useLegacyAllocation = studentSettledTotal <= 0 && partnerSettledFallback > 0;
 
   const legacyAllocation = useLegacyAllocation
     ? allocateSettledToStudents(
@@ -273,7 +266,7 @@ function applyStudentSettlements(
 
   return baseRows.map((row) => {
     const commissionShared = useLegacyAllocation
-      ? legacyAllocation?.get(row.studentDbId)?.settled ?? 0
+      ? (legacyAllocation?.get(row.studentDbId)?.settled ?? 0)
       : row.commissionSharedStored;
     const pendingShared = calculatePendingShared(row.partnerShareExpected, commissionShared);
     const projectedNetEarned = calculateProjectedNetEarned(
@@ -389,11 +382,7 @@ export async function getPartnerCommissionSummary(
     legacySettled ??= partner?.performance?.commissionSettled ?? 0;
   }
 
-  const rows = await getPartnerStudentCommissions(
-    partnerId,
-    defaultPercent,
-    legacySettled ?? 0
-  );
+  const rows = await getPartnerStudentCommissions(partnerId, defaultPercent, legacySettled ?? 0);
 
   return summarizeRows(rows, defaultPercent ?? 0);
 }
@@ -591,9 +580,7 @@ export async function getPartnerCommissionLedger(
     (a, b) => b.date.getTime() - a.date.getTime()
   );
 
-  const filtered = month
-    ? allEntries.filter((entry) => entry.month === month)
-    : allEntries;
+  const filtered = month ? allEntries.filter((entry) => entry.month === month) : allEntries;
 
   const summary = await getPartnerCommissionSummary(partnerId);
 

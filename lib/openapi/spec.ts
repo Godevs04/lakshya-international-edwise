@@ -118,7 +118,8 @@ function buildRestPaths(): Record<string, OpenApiPathItem> {
       get: {
         tags: ["REST — Health"],
         summary: "Service health check",
-        description: "Returns database, environment, and SMTP status. Used by uptime monitors and load balancers.",
+        description:
+          "Returns database, environment, and SMTP status. Used by uptime monitors and load balancers.",
         operationId: "getHealth",
         responses: {
           200: jsonResponse("Service healthy", "#/components/schemas/HealthResponse"),
@@ -130,7 +131,8 @@ function buildRestPaths(): Record<string, OpenApiPathItem> {
       get: {
         tags: ["REST — Cron"],
         summary: "Run follow-up reminder job (GET)",
-        description: "Sends due follow-up reminder emails. Requires `Authorization: Bearer {CRON_SECRET}` in production.",
+        description:
+          "Sends due follow-up reminder emails. Requires `Authorization: Bearer {CRON_SECRET}` in production.",
         operationId: "runFollowUpRemindersGet",
         security: [{ cronBearer: [] }],
         responses: {
@@ -156,7 +158,8 @@ function buildRestPaths(): Record<string, OpenApiPathItem> {
       get: {
         tags: ["REST — Auth.js"],
         summary: "Get current session",
-        description: "Auth.js session endpoint. Returns the authenticated user when a valid session cookie is present.",
+        description:
+          "Auth.js session endpoint. Returns the authenticated user when a valid session cookie is present.",
         operationId: "getAuthSession",
         responses: {
           200: jsonResponse("Session payload or null"),
@@ -199,7 +202,8 @@ function buildRestPaths(): Record<string, OpenApiPathItem> {
       post: {
         tags: ["REST — Auth.js"],
         summary: "Credentials sign-in callback",
-        description: "Auth.js credentials provider callback. Expects CSRF token and login form fields.",
+        description:
+          "Auth.js credentials provider callback. Expects CSRF token and login form fields.",
         operationId: "postAuthCredentialsCallback",
         requestBody: {
           required: true,

@@ -25,13 +25,17 @@ describe("site config", () => {
 
   it("normalizes legacy support emails to the production mailbox", () => {
     expect(normalizeSupportEmail("hello@teamgodevs.in")).toBe(PRODUCTION_SUPPORT_EMAIL);
-    expect(normalizeSupportEmail("hello@lakshyainternationaledwise.com")).toBe(PRODUCTION_SUPPORT_EMAIL);
-    expect(normalizeSupportEmail("support@lakshyainternationaledwise.com")).toBe(PRODUCTION_SUPPORT_EMAIL);
+    expect(normalizeSupportEmail("hello@lakshyainternationaledwise.com")).toBe(
+      PRODUCTION_SUPPORT_EMAIL
+    );
+    expect(normalizeSupportEmail("support@lakshyainternationaledwise.com")).toBe(
+      PRODUCTION_SUPPORT_EMAIL
+    );
   });
 
   it("normalizes legacy addresses inside SMTP from headers", () => {
-    expect(
-      normalizeSmtpFromAddress('Lakshya International Edwise <hello@teamgodevs.in>')
-    ).toBe(`Lakshya International Edwise <${PRODUCTION_SUPPORT_EMAIL}>`);
+    expect(normalizeSmtpFromAddress("Lakshya International Edwise <hello@teamgodevs.in>")).toBe(
+      `Lakshya International Edwise <${PRODUCTION_SUPPORT_EMAIL}>`
+    );
   });
 });

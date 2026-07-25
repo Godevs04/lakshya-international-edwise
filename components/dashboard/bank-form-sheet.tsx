@@ -55,9 +55,10 @@ export function BankFormSheet({ lender, open, onOpenChange, trigger }: BankFormS
     setLoading(true);
     const formData = new FormData(event.currentTarget);
 
-    const result = isEdit && lender
-      ? await updateLenderAction(lender._id, formData)
-      : await createLenderAction(formData);
+    const result =
+      isEdit && lender
+        ? await updateLenderAction(lender._id, formData)
+        : await createLenderAction(formData);
 
     if (result.success) {
       notify.success(isEdit ? "Bank updated" : "Bank added");

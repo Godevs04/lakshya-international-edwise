@@ -20,10 +20,7 @@ export function resolveUserPermissions(
   return getPermissionsForRole(role);
 }
 
-export function hasPermission(
-  user: SessionUser | null | undefined,
-  permission: string
-): boolean {
+export function hasPermission(user: SessionUser | null | undefined, permission: string): boolean {
   if (!user) return false;
   if (user.permissions.includes("*")) return true;
   if (user.permissions.includes(permission)) return true;
@@ -51,18 +48,12 @@ const ROUTE_PERMISSIONS: { prefix: string; permission: string }[] = [
   { prefix: "/dashboard/audit", permission: "audit:read" },
 ];
 
-export function canAccessRoute(
-  user: SessionUser | null | undefined,
-  route: string
-): boolean {
+export function canAccessRoute(user: SessionUser | null | undefined, route: string): boolean {
   if (!user) return false;
   if (user.role === "super_admin") return true;
 
   if (route.startsWith("/dashboard/site-leads")) {
-    return hasAnyPermission(user, [
-      PERMISSIONS.ADMISSIONS_READ,
-      PERMISSIONS.PARTNERS_READ,
-    ]);
+    return hasAnyPermission(user, [PERMISSIONS.ADMISSIONS_READ, PERMISSIONS.PARTNERS_READ]);
   }
 
   for (const { prefix, permission } of ROUTE_PERMISSIONS) {
@@ -83,10 +74,7 @@ export function requireAnyPermission(
   }
 }
 
-export function requirePermission(
-  user: SessionUser | null | undefined,
-  permission: string
-): void {
+export function requirePermission(user: SessionUser | null | undefined, permission: string): void {
   if (!hasPermission(user, permission)) {
     throw new Error("Unauthorized: insufficient permissions");
   }

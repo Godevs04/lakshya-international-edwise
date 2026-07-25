@@ -40,16 +40,24 @@ export function FollowUpCards({ followups }: FollowUpCardsProps) {
             whileHover={{ y: -2 }}
             className="group flex flex-col gap-3 rounded-2xl border border-[#E8952E]/10 bg-white/50 p-4 backdrop-blur-sm transition-all hover:border-[#E8952E]/20 hover:shadow-lg hover:shadow-[#E8952E]/10 sm:flex-row sm:items-center dark:bg-white/5"
           >
-            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${PRIORITY_STYLES[priority]} shadow-md`}>
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${PRIORITY_STYLES[priority]} shadow-md`}
+            >
               <Calendar className="h-5 w-5 text-white" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">{f.firstName} {f.lastName}</p>
+              <p className="text-sm font-semibold">
+                {f.firstName} {f.lastName}
+              </p>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">{f.note}</p>
               <p className="mt-1 text-xs font-medium text-[#E8952E]">{formatDate(f.dueDate)}</p>
             </div>
             <Link href={`/dashboard/students/${f.id}`}>
-              <Button variant="ghost" size="icon-sm" className="opacity-0 transition-opacity group-hover:opacity-100">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              >
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

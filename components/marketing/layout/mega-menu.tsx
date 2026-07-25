@@ -163,10 +163,7 @@ function ServicesMegaMenu({ onClose }: { onClose: () => void }) {
               aria-selected={isActive}
               onMouseEnter={() => setActiveSlug(service.slug)}
               onFocus={() => setActiveSlug(service.slug)}
-              className={cn(
-                "mega-menu-sidebar-item",
-                isActive && "mega-menu-sidebar-item-active"
-              )}
+              className={cn("mega-menu-sidebar-item", isActive && "mega-menu-sidebar-item-active")}
             >
               <span>{service.title}</span>
               <ChevronRight
@@ -224,13 +221,7 @@ function CountriesMegaMenu({ onClose }: { onClose: () => void }) {
           >
             {country.image ? (
               <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg ring-1 ring-black/5">
-                <Image
-                  src={country.image}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="40px"
-                />
+                <Image src={country.image} alt="" fill className="object-cover" sizes="40px" />
               </span>
             ) : (
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">

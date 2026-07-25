@@ -45,10 +45,7 @@ describe("buildOpenApiDocument", () => {
     expect(doc.paths["/api/cron/follow-up-reminders"]).toBeDefined();
     expect(doc.paths["/api/auth/session"]).toBeDefined();
 
-    const actionCount = SERVER_ACTION_GROUPS.reduce(
-      (sum, group) => sum + group.actions.length,
-      0
-    );
+    const actionCount = SERVER_ACTION_GROUPS.reduce((sum, group) => sum + group.actions.length, 0);
     const actionPaths = Object.keys(doc.paths).filter((path) =>
       path.startsWith("/server-actions/")
     );

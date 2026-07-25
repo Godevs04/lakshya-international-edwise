@@ -88,10 +88,7 @@ export function PartnerLeadForm() {
     formData.set("companyName", values.companyName);
     formData.set("city", values.city);
     formData.set("isOwner", values.isOwner === "yes" ? "true" : "false");
-    formData.set(
-      "mobileIsWhatsapp",
-      values.mobileIsWhatsapp === "yes" ? "true" : "false"
-    );
+    formData.set("mobileIsWhatsapp", values.mobileIsWhatsapp === "yes" ? "true" : "false");
     if (values.mobileIsWhatsapp === "no" && values.whatsapp) {
       formData.set("whatsapp", values.whatsapp);
     }
@@ -122,33 +119,51 @@ export function PartnerLeadForm() {
         <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-primary" />
         <h3 className="text-xl font-semibold text-foreground">Thank you!</h3>
         <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-          Our partnerships team will reach out to you shortly to discuss how we can grow
-          together.
+          Our partnerships team will reach out to you shortly to discuss how we can grow together.
         </p>
       </motion.div>
     );
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="consultation-card rounded-2xl p-6 md:p-8">
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="consultation-card rounded-2xl p-6 md:p-8"
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="partner-name">Full name</Label>
-          <Input id="partner-name" {...form.register("name")} placeholder="Your name" className={fieldClass} />
+          <Input
+            id="partner-name"
+            {...form.register("name")}
+            placeholder="Your name"
+            className={fieldClass}
+          />
           {form.formState.errors.name && (
             <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="partner-email">Email</Label>
-          <Input id="partner-email" type="email" {...form.register("email")} placeholder="you@company.com" className={fieldClass} />
+          <Input
+            id="partner-email"
+            type="email"
+            {...form.register("email")}
+            placeholder="you@company.com"
+            className={fieldClass}
+          />
           {form.formState.errors.email && (
             <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
           )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="partner-phone">Mobile number</Label>
-          <Input id="partner-phone" {...form.register("phone")} placeholder="10-digit mobile" className={fieldClass} />
+          <Input
+            id="partner-phone"
+            {...form.register("phone")}
+            placeholder="10-digit mobile"
+            className={fieldClass}
+          />
           {form.formState.errors.phone && (
             <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
           )}
@@ -199,14 +214,24 @@ export function PartnerLeadForm() {
 
         <div className="space-y-2">
           <Label htmlFor="partner-company">Company registered name</Label>
-          <Input id="partner-company" {...form.register("companyName")} placeholder="Your company" className={fieldClass} />
+          <Input
+            id="partner-company"
+            {...form.register("companyName")}
+            placeholder="Your company"
+            className={fieldClass}
+          />
           {form.formState.errors.companyName && (
             <p className="text-xs text-destructive">{form.formState.errors.companyName.message}</p>
           )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="partner-city">City</Label>
-          <Input id="partner-city" {...form.register("city")} placeholder="City" className={fieldClass} />
+          <Input
+            id="partner-city"
+            {...form.register("city")}
+            placeholder="City"
+            className={fieldClass}
+          />
           {form.formState.errors.city && (
             <p className="text-xs text-destructive">{form.formState.errors.city.message}</p>
           )}
@@ -241,7 +266,13 @@ export function PartnerLeadForm() {
         </div>
       </div>
 
-      <input type="text" tabIndex={-1} autoComplete="off" className="hidden" {...form.register("website")} />
+      <input
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        className="hidden"
+        {...form.register("website")}
+      />
 
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 

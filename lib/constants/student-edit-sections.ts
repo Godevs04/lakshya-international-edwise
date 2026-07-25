@@ -16,9 +16,7 @@ export const STUDENT_EDIT_SECTIONS: Record<
   },
 };
 
-export function parseStudentEditSection(
-  value?: string | null
-): StudentEditSectionKey | undefined {
+export function parseStudentEditSection(value?: string | null): StudentEditSectionKey | undefined {
   if (!value) return undefined;
   return value in STUDENT_EDIT_SECTIONS ? (value as StudentEditSectionKey) : undefined;
 }

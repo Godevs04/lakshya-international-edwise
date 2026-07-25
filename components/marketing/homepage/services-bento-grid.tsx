@@ -36,15 +36,11 @@ function slotClass(slug: string) {
 function useReveal(index: number) {
   const { prefersReducedMotion } = useMarketingMotion();
   return {
-    initial: prefersReducedMotion
-      ? false
-      : { opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" },
+    initial: prefersReducedMotion ? false : { opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" },
     whileInView: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
     viewport: { once: true, margin: "-40px", amount: 0.12 } as const,
     transition: { duration: 0.68, delay: index * 0.07, ease: EASE },
-    hover: prefersReducedMotion
-      ? undefined
-      : { y: -8, scale: 1.02, transition: HOVER_TRANSITION },
+    hover: prefersReducedMotion ? undefined : { y: -8, scale: 1.02, transition: HOVER_TRANSITION },
   };
 }
 

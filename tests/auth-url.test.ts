@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getAuthUrl, getConfiguredAuthUrl, getPublicAuthUrl, resolveAuthUrl } from "@/lib/config/env";
+import {
+  getAuthUrl,
+  getConfiguredAuthUrl,
+  getPublicAuthUrl,
+  resolveAuthUrl,
+} from "@/lib/config/env";
 
 describe("resolveAuthUrl", () => {
   afterEach(() => {

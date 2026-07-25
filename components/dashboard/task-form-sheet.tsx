@@ -97,7 +97,10 @@ export function TaskFormSheet({
           </Button>
         }
       />
-      <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
+      >
         <SheetHeader className="border-b border-[#E8952E]/10">
           <SheetTitle>New Task</SheetTitle>
           <SheetDescription>
@@ -132,12 +135,23 @@ export function TaskFormSheet({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="task-dueAt">Due date & time</Label>
-              <Input id="task-dueAt" name="dueAt" type="datetime-local" required className="w-full" />
+              <Input
+                id="task-dueAt"
+                name="dueAt"
+                type="datetime-local"
+                required
+                className="w-full"
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="task-reminderAt">Reminder (optional)</Label>
-              <Input id="task-reminderAt" name="reminderAt" type="datetime-local" className="w-full" />
+              <Input
+                id="task-reminderAt"
+                name="reminderAt"
+                type="datetime-local"
+                className="w-full"
+              />
             </div>
           </div>
 

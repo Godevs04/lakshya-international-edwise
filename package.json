@@ -4,9 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p ${PORT:-4000}",
-    "build": "next build",
+    "build": "rm -rf .next && next build",
     "start": "next start -p ${PORT:-4000}",
+    "start:standalone": "cp -R public .next/standalone/public && mkdir -p .next/standalone/.next && cp -R .next/static .next/standalone/.next/static && PORT=${PORT:-4000} HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "knip": "knip",
+    "knip:files": "knip --include files --no-progress",
+    "check:env": "tsx scripts/check-env.ts",
+    "lighthouse:ci": "lhci autorun",
+    "lighthouse:ci:prod": "echo 'Tip: run against next start (production), not next dev' && lhci autorun",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright install chromium && playwright test",
@@ -14,7 +22,18 @@
     "test:e2e:ui": "playwright install chromium && playwright test --ui",
     "seed": "tsx scripts/seed.ts",
     "sync:branding": "tsx scripts/seed.ts",
-    "backup:mongodb": "bash scripts/backup-mongodb.sh"
+    "backup:mongodb": "bash scripts/backup-mongodb.sh",
+    "prepare": "husky",
+    "lint:staged": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "prettier --write",
+      "eslint --max-warnings=0 --fix"
+    ],
+    "*.{json,css,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -64,6 +83,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.52.0",
     "@posthog/nextjs-config": "^1.7.6",
     "@tailwindcss/postcss": "^4",
@@ -76,6 +96,11 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "knip": "^6.29.0",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5",

@@ -57,9 +57,7 @@ function rectLayer({
     nm: name,
     sr: 1,
     ks: {
-      o: opacityKeyframes
-        ? { a: 1, k: opacityKeyframes }
-        : { a: 0, k: 100 },
+      o: opacityKeyframes ? { a: 1, k: opacityKeyframes } : { a: 0, k: 100 },
       r: { a: 0, k: 0 },
       p: { a: 0, k: [x, y, 0] },
       a: { a: 0, k: [0, h / 2, 0] },
@@ -287,9 +285,21 @@ function checkLayer({ ind, x, y, color, delay = 30 }) {
             ks: {
               a: 0,
               k: {
-                i: [[0, 0], [0, 0], [0, 0]],
-                o: [[0, 0], [0, 0], [0, 0]],
-                v: [[-18, 2], [-6, 14], [20, -12]],
+                i: [
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                ],
+                o: [
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                ],
+                v: [
+                  [-18, 2],
+                  [-6, 14],
+                  [20, -12],
+                ],
                 c: false,
               },
             },
@@ -596,9 +606,18 @@ const searchEmpty = base("Search Empty", 200, 200, 150, [
             ks: {
               a: 0,
               k: {
-                i: [[0, 0], [0, 0]],
-                o: [[0, 0], [0, 0]],
-                v: [[28, 28], [48, 48]],
+                i: [
+                  [0, 0],
+                  [0, 0],
+                ],
+                o: [
+                  [0, 0],
+                  [0, 0],
+                ],
+                v: [
+                  [28, 28],
+                  [48, 48],
+                ],
                 c: false,
               },
             },

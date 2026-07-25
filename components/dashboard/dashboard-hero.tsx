@@ -65,8 +65,7 @@ export function DashboardHero({ userName }: DashboardHeroProps) {
           transition={{ delay: 0.2 }}
           className="mt-2 max-w-2xl text-2xl font-bold tracking-tight text-slate-950 dark:text-slate-50 sm:text-3xl md:text-4xl"
         >
-          {greeting},{" "}
-          <span className="gradient-text">{firstName}</span>
+          {greeting}, <span className="gradient-text">{firstName}</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, x: -20 }}

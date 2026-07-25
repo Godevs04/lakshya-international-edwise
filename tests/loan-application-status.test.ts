@@ -40,11 +40,7 @@ describe("parallel bank PF Paid workflow", () => {
   it("selects the PF Paid bank and closes every other active bank", async () => {
     const { student, avanseId } = createStudentWithParallelApplications();
 
-    await updateLoanApplicationStatus(
-      student as never,
-      avanseId.toString(),
-      "pf_paid"
-    );
+    await updateLoanApplicationStatus(student as never, avanseId.toString(), "pf_paid");
 
     expect(student.loanApplications[0]).toMatchObject({
       applicationStatus: "pf_paid",
@@ -66,18 +62,10 @@ describe("parallel bank PF Paid workflow", () => {
   it("rejects changes to another bank after PF Paid is recorded", async () => {
     const { student, avanseId, credilaId } = createStudentWithParallelApplications();
 
-    await updateLoanApplicationStatus(
-      student as never,
-      avanseId.toString(),
-      "pf_paid"
-    );
+    await updateLoanApplicationStatus(student as never, avanseId.toString(), "pf_paid");
 
     await expect(
-      updateLoanApplicationStatus(
-        student as never,
-        credilaId.toString(),
-        "pf_paid"
-      )
+      updateLoanApplicationStatus(student as never, credilaId.toString(), "pf_paid")
     ).rejects.toThrow("closed because Avanse has reached PF Paid");
   });
 });

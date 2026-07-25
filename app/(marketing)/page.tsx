@@ -9,6 +9,7 @@ import { CountryCard } from "@/components/marketing/cards/country-card";
 import { FaqSection } from "@/components/marketing/sections/faq";
 import { WhyChooseSection } from "@/components/marketing/sections/why-choose";
 import { HomepageJourneyPath } from "@/components/marketing/motion/homepage-journey-path";
+import { LoanCalculatorSectionLazy } from "@/components/marketing/sections/loan-calculator-section-lazy";
 import { JsonLd, faqPageJsonLd, websiteJsonLd } from "@/components/marketing/seo/json-ld";
 import { MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
 import { MARKETING_FAQS } from "@/lib/constants/marketing/faqs";
@@ -43,14 +44,6 @@ const LendingPartnersPreview = dynamic(
   () =>
     import("@/components/marketing/sections/lending-partners-preview").then(
       (mod) => mod.LendingPartnersPreview
-    ),
-  { ssr: true }
-);
-
-const LoanCalculatorSection = dynamic(
-  () =>
-    import("@/components/marketing/sections/loan-calculator-section").then(
-      (mod) => mod.LoanCalculatorSection
     ),
   { ssr: true }
 );
@@ -106,7 +99,7 @@ export default function MarketingHomePage() {
 
       <HomepageJourneyPath />
       <FinanceHero />
-      <LoanCalculatorSection />
+      <LoanCalculatorSectionLazy />
       <LakshyaRootMap />
       <FinanceProcessHorizontal />
       <WhyChooseSection />

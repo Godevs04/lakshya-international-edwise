@@ -190,12 +190,7 @@ export function UserMenuPermissions({
         <SummaryPill label="Hidden" value={summary.none} tone="none" />
       </div>
 
-      <div
-        className={cn(
-          "grid gap-3",
-          compact ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
-        )}
-      >
+      <div className={cn("grid gap-3", compact ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
         {MENU_PERMISSION_MODULES.map((menuModule) => {
           const Icon = MODULE_ICONS[menuModule.key];
           const level = effectiveAccess[menuModule.key] ?? "none";

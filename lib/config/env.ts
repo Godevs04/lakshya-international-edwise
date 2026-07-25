@@ -57,13 +57,9 @@ function normalizeBaseUrl(url: string): string {
 
 /** Canonical app URL for Auth.js redirects, emails, and password reset links. */
 export function resolveAuthUrl(): string {
-  const explicit =
-    trimEnv(process.env.AUTH_URL) ?? trimEnv(process.env.NEXTAUTH_URL);
+  const explicit = trimEnv(process.env.AUTH_URL) ?? trimEnv(process.env.NEXTAUTH_URL);
 
-  if (
-    explicit &&
-    !(process.env.NODE_ENV === "production" && isLocalhostUrl(explicit))
-  ) {
+  if (explicit && !(process.env.NODE_ENV === "production" && isLocalhostUrl(explicit))) {
     return normalizeBaseUrl(explicit);
   }
 
@@ -81,9 +77,7 @@ export function resolveAuthUrl(): string {
     return normalizeBaseUrl(explicit);
   }
 
-  return normalizeBaseUrl(
-    `http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`
-  );
+  return normalizeBaseUrl(`http://localhost:${trimEnv(process.env.PORT) ?? "4000"}`);
 }
 
 /**
@@ -91,8 +85,7 @@ export function resolveAuthUrl(): string {
  * Auth.js route redirects should prefer the current request host when this is unset.
  */
 export function getConfiguredAuthUrl(): string | undefined {
-  const explicit =
-    trimEnv(process.env.AUTH_URL) ?? trimEnv(process.env.NEXTAUTH_URL);
+  const explicit = trimEnv(process.env.AUTH_URL) ?? trimEnv(process.env.NEXTAUTH_URL);
 
   if (!explicit) {
     return undefined;
@@ -111,21 +104,15 @@ function resolveExplicitPublicUrl(): string | undefined {
     return authUrl;
   }
 
-  const appUrl =
-    trimEnv(process.env.APP_URL) ?? trimEnv(process.env.NEXT_PUBLIC_APP_URL);
-  if (
-    appUrl &&
-    !(process.env.NODE_ENV === "production" && isLocalhostUrl(appUrl))
-  ) {
+  const appUrl = trimEnv(process.env.APP_URL) ?? trimEnv(process.env.NEXT_PUBLIC_APP_URL);
+  if (appUrl && !(process.env.NODE_ENV === "production" && isLocalhostUrl(appUrl))) {
     return normalizeBaseUrl(appUrl);
   }
 
   const vercelProduction = trimEnv(process.env.VERCEL_PROJECT_PRODUCTION_URL);
   if (vercelProduction && process.env.NODE_ENV === "production") {
     return normalizeBaseUrl(
-      vercelProduction.startsWith("http")
-        ? vercelProduction
-        : `https://${vercelProduction}`
+      vercelProduction.startsWith("http") ? vercelProduction : `https://${vercelProduction}`
     );
   }
 

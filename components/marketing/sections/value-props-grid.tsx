@@ -140,10 +140,7 @@ export function ValuePropsGrid({
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.2, ease: EASE }}
       >
-        <EligibilityCta
-          source={ctaSource}
-          className="services-bento-btn-premium value-props-cta"
-        >
+        <EligibilityCta source={ctaSource} className="services-bento-btn-premium value-props-cta">
           Check Eligibility
           <ArrowRight className="services-bento-btn-arrow h-4 w-4" aria-hidden />
         </EligibilityCta>

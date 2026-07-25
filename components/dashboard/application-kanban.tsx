@@ -17,11 +17,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
+import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -53,11 +49,7 @@ function KanbanCard({ app, canWrite }: { app: ApplicationListItem; canWrite: boo
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...(canWrite ? { ...attributes, ...listeners } : {})}
-    >
+    <div ref={setNodeRef} style={style} {...(canWrite ? { ...attributes, ...listeners } : {})}>
       <GlassCard
         hover={canWrite}
         className={`mb-2 p-4 ${canWrite ? "cursor-grab active:cursor-grabbing" : "cursor-default"}`}
@@ -140,9 +132,7 @@ export function ApplicationKanban({
     const app = apps.find((a) => a._id === appId);
     if (!app || app.status === newStatus) return;
 
-    setApps((prev) =>
-      prev.map((a) => (a._id === appId ? { ...a, status: newStatus } : a))
-    );
+    setApps((prev) => prev.map((a) => (a._id === appId ? { ...a, status: newStatus } : a)));
 
     const result = await updateApplicationStatusAction(appId, newStatus);
     if (result.success) {
@@ -159,7 +149,9 @@ export function ApplicationKanban({
   return (
     <div className="space-y-4">
       {!canWrite && view === "kanban" && (
-        <p className="text-sm text-muted-foreground">View-only mode — drag & drop requires edit permission.</p>
+        <p className="text-sm text-muted-foreground">
+          View-only mode — drag & drop requires edit permission.
+        </p>
       )}
       <Tabs value={view} onValueChange={handleViewChange}>
         <TabsList>
@@ -219,20 +211,24 @@ export function ApplicationKanban({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tableApps.length ? tableApps.map((app) => (
-                  <TableRow key={app._id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{app.studentName}</p>
-                        <p className="text-xs text-muted-foreground">{app.studentId}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{app.partnerName ?? "—"}</TableCell>
-                    <TableCell>{formatCurrency(app.loanAmount)}</TableCell>
-                    <TableCell><StatusBadge status={app.status} /></TableCell>
-                    <TableCell className="capitalize">{app.priority ?? "medium"}</TableCell>
-                  </TableRow>
-                )) : (
+                {tableApps.length ? (
+                  tableApps.map((app) => (
+                    <TableRow key={app._id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{app.studentName}</p>
+                          <p className="text-xs text-muted-foreground">{app.studentId}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{app.partnerName ?? "—"}</TableCell>
+                      <TableCell>{formatCurrency(app.loanAmount)}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={app.status} />
+                      </TableCell>
+                      <TableCell className="capitalize">{app.priority ?? "medium"}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                       No applications found.
@@ -250,7 +246,9 @@ export function ApplicationKanban({
                   variant="outline"
                   size="sm"
                   disabled={tableResult.page <= 1}
-                  onClick={() => router.push(`/dashboard/applications?view=table&page=${tableResult.page - 1}`)}
+                  onClick={() =>
+                    router.push(`/dashboard/applications?view=table&page=${tableResult.page - 1}`)
+                  }
                 >
                   Previous
                 </Button>
@@ -261,7 +259,9 @@ export function ApplicationKanban({
                   variant="outline"
                   size="sm"
                   disabled={tableResult.page >= tableResult.totalPages}
-                  onClick={() => router.push(`/dashboard/applications?view=table&page=${tableResult.page + 1}`)}
+                  onClick={() =>
+                    router.push(`/dashboard/applications?view=table&page=${tableResult.page + 1}`)
+                  }
                 >
                   Next
                 </Button>

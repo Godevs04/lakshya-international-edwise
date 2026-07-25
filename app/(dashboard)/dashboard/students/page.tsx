@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StudentsTable } from "@/components/tables/students-table";
-import {
-  getAssignableUsers,
-  getStudents,
-} from "@/lib/actions/student.actions";
+import { getAssignableUsers, getStudents } from "@/lib/actions/student.actions";
 import { getPartnersList, getPartnerById } from "@/lib/actions/partner.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { getStudentPageAccess, requirePagePermission } from "@/lib/auth/page-access";
@@ -14,9 +11,7 @@ import { mergePartnerOptions } from "@/lib/utils/partner-options";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-function parseFilters(
-  params: Record<string, string | undefined>
-): StudentListFilters {
+function parseFilters(params: Record<string, string | undefined>): StudentListFilters {
   return {
     page: params.page,
     search: params.search,
@@ -95,7 +90,9 @@ export default async function StudentsPage({
         action={
           access.canWrite ? (
             <Link href="/dashboard/students/new">
-              <Button><Plus className="mr-1.5 h-4 w-4" /> Add Student</Button>
+              <Button>
+                <Plus className="mr-1.5 h-4 w-4" /> Add Student
+              </Button>
             </Link>
           ) : undefined
         }

@@ -65,10 +65,7 @@ describe("student-visibility", () => {
     const filter = buildStudentVisibilityFilter(user("staff", STAFF_B_ID));
 
     expect(filter).toEqual({
-      $or: [
-        { "metadata.createdBy": expect.anything() },
-        { assignedTo: expect.anything() },
-      ],
+      $or: [{ "metadata.createdBy": expect.anything() }, { assignedTo: expect.anything() }],
     });
   });
 

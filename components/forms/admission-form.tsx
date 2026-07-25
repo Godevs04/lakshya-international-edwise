@@ -14,7 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormSection } from "@/components/forms/form-section";
-import { AssigneeSelect, mergeAssigneeOptions, type AssigneeOption } from "@/components/forms/assignee-select";
+import {
+  AssigneeSelect,
+  mergeAssigneeOptions,
+  type AssigneeOption,
+} from "@/components/forms/assignee-select";
 import { TARGET_COUNTRIES, TARGET_INTAKES } from "@/lib/constants/study-abroad";
 import {
   ADMISSION_EDIT_SECTIONS,
@@ -108,11 +112,7 @@ export function AdmissionForm({
         <>
           <input type="hidden" name="targetCountry" value={targetCountry} />
           <input type="hidden" name="targetIntake" value={targetIntake} />
-          <input
-            type="hidden"
-            name="targetUniversity"
-            value={initialData.targetUniversity ?? ""}
-          />
+          <input type="hidden" name="targetUniversity" value={initialData.targetUniversity ?? ""} />
         </>
       ) : null}
 
@@ -147,12 +147,7 @@ export function AdmissionForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Student last name *</Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                defaultValue={initialData.lastName}
-                required
-              />
+              <Input id="lastName" name="lastName" defaultValue={initialData.lastName} required />
             </div>
             <div className="sm:col-span-2">
               <StudentPhoneField
@@ -177,7 +172,10 @@ export function AdmissionForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="targetCountry">Country</Label>
-              <Select value={targetCountry} onValueChange={(value) => setTargetCountry(value ?? "")}>
+              <Select
+                value={targetCountry}
+                onValueChange={(value) => setTargetCountry(value ?? "")}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>

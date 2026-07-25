@@ -78,17 +78,27 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                         <p className="text-xs text-muted-foreground">{row.owner}</p>
                       ) : null}
                     </TableCell>
-                    <TableCell>{formatPercent(row.partnerSharePercent || row.commissionPercent)}</TableCell>
+                    <TableCell>
+                      {formatPercent(row.partnerSharePercent || row.commissionPercent)}
+                    </TableCell>
                     <TableCell>
                       {row.disbursedStudentCount}/{row.studentsCount}
                     </TableCell>
                     <TableCell>{formatCurrency(row.totalDisbursed)}</TableCell>
                     <TableCell>{formatCurrency(row.commissionExpected)}</TableCell>
-                    <TableCell className="text-[#22C55E]">{formatCurrency(row.commissionReceived)}</TableCell>
-                    <TableCell className="text-[#F59E0B]">{formatCurrency(row.pendingReceived)}</TableCell>
+                    <TableCell className="text-[#22C55E]">
+                      {formatCurrency(row.commissionReceived)}
+                    </TableCell>
+                    <TableCell className="text-[#F59E0B]">
+                      {formatCurrency(row.pendingReceived)}
+                    </TableCell>
                     <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
-                    <TableCell className="text-[#22C55E]">{formatCurrency(row.commissionShared)}</TableCell>
-                    <TableCell className="text-[#F59E0B]">{formatCurrency(row.pendingShared)}</TableCell>
+                    <TableCell className="text-[#22C55E]">
+                      {formatCurrency(row.commissionShared)}
+                    </TableCell>
+                    <TableCell className="text-[#F59E0B]">
+                      {formatCurrency(row.pendingShared)}
+                    </TableCell>
                     <TableCell className="font-medium text-[#E8952E]">
                       {formatCurrency(row.commissionEarned)}
                     </TableCell>

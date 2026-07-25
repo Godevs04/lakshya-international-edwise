@@ -3,17 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import {
-  filterNavItems,
-  isNavItemActive,
-  type NavItem,
-} from "@/components/dashboard/nav-config";
+import { filterNavItems, isNavItemActive, type NavItem } from "@/components/dashboard/nav-config";
 import { SidebarBrand } from "@/components/brand/sidebar-brand";
 import { NavBadge } from "@/components/dashboard/nav-badge";
 import type { AppModules } from "@/types";
@@ -48,7 +40,10 @@ export function MobileNavSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sidebar-solid w-[min(100vw-2rem,320px)] border-sidebar-border p-0 text-sidebar-foreground">
+      <SheetContent
+        side="right"
+        className="sidebar-solid w-[min(100vw-2rem,320px)] border-sidebar-border p-0 text-sidebar-foreground"
+      >
         <SheetHeader className="border-b border-sidebar-border px-4 py-3.5 text-left">
           <SidebarBrand companyName={companyName} logo={logo} linkToOverview={false} />
         </SheetHeader>
@@ -66,11 +61,7 @@ export function MobileNavSheet({
                 ? `${TASKS_HREF}?overdue=1`
                 : item.href;
             return (
-              <Link
-                key={item.href}
-                href={href}
-                onClick={() => onOpenChange(false)}
-              >
+              <Link key={item.href} href={href} onClick={() => onOpenChange(false)}>
                 <div
                   className={cn(
                     "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",

@@ -31,11 +31,7 @@ export default async function EditPartnerPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title={
-          focusSection
-            ? `Edit ${PARTNER_EDIT_SECTIONS[focusSection].label}`
-            : "Edit Partner"
-        }
+        title={focusSection ? `Edit ${PARTNER_EDIT_SECTIONS[focusSection].label}` : "Edit Partner"}
         description={partner.companyName}
       />
       <PartnerForm

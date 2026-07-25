@@ -54,12 +54,7 @@ function SummaryCard({
   );
 }
 
-export function TaskSummaryCards({
-  myOpen,
-  overdue,
-  dueToday,
-  activeView,
-}: TaskSummaryCardsProps) {
+export function TaskSummaryCards({ myOpen, overdue, dueToday, activeView }: TaskSummaryCardsProps) {
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       <SummaryCard

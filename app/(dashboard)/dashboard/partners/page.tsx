@@ -38,7 +38,9 @@ export default async function PartnersPage({
             </Link>
             {access.canWrite ? (
               <Link href="/dashboard/partners/new">
-                <Button><Plus className="mr-1.5 h-4 w-4" /> Add Partner</Button>
+                <Button>
+                  <Plus className="mr-1.5 h-4 w-4" /> Add Partner
+                </Button>
               </Link>
             ) : null}
           </div>

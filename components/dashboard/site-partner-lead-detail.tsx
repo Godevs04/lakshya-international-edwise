@@ -57,9 +57,7 @@ export function SitePartnerLeadDetail({ lead }: SitePartnerLeadDetailProps) {
         </h3>
         <div className="mt-3">
           <p className="text-lg font-semibold">{lead.companyName}</p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            {lead.partnerCode ?? "—"}
-          </p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">{lead.partnerCode ?? "—"}</p>
         </div>
       </GlassCard>
 
@@ -98,7 +96,10 @@ export function SitePartnerLeadDetail({ lead }: SitePartnerLeadDetailProps) {
           </h3>
           <div className="mt-3 space-y-3">
             {lead.activities.map((activity, index) => (
-              <div key={`${activity.action}-${index}`} className="rounded-xl bg-muted/40 p-3 text-sm">
+              <div
+                key={`${activity.action}-${index}`}
+                className="rounded-xl bg-muted/40 p-3 text-sm"
+              >
                 <p className="font-medium">{activity.description}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {[activity.userName, activity.createdAt ? formatDate(activity.createdAt) : null]

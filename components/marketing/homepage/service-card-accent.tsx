@@ -30,11 +30,36 @@ function BlockedAccountAccent() {
   return (
     <div className="services-bento-accent services-bento-accent-blocked" aria-hidden>
       <span className="services-bento-accent-gradient-bar" />
-      <svg viewBox="0 0 80 80" fill="none" className="services-bento-accent-svg services-bento-accent-svg-sm">
-        <rect x="16" y="20" width="48" height="40" rx="8" stroke="#0b8fd8" strokeWidth="1.5" opacity="0.35" />
-        <path d="M28 36h24M28 44h16" stroke="#0b8fd8" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+      <svg
+        viewBox="0 0 80 80"
+        fill="none"
+        className="services-bento-accent-svg services-bento-accent-svg-sm"
+      >
+        <rect
+          x="16"
+          y="20"
+          width="48"
+          height="40"
+          rx="8"
+          stroke="#0b8fd8"
+          strokeWidth="1.5"
+          opacity="0.35"
+        />
+        <path
+          d="M28 36h24M28 44h16"
+          stroke="#0b8fd8"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.4"
+        />
         <circle cx="52" cy="44" r="8" fill="#0b8fd8" opacity="0.12" />
-        <path d="M49 44l2 2 4-4" stroke="#0b8fd8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M49 44l2 2 4-4"
+          stroke="#0b8fd8"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </div>
   );
@@ -75,7 +100,13 @@ function PreparationAccent() {
           fill="url(#book-fill)"
         />
         <path d="M45 14v48" stroke="#0b8fd8" strokeWidth="1" opacity="0.2" />
-        <path d="M20 28h22M20 36h30M20 44h18" stroke="#0b8fd8" strokeWidth="1.5" strokeLinecap="round" opacity="0.35" />
+        <path
+          d="M20 28h22M20 36h30M20 44h18"
+          stroke="#0b8fd8"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.35"
+        />
         <defs>
           <linearGradient id="book-fill" x1="8" y1="14" x2="82" y2="62">
             <stop stopColor="#0b8fd8" stopOpacity="0.12" />

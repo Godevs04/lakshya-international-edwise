@@ -11,8 +11,8 @@ export default function OfflinePage() {
       </div>
       <h1 className="text-xl font-semibold">You are offline</h1>
       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        Check your internet connection and try again. Some pages may be unavailable until
-        you are back online.
+        Check your internet connection and try again. Some pages may be unavailable until you are
+        back online.
       </p>
       <Link href="/" className={cn(buttonVariants(), "mt-6 inline-flex")}>
         Try again

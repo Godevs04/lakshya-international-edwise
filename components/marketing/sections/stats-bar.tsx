@@ -15,24 +15,20 @@ export function StatsBar() {
       <MarketingContainer>
         <div className="grid grid-cols-2 gap-6 md:grid-cols-5 md:gap-8">
           {MARKETING_STATS.map((stat) => (
-              <motion.div
-                key={stat.label}
-                {...motionProps.fadeInUp}
-                className="text-center"
-              >
-                {stat.icon && (
-                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <MarketingIcon name={stat.icon} className="h-5 w-5" />
-                  </div>
-                )}
-                <p className="text-2xl font-bold text-primary md:text-3xl">
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} variant="scramble" />
-                </p>
-                <p className="mt-1 text-sm font-medium text-secondary">{stat.label}</p>
-                {stat.description && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">{stat.description}</p>
-                )}
-              </motion.div>
+            <motion.div key={stat.label} {...motionProps.fadeInUp} className="text-center">
+              {stat.icon && (
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <MarketingIcon name={stat.icon} className="h-5 w-5" />
+                </div>
+              )}
+              <p className="text-2xl font-bold text-primary md:text-3xl">
+                <AnimatedCounter value={stat.value} suffix={stat.suffix} variant="scramble" />
+              </p>
+              <p className="mt-1 text-sm font-medium text-secondary">{stat.label}</p>
+              {stat.description && (
+                <p className="mt-0.5 text-xs text-muted-foreground">{stat.description}</p>
+              )}
+            </motion.div>
           ))}
         </div>
       </MarketingContainer>

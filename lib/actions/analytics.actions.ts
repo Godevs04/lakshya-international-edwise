@@ -36,10 +36,14 @@ const cachedMonthlyRevenue = unstable_cache(getMonthlyRevenue, ["analytics-reven
   tags: [CACHE_TAGS.analytics],
 });
 
-const cachedStudentDemographics = unstable_cache(getStudentDemographics, ["analytics-demographics"], {
-  revalidate: CACHE_SECONDS,
-  tags: [CACHE_TAGS.analytics],
-});
+const cachedStudentDemographics = unstable_cache(
+  getStudentDemographics,
+  ["analytics-demographics"],
+  {
+    revalidate: CACHE_SECONDS,
+    tags: [CACHE_TAGS.analytics],
+  }
+);
 
 const cachedHeatMapData = unstable_cache(getHeatMapData, ["analytics-heatmap"], {
   revalidate: CACHE_SECONDS,
@@ -61,10 +65,14 @@ const cachedAnalyticsSummary = unstable_cache(getAnalyticsSummary, ["analytics-s
   tags: [CACHE_TAGS.analytics],
 });
 
-const cachedApplicationPipeline = unstable_cache(getApplicationPipelineFunnel, ["analytics-app-pipeline"], {
-  revalidate: CACHE_SECONDS,
-  tags: [CACHE_TAGS.analytics],
-});
+const cachedApplicationPipeline = unstable_cache(
+  getApplicationPipelineFunnel,
+  ["analytics-app-pipeline"],
+  {
+    revalidate: CACHE_SECONDS,
+    tags: [CACHE_TAGS.analytics],
+  }
+);
 
 const cachedLenderDistribution = unstable_cache(getLenderDistribution, ["analytics-lenders"], {
   revalidate: CACHE_SECONDS,

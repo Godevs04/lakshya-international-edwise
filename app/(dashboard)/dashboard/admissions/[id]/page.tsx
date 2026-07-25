@@ -9,11 +9,7 @@ import { PERMISSIONS } from "@/lib/constants/permissions";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-export default async function AdmissionDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function AdmissionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireModuleEnabled("students");
   await requirePagePermission(PERMISSIONS.ADMISSIONS_READ);
 

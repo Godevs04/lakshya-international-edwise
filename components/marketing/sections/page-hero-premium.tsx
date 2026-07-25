@@ -105,10 +105,7 @@ export function PageHeroPremium({
           {stats && stats.length > 0 ? (
             <RevealItem>
               <div
-                className={cn(
-                  "mt-8 flex flex-wrap gap-6 md:gap-10",
-                  centered && "justify-center"
-                )}
+                className={cn("mt-8 flex flex-wrap gap-6 md:gap-10", centered && "justify-center")}
               >
                 {stats.map((stat) => (
                   <div key={stat.label} className="text-left">
@@ -128,12 +125,7 @@ export function PageHeroPremium({
           ) : null}
           {(primaryCta || secondaryCta || children) && (
             <RevealItem>
-              <div
-                className={cn(
-                  "mt-8 flex flex-wrap gap-3",
-                  centered && "justify-center"
-                )}
-              >
+              <div className={cn("mt-8 flex flex-wrap gap-3", centered && "justify-center")}>
                 {primaryCta ? (
                   <Link
                     href={primaryCta.href}

@@ -90,7 +90,10 @@ export default async function AnalyticsPage() {
             delay={0.05}
           />
         ) : (
-          <EmptyState title="No application pipeline data" description="Add students to see the funnel." />
+          <EmptyState
+            title="No application pipeline data"
+            description="Add students to see the funnel."
+          />
         )}
         {funnel.some((f) => f.value > 0) ? (
           <VisualFunnelChart
@@ -101,7 +104,10 @@ export default async function AnalyticsPage() {
             delay={0.1}
           />
         ) : (
-          <EmptyState title="No lifecycle funnel data" description="Student status updates will populate this chart." />
+          <EmptyState
+            title="No lifecycle funnel data"
+            description="Student status updates will populate this chart."
+          />
         )}
       </div>
 
@@ -150,16 +156,17 @@ export default async function AnalyticsPage() {
             delay={0.22}
           />
         )}
-        {loanDist.some((l) => l.value > 0) && (
-          <LoanRangeChart data={loanDist} delay={0.24} />
-        )}
+        {loanDist.some((l) => l.value > 0) && <LoanRangeChart data={loanDist} delay={0.24} />}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {lenderDist.length > 0 ? (
           <LenderBarChart data={lenderDist} delay={0.26} />
         ) : (
-          <EmptyState title="No lender data" description="Assign lenders on student profiles to see the mix." />
+          <EmptyState
+            title="No lender data"
+            description="Assign lenders on student profiles to see the mix."
+          />
         )}
         {heatmap.length > 0 && <AnalyticsHeatMap data={heatmap} delay={0.28} />}
       </div>

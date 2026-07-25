@@ -69,9 +69,7 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
     <GlassCard className="p-8 shadow-2xl shadow-[#E8952E]/10">
       <div className="mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Sign in to your enterprise dashboard
-        </p>
+        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to your enterprise dashboard</p>
         <p className="mt-1 text-xs text-muted-foreground/80">{APP_TAGLINE}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">

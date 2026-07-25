@@ -72,25 +72,14 @@ function UserPermissionsEditor({
   }
 
   return (
-    <UserMenuPermissions
-      role={user.role}
-      value={permissions}
-      onChange={handleChange}
-      compact
-    />
+    <UserMenuPermissions role={user.role} value={permissions} onChange={handleChange} compact />
   );
 }
 
-export function UserPermissionsSheet({
-  user,
-  open,
-  onOpenChange,
-}: UserPermissionsSheetProps) {
+export function UserPermissionsSheet({ user, open, onOpenChange }: UserPermissionsSheetProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const permissionsRef = useRef<UserMenuPermissionsValue>(
-    buildDefaultMenuPermissions("staff")
-  );
+  const permissionsRef = useRef<UserMenuPermissionsValue>(buildDefaultMenuPermissions("staff"));
 
   async function handleSave() {
     if (!user) return;
@@ -183,9 +172,10 @@ export function UserPermissionsSheet({
   );
 }
 
-export function serializeMenuPermissions(
-  value: UserMenuPermissionsValue
-): { useCustomPermissions: string; menuAccess: string } {
+export function serializeMenuPermissions(value: UserMenuPermissionsValue): {
+  useCustomPermissions: string;
+  menuAccess: string;
+} {
   return {
     useCustomPermissions: value.useCustomPermissions ? "true" : "false",
     menuAccess: JSON.stringify(value.menuAccess),

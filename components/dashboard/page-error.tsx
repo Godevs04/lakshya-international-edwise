@@ -10,11 +10,7 @@ interface PageErrorProps {
   title?: string;
 }
 
-export function PageError({
-  error,
-  reset,
-  title = "Something went wrong",
-}: PageErrorProps) {
+export function PageError({ error, reset, title = "Something went wrong" }: PageErrorProps) {
   useEffect(() => {
     logger.error(title, error);
   }, [error, title]);

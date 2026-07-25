@@ -19,10 +19,7 @@ async function getAuthorizedReportData(
   return getReportData(preset, reportType);
 }
 
-export async function getReportAction(
-  preset: DateRangePreset,
-  reportType: ReportType
-) {
+export async function getReportAction(preset: DateRangePreset, reportType: ReportType) {
   return runLogged("getReportAction", async () => {
     return getAuthorizedReportData(preset, reportType);
   });
@@ -54,11 +51,7 @@ export async function exportReportCSVAction(
     requirePermission(user, PERMISSIONS.REPORTS_EXPORT);
     const [data, options] = await Promise.all([
       getAuthorizedReportData(preset, reportType),
-      buildReportExportOptions(
-        preset,
-        reportType,
-        user?.name ?? user?.email ?? "System"
-      ),
+      buildReportExportOptions(preset, reportType, user?.name ?? user?.email ?? "System"),
     ]);
     return exportToCsv(data, options);
   });
@@ -73,11 +66,7 @@ export async function exportReportExcelAction(
     requirePermission(user, PERMISSIONS.REPORTS_EXPORT);
     const [data, options] = await Promise.all([
       getAuthorizedReportData(preset, reportType),
-      buildReportExportOptions(
-        preset,
-        reportType,
-        user?.name ?? user?.email ?? "System"
-      ),
+      buildReportExportOptions(preset, reportType, user?.name ?? user?.email ?? "System"),
     ]);
     const buffer = exportToExcel(data, options);
     return buffer.toString("base64");
@@ -93,11 +82,7 @@ export async function exportReportPdfAction(
     requirePermission(user, PERMISSIONS.REPORTS_EXPORT);
     const [data, options] = await Promise.all([
       getAuthorizedReportData(preset, reportType),
-      buildReportExportOptions(
-        preset,
-        reportType,
-        user?.name ?? user?.email ?? "System"
-      ),
+      buildReportExportOptions(preset, reportType, user?.name ?? user?.email ?? "System"),
     ]);
     const pdf = await exportToPdf(data, options);
     return Buffer.from(pdf).toString("base64");

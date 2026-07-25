@@ -38,15 +38,7 @@ import {
   type AuditLogItem,
   type AuditLogStats,
 } from "@/lib/actions/audit.actions";
-import {
-  Activity,
-  CalendarDays,
-  Download,
-  Eye,
-  Filter,
-  Shield,
-  TrendingUp,
-} from "lucide-react";
+import { Activity, CalendarDays, Download, Eye, Filter, Shield, TrendingUp } from "lucide-react";
 
 interface AuditLogTableProps {
   data: AuditLogItem[];
@@ -57,13 +49,7 @@ interface AuditLogTableProps {
   totalPages: number;
 }
 
-export function AuditLogTable({
-  data,
-  stats,
-  total,
-  page,
-  totalPages,
-}: AuditLogTableProps) {
+export function AuditLogTable({ data, stats, total, page, totalPages }: AuditLogTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
@@ -171,9 +157,13 @@ export function AuditLogTable({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm text-muted-foreground">{card.label}</p>
-                  <p className="mt-1 text-2xl font-bold tracking-tight">{card.value.toLocaleString("en-IN")}</p>
+                  <p className="mt-1 text-2xl font-bold tracking-tight">
+                    {card.value.toLocaleString("en-IN")}
+                  </p>
                 </div>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${card.tone}`}>
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${card.tone}`}
+                >
                   <Icon className="h-5 w-5 text-white" />
                 </div>
               </div>
@@ -289,9 +279,7 @@ export function AuditLogTable({
                       </span>
                     </TableCell>
                     <TableCell className="max-w-[280px]">
-                      <p className="line-clamp-2 text-sm">
-                        {log.description ?? "—"}
-                      </p>
+                      <p className="line-clamp-2 text-sm">{log.description ?? "—"}</p>
                       {metadataPreview && (
                         <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
                           {metadataPreview}
@@ -300,8 +288,8 @@ export function AuditLogTable({
                     </TableCell>
                     <TableCell className="min-w-[140px]">
                       <span className="capitalize">{log.resourceType}</span>
-                      {log.resourceId && (
-                        resourceHref ? (
+                      {log.resourceId &&
+                        (resourceHref ? (
                           <Link
                             href={resourceHref}
                             className="mt-0.5 block font-mono text-xs text-[#E8952E] hover:underline"
@@ -312,8 +300,7 @@ export function AuditLogTable({
                           <span className="mt-0.5 block font-mono text-xs text-muted-foreground">
                             {log.resourceId.slice(-8)}
                           </span>
-                        )
-                      )}
+                        ))}
                     </TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {log.ip && log.ip !== "unknown" ? log.ip : "—"}
@@ -344,24 +331,26 @@ export function AuditLogTable({
           <div className="flex items-center gap-2">
             {page > 1 && (
               <Link href={buildUrl({ page: String(page - 1) })}>
-                <Button variant="outline" size="sm">Previous</Button>
+                <Button variant="outline" size="sm">
+                  Previous
+                </Button>
               </Link>
             )}
-            <span className="px-2">Page {page} of {totalPages || 1}</span>
+            <span className="px-2">
+              Page {page} of {totalPages || 1}
+            </span>
             {page < totalPages && (
               <Link href={buildUrl({ page: String(page + 1) })}>
-                <Button variant="outline" size="sm">Next</Button>
+                <Button variant="outline" size="sm">
+                  Next
+                </Button>
               </Link>
             )}
           </div>
         </div>
       </GlassCard>
 
-      <AuditDetailSheet
-        log={selectedLog}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      <AuditDetailSheet log={selectedLog} open={detailOpen} onOpenChange={setDetailOpen} />
     </div>
   );
 }

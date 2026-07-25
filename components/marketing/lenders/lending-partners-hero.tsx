@@ -2,22 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Clock,
-  Sparkles,
-  TrendingDown,
-  Wallet,
-} from "lucide-react";
+import { ArrowRight, BadgeCheck, Clock, Sparkles, TrendingDown, Wallet } from "lucide-react";
 import { MarketingContainer } from "@/components/marketing/layout/marketing-container";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import { LenderLogo } from "@/components/marketing/lenders/lender-logo";
-import {
-  getHeroShowcaseLenders,
-  MARKETING_LENDERS,
-} from "@/lib/constants/marketing/lenders";
+import { getHeroShowcaseLenders, MARKETING_LENDERS } from "@/lib/constants/marketing/lenders";
 import { RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
 import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
@@ -70,9 +60,7 @@ export function LendingPartnersHero() {
               <h1 className="hero-premium-heading mt-4">
                 <span className="text-[#0b1e48]">One Application,</span>
                 <br />
-                <span className="hero-premium-heading-accent">
-                  Every Top Lender Compared
-                </span>
+                <span className="hero-premium-heading-accent">Every Top Lender Compared</span>
               </h1>
             </RevealItem>
             <RevealItem>
@@ -161,34 +149,35 @@ export function LendingPartnersHero() {
                     {TIMELINE.map((item, i) => {
                       const barDelay = 150 + i * 100;
                       return (
-                      <li key={item.step}>
-                        <div className="mb-1 flex justify-between text-[11px] text-white/75">
-                          <span>{item.step}</span>
-                          <span>
-                            <AnimatedCounter
-                              value={item.pct}
-                              suffix="%"
-                              variant="linear"
-                              duration={BAR_DURATION_MS}
-                              delay={barDelay}
+                        <li key={item.step}>
+                          <div className="mb-1 flex justify-between text-[11px] text-white/75">
+                            <span>{item.step}</span>
+                            <span>
+                              <AnimatedCounter
+                                value={item.pct}
+                                suffix="%"
+                                variant="linear"
+                                duration={BAR_DURATION_MS}
+                                delay={barDelay}
+                              />
+                            </span>
+                          </div>
+                          <div className="lp-hero-progress-track h-1.5 overflow-hidden rounded-full">
+                            <motion.span
+                              className="lp-hero-progress-fill block h-full rounded-full"
+                              initial={prefersReducedMotion ? false : { width: 0 }}
+                              whileInView={{ width: `${item.pct}%` }}
+                              viewport={{ once: true }}
+                              transition={{
+                                duration: BAR_DURATION_MS / 1000,
+                                delay: barDelay / 1000,
+                                ease: [0.22, 1, 0.36, 1],
+                              }}
                             />
-                          </span>
-                        </div>
-                        <div className="lp-hero-progress-track h-1.5 overflow-hidden rounded-full">
-                          <motion.span
-                            className="lp-hero-progress-fill block h-full rounded-full"
-                            initial={prefersReducedMotion ? false : { width: 0 }}
-                            whileInView={{ width: `${item.pct}%` }}
-                            viewport={{ once: true }}
-                            transition={{
-                              duration: BAR_DURATION_MS / 1000,
-                              delay: barDelay / 1000,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                          />
-                        </div>
-                      </li>
-                    );})}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 
@@ -200,34 +189,37 @@ export function LendingPartnersHero() {
                     {RATE_BARS.map((bar, i) => {
                       const barDelay = 200 + i * 80;
                       return (
-                      <li key={bar.label} className="flex items-center gap-2">
-                        <span className="w-14 shrink-0 text-[10px] text-white/70">{bar.label}</span>
-                        <div className="lp-hero-rate-track h-2 min-w-0 flex-1 overflow-hidden rounded-full">
-                          <motion.span
-                            className="lp-hero-rate-fill block h-full rounded-full"
-                            style={{ width: `${bar.width}%` }}
-                            initial={prefersReducedMotion ? false : { scaleX: 0 }}
-                            whileInView={{ scaleX: 1 }}
-                            viewport={{ once: true }}
-                            transition={{
-                              duration: RATE_DURATION_MS / 1000,
-                              delay: barDelay / 1000,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                          />
-                        </div>
-                        <span className="w-11 shrink-0 text-right text-[10px] font-bold tabular-nums text-sky-200">
-                          <AnimatedCounter
-                            value={bar.rate}
-                            suffix="%"
-                            decimals={2}
-                            variant="linear"
-                            duration={RATE_DURATION_MS}
-                            delay={barDelay}
-                          />
-                        </span>
-                      </li>
-                    );})}
+                        <li key={bar.label} className="flex items-center gap-2">
+                          <span className="w-14 shrink-0 text-[10px] text-white/70">
+                            {bar.label}
+                          </span>
+                          <div className="lp-hero-rate-track h-2 min-w-0 flex-1 overflow-hidden rounded-full">
+                            <motion.span
+                              className="lp-hero-rate-fill block h-full rounded-full"
+                              style={{ width: `${bar.width}%` }}
+                              initial={prefersReducedMotion ? false : { scaleX: 0 }}
+                              whileInView={{ scaleX: 1 }}
+                              viewport={{ once: true }}
+                              transition={{
+                                duration: RATE_DURATION_MS / 1000,
+                                delay: barDelay / 1000,
+                                ease: [0.22, 1, 0.36, 1],
+                              }}
+                            />
+                          </div>
+                          <span className="w-11 shrink-0 text-right text-[10px] font-bold tabular-nums text-sky-200">
+                            <AnimatedCounter
+                              value={bar.rate}
+                              suffix="%"
+                              decimals={2}
+                              variant="linear"
+                              duration={RATE_DURATION_MS}
+                              delay={barDelay}
+                            />
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 
@@ -239,10 +231,7 @@ export function LendingPartnersHero() {
                     {showcase.map((lender) => (
                       <div
                         key={lender.slug}
-                        className={cn(
-                          "lp-hero-logo-tile",
-                          `lp-hero-logo-tile-${lender.slug}`
-                        )}
+                        className={cn("lp-hero-logo-tile", `lp-hero-logo-tile-${lender.slug}`)}
                       >
                         <LenderLogo
                           lender={lender}

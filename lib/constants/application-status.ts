@@ -45,7 +45,10 @@ interface StudentApplicationInput {
 }
 
 export function deriveApplicationStatus(student: StudentApplicationInput): ApplicationStatusId {
-  if (student.applicationStatus && APPLICATION_STATUS_VALUES.includes(student.applicationStatus as ApplicationStatusId)) {
+  if (
+    student.applicationStatus &&
+    APPLICATION_STATUS_VALUES.includes(student.applicationStatus as ApplicationStatusId)
+  ) {
     return student.applicationStatus as ApplicationStatusId;
   }
 
@@ -89,6 +92,11 @@ export function applyApplicationStatus(applicationStatus: ApplicationStatusId): 
     case "rejected":
       return { applicationStatus, status: "rejected", loggedIn: false, pfPaid: false };
     default:
-      return { applicationStatus: "docs_pending", status: "documents_pending", loggedIn: false, pfPaid: false };
+      return {
+        applicationStatus: "docs_pending",
+        status: "documents_pending",
+        loggedIn: false,
+        pfPaid: false,
+      };
   }
 }

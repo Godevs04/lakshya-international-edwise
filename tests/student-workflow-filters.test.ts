@@ -17,7 +17,9 @@ describe("buildWorkflowMongoFilter", () => {
 
 describe("loanStatusChartHref", () => {
   it("maps chart labels to student list filters", () => {
-    expect(loanStatusChartHref("documents pending")).toBe("/dashboard/students?workflow=docs_pending");
+    expect(loanStatusChartHref("documents pending")).toBe(
+      "/dashboard/students?workflow=docs_pending"
+    );
     expect(loanStatusChartHref("sanctioned")).toBe("/dashboard/students?workflow=sanctioned");
     expect(loanStatusChartHref("disbursed")).toBe("/dashboard/students?workflow=disbursed");
     expect(loanStatusChartHref("rejected")).toBe("/dashboard/students?status=rejected");

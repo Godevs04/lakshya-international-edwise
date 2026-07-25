@@ -18,11 +18,7 @@ function TopbarFallback() {
   return <Skeleton className="h-11 w-full rounded-full bg-primary/10 sm:h-12" />;
 }
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) {
     redirect("/login");

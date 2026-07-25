@@ -1,12 +1,7 @@
 import type { StudentStatus, PartnerStatus, ApplicationStatus } from "@/lib/constants/statuses";
 import type { PartnerActionStatus } from "@/lib/constants/partner-action-statuses";
 
-export type UserRole =
-  | "super_admin"
-  | "admin"
-  | "manager"
-  | "staff"
-  | "viewer";
+export type UserRole = "super_admin" | "admin" | "manager" | "staff" | "viewer";
 
 export interface SessionUser {
   id: string;

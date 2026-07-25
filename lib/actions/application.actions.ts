@@ -46,13 +46,15 @@ function mapApplication(a: {
   };
 }
 
-export async function getApplications(params: {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  status?: string;
-  pipeline?: boolean;
-} = {}): Promise<PaginatedResult<ApplicationListItem>> {
+export async function getApplications(
+  params: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    status?: string;
+    pipeline?: boolean;
+  } = {}
+): Promise<PaginatedResult<ApplicationListItem>> {
   return runLoggedQuery(
     "getApplications",
     async () => {
@@ -74,12 +76,7 @@ export async function getApplications(params: {
       if (params.search) {
         const regex = toSafeRegExp(params.search);
         const matchingStudents = await Student.find({
-          $or: [
-            { firstName: regex },
-            { lastName: regex },
-            { studentId: regex },
-            { phone: regex },
-          ],
+          $or: [{ firstName: regex }, { lastName: regex }, { studentId: regex }, { phone: regex }],
         })
           .select("_id")
           .limit(100)

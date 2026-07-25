@@ -43,7 +43,7 @@ export function FinanceProcessHorizontal() {
 
         <ol className="relative grid gap-8 md:grid-cols-5 md:gap-6">
           {HOW_IT_WORKS_STEPS.map((step, index) => (
-            <RevealItem key={step.title} className="list-none">
+            <RevealItem key={step.title} as="li" className="list-none">
               <motion.div
                 className="relative flex flex-col items-center text-center"
                 initial={scaleIn.initial}

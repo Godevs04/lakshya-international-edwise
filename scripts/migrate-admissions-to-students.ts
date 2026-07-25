@@ -70,9 +70,7 @@ async function main() {
       lead.admissionRevenue != null && lead.admissionRevenue > 0
         ? ` | revenue ?${lead.admissionRevenue}`
         : "";
-    logger.info(
-      `  · ${lead.studentId} · ${name}${lead.phone ? ` (${lead.phone})` : ""}${revenue}`
-    );
+    logger.info(`  ï¿½ ${lead.studentId} ï¿½ ${name}${lead.phone ? ` (${lead.phone})` : ""}${revenue}`);
   }
 
   if (options.dryRun) {
@@ -86,9 +84,7 @@ async function main() {
     { $set: { recordType: STUDENT_RECORD_TYPE.STUDENT } }
   );
 
-  logger.info(
-    `\nMigrated ${result.modifiedCount} record(s) to Students (recordType=student).`
-  );
+  logger.info(`\nMigrated ${result.modifiedCount} record(s) to Students (recordType=student).`);
   logger.info("All profile, loan, note, and admission revenue fields were left unchanged.");
   process.exit(0);
 }

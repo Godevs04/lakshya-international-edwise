@@ -28,9 +28,7 @@ function toObjectId(value: string): Types.ObjectId {
   return new Types.ObjectId(value.trim());
 }
 
-async function resolveTaskStudentId(
-  raw?: string
-): Promise<Types.ObjectId | undefined | null> {
+async function resolveTaskStudentId(raw?: string): Promise<Types.ObjectId | undefined | null> {
   const trimmed = raw?.trim();
   if (!trimmed) return undefined;
 
@@ -111,12 +109,8 @@ export async function getTaskSummary(): Promise<{
       const overdueFilter = { ...openFilter, dueAt: { $lt: now } };
 
       const [myOpen, myOverdue, allOverdue, dueToday] = await Promise.all([
-        userId
-          ? Task.countDocuments({ ...openFilter, assignedTo: userId })
-          : Promise.resolve(0),
-        userId
-          ? Task.countDocuments({ ...overdueFilter, assignedTo: userId })
-          : Promise.resolve(0),
+        userId ? Task.countDocuments({ ...openFilter, assignedTo: userId }) : Promise.resolve(0),
+        userId ? Task.countDocuments({ ...overdueFilter, assignedTo: userId }) : Promise.resolve(0),
         Task.countDocuments(overdueFilter),
         Task.countDocuments({
           ...openFilter,
@@ -145,86 +139,90 @@ export async function getTasks(params: {
   dueToday?: boolean;
   assigneeId?: string;
 }): Promise<PaginatedResult<TaskListItem>> {
-  return runLoggedQuery("getTasks", async () => {
-    const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_READ);
+  return runLoggedQuery(
+    "getTasks",
+    async () => {
+      const user = await getSessionUser();
+      requirePermission(user, PERMISSIONS.STUDENTS_READ);
 
-    await connectDB();
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
-    const skip = (page - 1) * pageSize;
+      await connectDB();
+      const page = params.page ?? 1;
+      const pageSize = params.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-    const filter: Record<string, unknown> = {};
-    const now = new Date();
+      const filter: Record<string, unknown> = {};
+      const now = new Date();
 
-    if (params.status) filter.status = params.status;
-    if (params.mine && user?.id && isObjectId(user.id)) {
-      filter.assignedTo = toObjectId(user.id);
-    }
-    if (params.assigneeId && isObjectId(params.assigneeId)) {
-      filter.assignedTo = toObjectId(params.assigneeId);
-    }
-    if (params.overdue) {
-      filter.status = "open";
-      filter.dueAt = { $lt: now };
-      if (user?.id && isObjectId(user.id) && !canViewAllOverdueTasks(user.role)) {
+      if (params.status) filter.status = params.status;
+      if (params.mine && user?.id && isObjectId(user.id)) {
         filter.assignedTo = toObjectId(user.id);
       }
-    }
-    if (params.dueToday) {
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(now);
-      endOfDay.setHours(23, 59, 59, 999);
-      filter.status = "open";
-      filter.dueAt = { $gte: startOfDay, $lte: endOfDay };
-    }
+      if (params.assigneeId && isObjectId(params.assigneeId)) {
+        filter.assignedTo = toObjectId(params.assigneeId);
+      }
+      if (params.overdue) {
+        filter.status = "open";
+        filter.dueAt = { $lt: now };
+        if (user?.id && isObjectId(user.id) && !canViewAllOverdueTasks(user.role)) {
+          filter.assignedTo = toObjectId(user.id);
+        }
+      }
+      if (params.dueToday) {
+        const startOfDay = new Date(now);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(now);
+        endOfDay.setHours(23, 59, 59, 999);
+        filter.status = "open";
+        filter.dueAt = { $gte: startOfDay, $lte: endOfDay };
+      }
 
-    const [data, total] = await Promise.all([
-      Task.find(filter)
-        .populate("assignedTo", "name")
-        .populate("studentId", "firstName lastName studentId")
-        .sort({ dueAt: 1 })
-        .skip(skip)
-        .limit(pageSize)
-        .lean(),
-      Task.countDocuments(filter),
-    ]);
+      const [data, total] = await Promise.all([
+        Task.find(filter)
+          .populate("assignedTo", "name")
+          .populate("studentId", "firstName lastName studentId")
+          .sort({ dueAt: 1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Task.countDocuments(filter),
+      ]);
 
-    return {
-      data: data.map((task) => {
-        const student = task.studentId as {
-          firstName?: string;
-          lastName?: string;
-          studentId?: string;
-          _id?: Types.ObjectId;
-        } | null;
+      return {
+        data: data.map((task) => {
+          const student = task.studentId as {
+            firstName?: string;
+            lastName?: string;
+            studentId?: string;
+            _id?: Types.ObjectId;
+          } | null;
 
-        return {
-          _id: task._id.toString(),
-          title: task.title,
-          description: task.description,
-          studentId: student?._id?.toString(),
-          studentCode: student?.studentId,
-          studentName: student
-            ? `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim()
-            : undefined,
-          assignedToId: (task.assignedTo as { _id?: Types.ObjectId } | null)?._id?.toString(),
-          assignedToName: (task.assignedTo as { name?: string } | null)?.name,
-          createdByName: task.metadata?.createdByName,
-          dueAt: task.dueAt,
-          reminderAt: task.reminderAt,
-          status: task.status,
-          isOverdue: task.status === "open" && task.dueAt < now,
-          createdAt: task.createdAt,
-        };
-      }),
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
-  }, emptyPaginated(params.page ?? 1, params.pageSize ?? 10));
+          return {
+            _id: task._id.toString(),
+            title: task.title,
+            description: task.description,
+            studentId: student?._id?.toString(),
+            studentCode: student?.studentId,
+            studentName: student
+              ? `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim()
+              : undefined,
+            assignedToId: (task.assignedTo as { _id?: Types.ObjectId } | null)?._id?.toString(),
+            assignedToName: (task.assignedTo as { name?: string } | null)?.name,
+            createdByName: task.metadata?.createdByName,
+            dueAt: task.dueAt,
+            reminderAt: task.reminderAt,
+            status: task.status,
+            isOverdue: task.status === "open" && task.dueAt < now,
+            createdAt: task.createdAt,
+          };
+        }),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    },
+    emptyPaginated(params.page ?? 1, params.pageSize ?? 10)
+  );
 }
 
 export async function createTaskAction(formData: FormData): Promise<ActionResult<{ id: string }>> {
@@ -248,7 +246,10 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
 
     const studentObjectId = await resolveTaskStudentId(data.studentId);
     if (studentObjectId === null) {
-      return { success: false, error: "Linked student not found. Use a student ID (e.g. STU-001) or profile ID." };
+      return {
+        success: false,
+        error: "Linked student not found. Use a student ID (e.g. STU-001) or profile ID.",
+      };
     }
 
     const task = await Task.create({
@@ -342,7 +343,10 @@ export async function updateTaskAction(formData: FormData): Promise<ActionResult
 
     const studentObjectId = await resolveTaskStudentId(data.studentId);
     if (studentObjectId === null) {
-      return { success: false, error: "Linked student not found. Use a student ID (e.g. STU-001) or profile ID." };
+      return {
+        success: false,
+        error: "Linked student not found. Use a student ID (e.g. STU-001) or profile ID.",
+      };
     }
 
     const previousAssigneeId = existing.assignedTo?.toString();

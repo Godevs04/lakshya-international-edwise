@@ -59,5 +59,4 @@ if (process.env.NODE_ENV !== "production" && mongoose.models.User) {
   delete mongoose.models.User;
 }
 
-export const User: Model<IUser> =
-  mongoose.models.User ?? mongoose.model<IUser>("User", UserSchema);
+export const User: Model<IUser> = mongoose.models.User ?? mongoose.model<IUser>("User", UserSchema);

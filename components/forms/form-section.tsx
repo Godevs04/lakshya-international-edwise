@@ -30,9 +30,7 @@ export function FormSection({
     >
       <div className="mb-4">
         <h3 className="text-sm font-semibold">{title}</h3>
-        {description ? (
-          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="mt-1 text-xs text-muted-foreground">{description}</p> : null}
       </div>
       {children}
     </GlassCard>

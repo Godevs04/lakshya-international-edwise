@@ -31,8 +31,8 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
       {
-        src: "/Lakshya-App-logo.png",
-        sizes: "4096x4100",
+        src: "/Lakshya-App-logo-256.png",
+        sizes: "256x256",
         type: "image/png",
         purpose: "any",
       },

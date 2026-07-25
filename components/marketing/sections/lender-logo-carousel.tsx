@@ -17,8 +17,8 @@ export function LenderLogoCarousel() {
             One application, every top lender
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Select your preferred lender — we compare rates across banks and NBFCs so you
-            get the lowest interest and fastest approval.
+            Select your preferred lender — we compare rates across banks and NBFCs so you get the
+            lowest interest and fastest approval.
           </p>
         </div>
       </MarketingContainer>

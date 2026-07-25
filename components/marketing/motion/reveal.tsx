@@ -49,19 +49,22 @@ export function RevealStagger({ children, className }: RevealStaggerProps) {
 interface RevealItemProps {
   children: React.ReactNode;
   className?: string;
+  /** Render as a list item when used inside ol/ul for accessibility. */
+  as?: "div" | "li";
 }
 
-export function RevealItem({ children, className }: RevealItemProps) {
+export function RevealItem({ children, className, as = "div" }: RevealItemProps) {
   const motionProps = useMarketingMotion();
+  const MotionTag = as === "li" ? motion.li : motion.div;
 
   return (
-    <motion.div
+    <MotionTag
       className={cn(className)}
       initial={motionProps.item.initial}
       whileInView={motionProps.item.whileInView}
       transition={motionProps.item.transition}
     >
       {children}
-    </motion.div>
+    </MotionTag>
   );
 }

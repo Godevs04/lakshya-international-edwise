@@ -22,9 +22,7 @@ export function CtaBanner({
   source = "cta-banner",
   targetCountry,
 }: CtaBannerProps) {
-  const whatsapp = getWhatsAppLink(
-    "Hello, I would like to check my education loan eligibility."
-  );
+  const whatsapp = getWhatsAppLink("Hello, I would like to check my education loan eligibility.");
 
   return (
     <section data-journey-node="cta" className={cn("section-padding section-relative", className)}>

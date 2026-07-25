@@ -140,10 +140,7 @@ export function permissionsToMenuAccess(permissions: string[]): MenuAccessMap {
 
 /** Show admissions access in the UI when older custom grants only included students. */
 export function applyLegacyMenuAccessFallback(access: MenuAccessMap): MenuAccessMap {
-  if (
-    (access.admissions ?? "none") === "none" &&
-    (access.students ?? "none") !== "none"
-  ) {
+  if ((access.admissions ?? "none") === "none" && (access.students ?? "none") !== "none") {
     return { ...access, admissions: access.students };
   }
   return access;

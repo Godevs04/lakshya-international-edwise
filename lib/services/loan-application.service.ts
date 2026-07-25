@@ -11,7 +11,11 @@ import {
   isWinningLoanApplicationStatus,
   type LoanApplicationHistoryAction,
 } from "@/lib/constants/loan-application";
-import { getLenderSlugById, resolveLenderIdBySlug, resolveLenderNameBySlug } from "@/lib/services/lender.service";
+import {
+  getLenderSlugById,
+  resolveLenderIdBySlug,
+  resolveLenderNameBySlug,
+} from "@/lib/services/lender.service";
 import { formatDateTime } from "@/lib/utils/format";
 
 interface SessionUser {
@@ -19,7 +23,9 @@ interface SessionUser {
   name?: string;
 }
 
-export function toSessionUser(user: { id: string; name: string } | null | undefined): SessionUser | undefined {
+export function toSessionUser(
+  user: { id: string; name: string } | null | undefined
+): SessionUser | undefined {
   if (!user) return undefined;
   return { id: user.id, name: user.name };
 }
@@ -27,7 +33,9 @@ export function toSessionUser(user: { id: string; name: string } | null | undefi
 type StudentDoc = IStudent & { _id: Types.ObjectId };
 
 function getPrimaryApplication(student: StudentDoc) {
-  return student.loanApplications?.find((entry) => entry.isPrimary) ?? student.loanApplications?.[0];
+  return (
+    student.loanApplications?.find((entry) => entry.isPrimary) ?? student.loanApplications?.[0]
+  );
 }
 
 export function syncGlobalSentToBank(student: StudentDoc) {
@@ -64,17 +72,12 @@ function getLoanApplicationLenderId(
   application: StudentDoc["loanApplications"][number]
 ): Types.ObjectId | undefined {
   const lender = application.lenderId as unknown as
-    | Types.ObjectId
-    | { _id?: Types.ObjectId }
-    | undefined;
+    Types.ObjectId | { _id?: Types.ObjectId } | undefined;
   if (!lender) return undefined;
   return "_id" in lender && lender._id ? lender._id : (lender as Types.ObjectId);
 }
 
-function assertLoanApplicationIsOpen(
-  student: StudentDoc,
-  applicationId: Types.ObjectId | string
-) {
+function assertLoanApplicationIsOpen(student: StudentDoc, applicationId: Types.ObjectId | string) {
   const winner = getWinningLoanApplication(student.loanApplications ?? []);
   if (winner && winner._id?.toString() !== applicationId.toString()) {
     throw new Error(
@@ -211,8 +214,7 @@ export async function syncPrimaryLoanApplicationFromStudentEdit(
     return;
   }
 
-  const lenderChanged =
-    options.previousLenderId?.toString() !== newLenderId.toString();
+  const lenderChanged = options.previousLenderId?.toString() !== newLenderId.toString();
   if (lenderChanged) {
     const existing = findApplicationByLenderId(student, newLenderId);
     if (existing) {
@@ -241,18 +243,14 @@ export async function syncPrimaryLoanApplicationFromStudentEdit(
     );
   }
 
-  const newStatus = (student.applicationStatus ?? deriveApplicationStatus(student)) as ApplicationStatusId;
+  const newStatus = (student.applicationStatus ??
+    deriveApplicationStatus(student)) as ApplicationStatusId;
   if (
     primary.applicationStatus !== newStatus &&
     isWinningLoanApplicationStatus(newStatus) &&
     primary._id
   ) {
-    await updateLoanApplicationStatus(
-      student,
-      primary._id.toString(),
-      newStatus,
-      options.user
-    );
+    await updateLoanApplicationStatus(student, primary._id.toString(), newStatus, options.user);
   }
 
   if (primary.applicationStatus !== newStatus) {
@@ -468,8 +466,7 @@ export async function sendLoanApplicationToBank(
 
   pushApplicationHistory(student, applicationId, "sent_to_bank", user);
 
-  const lenderName =
-    (app.lenderId as { name?: string } | undefined)?.name ?? "the lender";
+  const lenderName = (app.lenderId as { name?: string } | undefined)?.name ?? "the lender";
   const noteContent = `${sentToBankByName ?? "Team"} sent student to ${lenderName} on ${formatDateTime(sentToBankAt)}.`;
   appendLoanApplicationNote(student, noteContent, user);
 
@@ -546,12 +543,7 @@ export async function updateStudentLoanDetails(
   }
   if (data.currency !== undefined) student.loan.currency = data.currency;
   if (data.roi !== undefined || data.interest !== undefined) {
-    const rate =
-      data.roi ??
-      data.interest ??
-      student.loan.roi ??
-      student.loan.interest ??
-      0;
+    const rate = data.roi ?? data.interest ?? student.loan.roi ?? student.loan.interest ?? 0;
     student.loan.roi = rate;
     student.loan.interest = rate;
   }
@@ -607,9 +599,7 @@ export async function updateLoanApplicationStatus(
         pushApplicationHistory(student, sibling._id!, "status_updated", user, {
           status: "not_interested",
           note: `Auto-closed because ${winnerName} reached ${winnerStatusLabel}${
-            siblingOldStatus
-              ? ` (previously ${getApplicationStatusLabel(siblingOldStatus)})`
-              : ""
+            siblingOldStatus ? ` (previously ${getApplicationStatusLabel(siblingOldStatus)})` : ""
           }`,
         });
       }
@@ -671,8 +661,7 @@ export async function rejectLoanApplication(
     note: rejectionNote?.trim() || undefined,
   });
 
-  const lenderName =
-    (app.lenderId as { name?: string } | undefined)?.name ?? "the lender";
+  const lenderName = (app.lenderId as { name?: string } | undefined)?.name ?? "the lender";
   appendLoanApplicationNote(
     student,
     `${user?.name ?? "Team"} recorded rejection from ${lenderName} on ${formatDateTime(rejectedAt)}${rejectionNote?.trim() ? `: ${rejectionNote.trim()}` : ""}.`,
@@ -689,33 +678,31 @@ export async function rejectLoanApplication(
   await student.save();
 }
 
-export function serializeLoanApplications(
-  student: {
-    loanApplications?: Array<{
+export function serializeLoanApplications(student: {
+  loanApplications?: Array<{
+    _id?: Types.ObjectId;
+    lenderId?: { _id?: Types.ObjectId; name?: string; slug?: string } | Types.ObjectId;
+    applicationStatus?: string;
+    applicationNumber?: string;
+    sentToBank?: boolean;
+    sentToBankAt?: Date;
+    sentToBankByName?: string;
+    rejectedAt?: Date;
+    rejectedByName?: string;
+    rejectionNote?: string;
+    isPrimary?: boolean;
+    history?: Array<{
       _id?: Types.ObjectId;
-      lenderId?: { _id?: Types.ObjectId; name?: string; slug?: string } | Types.ObjectId;
-      applicationStatus?: string;
-      applicationNumber?: string;
-      sentToBank?: boolean;
-      sentToBankAt?: Date;
-      sentToBankByName?: string;
-      rejectedAt?: Date;
-      rejectedByName?: string;
-      rejectionNote?: string;
-      isPrimary?: boolean;
-      history?: Array<{
-        _id?: Types.ObjectId;
-        action: string;
-        status?: string;
-        note?: string;
-        createdByName?: string;
-        createdAt?: Date;
-      }>;
+      action: string;
+      status?: string;
+      note?: string;
+      createdByName?: string;
       createdAt?: Date;
-      updatedAt?: Date;
     }>;
-  }
-) {
+    createdAt?: Date;
+    updatedAt?: Date;
+  }>;
+}) {
   return (student.loanApplications ?? []).map((entry) => {
     const lender =
       entry.lenderId && typeof entry.lenderId === "object" && "name" in entry.lenderId

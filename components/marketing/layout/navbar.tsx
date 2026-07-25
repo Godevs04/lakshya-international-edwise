@@ -151,11 +151,7 @@ function DesktopNavItem({
       </motion.div>
 
       {hasMega && item.megaMenu && item.megaMenu !== "none" && (
-        <MegaMenu
-          type={item.megaMenu}
-          isOpen={openMega === item.megaMenu}
-          onClose={onMegaClose}
-        />
+        <MegaMenu type={item.megaMenu} isOpen={openMega === item.megaMenu} onClose={onMegaClose} />
       )}
     </div>
   );
@@ -168,12 +164,7 @@ interface MobileNavLinkProps {
   onNavigate: () => void;
 }
 
-function MobileNavLink({
-  item,
-  active,
-  prefersReducedMotion,
-  onNavigate,
-}: MobileNavLinkProps) {
+function MobileNavLink({ item, active, prefersReducedMotion, onNavigate }: MobileNavLinkProps) {
   return (
     <motion.div
       whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
@@ -256,21 +247,17 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
         <div className="hidden min-w-0 flex-1 items-center justify-start lg:flex">
           <Link
             href="/"
-            className="group relative z-10 flex min-w-0 max-w-full items-center gap-2.5"
+            className="group relative z-10 flex min-w-0 max-w-full items-center gap-3"
             aria-label={`${companyName} home`}
           >
             <motion.div
               className="flex shrink-0 items-center origin-left"
-              animate={{ scale: compact ? 0.9 : 1 }}
+              animate={{ scale: compact ? 0.92 : 1 }}
               transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: EASE }}
             >
-              <AppLogo
-                alt={companyName}
-                variant="mobile"
-                className="!h-9 !max-w-[3rem] !rounded-xl !px-2 !py-1 !shadow-sm !ring-1 !ring-black/[0.04] transition-shadow duration-[250ms] group-hover:!shadow-md"
-              />
+              <AppLogo alt={companyName} variant="navbar" framed={false} decorative priority />
             </motion.div>
-            <span className="hidden min-w-0 truncate text-sm font-semibold tracking-tight text-secondary transition-colors duration-[250ms] group-hover:text-primary min-[1680px]:inline">
+            <span className="hidden min-w-0 truncate text-[15px] font-semibold leading-snug tracking-tight text-slate-900 transition-colors duration-[250ms] group-hover:text-primary xl:inline">
               {companyName}
             </span>
           </Link>
@@ -279,14 +266,13 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
         {/* Mobile logo */}
         <Link
           href="/"
-          className="group relative z-10 flex shrink-0 items-center gap-2.5 lg:hidden"
+          className="group relative z-10 flex min-w-0 max-w-[min(100%,14rem)] shrink items-center gap-2.5 lg:hidden"
           aria-label={`${companyName} home`}
         >
-          <AppLogo
-            alt={companyName}
-            variant="mobile"
-            className="!h-9 !max-w-[3rem] !rounded-xl !px-2 !py-1 !shadow-sm !ring-1 !ring-black/[0.04]"
-          />
+          <AppLogo alt={companyName} variant="navbar" framed={false} decorative priority />
+          <span className="min-w-0 truncate text-sm font-semibold tracking-tight text-slate-900">
+            Lakshya
+          </span>
         </Link>
 
         {/* CENTER — Single glass navigation container */}
@@ -332,10 +318,7 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
             <span className="hidden xl:inline">Staff Portal</span>
           </Link>
 
-          <EligibilityCta
-            source="navbar"
-            className="nav-eligibility-cta group"
-          >
+          <EligibilityCta source="navbar" className="nav-eligibility-cta group">
             Check Eligibility
             <ArrowRight
               className="h-4 w-4 transition-transform duration-[250ms] ease-out group-hover:translate-x-1"
@@ -375,7 +358,10 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
           >
             <div className="px-5 py-4">
               <LayoutGroup id="marketing-nav-mobile">
-                <nav className="nav-glass-mobile space-y-0.5 rounded-2xl p-2" aria-label="Mobile navigation">
+                <nav
+                  className="nav-glass-mobile space-y-0.5 rounded-2xl p-2"
+                  aria-label="Mobile navigation"
+                >
                   {MARKETING_NAV.map((item, index) => (
                     <motion.div
                       key={item.href}
@@ -415,9 +401,17 @@ export function MarketingNavbar({ companyName }: MarketingNavbarProps) {
                       <AnimatePresence>
                         {item.children && expandedMobile === item.href && (
                           <motion.div
-                            initial={prefersReducedMotion ? false : { opacity: 0, height: 0, filter: "blur(4px)" }}
+                            initial={
+                              prefersReducedMotion
+                                ? false
+                                : { opacity: 0, height: 0, filter: "blur(4px)" }
+                            }
                             animate={{ opacity: 1, height: "auto", filter: "blur(0px)" }}
-                            exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0, filter: "blur(4px)" }}
+                            exit={
+                              prefersReducedMotion
+                                ? undefined
+                                : { opacity: 0, height: 0, filter: "blur(4px)" }
+                            }
                             transition={{ duration: 0.25, ease: EASE }}
                             className="ml-3 overflow-hidden border-l border-slate-200 pl-3"
                           >

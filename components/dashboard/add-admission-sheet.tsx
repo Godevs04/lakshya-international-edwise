@@ -38,7 +38,10 @@ interface AddAdmissionSheetProps {
   canViewRevenue?: boolean;
 }
 
-export function AddAdmissionSheet({ assignableUsers, canViewRevenue = false }: AddAdmissionSheetProps) {
+export function AddAdmissionSheet({
+  assignableUsers,
+  canViewRevenue = false,
+}: AddAdmissionSheetProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -80,7 +83,8 @@ export function AddAdmissionSheet({ assignableUsers, canViewRevenue = false }: A
         <SheetHeader>
           <SheetTitle>Add Admission</SheetTitle>
           <SheetDescription>
-            Capture admission details for a new lead. Link to the full student profile anytime from the list.
+            Capture admission details for a new lead. Link to the full student profile anytime from
+            the list.
           </SheetDescription>
         </SheetHeader>
 
@@ -96,11 +100,7 @@ export function AddAdmissionSheet({ assignableUsers, canViewRevenue = false }: A
             </div>
           </div>
 
-          <StudentPhoneField
-            id="admission-phone"
-            name="phone"
-            label="Number"
-          />
+          <StudentPhoneField id="admission-phone" name="phone" label="Number" />
 
           <div className="space-y-2">
             <Label htmlFor="admission-targetCountry">Country</Label>
@@ -138,7 +138,11 @@ export function AddAdmissionSheet({ assignableUsers, canViewRevenue = false }: A
 
           <div className="space-y-2">
             <Label htmlFor="admission-targetUniversity">University</Label>
-            <Input id="admission-targetUniversity" name="targetUniversity" placeholder="e.g. University of Melbourne" />
+            <Input
+              id="admission-targetUniversity"
+              name="targetUniversity"
+              placeholder="e.g. University of Melbourne"
+            />
           </div>
 
           {canViewRevenue ? (
