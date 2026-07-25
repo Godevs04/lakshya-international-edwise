@@ -3,7 +3,15 @@ import { notFound } from "next/navigation";
 import { CountryHero } from "@/components/marketing/sections/country-hero";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
+import { CountryLoanMetricsBand } from "@/components/marketing/countries/country-loan-metrics-band";
+import { CountryLoanHowItWorks } from "@/components/marketing/countries/country-loan-how-it-works";
+import { CountryLoanTypesSection } from "@/components/marketing/countries/country-loan-types-section";
+import { EducationLoanLenderCompare } from "@/components/marketing/services/education-loan-lender-compare";
 import { getMarketingCountry, MARKETING_COUNTRIES } from "@/lib/constants/marketing/countries";
+import {
+  getCountryCompareLenders,
+  getCountryLoanGuide,
+} from "@/lib/constants/marketing/country-loan-guides";
 import { getMarketingContact, getSiteUrl } from "@/lib/config/marketing";
 import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
 import {
@@ -82,6 +90,8 @@ export default async function CountryDetailPage({
   const contact = getMarketingContact();
   const siteUrl = getSiteUrl();
   const countryUrl = getAbsoluteUrl(`/countries/${slug}`);
+  const loanGuide = getCountryLoanGuide(slug, country.name);
+  const compareLenders = getCountryCompareLenders(slug, country.name);
 
   return (
     <>
@@ -104,6 +114,43 @@ export default async function CountryDetailPage({
         ]}
       />
       <CountryHero country={country} slug={slug} />
+
+      <SectionShell variant="white" padding className="page-section-premium" background="grid">
+        <CountryLoanMetricsBand
+          countryName={country.name}
+          slug={slug}
+          metrics={loanGuide.metrics}
+        />
+      </SectionShell>
+
+      <SectionShell variant="muted" padding className="page-section-premium">
+        <CountryLoanHowItWorks countryName={country.name} steps={loanGuide.howItWorks} />
+      </SectionShell>
+
+      <SectionShell variant="white" padding className="page-section-premium" background="grid">
+        <CountryLoanTypesSection
+          countryName={country.name}
+          slug={slug}
+          loanTypes={loanGuide.loanTypes}
+        />
+      </SectionShell>
+
+      <SectionShell
+        variant="muted"
+        padding
+        className="page-section-premium"
+        eyebrow="Bank comparison"
+        title={`Compare lenders for ${country.name}`}
+        description={loanGuide.compareIntro}
+      >
+        <EducationLoanLenderCompare
+          lenders={compareLenders}
+          countryName={country.name}
+          intro={loanGuide.compareIntro}
+          sourcePrefix={`country-${slug}-compare`}
+          headingId={`${slug}-compare-lenders`}
+        />
+      </SectionShell>
 
       {country.answerSummary ? (
         <SectionShell variant="white" padding className="page-section-premium">

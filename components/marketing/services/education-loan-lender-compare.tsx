@@ -41,27 +41,45 @@ function formatRoi(lender: MarketingLender): string {
   return `From ${lender.roiFrom}%`;
 }
 
-export function EducationLoanLenderCompare() {
+interface EducationLoanLenderCompareProps {
+  lenders?: MarketingLender[];
+  countryName?: string;
+  intro?: string;
+  sourcePrefix?: string;
+  headingId?: string;
+}
+
+export function EducationLoanLenderCompare({
+  lenders: lendersProp,
+  countryName,
+  intro,
+  sourcePrefix = "education-loan-compare",
+  headingId = "compare-lenders",
+}: EducationLoanLenderCompareProps) {
   const [filter, setFilter] = useState<CompareFilter>("all");
+  const baseLenders = lendersProp ?? MARKETING_LENDERS;
 
   const lenders = useMemo(() => {
-    if (filter === "all") return MARKETING_LENDERS;
-    return MARKETING_LENDERS.filter((lender) => lender.category === filter);
-  }, [filter]);
+    if (filter === "all") return baseLenders;
+    return baseLenders.filter((lender) => lender.category === filter);
+  }, [filter, baseLenders]);
+
+  const title = countryName
+    ? `Compare banks for ${countryName} education loans`
+    : "Compare popular lenders side by side";
 
   return (
-    <div id="compare-lenders" className="loan-lender-compare scroll-mt-28">
+    <div id={headingId} className="loan-lender-compare scroll-mt-28">
       <div className="loan-lender-compare-intro">
         <div className="loan-lender-compare-intro-copy">
           <span className="loan-lender-compare-eyebrow">
             <Scale className="h-3.5 w-3.5" aria-hidden />
             Lender comparison
           </span>
-          <h3 className="loan-lender-compare-title">Compare popular lenders side by side</h3>
+          <h3 className="loan-lender-compare-title">{title}</h3>
           <p>
-            Explore ROI, loan amount, approval speed, and collateral needs across government banks,
-            private banks, NBFCs, and international partners — then check your best match with
-            Lakshya.
+            {intro ??
+              "Explore ROI, loan amount, approval speed, and collateral needs across government banks, private banks, NBFCs, and international partners — then check your best match with Lakshya."}
           </p>
         </div>
         <Link href="/lending-partners" className="loan-lender-compare-partners-link">
@@ -70,11 +88,7 @@ export function EducationLoanLenderCompare() {
         </Link>
       </div>
 
-      <div
-        className="loan-lender-tabs"
-        role="tablist"
-        aria-label="Filter lenders by category"
-      >
+      <div className="loan-lender-tabs" role="tablist" aria-label="Filter lenders by category">
         {FILTERS.map((item) => {
           const active = filter === item.value;
           return (
@@ -105,8 +119,7 @@ export function EducationLoanLenderCompare() {
               >
                 <span>{LENDER_CATEGORY_LABELS[category]}</span>
                 <span>
-                  {MARKETING_LENDERS.filter((lender) => lender.category === category).length}{" "}
-                  partners
+                  {baseLenders.filter((lender) => lender.category === category).length} partners
                 </span>
               </button>
             </li>
@@ -117,7 +130,9 @@ export function EducationLoanLenderCompare() {
       <div className="loan-lender-table-wrap">
         <table className="loan-lender-table">
           <caption className="sr-only">
-            Education loan lender comparison for studying abroad
+            {countryName
+              ? `Education loan lender comparison for studying in ${countryName}`
+              : "Education loan lender comparison for studying abroad"}
           </caption>
           <thead>
             <tr>
@@ -176,8 +191,9 @@ export function EducationLoanLenderCompare() {
                   </td>
                   <td>
                     <EligibilityCta
-                      source={`education-loan-compare-${lender.slug}`}
+                      source={`${sourcePrefix}-${lender.slug}`}
                       preferredLender={lender.name}
+                      targetCountry={countryName}
                       className="loan-lender-row-cta"
                     >
                       Check

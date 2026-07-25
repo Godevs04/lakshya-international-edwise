@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, ClipboardList, MapPin, Scale } from "lucide-react";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
@@ -10,16 +11,29 @@ import {
 } from "@/lib/constants/marketing/education-loan-options";
 import { cn } from "@/lib/utils";
 
-function LoanTypeNav() {
+function LoanTypeNav({ activeSlug }: { activeSlug: string }) {
   return (
     <nav className="loan-type-nav" aria-label="Education loan types">
       {EDUCATION_LOAN_TYPE_DETAILS.map((loanType) => (
-        <Link key={loanType.slug} href={`#${loanType.slug}`} className="loan-type-nav-link">
+        <Link
+          key={loanType.slug}
+          href={`#${loanType.slug}`}
+          className={cn(
+            "loan-type-nav-link",
+            activeSlug === loanType.slug && "loan-type-nav-link-active"
+          )}
+        >
           <MarketingIcon name={loanType.icon} className="h-4 w-4" />
           <span>{loanType.title}</span>
         </Link>
       ))}
-      <Link href="#compare-lenders" className="loan-type-nav-link">
+      <Link
+        href="#compare-lenders"
+        className={cn(
+          "loan-type-nav-link",
+          activeSlug === "compare-lenders" && "loan-type-nav-link-active"
+        )}
+      >
         <Scale className="h-4 w-4" aria-hidden />
         <span>Compare lenders</span>
       </Link>
@@ -27,12 +41,25 @@ function LoanTypeNav() {
   );
 }
 
-function LoanTypeCard({ loanType }: { loanType: EducationLoanTypeDetail }) {
+function LoanTypeCard({
+  loanType,
+  emphasized,
+}: {
+  loanType: EducationLoanTypeDetail;
+  emphasized: boolean;
+}) {
   return (
-    <article id={loanType.slug} className="loan-type-detail scroll-mt-28">
+    <article
+      id={loanType.slug}
+      className={cn(
+        "loan-type-detail scroll-mt-28",
+        emphasized && "loan-type-detail-emphasized"
+      )}
+    >
       <div className="loan-type-detail-hero">
         <div className="loan-type-detail-copy">
           <span className="loan-type-detail-eyebrow">{loanType.eyebrow}</span>
+          <p className="loan-type-detail-product-name">{loanType.title}</p>
           <div className="loan-type-detail-title-row">
             <span className="loan-type-detail-icon">
               <MarketingIcon name={loanType.icon} className="h-6 w-6" />
@@ -59,7 +86,7 @@ function LoanTypeCard({ loanType }: { loanType: EducationLoanTypeDetail }) {
         </div>
 
         <aside className="loan-type-detail-aside">
-          <h4 className="loan-type-aside-title">Why choose this loan</h4>
+          <h4 className="loan-type-aside-title">Why choose {loanType.title}</h4>
           <ul className="loan-type-aside-list">
             {loanType.benefits.slice(0, 6).map((benefit) => (
               <li key={benefit}>
@@ -85,7 +112,7 @@ function LoanTypeCard({ loanType }: { loanType: EducationLoanTypeDetail }) {
       </div>
 
       <div className="loan-type-benefits-grid">
-        <h4>Key advantages</h4>
+        <h4>Key advantages of {loanType.title}</h4>
         <ul>
           {loanType.benefits.map((benefit) => (
             <li key={benefit}>
@@ -100,8 +127,11 @@ function LoanTypeCard({ loanType }: { loanType: EducationLoanTypeDetail }) {
         <div className="loan-type-checklist-head">
           <ClipboardList className="h-5 w-5 text-primary" aria-hidden />
           <div>
-            <h4>Document checklist</h4>
-            <p>Prepare these documents before you start your {loanType.title.toLowerCase()} application.</p>
+            <h4>{loanType.title} — Document checklist</h4>
+            <p>
+              Prepare these documents only for a {loanType.title.toLowerCase()}. This checklist is
+              specific to this loan type and is not shared with other products.
+            </p>
           </div>
         </div>
         <div className="loan-type-checklist-grid">
@@ -134,12 +164,34 @@ function LoanTypeCard({ loanType }: { loanType: EducationLoanTypeDetail }) {
 }
 
 export function EducationLoanTypesDetail() {
+  const [activeSlug, setActiveSlug] = useState(EDUCATION_LOAN_TYPE_DETAILS[0]?.slug ?? "");
+
+  useEffect(() => {
+    const syncHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (
+        hash &&
+        (EDUCATION_LOAN_TYPE_DETAILS.some((entry) => entry.slug === hash) ||
+          hash === "compare-lenders")
+      ) {
+        setActiveSlug(hash);
+      }
+    };
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, []);
+
   return (
     <div className="loan-types-detail">
-      <LoanTypeNav />
-      <div className={cn("loan-types-detail-list")}>
+      <LoanTypeNav activeSlug={activeSlug} />
+      <div className="loan-types-detail-list">
         {EDUCATION_LOAN_TYPE_DETAILS.map((loanType) => (
-          <LoanTypeCard key={loanType.slug} loanType={loanType} />
+          <LoanTypeCard
+            key={loanType.slug}
+            loanType={loanType}
+            emphasized={activeSlug === loanType.slug}
+          />
         ))}
       </div>
     </div>
