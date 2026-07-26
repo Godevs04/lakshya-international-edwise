@@ -1,12 +1,15 @@
 module.exports = {
   ci: {
     collect: {
-      // Prefer a production server for real scores:
-      //   npm run build && npm run start
-      //   LIGHTHOUSE_URL=http://localhost:4000/ npm run lighthouse:ci
+      // Prefer the final host (www) to avoid a ~550ms apex→www redirect in audits.
+      //   LIGHTHOUSE_URL=https://www.lakshyainternationaledwise.com/ npm run lighthouse:ci:prod
+      //   npm run build && npm run start && LIGHTHOUSE_URL=http://localhost:4000/ npm run lighthouse:ci
       // Dev/Turbopack builds inflate JS and tank Performance.
+      // GitHub: Actions → Lighthouse → Run workflow (or auto after merge to main + 3m).
       url: [
-        process.env.LIGHTHOUSE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:4000/",
+        process.env.LIGHTHOUSE_URL ||
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          "https://www.lakshyainternationaledwise.com/",
       ],
       numberOfRuns: 1,
       settings: {
