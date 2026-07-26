@@ -1,0 +1,76 @@
+# Separate Lighthouse CI — run on demand against production (or after merge).
+# Manual: Actions → Lighthouse → Run workflow → paste URL if needed.
+name: Lighthouse
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Production (or staging) URL to audit"
+        required: true
+        default: "https://www.lakshyainternationaledwise.com/"
+        type: string
+      wait_minutes:
+        description: "Minutes to wait before auditing (e.g. after deploy)"
+        required: false
+        default: "0"
+        type: string
+  # After merge to main — wait 3 minutes so production deploy can settle
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".claude/**"
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Audit site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Resolve target URL
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "url=${{ inputs.url }}" >> "$GITHUB_OUTPUT"
+            echo "wait=${{ inputs.wait_minutes }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://www.lakshyainternationaledwise.com/" >> "$GITHUB_OUTPUT"
+            echo "wait=3" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait for deploy settle
+        if: steps.target.outputs.wait != '0'
+        run: |
+          mins="${{ steps.target.outputs.wait }}"
+          echo "Waiting ${mins} minute(s) before Lighthouse…"
+          sleep $((mins * 60))
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chrome
+        id: install-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Run Lighthouse CI
+        env:
+          LIGHTHOUSE_URL: ${{ steps.target.outputs.url }}
+          CHROME_PATH: ${{ steps.install-chrome.outputs.chrome-path }}
+        run: |
+          echo "Auditing: $LIGHTHOUSE_URL"
+          npx lhci autorun

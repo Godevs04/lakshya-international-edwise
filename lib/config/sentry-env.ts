@@ -43,5 +43,6 @@ export function getSentryReplaySessionSampleRate(): number {
     const rate = Number.parseFloat(raw);
     if (!Number.isNaN(rate) && rate >= 0 && rate <= 1) return rate;
   }
-  return 0.1;
+  // Off by default — Replay SDK is heavy for marketing LCP; opt in via env.
+  return 0;
 }

@@ -9,7 +9,7 @@ import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-c
 import { HeroComposition } from "@/components/marketing/homepage/hero-composition";
 import { HeroPromiseStrip } from "@/components/marketing/homepage/hero-promise-strip";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
-import { Reveal, RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
+import { RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
 import { TRUST_METRICS } from "@/lib/constants/marketing/lakshya-value-props";
 
 export function FinanceHero() {
@@ -92,9 +92,7 @@ export function FinanceHero() {
             </RevealItem>
           </RevealStagger>
 
-          <Reveal delay={0.15}>
-            <HeroComposition />
-          </Reveal>
+          <HeroComposition />
         </div>
 
         <div className="mt-10 md:mt-12" data-journey-node="lenders">

@@ -40,7 +40,6 @@ function useParallaxLayer(strength: number) {
 
 export function HeroComposition() {
   const { prefersReducedMotion, floatSlow } = useMarketingMotion();
-  const globe = useParallaxLayer(0.35);
   const landmarks = useParallaxLayer(0.55);
   const cards = useParallaxLayer(0.4);
 
@@ -48,23 +47,21 @@ export function HeroComposition() {
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (prefersReducedMotion) return;
       const rect = event.currentTarget.getBoundingClientRect();
-      globe.bind(event.clientX, event.clientY, rect);
       landmarks.bind(event.clientX, event.clientY, rect);
       cards.bind(event.clientX, event.clientY, rect);
     },
-    [prefersReducedMotion, globe, landmarks, cards]
+    [prefersReducedMotion, landmarks, cards]
   );
 
   const onLeave = useCallback(() => {
-    globe.reset();
     landmarks.reset();
     cards.reset();
-  }, [globe, landmarks, cards]);
+  }, [landmarks, cards]);
 
   return (
     <div className="hero-composition" onMouseMove={onMove} onMouseLeave={onLeave} aria-hidden>
-      {/* Sole priority image — LCP element */}
-      <motion.div className="hero-comp-globe" style={{ x: globe.x, y: globe.y }}>
+      {/* Sole priority image — LCP element (no opacity animation — that delays LCP ~780ms) */}
+      <div className="hero-comp-globe">
         <Image
           src={ASSETS.globe}
           alt=""
@@ -72,10 +69,11 @@ export function HeroComposition() {
           height={340}
           className="hero-comp-globe-img"
           priority
+          fetchPriority="high"
           quality={70}
           sizes="(max-width: 1024px) 70vw, 340px"
         />
-      </motion.div>
+      </div>
 
       <motion.div
         className="hero-comp-float hero-comp-cap"

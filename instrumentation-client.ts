@@ -10,14 +10,15 @@ import { getPostHogProjectToken, isPostHogClientEnabled } from "@/lib/config/pos
 const dsn = getPublicSentryDsn();
 
 if (dsn) {
+  const sessionSampleRate = Math.min(getSentryReplaySessionSampleRate(), 0.05);
   Sentry.init({
     dsn,
-    // Replay is heavy on LCP — keep error-only capture for marketing performance.
-    integrations: [Sentry.replayIntegration()],
+    // Replay is heavy — only register when sampling is enabled.
+    integrations: sessionSampleRate > 0 ? [Sentry.replayIntegration()] : [],
     tracesSampleRate: getSentryTracesSampleRate(),
     enableLogs: true,
-    replaysSessionSampleRate: Math.min(getSentryReplaySessionSampleRate(), 0.05),
-    replaysOnErrorSampleRate: 1,
+    replaysSessionSampleRate: sessionSampleRate,
+    replaysOnErrorSampleRate: sessionSampleRate > 0 ? 1 : 0,
     sendDefaultPii: false,
   });
 }
@@ -34,6 +35,9 @@ function initPostHog() {
     capture_exceptions: true,
     // Avoid competing with LCP on first paint.
     capture_pageview: false,
+    // Drop heavy optional bundles (surveys / session replay) — ~100KB+ unused JS in Lighthouse.
+    disable_session_recording: true,
+    disable_surveys: true,
     debug: process.env.NODE_ENV === "development",
   });
   posthog.capture("$pageview");

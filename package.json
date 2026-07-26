@@ -14,7 +14,7 @@
     "knip:files": "knip --include files --no-progress",
     "check:env": "tsx scripts/check-env.ts",
     "lighthouse:ci": "lhci autorun",
-    "lighthouse:ci:prod": "echo 'Tip: run against next start (production), not next dev' && lhci autorun",
+    "lighthouse:ci:prod": "LIGHTHOUSE_URL=${LIGHTHOUSE_URL:-https://www.lakshyainternationaledwise.com/} lhci autorun",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright install chromium && playwright test",
