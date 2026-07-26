@@ -3,13 +3,17 @@
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useCallback } from "react";
-import { BookOpen, GraduationCap, Stamp, TrendingUp } from "lucide-react";
+import { BookOpen, Stamp, TrendingUp } from "lucide-react";
 import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
 
+/**
+ * Hero visual matching the polished collage composition:
+ * digital globe + Multiple.png landmark cluster + glass UI cards + lender chips.
+ */
 const ASSETS = {
-  landmarks: "/assets/hero/Multiple.jpg",
-  globe: "/assets/icons/global-network-digital-earth-visualization.jpg",
+  landmarks: "/assets/hero/Multiple.png",
+  globe: "/assets/icons/global-network-digital-earth-visualization.png",
   lenders: [
     "/assets/partners/sbi.png",
     "/assets/partners/credila.png",
@@ -38,58 +42,52 @@ function useParallaxLayer(strength: number) {
   };
 }
 
+function floatTransition(duration: number, delay: number) {
+  return { duration, repeat: Infinity, ease: "easeInOut" as const, delay };
+}
+
 export function HeroComposition() {
   const { prefersReducedMotion, floatSlow } = useMarketingMotion();
-  const landmarks = useParallaxLayer(0.55);
-  const cards = useParallaxLayer(0.4);
+  const globe = useParallaxLayer(0.25);
+  const landmarks = useParallaxLayer(0.45);
+  const cards = useParallaxLayer(0.35);
 
   const onMove = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (prefersReducedMotion) return;
       const rect = event.currentTarget.getBoundingClientRect();
+      globe.bind(event.clientX, event.clientY, rect);
       landmarks.bind(event.clientX, event.clientY, rect);
       cards.bind(event.clientX, event.clientY, rect);
     },
-    [prefersReducedMotion, landmarks, cards]
+    [prefersReducedMotion, globe, landmarks, cards]
   );
 
   const onLeave = useCallback(() => {
+    globe.reset();
     landmarks.reset();
     cards.reset();
-  }, [landmarks, cards]);
+  }, [globe, landmarks, cards]);
 
   return (
     <div className="hero-composition" onMouseMove={onMove} onMouseLeave={onLeave} aria-hidden>
-      {/* Sole priority image — LCP element (no opacity animation — that delays LCP ~780ms) */}
-      <div className="hero-comp-globe">
+      <motion.div className="hero-comp-globe" style={{ x: globe.x, y: globe.y }}>
         <Image
           src={ASSETS.globe}
           alt=""
-          width={340}
-          height={340}
+          width={400}
+          height={400}
           className="hero-comp-globe-img"
-          priority
-          fetchPriority="high"
-          quality={70}
-          sizes="(max-width: 1024px) 70vw, 340px"
+          quality={75}
+          sizes="(max-width: 1024px) 70vw, 400px"
+          loading="lazy"
         />
-      </div>
-
-      <motion.div
-        className="hero-comp-float hero-comp-cap"
-        {...(prefersReducedMotion ? {} : floatSlow)}
-      >
-        <GraduationCap className="h-5 w-5 text-primary" />
       </motion.div>
 
       <motion.div
         className="hero-comp-float hero-comp-passport"
         animate={prefersReducedMotion ? undefined : { y: [0, -5, 0] }}
-        transition={
-          prefersReducedMotion
-            ? undefined
-            : { duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }
-        }
+        transition={prefersReducedMotion ? undefined : floatTransition(6.5, 0.8)}
       >
         <BookOpen className="h-4 w-4 text-primary" />
       </motion.div>
@@ -97,11 +95,7 @@ export function HeroComposition() {
       <motion.div
         className="hero-comp-float hero-comp-visa"
         animate={prefersReducedMotion ? undefined : { y: [0, -4, 0] }}
-        transition={
-          prefersReducedMotion
-            ? undefined
-            : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
-        }
+        transition={prefersReducedMotion ? undefined : floatTransition(7, 1.2)}
       >
         <Stamp className="h-4 w-4 text-primary" />
       </motion.div>
@@ -111,12 +105,13 @@ export function HeroComposition() {
           <Image
             src={ASSETS.landmarks}
             alt=""
-            width={520}
-            height={214}
+            width={560}
+            height={594}
             className="hero-comp-landmarks-img"
-            quality={70}
-            sizes="(max-width: 1024px) 90vw, 520px"
-            loading="lazy"
+            priority
+            fetchPriority="high"
+            quality={80}
+            sizes="(max-width: 1024px) 90vw, 560px"
           />
         </motion.div>
       </div>
@@ -153,11 +148,7 @@ export function HeroComposition() {
         <motion.div
           className="hero-glass-card hero-glass-approval"
           animate={prefersReducedMotion ? undefined : { y: [0, -4, 0] }}
-          transition={
-            prefersReducedMotion
-              ? undefined
-              : { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
-          }
+          transition={prefersReducedMotion ? undefined : floatTransition(6, 0.5)}
         >
           <p className="hero-glass-label">Approval Status</p>
           <div className="hero-approval-bar">
@@ -183,11 +174,7 @@ export function HeroComposition() {
         <motion.div
           className="hero-glass-card hero-glass-student"
           animate={prefersReducedMotion ? undefined : { y: [0, -5, 0] }}
-          transition={
-            prefersReducedMotion
-              ? undefined
-              : { duration: 6.8, repeat: Infinity, ease: "easeInOut", delay: 1 }
-          }
+          transition={prefersReducedMotion ? undefined : floatTransition(6.8, 1)}
         >
           <p className="hero-glass-label">Destination</p>
           <p className="hero-glass-value text-base">Canada · MS CS</p>
