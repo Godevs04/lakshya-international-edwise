@@ -17,7 +17,6 @@ on:
         type: string
   # After merge to main — wait 3 minutes so production deploy can settle
   push:
-    branches: [main]
     paths-ignore:
       - "**.md"
       - "docs/**"
