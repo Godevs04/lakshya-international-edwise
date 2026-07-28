@@ -41,6 +41,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Vercel cannot host Socket.IO (custom server). Disable same-origin realtime there
+  // unless NEXT_PUBLIC_SUPPORT_SOCKET_URL points at a dedicated host (e.g. Fly).
+  env: {
+    NEXT_PUBLIC_SUPPORT_REALTIME:
+      process.env.NEXT_PUBLIC_SUPPORT_SOCKET_URL || !process.env.VERCEL ? "1" : "0",
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [100, 85, 75, 70],

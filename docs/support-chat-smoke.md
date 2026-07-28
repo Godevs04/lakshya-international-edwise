@@ -27,5 +27,7 @@
 3. Enquiry email (if `WEBSITE_ENQUIRY_NOTIFY_EMAIL` set) mentions support chat.
 
 ## Notes
-- `npm run dev:next` / `npm run start:next` run Next without Socket.IO; chat still works via server actions (no typing indicators).
-- Docker production CMD uses `npx tsx server.ts` for Next + Socket.IO.
+- `npm run dev:next` / `npm run start:next` run Next without Socket.IO; chat still works via server actions + polling (no typing indicators).
+- Docker / Fly production CMD uses `npx tsx server.ts` for Next + Socket.IO.
+- **Vercel cannot host Socket.IO** (no custom Node server). On Vercel builds, same-origin realtime is disabled automatically; inbox/widget poll every 5s instead.
+- For realtime on Vercel: deploy `server.ts` to Fly (see `fly.toml`) and set `NEXT_PUBLIC_SUPPORT_SOCKET_URL` to that origin.
