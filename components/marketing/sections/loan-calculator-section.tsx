@@ -401,7 +401,7 @@ export function LoanCalculatorSection() {
     <SectionShell
       withReveal
       eyebrow="Loan calculator"
-      title="Estimate your education loan EMI"
+      title="Estimate Your Education Loan EMI"
       description="Use this quick static estimate to plan your budget before speaking with our loan team."
     >
       <Reveal>

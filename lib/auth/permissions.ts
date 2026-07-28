@@ -46,6 +46,7 @@ const ROUTE_PERMISSIONS: { prefix: string; permission: string }[] = [
   { prefix: "/dashboard/analytics", permission: "analytics:read" },
   { prefix: "/dashboard/settings", permission: "settings:read" },
   { prefix: "/dashboard/audit", permission: "audit:read" },
+  { prefix: "/dashboard/support", permission: "support:read" },
 ];
 
 export function canAccessRoute(user: SessionUser | null | undefined, route: string): boolean {

@@ -10,6 +10,7 @@ import { GoogleReviewsSection } from "@/components/marketing/sections/google-rev
 import { OfficeHighlightsSection } from "@/components/marketing/sections/office-highlights";
 import { CtaBanner } from "@/components/marketing/sections/cta-banner";
 import { JsonLd, breadcrumbJsonLd } from "@/components/marketing/seo/json-ld";
+import { ABOUT_PAGE_DESCRIPTION } from "@/lib/constants/marketing/about";
 import { getMarketingContact } from "@/lib/config/marketing";
 import { buildMarketingMetadata, getAbsoluteUrl } from "@/lib/seo/marketing-metadata";
 
@@ -17,8 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const contact = getMarketingContact();
   return buildMarketingMetadata({
     title: `About Us | ${contact.companyName}`,
-    description:
-      "Learn about Lakshya International Edwise — India's trusted overseas education loan partner with 20+ lenders, 20,000+ students funded, and zero service charges.",
+    description: ABOUT_PAGE_DESCRIPTION,
     path: "/about",
   });
 }
@@ -36,16 +36,18 @@ export default function AboutPage() {
       />
       <PageHero
         eyebrow="About Us"
-        title="Making global education"
+        title="Making Global Education"
         titleAccent="Affordable, Accessible, Achievable"
-        description={`${contact.companyName} — transparent loan comparisons and expert guidance at every step.`}
+        description={`${contact.companyName} is a partnership firm in India — expert education loan advisory with 20+ banks and NBFCs, end-to-end from profile evaluation to disbursement.`}
+        decorativeLottie="about"
+        decorativeLottieClassName="page-hero-premium-lottie-about"
         stats={[
           { label: "Students guided", value: 8500, suffix: "+" },
           { label: "Lending partners", value: 20, suffix: "+" },
           { label: "Years of experience", value: 12, suffix: "+" },
         ]}
       />
-      <AboutJourneySection />
+      <AboutJourneySection companyName={contact.companyName} />
       <WhyChooseSection />
       <StatsBar />
       <ProcessTimelineSection />
@@ -54,7 +56,7 @@ export default function AboutPage() {
         background="grid"
         eyebrow="Gallery"
         title="Life at Lakshya"
-        description="Counselling sessions, workshops, and student success moments across our offices."
+        description="A curated look at counselling sessions, workshops, and student success moments — coming soon."
         className="page-section-premium"
       >
         <GalleryGrid />

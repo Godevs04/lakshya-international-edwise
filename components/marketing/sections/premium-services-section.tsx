@@ -13,7 +13,7 @@ export function PremiumServicesSection({ showHeading = true }: PremiumServicesSe
       variant="white"
       background="grid"
       eyebrow={showHeading ? "Our Services" : undefined}
-      title={showHeading ? "Everything you need to fund your education abroad" : undefined}
+      title={showHeading ? "Everything You Need To Fund Your Education Abroad" : undefined}
       description={
         showHeading
           ? "One finance partner for loans, forex, blocked accounts, and more — so you can focus on your studies."

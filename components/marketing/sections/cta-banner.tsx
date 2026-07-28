@@ -16,7 +16,7 @@ interface CtaBannerProps {
 }
 
 export function CtaBanner({
-  title = "Ready to fund your education abroad?",
+  title = "Ready to Fund Your Education Abroad?",
   description = "Check your eligibility in under 7 minutes and get matched with the best lender for your profile.",
   className,
   source = "cta-banner",

@@ -16,7 +16,7 @@ export function FinanceProcessHorizontal() {
       variant="accent"
       background="routes"
       eyebrow="Your Dream, Our Lakshya"
-      title="How it works — from eligibility to takeoff"
+      title="How It Works — From Eligibility to Takeoff"
       description="A clear, fast path with milestones you can actually count on."
     >
       <div className="relative">

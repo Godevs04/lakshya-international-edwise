@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useId, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
 import type { MarketingService } from "@/types/marketing";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
@@ -12,6 +13,7 @@ import { ServicesFeaturedPanel } from "@/components/marketing/homepage/services-
 import { ServiceCardAccent } from "@/components/marketing/homepage/service-card-accent";
 import { ServiceCardPreview } from "@/components/marketing/homepage/service-card-preview";
 import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
+import { cn } from "@/lib/utils";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const HOVER_TRANSITION = { duration: 0.28, ease: EASE } as const;
@@ -44,9 +46,42 @@ function useReveal(index: number) {
   };
 }
 
+function ReadMoreToggle({
+  expanded,
+  onToggle,
+  controlsId,
+  className,
+  label,
+}: {
+  expanded: boolean;
+  onToggle: () => void;
+  controlsId: string;
+  className?: string;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={cn("services-bento-read-more", className)}
+      aria-expanded={expanded}
+      aria-controls={controlsId}
+      aria-label={expanded ? `Show less about ${label}` : `Read more about ${label}`}
+      onClick={onToggle}
+    >
+      <span>{expanded ? "Show less" : "Read more"}</span>
+      <ChevronDown
+        className={cn("h-3.5 w-3.5 transition-transform duration-300", expanded && "rotate-180")}
+        aria-hidden
+      />
+    </button>
+  );
+}
+
 function FeaturedServiceCard({ service, index }: { service: MarketingService; index: number }) {
   const motionProps = useReveal(index);
   const { prefersReducedMotion } = useMarketingMotion();
+  const [expanded, setExpanded] = useState(false);
+  const detailsId = useId();
 
   return (
     <motion.article
@@ -95,8 +130,26 @@ function FeaturedServiceCard({ service, index }: { service: MarketingService; in
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.16, ease: EASE }}
             >
-              {service.description}
+              {service.shortDescription}
             </motion.p>
+
+            <ReadMoreToggle
+              expanded={expanded}
+              onToggle={() => setExpanded((value) => !value)}
+              controlsId={detailsId}
+              className="services-bento-read-more-featured"
+              label={service.title}
+            />
+
+            <div
+              id={detailsId}
+              className={cn("services-bento-read-more-panel", expanded && "is-open")}
+              hidden={!expanded}
+            >
+              <p className="services-bento-featured-desc services-bento-featured-desc-expanded">
+                {service.description}
+              </p>
+            </div>
 
             {service.highlights && (
               <ul className="services-bento-featured-highlights">
@@ -169,6 +222,8 @@ function CompactServiceCard({
 }) {
   const motionProps = useReveal(index);
   const { prefersReducedMotion } = useMarketingMotion();
+  const [expanded, setExpanded] = useState(false);
+  const detailsId = useId();
   const slot = BENTO_SLOTS.find((s) => s.slug === service.slug)?.slot ?? "base-a";
   const isSide = slot === "side-a" || slot === "side-b";
 
@@ -203,6 +258,13 @@ function CompactServiceCard({
               <h3 className="services-bento-compact-title">{service.title}</h3>
             </Link>
             <p className="services-bento-compact-desc">{service.shortDescription}</p>
+            <ReadMoreToggle
+              expanded={expanded}
+              onToggle={() => setExpanded((value) => !value)}
+              controlsId={detailsId}
+              className="services-bento-read-more-compact"
+              label={service.title}
+            />
           </div>
 
           <Link
@@ -214,13 +276,22 @@ function CompactServiceCard({
           </Link>
         </div>
 
-        {service.highlights && service.highlights.length > 0 && (
-          <ul className="services-bento-compact-highlights">
-            {service.highlights.slice(0, isSide ? 3 : 2).map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        )}
+        <div
+          id={detailsId}
+          className={cn("services-bento-read-more-panel", expanded && "is-open")}
+          hidden={!expanded}
+        >
+          <p className="services-bento-compact-desc services-bento-compact-desc-expanded">
+            {service.description}
+          </p>
+          {service.highlights && service.highlights.length > 0 ? (
+            <ul className="services-bento-compact-highlights">
+              {service.highlights.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
 
         <ServiceCardPreview slug={service.slug} />
 

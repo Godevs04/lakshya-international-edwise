@@ -37,8 +37,8 @@ export default function ContactPage() {
       />
       <PageHero
         eyebrow="Contact"
-        title="Talk to our"
-        titleAccent="loan experts"
+        title="Talk to Our"
+        titleAccent="Loan Experts"
         description="Reach out for education loan guidance. We respond within one business day."
       />
 

@@ -106,7 +106,7 @@ export default function MarketingHomePage() {
 
       <ValuePropsGrid
         eyebrow="What Lakshya Accepts"
-        title="Rejected elsewhere? We still say yes."
+        title="Rejected Elsewhere? We Still Say Yes."
         description="Low CIBIL, no guarantor, gap years — we work with lenders who look at the whole picture."
         items={WHAT_LAKSHYA_ACCEPTS}
         variant="white"
@@ -115,7 +115,7 @@ export default function MarketingHomePage() {
 
       <ValuePropsGrid
         eyebrow="What Lakshya Gives Back"
-        title="More than a loan — real value for students"
+        title="More Than a Loan — Real Value for Students"
         description="Lower rates, fee waivers, and end-to-end support that saves you time and money."
         items={WHAT_LAKSHYA_GIVES_BACK}
         variant="accent"
@@ -129,7 +129,7 @@ export default function MarketingHomePage() {
         background="map"
         journeyNode="countries"
         eyebrow="Countries"
-        title="Education loans for every top destination"
+        title="Education Loans for Every Top Destination"
         description="Country-specific loan guidance, visa financials, and lender options."
         containerClassName="max-w-[90rem]"
       >

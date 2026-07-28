@@ -44,7 +44,7 @@ function defaultLoanTypes(countryName: string): CountryLoanTypeNote[] {
     if (type.slug === "without-guarantor") {
       return {
         slug: type.slug,
-        summary: `Without-guarantor options for ${countryName} focus on your university, course, and career outcomes — not a family co-signer.`,
+        summary: `Non-Cosigner Loan (without guarantee) options for ${countryName} focus on your university, course, and career outcomes — not a family co-signer.`,
       };
     }
     if (type.slug === "non-collateral") {
@@ -205,7 +205,7 @@ export const COUNTRY_LOAN_GUIDES: Record<string, CountryLoanGuide> = {
       {
         slug: "without-guarantor",
         summary:
-          "Germany files often combine blocked-account planning with without-guarantor or profile-led lenders for eligible universities.",
+          "Germany files often combine blocked-account planning with Non-Cosigner Loan (without guarantee) or profile-led lenders for eligible universities.",
       },
       {
         slug: "non-collateral",

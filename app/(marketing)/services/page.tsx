@@ -20,8 +20,8 @@ export default function ServicesPage() {
     <>
       <PageHero
         eyebrow="Our Services"
-        title="Everything you need"
-        titleAccent="to fund your education abroad"
+        title="Everything You Need"
+        titleAccent="To Fund Your Education Abroad"
         description="One finance partner for loans, forex, blocked accounts, and more — with a single Check Eligibility form."
         decorativeLottie="globe-orbit"
       />

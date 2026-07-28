@@ -26,7 +26,7 @@ export function LendingPartnersPreview() {
       background="map"
       journeyNode="lenders"
       eyebrow="Lending Partners"
-      title="Banks, NBFCs & international lenders — all in one place"
+      title="Banks, NBFCs & International Lenders — All in One Place"
       description="Government banks for the lowest rates, NBFCs for speed and flexibility, and international lenders for no-collateral funding."
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -9,7 +9,8 @@ export type MarketingLottiePreset =
   | "contact-us"
   | "partner-handshake"
   | "business-analysis"
-  | "page-not-found";
+  | "page-not-found"
+  | "about";
 
 export type MarketingLottieAnimation = object;
 
@@ -28,6 +29,7 @@ const PRESET_LOADERS: Record<
   "partner-handshake": () => import("@/public/lottie/Stickman and woman handshake.json"),
   "business-analysis": () => import("@/public/lottie/Business Analysis.json"),
   "page-not-found": () => import("@/public/lottie/Page Not Found 404.json"),
+  about: () => import("@/public/lottie/About.json"),
 };
 
 /** Lazy-load a single Lottie JSON so pages do not ship the full ~2MB preset barrel. */

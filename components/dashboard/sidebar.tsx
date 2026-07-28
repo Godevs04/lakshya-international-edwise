@@ -27,6 +27,7 @@ interface SidebarProps {
   companyName: string;
   logo?: string;
   modules?: AppModules;
+  permissions?: string[];
   overdueTaskCount?: number;
   pendingSiteLeadCount?: number;
 }
@@ -35,13 +36,15 @@ export function Sidebar({
   companyName,
   logo,
   modules,
+  permissions,
   overdueTaskCount = 0,
   pendingSiteLeadCount = 0,
 }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const filteredNav = filterNavItems(modules, session?.user?.permissions);
+  // Prefer server-passed permissions so SSR and hydration filter the same nav items.
+  const filteredNav = filterNavItems(modules, permissions ?? session?.user?.permissions);
 
   return (
     <aside
@@ -190,12 +193,14 @@ function NavLinkItem({
 
 export function MobileNav({
   modules,
+  permissions,
   companyName = "CRM",
   logo,
   overdueTaskCount = 0,
   pendingSiteLeadCount = 0,
 }: {
   modules?: AppModules;
+  permissions?: string[];
   companyName?: string;
   logo?: string;
   overdueTaskCount?: number;
@@ -204,7 +209,7 @@ export function MobileNav({
   const pathname = usePathname();
   const { data: session } = useSession();
   const [moreOpen, setMoreOpen] = useState(false);
-  const filteredNav = filterNavItems(modules, session?.user?.permissions);
+  const filteredNav = filterNavItems(modules, permissions ?? session?.user?.permissions);
   const primaryNav = filteredNav.filter((item) =>
     MOBILE_PRIMARY_HREFS.includes(item.href as (typeof MOBILE_PRIMARY_HREFS)[number])
   );
@@ -268,6 +273,7 @@ export function MobileNav({
         companyName={companyName}
         logo={logo}
         modules={modules}
+        permissions={permissions}
         items={secondaryNav}
         overdueTaskCount={overdueTaskCount}
         pendingSiteLeadCount={pendingSiteLeadCount}

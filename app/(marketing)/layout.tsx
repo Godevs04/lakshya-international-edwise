@@ -6,6 +6,7 @@ import { MarketingNavbar } from "@/components/marketing/layout/navbar";
 import { MarketingFooter } from "@/components/marketing/layout/footer";
 import { FloatingContactBar } from "@/components/marketing/layout/floating-contact-bar";
 import { InactivityEligibilityPrompt } from "@/components/marketing/layout/inactivity-eligibility-prompt";
+import { SupportChatWidget } from "@/components/marketing/support-chat/support-chat-widget";
 import { EligibilityModalProvider } from "@/components/marketing/eligibility/eligibility-modal-provider";
 import { JsonLd, organizationJsonLd } from "@/components/marketing/seo/json-ld";
 import { getMarketingContact, getSiteUrl, getWhatsAppLink } from "@/lib/config/marketing";
@@ -41,6 +42,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <main className="marketing-premium">{children}</main>
         <MarketingFooter />
         <FloatingContactBar whatsappLink={whatsappLink} phone={contact.phone} />
+        <SupportChatWidget />
         <InactivityEligibilityPrompt />
       </EligibilityModalProvider>
     </div>

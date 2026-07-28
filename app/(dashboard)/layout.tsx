@@ -42,6 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           companyName={config.company.name}
           logo={config.company.logo}
           modules={config.modules}
+          permissions={session.user.permissions}
           overdueTaskCount={overdueTaskCount}
           pendingSiteLeadCount={pendingSiteLeadCount}
         />
@@ -66,6 +67,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
         <MobileNav
           modules={config.modules}
+          permissions={session.user.permissions}
           companyName={config.company.name}
           logo={config.company.logo}
           overdueTaskCount={overdueTaskCount}

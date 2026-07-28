@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ClipboardList, MapPin, Scale } from "lucide-react";
+import { CheckCircle2, MapPin, Scale } from "lucide-react";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 import {
   EDUCATION_LOAN_TYPE_DETAILS,
   type EducationLoanTypeDetail,
 } from "@/lib/constants/marketing/education-loan-options";
+import { DocumentChecklistAccordion } from "@/components/marketing/services/document-checklist-accordion";
 import { cn } from "@/lib/utils";
 
 function LoanTypeNav({ activeSlug }: { activeSlug: string }) {
@@ -120,30 +121,11 @@ function LoanTypeCard({
         </ul>
       </div>
 
-      <div className="loan-type-checklist">
-        <div className="loan-type-checklist-head">
-          <ClipboardList className="h-5 w-5 text-primary" aria-hidden />
-          <div>
-            <h4>{loanType.title} — Document checklist</h4>
-            <p>
-              Prepare these documents only for a {loanType.title.toLowerCase()}. This checklist is
-              specific to this loan type and is not shared with other products.
-            </p>
-          </div>
-        </div>
-        <div className="loan-type-checklist-grid">
-          {loanType.checklist.map((group) => (
-            <div key={group.title} className="loan-type-checklist-card">
-              <h5>{group.title}</h5>
-              <ul>
-                {group.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
+      <DocumentChecklistAccordion
+        title={`${loanType.title} — Document Checklist`}
+        description={`Prepare these documents only for a ${loanType.title}. This checklist is specific to this loan type and is not shared with other products.`}
+        groups={loanType.checklist}
+      />
 
       <div className="loan-type-trust">
         <ul>

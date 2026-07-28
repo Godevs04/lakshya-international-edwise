@@ -16,7 +16,7 @@ export function OfficeHighlightsSection() {
     <SectionShell
       variant="tint"
       eyebrow="Visit Us"
-      title="Our office"
+      title="Our Office"
       description="Walk in for a free consultation or connect with us online."
     >
       {contact.mapCenter ? (

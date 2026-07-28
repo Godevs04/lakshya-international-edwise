@@ -30,7 +30,7 @@ export function TestimonialsSection({ showHeading = true }: TestimonialsSectionP
       background="radial"
       journeyNode="success"
       eyebrow="Student Stories"
-      title="Students trust Lakshya to fund their global future"
+      title="Students Trust Lakshya to Fund Their Global Future"
       description="Real loan approvals for students headed to top universities worldwide."
       align="center"
     >

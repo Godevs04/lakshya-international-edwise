@@ -11,6 +11,7 @@ import {
   Shield,
   GraduationCap,
   Globe,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 import type { AppModules } from "@/types";
@@ -39,6 +40,13 @@ export const navItems: NavItem[] = [
     module: null,
     permission: null,
     anyPermissions: ["admissions:read", "partners:read"],
+  },
+  {
+    href: "/dashboard/support",
+    label: "Support",
+    icon: MessageCircle,
+    module: null,
+    permission: "support:read",
   },
   {
     href: "/dashboard/students",

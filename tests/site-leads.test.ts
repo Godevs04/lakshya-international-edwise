@@ -6,6 +6,7 @@ import {
   officialPartnersFilter,
   SITE_LEAD_PROMOTION_STATUS,
   SITE_LEAD_SOURCE,
+  WEBSITE_LEAD_SOURCES,
 } from "@/lib/constants/site-leads";
 import {
   STUDENT_RECORD_TYPE,
@@ -28,7 +29,7 @@ describe("site-leads filters", () => {
   it("separates website pending student leads from manual admissions", () => {
     expect(websitePendingStudentLeadsFilter()).toEqual({
       recordType: STUDENT_RECORD_TYPE.ADMISSION,
-      "metadata.leadSource": SITE_LEAD_SOURCE.WEBSITE,
+      "metadata.leadSource": { $in: [...WEBSITE_LEAD_SOURCES] },
       $or: [
         { "metadata.promotionStatus": { $exists: false } },
         { "metadata.promotionStatus": SITE_LEAD_PROMOTION_STATUS.PENDING },
@@ -39,7 +40,7 @@ describe("site-leads filters", () => {
       recordType: STUDENT_RECORD_TYPE.ADMISSION,
       $or: [
         { "metadata.leadSource": { $exists: false } },
-        { "metadata.leadSource": { $ne: SITE_LEAD_SOURCE.WEBSITE } },
+        { "metadata.leadSource": { $nin: [...WEBSITE_LEAD_SOURCES] } },
       ],
     });
   });

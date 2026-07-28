@@ -19,6 +19,7 @@ interface MobileNavSheetProps {
   companyName: string;
   logo?: string;
   modules?: AppModules;
+  permissions?: string[];
   items?: NavItem[];
   overdueTaskCount?: number;
   pendingSiteLeadCount?: number;
@@ -30,13 +31,14 @@ export function MobileNavSheet({
   companyName,
   logo,
   modules,
+  permissions,
   items,
   overdueTaskCount = 0,
   pendingSiteLeadCount = 0,
 }: MobileNavSheetProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const filteredNav = items ?? filterNavItems(modules, session?.user?.permissions);
+  const filteredNav = items ?? filterNavItems(modules, permissions ?? session?.user?.permissions);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

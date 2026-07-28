@@ -3,8 +3,14 @@ interface JsonLdProps {
 }
 
 export function JsonLd({ data }: JsonLdProps) {
+  const json = JSON.stringify(data).replace(/</g, "\\u003c");
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script
+      type="application/ld+json"
+      // JSON-LD is static SEO markup from Server Components; suppress React 19 client script warning noise.
+      suppressHydrationWarning
+      dangerouslySetInnerHTML={{ __html: json }}
+    />
   );
 }
 

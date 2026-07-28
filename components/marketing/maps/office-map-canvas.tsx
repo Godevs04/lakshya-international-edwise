@@ -14,7 +14,7 @@ interface OfficeMapCanvasProps {
 
 export function OfficeMapCanvas({
   center,
-  title = "Our office",
+  title = "Our Office",
   className,
   compact = false,
 }: OfficeMapCanvasProps) {

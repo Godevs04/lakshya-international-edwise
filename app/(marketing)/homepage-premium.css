@@ -380,6 +380,45 @@
   line-height: 1.15;
 }
 
+.marketing-site .services-bento-read-more {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--lp-blue, #0b8fd8);
+  cursor: pointer;
+}
+
+.marketing-site .services-bento-read-more:hover {
+  color: var(--lp-navy, #0b1e48);
+}
+
+.marketing-site .services-bento-read-more-panel {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.65rem;
+}
+
+.marketing-site .services-bento-read-more-panel[hidden] {
+  display: none;
+}
+
+.marketing-site .services-bento-featured-desc-expanded {
+  margin-top: 0;
+}
+
+.marketing-site .services-bento-compact-desc-expanded {
+  margin-top: 0;
+  margin-bottom: 0.65rem;
+}
+
 .marketing-site .services-bento-featured-desc {
   position: relative;
   z-index: 1;
@@ -1952,7 +1991,7 @@
   filter: drop-shadow(0 0 40px rgba(11, 143, 216, 0.18));
 }
 
-/* Cohesive Multiple.png landmark cluster (Liberty + Pisa + Big Ben + Eiffel + Sydney) */
+/* Cohesive Multiple.png landmark cluster */
 .marketing-site .hero-comp-landmarks {
   position: absolute;
   bottom: -2%;
@@ -3155,6 +3194,15 @@
   opacity: 0.85;
 }
 
+.marketing-site .page-hero-premium-lottie-about {
+  top: 50%;
+  right: clamp(1rem, 5vw, 3.5rem);
+  width: min(28rem, 44vw);
+  max-width: 46%;
+  transform: translateY(-48%);
+  opacity: 0.95;
+}
+
 .marketing-site .page-hero-premium-lottie-player {
   width: 100%;
   aspect-ratio: 1;
@@ -3163,6 +3211,201 @@
 @media (max-width: 767px) {
   .marketing-site .page-hero-premium-lottie {
     display: none;
+  }
+}
+
+/* Gallery — Coming Soon */
+.marketing-site .gallery-coming-soon {
+  position: relative;
+  display: grid;
+  gap: 1.75rem;
+  align-items: center;
+  overflow: hidden;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  border-radius: 1.5rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 12%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--primary) 6%, white) 0%,
+    color-mix(in oklab, var(--secondary) 4%, white) 55%,
+    white 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .marketing-site .gallery-coming-soon {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 2.5rem;
+    min-height: 20rem;
+  }
+}
+
+.marketing-site .gallery-coming-soon-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -20% auto auto 45%;
+  width: min(28rem, 70%);
+  height: min(28rem, 70%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--primary) 18%, transparent) 0%,
+    transparent 68%
+  );
+  filter: blur(8px);
+}
+
+.marketing-site .gallery-coming-soon-ring {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--primary) 16%, transparent);
+}
+
+.marketing-site .gallery-coming-soon-ring-1 {
+  width: 12rem;
+  height: 12rem;
+  top: 12%;
+  right: 8%;
+  animation: gallery-coming-soon-breathe 6s ease-in-out infinite;
+}
+
+.marketing-site .gallery-coming-soon-ring-2 {
+  width: 18rem;
+  height: 18rem;
+  bottom: -8%;
+  left: -4%;
+  opacity: 0.55;
+  animation: gallery-coming-soon-breathe 8s ease-in-out infinite reverse;
+}
+
+.marketing-site .gallery-coming-soon-media {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.marketing-site .gallery-coming-soon-lottie {
+  width: min(18rem, 72vw);
+}
+
+.marketing-site .gallery-coming-soon-lottie-player {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.marketing-site .gallery-coming-soon-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 28rem;
+}
+
+.marketing-site .gallery-coming-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 12%, white);
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.marketing-site .gallery-coming-soon-badge::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.marketing-site .gallery-coming-soon-badge-pulse::before {
+  animation: gallery-coming-soon-dot 1.8s ease-in-out infinite;
+}
+
+.marketing-site .gallery-coming-soon-title {
+  margin: 0;
+  color: var(--secondary);
+  font-size: clamp(1.45rem, 2.4vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.marketing-site .gallery-coming-soon-text {
+  margin: 0.75rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.marketing-site .gallery-coming-soon-progress {
+  margin-top: 1.35rem;
+  height: 2px;
+  width: min(12rem, 70%);
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+}
+
+.marketing-site .gallery-coming-soon-progress-bar {
+  display: block;
+  height: 100%;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 85%, white),
+    transparent
+  );
+  animation: gallery-coming-soon-sweep 2.4s ease-in-out infinite;
+}
+
+@keyframes gallery-coming-soon-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.75;
+  }
+}
+
+@keyframes gallery-coming-soon-dot {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes gallery-coming-soon-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-site .gallery-coming-soon-ring-1,
+  .marketing-site .gallery-coming-soon-ring-2,
+  .marketing-site .gallery-coming-soon-badge-pulse::before,
+  .marketing-site .gallery-coming-soon-progress-bar {
+    animation: none;
   }
 }
 
@@ -4263,6 +4506,95 @@
   color: #64748b;
 }
 
+.marketing-site .loan-type-checklist-accordion {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.marketing-site .loan-type-checklist-accordion-item {
+  border-radius: 1rem;
+  border: 1px solid rgba(11, 143, 216, 0.12);
+  background: #fff;
+  overflow: hidden;
+}
+
+.marketing-site .loan-type-checklist-accordion-item.is-open {
+  border-color: rgba(11, 143, 216, 0.28);
+  box-shadow: 0 8px 24px rgba(11, 30, 72, 0.06);
+}
+
+.marketing-site .loan-type-checklist-accordion-trigger {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.marketing-site .loan-type-checklist-accordion-title {
+  display: block;
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--lp-navy, #0b1e48);
+}
+
+.marketing-site .loan-type-checklist-accordion-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--lp-blue, #0b8fd8);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.marketing-site .loan-type-checklist-accordion-trigger:hover .loan-type-checklist-accordion-action {
+  color: var(--lp-navy, #0b1e48);
+}
+
+.marketing-site .loan-type-checklist-accordion-panel {
+  padding: 0 1rem 1rem;
+}
+
+.marketing-site .loan-type-checklist-accordion-panel[hidden] {
+  display: none;
+}
+
+.marketing-site .loan-type-checklist-accordion-panel ul {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0;
+  list-style: none;
+}
+
+.marketing-site .loan-type-checklist-accordion-panel li {
+  position: relative;
+  padding-left: 0.9rem;
+  font-size: 0.78125rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.marketing-site .loan-type-checklist-accordion-panel li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--lp-blue, #0b8fd8);
+}
+
 .marketing-site .loan-type-checklist-grid {
   margin-top: 1rem;
   display: grid;
@@ -5227,6 +5559,98 @@
   margin-top: 0.25rem;
   font-size: 0.875rem;
   color: var(--muted-foreground, #64748b);
+}
+
+.marketing-site .country-loan-type-checklist-accordion {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.marketing-site .country-loan-type-checklist-accordion-item {
+  border-radius: 1rem;
+  border: 1px solid rgba(11, 143, 216, 0.12);
+  background: #fff;
+  overflow: hidden;
+}
+
+.marketing-site .country-loan-type-checklist-accordion-item.is-open {
+  border-color: rgba(11, 143, 216, 0.28);
+  box-shadow: 0 8px 24px rgba(11, 30, 72, 0.06);
+}
+
+.marketing-site .country-loan-type-checklist-accordion-trigger {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.marketing-site .country-loan-type-checklist-accordion-title {
+  display: block;
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--lp-navy, #0b1e48);
+}
+
+.marketing-site .country-loan-type-checklist-accordion-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--lp-blue, #0b8fd8);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.marketing-site
+  .country-loan-type-checklist-accordion-trigger:hover
+  .country-loan-type-checklist-accordion-action {
+  color: var(--lp-navy, #0b1e48);
+}
+
+.marketing-site .country-loan-type-checklist-accordion-panel {
+  padding: 0 1rem 1rem;
+}
+
+.marketing-site .country-loan-type-checklist-accordion-panel[hidden] {
+  display: none;
+}
+
+.marketing-site .country-loan-type-checklist-accordion-panel ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.marketing-site .country-loan-type-checklist-accordion-panel li {
+  position: relative;
+  padding-left: 0.9rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--muted-foreground, #64748b);
+}
+
+.marketing-site .country-loan-type-checklist-accordion-panel li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--lp-blue, #0b8fd8);
 }
 
 .marketing-site .country-loan-type-checklist-grid {

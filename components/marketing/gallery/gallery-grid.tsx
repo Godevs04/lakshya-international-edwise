@@ -1,90 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-
-const GALLERY_CATEGORIES = ["All", "Events", "Counselling", "Success", "Workshops"] as const;
-
-const GALLERY_ITEMS = [
-  {
-    id: "1",
-    title: "Counselling Session",
-    category: "Counselling",
-    color: "from-emerald-100 to-emerald-50",
-  },
-  { id: "2", title: "University Fair", category: "Events", color: "from-sky-100 to-sky-50" },
-  { id: "3", title: "Visa Success", category: "Success", color: "from-violet-100 to-violet-50" },
-  {
-    id: "4",
-    title: "Student Orientation",
-    category: "Events",
-    color: "from-amber-100 to-amber-50",
-  },
-  { id: "5", title: "Loan Workshop", category: "Workshops", color: "from-rose-100 to-rose-50" },
-  { id: "6", title: "Alumni Meet", category: "Success", color: "from-teal-100 to-teal-50" },
-];
+import { motion } from "framer-motion";
+import { MarketingLottie } from "@/components/marketing/motion/marketing-lottie";
+import { useMarketingMotion } from "@/lib/motion/use-marketing-motion";
+import { useHydrationSafeReducedMotion } from "@/lib/motion/use-hydration-safe-reduced-motion";
 
 export function GalleryGrid() {
-  const [active, setActive] = useState<(typeof GALLERY_ITEMS)[number] | null>(null);
-  const [category, setCategory] = useState<string>("All");
-
-  const filtered =
-    category === "All" ? GALLERY_ITEMS : GALLERY_ITEMS.filter((item) => item.category === category);
+  const motionProps = useMarketingMotion();
+  const prefersReducedMotion = useHydrationSafeReducedMotion();
 
   return (
-    <>
-      <div className="mb-6 flex flex-wrap gap-2">
-        {GALLERY_CATEGORIES.map((entry) => (
-          <button
-            key={entry}
-            type="button"
-            onClick={() => setCategory(entry)}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-              category === entry
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {entry}
-          </button>
-        ))}
+    <motion.div
+      className="gallery-coming-soon"
+      initial={motionProps.fadeInUp.initial}
+      whileInView={motionProps.fadeInUp.whileInView}
+      viewport={motionProps.fadeInUp.viewport}
+      transition={motionProps.fadeInUp.transition}
+    >
+      <div className="gallery-coming-soon-glow" aria-hidden />
+      <div className="gallery-coming-soon-ring gallery-coming-soon-ring-1" aria-hidden />
+      <div className="gallery-coming-soon-ring gallery-coming-soon-ring-2" aria-hidden />
+
+      <div className="gallery-coming-soon-media">
+        <MarketingLottie
+          preset="about"
+          variant="inline"
+          className="gallery-coming-soon-lottie"
+          playerClassName="gallery-coming-soon-lottie-player"
+          reveal={false}
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setActive(item)}
-            className={`card-premium group relative aspect-[4/3] overflow-hidden bg-gradient-to-br ${item.color}`}
-          >
-            <div className="absolute inset-0 flex flex-col items-start justify-end p-4">
-              <span className="mb-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                {item.category}
-              </span>
-              <span className="rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-secondary">
-                {item.title}
-              </span>
-            </div>
-          </button>
-        ))}
+      <div className="gallery-coming-soon-copy">
+        <span
+          className={
+            prefersReducedMotion
+              ? "gallery-coming-soon-badge"
+              : "gallery-coming-soon-badge gallery-coming-soon-badge-pulse"
+          }
+        >
+          Coming Soon
+        </span>
+        <h3 className="gallery-coming-soon-title">Moments Worth Sharing</h3>
+        <p className="gallery-coming-soon-text">
+          We&apos;re preparing a curated gallery of counselling sessions, workshops, and student
+          success stories from across our offices.
+        </p>
+        <div className="gallery-coming-soon-progress" aria-hidden>
+          <span className="gallery-coming-soon-progress-bar" />
+        </div>
       </div>
-
-      <Dialog open={Boolean(active)} onOpenChange={() => setActive(null)}>
-        <DialogContent className="max-w-2xl">
-          {active && (
-            <div className={`aspect-video rounded-xl bg-gradient-to-br ${active.color} p-6`}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                {active.category}
-              </p>
-              <h3 className="mt-1 text-lg font-semibold text-secondary">{active.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Gallery media can be connected to Cloudinary assets when photos are available.
-              </p>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+    </motion.div>
   );
 }

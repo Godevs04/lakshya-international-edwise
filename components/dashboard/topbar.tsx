@@ -286,6 +286,7 @@ export function Topbar({
         companyName={companyName}
         logo={logo}
         modules={modules}
+        permissions={session?.user?.permissions}
       />
 
       {searchOpen ? <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} /> : null}

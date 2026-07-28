@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { SectionShell } from "@/components/marketing/sections/section-shell";
 import { AnimatedCounter } from "@/components/marketing/motion/counter";
 import { Reveal, RevealItem, RevealStagger } from "@/components/marketing/motion/reveal";
+import { ABOUT_PREVIEW_DESCRIPTION } from "@/lib/constants/marketing/about";
 import { ABOUT_MILESTONES } from "@/lib/constants/marketing/lakshya-value-props";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
 
@@ -13,8 +14,8 @@ export function AboutPreviewSection() {
       background="radial"
       journeyNode="about"
       eyebrow="About Lakshya"
-      title="Your trusted overseas education financial partner"
-      description="We make funding your global education simple, fair, and fast — comparing 20+ lenders so you get the lowest rate and fastest approval."
+      title="Your Trusted Overseas Education Loan Partner"
+      description={ABOUT_PREVIEW_DESCRIPTION}
     >
       <RevealStagger className="grid gap-6 md:grid-cols-3">
         {ABOUT_MILESTONES.map((milestone) => (
