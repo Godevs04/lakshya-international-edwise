@@ -15,6 +15,10 @@ app
   .prepare()
   .then(() => {
     const httpServer = createServer((req, res) => {
+      // Let Socket.IO own its path; don't let Next return 404 first.
+      if (req.url?.startsWith("/api/socketio")) {
+        return;
+      }
       const parsedUrl = parse(req.url!, true);
       void handle(req, res, parsedUrl);
     });

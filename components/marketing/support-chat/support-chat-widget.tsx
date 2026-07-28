@@ -174,6 +174,31 @@ export function SupportChatWidget() {
   });
 
   useEffect(() => {
+    if (step !== "chat" || !conversationId || !visitorId || connected || chatClosed) return;
+    const poll = async () => {
+      const thread = await getSupportVisitorThreadAction(conversationId, visitorId);
+      if (!thread.success || !thread.data) return;
+      if (thread.data.closed) {
+        setChatClosed(true);
+        setComposer("");
+        setTypingLabel(null);
+      }
+      setMessages(
+        thread.data.messages.map((m) => ({
+          id: m.id,
+          senderType: m.senderType,
+          body: m.body,
+          createdAt: m.createdAt,
+        }))
+      );
+    };
+    const id = window.setInterval(() => {
+      void poll();
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [step, conversationId, visitorId, connected, chatClosed]);
+
+  useEffect(() => {
     if (step === "chat" && conversationId) markSeen();
   }, [step, conversationId, messages.length, markSeen]);
 

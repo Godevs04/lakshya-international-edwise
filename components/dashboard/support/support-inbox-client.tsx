@@ -164,6 +164,17 @@ export function SupportInboxClient({ canAssign }: SupportInboxClientProps) {
   });
 
   useEffect(() => {
+    // HTTP poll when Socket.IO is unavailable (e.g. Vercel serverless).
+    if (connected) return;
+    const tick = () => {
+      void refreshInbox(tab);
+      if (selectedId) void loadDetail(selectedId);
+    };
+    const id = window.setInterval(tick, 5000);
+    return () => window.clearInterval(id);
+  }, [connected, tab, selectedId, refreshInbox, loadDetail]);
+
+  useEffect(() => {
     if (selectedId) markSeen();
   }, [selectedId, messages.length, markSeen]);
 
