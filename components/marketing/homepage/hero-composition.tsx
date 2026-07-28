@@ -78,6 +78,7 @@ export function HeroComposition() {
           width={400}
           height={400}
           className="hero-comp-globe-img"
+          style={{ width: "100%", height: "auto" }}
           quality={75}
           sizes="(max-width: 1024px) 70vw, 400px"
           loading="lazy"
@@ -108,9 +109,10 @@ export function HeroComposition() {
             width={560}
             height={594}
             className="hero-comp-landmarks-img"
+            style={{ width: "100%", height: "auto" }}
             priority
             fetchPriority="high"
-            quality={80}
+            quality={85}
             sizes="(max-width: 1024px) 90vw, 560px"
           />
         </motion.div>

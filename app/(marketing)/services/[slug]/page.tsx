@@ -32,7 +32,7 @@ export async function generateMetadata({
     return buildMarketingMetadata({
       title: `Overseas Education Loan in India | ${contact.companyName}`,
       description:
-        "Compare without-guarantor, non-collateral, and collateral education loans with Lakshya International Edwise. Lender comparison tables, eligibility, benefits, and document checklists for studying abroad.",
+        "Compare Non-Cosigner Loan (without guarantee), non-collateral, and collateral education loans with Lakshya International Edwise. Lender comparison tables, eligibility, benefits, and document checklists for studying abroad.",
       path: `/services/${slug}`,
       keywords: [
         "overseas education loan",
@@ -40,7 +40,7 @@ export async function generateMetadata({
         "student loan for international students",
         "non collateral education loan",
         "collateral education loan",
-        "education loan without guarantor",
+        "non-cosigner education loan without guarantee",
         "compare education loan lenders",
         "Lakshya International Edwise",
       ],
@@ -99,8 +99,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           variant="muted"
           background="grid"
           eyebrow="Loan Types"
-          title="Choose the right education loan for your profile"
-          description="Compare without-guarantor, non-collateral, and collateral options — then explore detailed eligibility, benefits, and document checklists below."
+          title="Choose the Right Education Loan for Your Profile"
+          description="Compare Non-Cosigner Loan (without guarantee), non-collateral, and collateral options — then explore detailed eligibility, benefits, and document checklists below."
           align="center"
         >
           <EducationLoanOptionsSection options={service.subOptions} />
@@ -112,7 +112,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           variant="white"
           background="grid"
           eyebrow="Detailed guide"
-          title="Types of education loans explained"
+          title="Types of Education Loans Explained"
           description="A clear breakdown of each loan type — structured like leading education-finance platforms, tailored for Lakshya International Edwise students."
           align="center"
           className="page-section-premium"
@@ -127,7 +127,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           variant="muted"
           background="grid"
           eyebrow="Loan schemes & lenders"
-          title="Study abroad education loan interest rates & partners"
+          title="Study Abroad Education Loan Interest Rates & Partners"
           description="Compare ROI, max loan amount, approval speed, and collateral requirements across 15+ banks, NBFCs, and international lenders."
           align="center"
           className="page-section-premium"
@@ -140,7 +140,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
       <SectionShell
         variant="white"
         background="grid"
-        title="What you get"
+        title="What You Get"
         eyebrow="Highlights"
         align="center"
         className="page-section-premium"

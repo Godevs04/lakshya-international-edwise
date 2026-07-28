@@ -28,8 +28,9 @@ export function HeroVisualCollage() {
           height={594}
           priority
           className="hero-collage-landmarks-img"
+          style={{ width: "100%", height: "auto" }}
           sizes="(max-width: 1024px) 90vw, 520px"
-          quality={80}
+          quality={85}
         />
       </motion.div>
     </div>

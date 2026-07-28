@@ -163,23 +163,23 @@ export default async function CountryDetailPage({ params }: { params: Promise<{ 
 
       <SectionShell variant="muted" padding className="page-section-premium" background="grid">
         <div className="grid gap-6 md:grid-cols-2">
-          <InfoBlock title="Why fund with Lakshya International Edwise" items={country.benefits} />
+          <InfoBlock title="Why Fund with Lakshya International Edwise" items={country.benefits} />
           <InfoBlock
-            title="Typical cost of study"
+            title="Typical Cost of Study"
             items={[
               country.tuitionRange ?? country.costOfStudy,
               country.livingCost ? `Living: ${country.livingCost}` : country.costOfStudy,
             ].filter(Boolean)}
           />
-          <InfoBlock title="Visa financial requirements" items={[country.visaInfo]} />
+          <InfoBlock title="Visa Financial Requirements" items={[country.visaInfo]} />
           {country.visaDuration ? (
-            <InfoBlock title="Visa type" items={[country.visaDuration]} />
+            <InfoBlock title="Visa Type" items={[country.visaDuration]} />
           ) : null}
           {country.universities.length > 0 ? (
-            <InfoBlock title="Popular universities" items={country.universities} />
+            <InfoBlock title="Popular Universities" items={country.universities} />
           ) : null}
           {country.careerOutlook ? (
-            <InfoBlock title="Career outlook" items={[country.careerOutlook]} />
+            <InfoBlock title="Career Outlook" items={[country.careerOutlook]} />
           ) : null}
         </div>
       </SectionShell>

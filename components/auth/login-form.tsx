@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GlassCard } from "@/components/cards/glass-card";
+import { PasswordInput } from "@/components/auth/password-input";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getLoginFailureReasonAction } from "@/lib/actions/auth.actions";
 
@@ -79,7 +80,7 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" placeholder="••••••••" required />
+          <PasswordInput id="password" name="password" placeholder="••••••••" required />
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

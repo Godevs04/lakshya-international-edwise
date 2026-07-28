@@ -10,7 +10,13 @@ export type SiteLeadPromotionStatus =
 
 export const SITE_LEAD_SOURCE = {
   WEBSITE: "website",
+  WEBSITE_CHAT: "website_chat",
 } as const;
+
+export const WEBSITE_LEAD_SOURCES = [
+  SITE_LEAD_SOURCE.WEBSITE,
+  SITE_LEAD_SOURCE.WEBSITE_CHAT,
+] as const;
 
 export const SITE_LEADS_TABS = ["students", "partners"] as const;
 export type SiteLeadsTab = (typeof SITE_LEADS_TABS)[number];
@@ -19,7 +25,7 @@ export type SiteLeadsTab = (typeof SITE_LEADS_TABS)[number];
 export function websitePendingStudentLeadsFilter() {
   return {
     recordType: STUDENT_RECORD_TYPE.ADMISSION,
-    "metadata.leadSource": SITE_LEAD_SOURCE.WEBSITE,
+    "metadata.leadSource": { $in: [...WEBSITE_LEAD_SOURCES] },
     $or: [
       { "metadata.promotionStatus": { $exists: false } },
       { "metadata.promotionStatus": SITE_LEAD_PROMOTION_STATUS.PENDING },
@@ -33,7 +39,7 @@ export function manualAdmissionLeadsFilter() {
     recordType: STUDENT_RECORD_TYPE.ADMISSION,
     $or: [
       { "metadata.leadSource": { $exists: false } },
-      { "metadata.leadSource": { $ne: SITE_LEAD_SOURCE.WEBSITE } },
+      { "metadata.leadSource": { $nin: [...WEBSITE_LEAD_SOURCES] } },
     ],
   };
 }

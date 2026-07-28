@@ -12,7 +12,7 @@ export const DEFAULT_MARKETING_KEYWORDS = [
   "education finance",
   "student loan for international students",
   "non collateral education loan",
-  "education loan without guarantor",
+  "non-cosigner education loan without guarantee",
   "fast education loan approval",
   "lowest education loan interest rate",
   "education loan for USA",

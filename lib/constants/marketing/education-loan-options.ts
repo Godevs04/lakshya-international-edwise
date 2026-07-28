@@ -24,14 +24,14 @@ export interface EducationLoanTypeDetail {
 export const EDUCATION_LOAN_TYPE_DETAILS: EducationLoanTypeDetail[] = [
   {
     slug: "without-guarantor",
-    title: "Without Guarantor Loan",
+    title: "Non-Cosigner Loan (without guarantee)",
     shortDescription:
-      "Fund your studies without a financial guarantor — no repayment during school for eligible profiles.",
+      "Fund your studies without a cosigner or financial guarantor — no repayment during school for eligible profiles.",
     icon: "Users",
     eyebrow: "Independent funding",
-    headline: "Study abroad without a financial guarantor",
+    headline: "Study Abroad Without a Cosigner or Financial Guarantor",
     summary: [
-      "At Lakshya International Edwise, we help students access without-guarantor education loans through trusted international and Indian lenders such as MPOWER, Prodigy Finance, Avanse Global, and selected partners.",
+      "At Lakshya International Edwise, we help students access Non-Cosigner Loan (without guarantee) options through trusted international and Indian lenders such as MPOWER, Prodigy Finance, Avanse Global, and selected partners.",
       "With this option, students can pursue their dream education without requiring a parent, guardian, or relative to co-sign the loan. Your future is evaluated based on your education, career prospects, university, and course — not only your family's financial profile.",
       "This is ideal for ambitious students with strong academic potential and admission to reputed universities who may not have a financially eligible co-applicant.",
     ],
@@ -88,7 +88,7 @@ export const EDUCATION_LOAN_TYPE_DETAILS: EducationLoanTypeDetail[] = [
         ],
       },
     ],
-    closingLine: "No guarantor. No financial dependency. Just your dream — and our expertise.",
+    closingLine: "No cosigner. No financial dependency. Just your dream — and our expertise.",
   },
   {
     slug: "non-collateral",

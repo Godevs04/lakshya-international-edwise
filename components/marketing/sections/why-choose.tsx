@@ -7,7 +7,7 @@ export function WhyChooseSection() {
     <SectionShell
       variant="tint"
       eyebrow="Why Choose Us"
-      title="Why students and parents choose us"
+      title="Why Students and Parents Choose Us"
       description="A consultancy built on transparency, expertise, and outcomes - not sales pressure."
     >
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

@@ -27,6 +27,7 @@ export interface PageHeroPremiumProps {
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
   decorativeLottie?: MarketingLottiePreset;
+  decorativeLottieClassName?: string;
   children?: React.ReactNode;
 }
 
@@ -42,6 +43,7 @@ export function PageHeroPremium({
   primaryCta,
   secondaryCta,
   decorativeLottie,
+  decorativeLottieClassName,
   children,
 }: PageHeroPremiumProps) {
   const centered = align === "center";
@@ -62,7 +64,7 @@ export function PageHeroPremium({
         <MarketingLottie
           preset={decorativeLottie}
           variant="inline"
-          className="page-hero-premium-lottie"
+          className={cn("page-hero-premium-lottie", decorativeLottieClassName)}
           playerClassName="page-hero-premium-lottie-player"
         />
       ) : null}

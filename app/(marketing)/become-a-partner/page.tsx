@@ -47,8 +47,8 @@ export default function BecomePartnerPage() {
       />
       <PageHero
         eyebrow="Become a Partner"
-        title="Grow with a finance partner"
-        titleAccent="who won't compete for your students"
+        title="Grow with a Finance Partner"
+        titleAccent="Who Won't Compete for Your Students"
         description="Refer students for education loans and let us handle the funding end-to-end — you focus on admissions."
       />
 

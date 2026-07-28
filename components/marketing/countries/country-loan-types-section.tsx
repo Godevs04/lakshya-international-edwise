@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, ClipboardList } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { MarketingIcon } from "@/lib/constants/marketing/icons";
 import {
   EDUCATION_LOAN_TYPE_DETAILS,
@@ -9,6 +9,7 @@ import {
 } from "@/lib/constants/marketing/education-loan-options";
 import type { CountryLoanTypeNote } from "@/lib/constants/marketing/country-loan-guides";
 import { EligibilityCta } from "@/components/marketing/eligibility/eligibility-cta";
+import { DocumentChecklistAccordion } from "@/components/marketing/services/document-checklist-accordion";
 import { cn } from "@/lib/utils";
 
 interface CountryLoanTypesSectionProps {
@@ -49,10 +50,11 @@ export function CountryLoanTypesSection({
     <div id="loan-types" className="country-loan-types scroll-mt-28">
       <div className="country-loan-types-head">
         <p className="country-loan-types-eyebrow">Detailed guide</p>
-        <h2>Types of education loans for {countryName}</h2>
+        <h2>Types of Education Loans for {countryName}</h2>
         <p>
           Each loan type has its own information and document checklist. Select a type below —
-          collateral, non-collateral, and without-guarantor are never mixed into one generic list.
+          collateral, non-collateral, and non-cosigner options are never mixed into one generic
+          list.
         </p>
       </div>
 
@@ -119,30 +121,12 @@ export function CountryLoanTypesSection({
           </aside>
         </div>
 
-        <div className="country-loan-type-checklist">
-          <div className="country-loan-type-checklist-head">
-            <ClipboardList className="h-5 w-5 text-primary" aria-hidden />
-            <div>
-              <h4>{detail.title} — Document checklist</h4>
-              <p>
-                Documents required specifically for a {detail.title.toLowerCase()} for {countryName}
-                . This list is not shared with other loan types.
-              </p>
-            </div>
-          </div>
-          <div className="country-loan-type-checklist-grid">
-            {detail.checklist.map((group) => (
-              <div key={group.title} className="country-loan-type-checklist-card">
-                <h5>{group.title}</h5>
-                <ul>
-                  {group.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
+        <DocumentChecklistAccordion
+          variant="country"
+          title={`${detail.title} — Document Checklist`}
+          description={`Documents required specifically for a ${detail.title} for ${countryName}. This list is not shared with other loan types.`}
+          groups={detail.checklist}
+        />
       </article>
     </div>
   );

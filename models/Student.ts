@@ -215,6 +215,7 @@ export interface IStudent extends Document {
     currentStatus?: string;
     preferredLender?: string;
     contactSubject?: string;
+    collateralPreference?: string;
     resubmittedAt?: Date;
     resubmissionCount?: number;
   };
@@ -338,6 +339,7 @@ const StudentSchema = new Schema<IStudent>(
       currentStatus: { type: String, trim: true },
       preferredLender: { type: String, trim: true },
       contactSubject: { type: String, trim: true },
+      collateralPreference: { type: String, trim: true },
       resubmittedAt: { type: Date },
       resubmissionCount: { type: Number, min: 0 },
     },

@@ -32,8 +32,8 @@ export default function FaqPage() {
       />
       <PageHero
         eyebrow="FAQ"
-        title="Education loan questions,"
-        titleAccent="answered"
+        title="Education Loan Questions,"
+        titleAccent="Answered"
         description="Everything you need to know about eligibility, rates, approvals, and funding your global education."
       />
       <SectionShell variant="white" className="page-section-premium" background="grid">

@@ -20,7 +20,7 @@ interface FaqSectionProps {
 
 export function FaqSection({
   items,
-  title = "Frequently asked questions",
+  title = "Frequently Asked Questions",
   description = "Answers to common questions about education loans, eligibility, and funding your studies abroad.",
 }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);

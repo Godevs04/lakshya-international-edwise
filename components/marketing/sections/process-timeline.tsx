@@ -16,7 +16,7 @@ export function ProcessTimelineSection() {
     <SectionShell
       variant="white"
       eyebrow="Your Journey"
-      title="From dream to global career"
+      title="From Dream to Global Career"
       description="A clear, step-by-step process that keeps you informed at every stage."
     >
       <div className="relative">

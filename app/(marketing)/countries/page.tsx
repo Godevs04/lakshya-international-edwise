@@ -22,8 +22,8 @@ export default function CountriesPage() {
     <>
       <PageHero
         eyebrow="Countries"
-        title="Fund your education"
-        titleAccent="in every top destination"
+        title="Fund Your Education"
+        titleAccent="In Every Top Destination"
         description="Compare loan options, visa financial requirements, and typical costs for each country."
         stats={[
           { label: "Countries covered", value: MARKETING_COUNTRIES.length },

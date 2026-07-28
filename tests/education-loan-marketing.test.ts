@@ -14,16 +14,16 @@ import { MARKETING_NAV } from "@/lib/constants/marketing/navigation";
 import { getMarketingService } from "@/lib/constants/marketing/services";
 
 describe("education loan type details", () => {
-  it("exposes exactly three product types without cosigner", () => {
+  it("exposes exactly three product types including Non-Cosigner Loan", () => {
     expect(EDUCATION_LOAN_TYPE_DETAILS).toHaveLength(3);
     expect(EDUCATION_LOAN_OPTIONS.map((option) => option.slug)).toEqual([
       "without-guarantor",
       "non-collateral",
       "collateral",
     ]);
-    expect(
-      EDUCATION_LOAN_TYPE_DETAILS.some((entry) => /cosigner/i.test(entry.slug + entry.title))
-    ).toBe(false);
+    const nonCosigner = getEducationLoanTypeDetail("without-guarantor");
+    expect(nonCosigner?.title).toBe("Non-Cosigner Loan (without guarantee)");
+    expect(nonCosigner?.slug).toBe("without-guarantor");
   });
 
   it("keeps detailed guides aligned with overview cards", () => {

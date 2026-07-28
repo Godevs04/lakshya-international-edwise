@@ -8,7 +8,7 @@ export function GoogleReviewsSection() {
     <SectionShell
       variant="white"
       eyebrow="Reviews"
-      title="What families say about us"
+      title="What Families Say About Us"
       description="Real feedback from students and parents who trusted us with their study abroad journey."
       align="center"
     >
