@@ -15,7 +15,7 @@ interface StudentContactActionsProps {
 }
 
 const iconLinkClass =
-  "inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E8952E]/10 bg-white/60 transition-colors hover:bg-[#E8952E]/8 dark:bg-white/5";
+  "inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#0B8FD8]/10 bg-white/60 transition-colors hover:bg-[#0B8FD8]/8 dark:bg-white/5";
 
 export function StudentContactActions({
   phone,

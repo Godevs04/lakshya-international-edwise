@@ -50,8 +50,8 @@ export function SiteLeadsTabs({
               className={cn(
                 "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
-                  : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
+                  ? "border-[#0B8FD8] bg-[#0B8FD8] text-white shadow-sm"
+                  : "border-[#0B8FD8]/15 bg-white/60 text-muted-foreground hover:border-[#0B8FD8]/30 hover:bg-[#0B8FD8]/8 hover:text-foreground dark:bg-white/5"
               )}
               aria-current={isActive ? "page" : undefined}
             >
@@ -60,7 +60,7 @@ export function SiteLeadsTabs({
                 <span
                   className={cn(
                     "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
-                    isActive ? "bg-white/20 text-white" : "bg-[#E8952E]/10 text-[#E8952E]"
+                    isActive ? "bg-white/20 text-white" : "bg-[#0B8FD8]/10 text-[#0B8FD8]"
                   )}
                 >
                   {tab.count > 99 ? "99+" : tab.count}

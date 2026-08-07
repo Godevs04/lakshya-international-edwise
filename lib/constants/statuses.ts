@@ -43,8 +43,8 @@ export interface StatusConfig {
 export const STUDENT_STATUS_CONFIG: Record<StudentStatus, StatusConfig> = {
   new: {
     label: "New",
-    color: "bg-[#E8952E]/12 text-[#E8952E] border-[#E8952E]/25",
-    dotColor: "bg-[#E8952E]",
+    color: "bg-[#0B8FD8]/12 text-[#0B8FD8] border-[#0B8FD8]/25",
+    dotColor: "bg-[#0B8FD8]",
   },
   contacted: {
     label: "Contacted",

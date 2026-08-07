@@ -385,7 +385,7 @@ export function StudentsTable({
                         router.push(`/dashboard/students/${student._id}`);
                       }
                     }}
-                    className="block min-w-0 flex-1 cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#E8952E]/40"
+                    className="block min-w-0 flex-1 cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#0B8FD8]/40"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">

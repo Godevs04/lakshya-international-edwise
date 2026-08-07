@@ -52,7 +52,7 @@ export function LenderLogo({ slug, name, logo, accent, size = "md", className }:
     ? {
         name: name ?? seedBrand?.name ?? slug ?? "Bank",
         logo,
-        accent: accent ?? seedBrand?.accent ?? "#E8952E",
+        accent: accent ?? seedBrand?.accent ?? "#0B8FD8",
       }
     : seedBrand;
   const sizeStyle = SIZE_STYLES[size];
@@ -80,7 +80,7 @@ export function LenderLogo({ slug, name, logo, accent, size = "md", className }:
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#E8952E] shadow-md",
+        "flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#0B8FD8] shadow-md",
         ICON_SHELL[size],
         className
       )}

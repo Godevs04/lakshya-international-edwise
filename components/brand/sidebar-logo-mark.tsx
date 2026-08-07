@@ -30,7 +30,7 @@ export function SidebarLogoMark({ src, alt, className, size = "md" }: SidebarLog
     >
       <motion.div
         className={cn(
-          "absolute rounded-full bg-gradient-to-br from-[#FDE68A]/80 via-[#F59E0B]/60 to-[#F472B6]/50 blur-md",
+          "absolute rounded-full bg-gradient-to-br from-[#7DD3FC]/80 via-[#0B8FD8]/55 to-[#0369A1]/50 blur-md",
           glowInset
         )}
         animate={
@@ -44,12 +44,12 @@ export function SidebarLogoMark({ src, alt, className, size = "md" }: SidebarLog
 
       <div
         className={cn(
-          "relative overflow-hidden rounded-full bg-gradient-to-b from-white to-[#FFF7ED] p-[3px]",
-          "shadow-[0_4px_14px_rgba(232,149,46,0.18)] ring-1 ring-primary/15",
+          "relative overflow-hidden rounded-full bg-gradient-to-b from-white to-[#F0F9FF] p-[3px]",
+          "shadow-[0_4px_14px_rgba(11,143,216,0.22)] ring-1 ring-primary/15",
           dimension
         )}
       >
-        <div className="relative h-full w-full overflow-hidden rounded-full bg-[#FFFBF5]">
+        <div className="relative h-full w-full overflow-hidden rounded-full bg-[#F8FBFF]">
           <Image
             src={logoSrc}
             alt={alt}

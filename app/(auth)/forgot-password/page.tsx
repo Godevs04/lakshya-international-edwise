@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <GlassCard className="p-8 shadow-2xl shadow-[#E8952E]/10">
+    <GlassCard className="border-primary/10 p-8 shadow-2xl shadow-primary/15 ring-1 ring-primary/10">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold tracking-tight">Forgot password</h2>
         <p className="mt-1 text-sm text-muted-foreground">

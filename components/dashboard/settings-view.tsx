@@ -312,9 +312,9 @@ export function SettingsView({
           {pendingUsers.length > 0 && (
             <GlassCard className="p-6">
               <div className="mb-4 flex items-center gap-2">
-                <Clock className="h-5 w-5 text-[#F59E0B]" />
+                <Clock className="h-5 w-5 text-[#0369A1]" />
                 <h3 className="text-base font-bold">Approval Queue</h3>
-                <span className="rounded-full bg-[#F59E0B]/12 px-2.5 py-0.5 text-xs font-semibold text-[#F59E0B]">
+                <span className="rounded-full bg-[#0369A1]/12 px-2.5 py-0.5 text-xs font-semibold text-[#0369A1]">
                   {pendingUsers.length} waiting
                 </span>
               </div>
@@ -328,7 +328,7 @@ export function SettingsView({
                   return (
                     <div
                       key={u._id}
-                      className="flex flex-col gap-3 rounded-2xl border border-[#F59E0B]/20 bg-[#F59E0B]/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-2xl border border-[#0369A1]/20 bg-[#0369A1]/5 p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
                         <p className="font-semibold">{u.name}</p>
@@ -523,7 +523,7 @@ export function SettingsView({
                         <span
                           className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                             u.useCustomPermissions
-                              ? "bg-[#E8952E]/12 text-[#B45309]"
+                              ? "bg-[#0B8FD8]/12 text-[#B45309]"
                               : "bg-muted text-muted-foreground"
                           }`}
                         >

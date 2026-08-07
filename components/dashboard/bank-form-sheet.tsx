@@ -145,7 +145,7 @@ export function BankFormSheet({ lender, open, onOpenChange, trigger }: BankFormS
               <input
                 type="color"
                 className="h-10 w-12 shrink-0 cursor-pointer rounded-md border bg-transparent p-1"
-                value={/^#[0-9A-Fa-f]{6}$/.test(accentColor) ? accentColor : "#E8952E"}
+                value={/^#[0-9A-Fa-f]{6}$/.test(accentColor) ? accentColor : "#0B8FD8"}
                 onChange={(event) => setAccentColor(event.target.value)}
               />
             </div>

@@ -144,7 +144,7 @@ function StatusMultiSelect({
                 key={status}
                 className={cn(
                   "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent",
-                  checked && "bg-[#E8952E]/12"
+                  checked && "bg-[#0B8FD8]/12"
                 )}
               >
                 <Checkbox checked={checked} onCheckedChange={() => toggleStatus(status)} />
@@ -252,7 +252,7 @@ export function StudentAdvancedSearch({
             <SlidersHorizontal className="mr-1.5 h-4 w-4" />
             Advanced
             {activeCount > 0 && (
-              <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#E8952E] px-1.5 text-xs font-semibold text-white">
+              <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0B8FD8] px-1.5 text-xs font-semibold text-white">
                 {activeCount}
               </span>
             )}

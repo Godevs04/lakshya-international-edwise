@@ -24,7 +24,7 @@ export function FormSection({
       id={id}
       className={cn(
         "scroll-mt-24 p-6 transition-shadow",
-        highlighted && "ring-2 ring-[#E8952E]/50",
+        highlighted && "ring-2 ring-[#0B8FD8]/50",
         className
       )}
     >

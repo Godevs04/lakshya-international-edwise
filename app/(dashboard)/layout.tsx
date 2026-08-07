@@ -60,7 +60,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 />
               </Suspense>
             </div>
-            <main className="min-w-0 flex-1 overflow-x-hidden px-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-2 sm:px-4 lg:px-8 lg:pb-8 lg:pt-4">
+            <main className="crm-page-enter min-w-0 flex-1 overflow-x-hidden px-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-2 sm:px-4 lg:px-8 lg:pb-8 lg:pt-4">
               {children}
             </main>
           </div>

@@ -43,4 +43,4 @@ export const fontMarketing = Plus_Jakarta_Sans({
 });
 
 export const fontFamilySans =
-  'var(--font-sn-pro), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  'var(--font-marketing), var(--font-sn-pro), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';

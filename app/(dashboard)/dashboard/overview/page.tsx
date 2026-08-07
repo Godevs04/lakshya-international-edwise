@@ -21,19 +21,19 @@ import type { MetricTrendInfo } from "@/lib/utils/metrics-trend";
 
 const LoanStatusBarChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.LoanStatusBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#0B8FD8]/8" /> }
 );
 const MonthlyStudentsAreaChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.MonthlyStudentsAreaChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#0B8FD8]/8" /> }
 );
 const LoanAmountBarChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.LoanAmountBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#0B8FD8]/8" /> }
 );
 const TopPartnersBarChart = dynamic(
   () => import("@/components/charts/dashboard-charts").then((m) => m.TopPartnersBarChart),
-  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#E8952E]/8" /> }
+  { loading: () => <Skeleton className="h-80 rounded-[20px] bg-[#0B8FD8]/8" /> }
 );
 
 function withTrend(
@@ -201,8 +201,8 @@ export default async function OverviewPage() {
       {siteLeadCounts.total > 0 ? (
         <GlassCard className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#E8952E]/12">
-              <Globe className="h-5 w-5 text-[#E8952E]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0B8FD8]/12">
+              <Globe className="h-5 w-5 text-[#0B8FD8]" />
             </div>
             <div>
               <p className="font-semibold">
@@ -218,7 +218,7 @@ export default async function OverviewPage() {
             {siteLeadCounts.students > 0 ? (
               <Link
                 href="/dashboard/site-leads?tab=students"
-                className="inline-flex items-center justify-center rounded-full border border-[#E8952E]/30 px-4 py-2 text-sm font-semibold text-[#E8952E] transition-colors hover:bg-[#E8952E]/10"
+                className="inline-flex items-center justify-center rounded-full border border-[#0B8FD8]/30 px-4 py-2 text-sm font-semibold text-[#0B8FD8] transition-colors hover:bg-[#0B8FD8]/10"
               >
                 {siteLeadCounts.students} student lead{siteLeadCounts.students === 1 ? "" : "s"}
               </Link>
@@ -226,14 +226,14 @@ export default async function OverviewPage() {
             {siteLeadCounts.partners > 0 ? (
               <Link
                 href="/dashboard/site-leads?tab=partners"
-                className="inline-flex items-center justify-center rounded-full border border-[#E8952E]/30 px-4 py-2 text-sm font-semibold text-[#E8952E] transition-colors hover:bg-[#E8952E]/10"
+                className="inline-flex items-center justify-center rounded-full border border-[#0B8FD8]/30 px-4 py-2 text-sm font-semibold text-[#0B8FD8] transition-colors hover:bg-[#0B8FD8]/10"
               >
                 {siteLeadCounts.partners} partner lead{siteLeadCounts.partners === 1 ? "" : "s"}
               </Link>
             ) : null}
             <Link
               href="/dashboard/site-leads"
-              className="inline-flex items-center justify-center rounded-full bg-[#E8952E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E8952E]/90"
+              className="inline-flex items-center justify-center rounded-full bg-[#0B8FD8] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0B8FD8]/90"
             >
               Review from site
             </Link>
@@ -318,7 +318,7 @@ export default async function OverviewPage() {
             <h3 className="text-base font-bold">Latest Partners</h3>
             <Link
               href="/dashboard/partners"
-              className="text-xs font-semibold text-[#E8952E] hover:underline"
+              className="text-xs font-semibold text-[#0B8FD8] hover:underline"
             >
               View all →
             </Link>
@@ -327,7 +327,7 @@ export default async function OverviewPage() {
             <div className="space-y-3">
               {latestPartners.map((p) => (
                 <Link key={p._id.toString()} href={`/dashboard/partners/${p._id}`}>
-                  <div className="group flex items-center gap-3 rounded-2xl bg-[#E8952E]/4 p-3 transition-all hover:translate-x-1 hover:bg-[#E8952E]/8">
+                  <div className="group flex items-center gap-3 rounded-2xl bg-[#0B8FD8]/4 p-3 transition-all hover:translate-x-1 hover:bg-[#0B8FD8]/8">
                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] shadow-md">
                       <Handshake className="h-4 w-4 text-white" />
                     </div>

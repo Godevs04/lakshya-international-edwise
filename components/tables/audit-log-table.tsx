@@ -125,7 +125,7 @@ export function AuditLogTable({ data, stats, total, page, totalPages }: AuditLog
       label: "Total events",
       value: stats.total,
       icon: Shield,
-      tone: "from-[#E8952E] to-[#F59E0B]",
+      tone: "from-[#0B8FD8] to-[#0369A1]",
     },
     {
       label: "Today",
@@ -143,7 +143,7 @@ export function AuditLogTable({ data, stats, total, page, totalPages }: AuditLog
       label: stats.topResourceType ? `Top: ${stats.topResourceType}` : "Most active",
       value: stats.topResourceCount,
       icon: Activity,
-      tone: "from-[#F59E0B] to-[#EF4444]",
+      tone: "from-[#0369A1] to-[#EF4444]",
     },
   ];
 
@@ -292,7 +292,7 @@ export function AuditLogTable({ data, stats, total, page, totalPages }: AuditLog
                         (resourceHref ? (
                           <Link
                             href={resourceHref}
-                            className="mt-0.5 block font-mono text-xs text-[#E8952E] hover:underline"
+                            className="mt-0.5 block font-mono text-xs text-[#0B8FD8] hover:underline"
                           >
                             {log.resourceId.slice(-8)}
                           </Link>

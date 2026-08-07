@@ -60,7 +60,7 @@ function AnimatedDotGrid({
           key={index}
           cx={cx}
           cy={cy}
-          fill="#E8952E"
+          fill="#0B8FD8"
           initial={{ r: 0.75, opacity: 0.12 }}
           animate={
             reducedMotion
@@ -168,25 +168,25 @@ export function Design06RibbonWaves({ className, variant = "hero" }: Design06Rib
               <stop offset="100%" stopColor="white" stopOpacity="1" />
             </linearGradient>
             <linearGradient id={`${uid}-ribbonA`} x1="0.5" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#FCD34D" stopOpacity="0" />
-              <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.08" />
-              <stop offset="70%" stopColor="#EA580C" stopOpacity="0.14" />
-              <stop offset="100%" stopColor="#FB923C" stopOpacity="0.1" />
+              <stop offset="0%" stopColor="#7DD3FC" stopOpacity="0" />
+              <stop offset="35%" stopColor="#0369A1" stopOpacity="0.08" />
+              <stop offset="70%" stopColor="#0EA5E9" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#7DD3FC" stopOpacity="0.1" />
             </linearGradient>
             <linearGradient id={`${uid}-ribbonB`} x1="0.55" y1="0" x2="1" y2="0.8">
-              <stop offset="0%" stopColor="#FDE68A" stopOpacity="0" />
-              <stop offset="45%" stopColor="#F59E0B" stopOpacity="0.07" />
-              <stop offset="100%" stopColor="#E8952E" stopOpacity="0.1" />
+              <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0" />
+              <stop offset="45%" stopColor="#0369A1" stopOpacity="0.07" />
+              <stop offset="100%" stopColor="#0B8FD8" stopOpacity="0.1" />
             </linearGradient>
             <linearGradient id={`${uid}-stroke`} x1="0.45" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#E8952E" stopOpacity="0" />
-              <stop offset="30%" stopColor="#F59E0B" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="#FBBF24" stopOpacity="0.28" />
+              <stop offset="0%" stopColor="#0B8FD8" stopOpacity="0" />
+              <stop offset="30%" stopColor="#0369A1" stopOpacity="0.16" />
+              <stop offset="100%" stopColor="#4FC3F7" stopOpacity="0.28" />
             </linearGradient>
             <radialGradient id={`${uid}-glow`} cx="0.82" cy="0.55" r="0.4">
-              <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.18" />
-              <stop offset="55%" stopColor="#F59E0B" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
+              <stop offset="0%" stopColor="#0369A1" stopOpacity="0.18" />
+              <stop offset="55%" stopColor="#0369A1" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#0369A1" stopOpacity="0" />
             </radialGradient>
             <filter id={`${uid}-soften`} x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="5" result="blur" />
@@ -253,7 +253,7 @@ export function Design06RibbonWaves({ className, variant = "hero" }: Design06Rib
                 <path
                   key={i}
                   d={d}
-                  stroke="#FBBF24"
+                  stroke="#4FC3F7"
                   strokeWidth={0.55 - i * 0.05}
                   strokeLinecap="round"
                   fill="none"
@@ -268,8 +268,8 @@ export function Design06RibbonWaves({ className, variant = "hero" }: Design06Rib
       {(isHero || isFull) && !reducedMotion && (
         <motion.div
           className={cn(
-            "absolute bottom-0 right-0 bg-gradient-to-l from-[#F59E0B]/6 via-[#F59E0B]/2 to-transparent",
-            isFull ? "h-full w-[62%] from-[#F59E0B]/9" : "h-36 w-[42%]"
+            "absolute bottom-0 right-0 bg-gradient-to-l from-[#0369A1]/6 via-[#0369A1]/2 to-transparent",
+            isFull ? "h-full w-[62%] from-[#0369A1]/9" : "h-36 w-[42%]"
           )}
           animate={{ opacity: [0.45, 0.75, 0.45] }}
           transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" as const }}

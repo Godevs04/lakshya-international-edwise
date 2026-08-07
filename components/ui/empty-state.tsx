@@ -13,12 +13,12 @@ export function EmptyState({ title, description, icon, action, className }: Empt
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center overflow-hidden rounded-[20px] border border-dashed border-[#E8952E]/20 bg-gradient-to-br from-[#E8952E]/5 to-[#06B6D4]/5 px-6 py-14 text-center",
+        "relative flex flex-col items-center justify-center overflow-hidden rounded-[20px] border border-dashed border-[#0B8FD8]/20 bg-gradient-to-br from-[#0B8FD8]/5 to-[#06B6D4]/5 px-6 py-14 text-center",
         className
       )}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(109,94,247,0.08),transparent_60%)]" />
-      <div className="relative mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-[#E8952E] to-[#F59E0B] shadow-lg shadow-[#E8952E]/30">
+      <div className="relative mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-[#0B8FD8] to-[#0369A1] shadow-lg shadow-[#0B8FD8]/30">
         {icon ?? <Sparkles className="h-7 w-7 text-white" />}
       </div>
       <h3 className="relative text-lg font-bold text-foreground">{title}</h3>

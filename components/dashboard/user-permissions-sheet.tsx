@@ -109,7 +109,7 @@ export function UserPermissionsSheet({ user, open, onOpenChange }: UserPermissio
       >
         <SheetHeader className="shrink-0 border-b border-border px-6 py-5 pr-14">
           <SheetTitle className="flex items-center gap-3 text-left text-lg font-bold">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8952E] to-[#F59E0B] text-white shadow-sm">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0B8FD8] to-[#0369A1] text-white shadow-sm">
               <KeyRound className="h-4 w-4" />
             </span>
             <span>Menu Access</span>
@@ -161,7 +161,7 @@ export function UserPermissionsSheet({ user, open, onOpenChange }: UserPermissio
             type="button"
             onClick={handleSave}
             disabled={!user || saving}
-            className="min-w-[120px] bg-gradient-to-r from-[#E8952E] to-[#F59E0B] font-semibold text-white shadow-md hover:opacity-95"
+            className="min-w-[120px] bg-gradient-to-r from-[#0B8FD8] to-[#0369A1] font-semibold text-white shadow-md hover:opacity-95"
           >
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Save access
