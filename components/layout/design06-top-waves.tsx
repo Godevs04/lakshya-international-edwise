@@ -41,9 +41,9 @@ const CONTOUR_LINES = [
 
 function FloatingOrbs({ reducedMotion }: { reducedMotion: boolean | null }) {
   const orbs = [
-    { cx: "78%", cy: "18%", r: 110, color: "#F59E0B", delay: 0 },
-    { cx: "92%", cy: "32%", r: 72, color: "#FBBF24", delay: 2 },
-    { cx: "62%", cy: "8%", r: 52, color: "#E8952E", delay: 4 },
+    { cx: "78%", cy: "18%", r: 110, color: "#0369A1", delay: 0 },
+    { cx: "92%", cy: "32%", r: 72, color: "#4FC3F7", delay: 2 },
+    { cx: "62%", cy: "8%", r: 52, color: "#0B8FD8", delay: 4 },
   ];
 
   return (
@@ -103,7 +103,7 @@ function AnimatedDotField({ reducedMotion }: { reducedMotion: boolean | null }) 
       {dots.map((dot, index) => (
         <motion.span
           key={index}
-          className="absolute h-0.5 w-0.5 rounded-full bg-[#E8952E] dark:bg-[#FCD34D]"
+          className="absolute h-0.5 w-0.5 rounded-full bg-[#0B8FD8] dark:bg-[#7DD3FC]"
           style={{ left: dot.left, top: dot.top }}
           animate={
             reducedMotion
@@ -141,7 +141,7 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
       )}
       aria-hidden
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8ED]/88 via-[#FFFBF5]/50 to-transparent dark:from-[#1c1917]/88 dark:via-[#292524]/36 dark:to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#F0F9FF]/88 via-[#F8FBFF]/50 to-transparent dark:from-[#070f1c]/88 dark:via-[#0b1e48]/36 dark:to-transparent" />
 
       <FloatingOrbs reducedMotion={reducedMotion} />
       <AnimatedDotField reducedMotion={reducedMotion} />
@@ -155,23 +155,23 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
         >
           <defs>
             <linearGradient id={`${uid}-waveA`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#FDE68A" stopOpacity="0.18" />
-              <stop offset="45%" stopColor="#F59E0B" stopOpacity="0.14" />
-              <stop offset="100%" stopColor="#E8952E" stopOpacity="0.1" />
+              <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.18" />
+              <stop offset="45%" stopColor="#0369A1" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#0B8FD8" stopOpacity="0.1" />
             </linearGradient>
             <linearGradient id={`${uid}-waveB`} x1="0" y1="0" x2="1" y2="0.8">
-              <stop offset="0%" stopColor="#FCD34D" stopOpacity="0.1" />
-              <stop offset="50%" stopColor="#EA580C" stopOpacity="0.14" />
-              <stop offset="100%" stopColor="#FB923C" stopOpacity="0.1" />
+              <stop offset="0%" stopColor="#7DD3FC" stopOpacity="0.1" />
+              <stop offset="50%" stopColor="#0EA5E9" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#7DD3FC" stopOpacity="0.1" />
             </linearGradient>
             <linearGradient id={`${uid}-waveC`} x1="0.2" y1="0" x2="0.9" y2="1">
-              <stop offset="0%" stopColor="#FEF3C7" stopOpacity="0.14" />
-              <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.08" />
+              <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#0369A1" stopOpacity="0.08" />
             </linearGradient>
             <linearGradient id={`${uid}-stroke`} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#E8952E" stopOpacity="0.06" />
-              <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.14" />
-              <stop offset="100%" stopColor="#FBBF24" stopOpacity="0.08" />
+              <stop offset="0%" stopColor="#0B8FD8" stopOpacity="0.06" />
+              <stop offset="50%" stopColor="#0369A1" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#4FC3F7" stopOpacity="0.08" />
             </linearGradient>
           </defs>
 
@@ -242,7 +242,7 @@ export function Design06TopWaves({ className }: Design06TopWavesProps) {
         </svg>
       </div>
 
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8952E]/18 to-transparent dark:via-[#FBBF24]/14" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#0B8FD8]/18 to-transparent dark:via-[#4FC3F7]/14" />
     </div>
   );
 }

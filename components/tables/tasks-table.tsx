@@ -56,7 +56,7 @@ const VIEW_TABS = [
 ] as const;
 
 const STATUS_STYLES: Record<TaskListItem["status"], string> = {
-  open: "bg-[#E8952E]/12 text-[#E8952E] border-[#E8952E]/25",
+  open: "bg-[#0B8FD8]/12 text-[#0B8FD8] border-[#0B8FD8]/25",
   done: "bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/25",
   cancelled: "bg-muted/80 text-muted-foreground border-border/50",
 };
@@ -177,8 +177,8 @@ export function TasksTable({
                 className={cn(
                   "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#E8952E] bg-[#E8952E]/12 text-[#E8952E]"
-                    : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
+                    ? "border-[#0B8FD8] bg-[#0B8FD8]/12 text-[#0B8FD8]"
+                    : "border-[#0B8FD8]/15 bg-white/60 text-muted-foreground hover:border-[#0B8FD8]/30 hover:bg-[#0B8FD8]/8 hover:text-foreground dark:bg-white/5"
                 )}
               >
                 {tab.label}
@@ -197,8 +197,8 @@ export function TasksTable({
                 className={cn(
                   "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
-                    : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
+                    ? "border-[#0B8FD8] bg-[#0B8FD8] text-white shadow-sm"
+                    : "border-[#0B8FD8]/15 bg-white/60 text-muted-foreground hover:border-[#0B8FD8]/30 hover:bg-[#0B8FD8]/8 hover:text-foreground dark:bg-white/5"
                 )}
               >
                 {tab.label}
@@ -238,7 +238,7 @@ export function TasksTable({
                 return (
                   <TableRow
                     key={task._id}
-                    className={task.isOverdue ? "bg-[#F59E0B]/5" : undefined}
+                    className={task.isOverdue ? "bg-[#0369A1]/5" : undefined}
                   >
                     <TableCell className="py-4 align-top">
                       <div className="min-w-0">
@@ -253,12 +253,12 @@ export function TasksTable({
                     <TableCell
                       className={cn(
                         "whitespace-nowrap py-4 align-top text-sm",
-                        task.isOverdue && "font-semibold text-[#D97706]"
+                        task.isOverdue && "font-semibold text-[#0284C7]"
                       )}
                     >
                       {formatDateTime(task.dueAt)}
                       {task.isOverdue ? (
-                        <span className="mt-1 block text-xs font-medium text-[#D97706]">
+                        <span className="mt-1 block text-xs font-medium text-[#0284C7]">
                           Overdue
                         </span>
                       ) : null}
@@ -266,7 +266,7 @@ export function TasksTable({
                     <TableCell className="whitespace-nowrap py-4 align-top text-sm text-muted-foreground">
                       {task.reminderAt ? (
                         <span className="inline-flex items-center gap-1">
-                          <Bell className="h-3.5 w-3.5 text-[#E8952E]" />
+                          <Bell className="h-3.5 w-3.5 text-[#0B8FD8]" />
                           {formatDateTime(task.reminderAt)}
                         </span>
                       ) : (
@@ -274,7 +274,7 @@ export function TasksTable({
                       )}
                     </TableCell>
                     <TableCell className="py-4 align-top text-sm">
-                      <span className={isAssignedToMe ? "font-semibold text-[#E8952E]" : undefined}>
+                      <span className={isAssignedToMe ? "font-semibold text-[#0B8FD8]" : undefined}>
                         {task.assignedToName ?? "—"}
                         {isAssignedToMe ? " (you)" : ""}
                       </span>
@@ -286,7 +286,7 @@ export function TasksTable({
                       {task.studentId ? (
                         <Link
                           href={`/dashboard/students/${task.studentId}`}
-                          className="text-[#E8952E] hover:underline"
+                          className="text-[#0B8FD8] hover:underline"
                         >
                           {task.studentName || "View student"}
                         </Link>
@@ -311,7 +311,7 @@ export function TasksTable({
                                   title="Assign to me"
                                   onClick={() => claimTask(task._id)}
                                 >
-                                  <UserPlus className="h-4 w-4 text-[#E8952E]" />
+                                  <UserPlus className="h-4 w-4 text-[#0B8FD8]" />
                                 </Button>
                               ) : null}
                               <Button
@@ -321,7 +321,7 @@ export function TasksTable({
                                 aria-label="Edit task"
                                 onClick={() => setEditingTask(task)}
                               >
-                                <Pencil className="h-4 w-4 text-[#E8952E]" />
+                                <Pencil className="h-4 w-4 text-[#0B8FD8]" />
                               </Button>
                               <Button
                                 type="button"
@@ -341,7 +341,7 @@ export function TasksTable({
                                   updateStatus(task._id, "cancelled", "Task cancelled")
                                 }
                               >
-                                <Ban className="h-4 w-4 text-[#F59E0B]" />
+                                <Ban className="h-4 w-4 text-[#0369A1]" />
                               </Button>
                             </>
                           ) : (
@@ -352,7 +352,7 @@ export function TasksTable({
                               aria-label="Reopen task"
                               onClick={() => updateStatus(task._id, "open", "Task reopened")}
                             >
-                              <RotateCcw className="h-4 w-4 text-[#E8952E]" />
+                              <RotateCcw className="h-4 w-4 text-[#0B8FD8]" />
                             </Button>
                           )}
                           <Button

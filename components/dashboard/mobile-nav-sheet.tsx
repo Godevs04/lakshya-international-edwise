@@ -85,7 +85,7 @@ export function MobileNavSheet({
                         className={cn(
                           "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold",
                           item.href === SITE_LEADS_HREF
-                            ? "bg-[#E8952E]/12 text-[#E8952E]"
+                            ? "bg-[#0B8FD8]/12 text-[#0B8FD8]"
                             : "bg-[#EF4444]/12 text-[#EF4444]"
                         )}
                       >

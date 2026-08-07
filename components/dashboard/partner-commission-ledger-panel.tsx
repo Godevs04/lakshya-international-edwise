@@ -137,7 +137,7 @@ export function PartnerCommissionLedgerPanel({
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">Pending shared</p>
-          <p className="text-2xl font-semibold text-[#F59E0B]">
+          <p className="text-2xl font-semibold text-[#0369A1]">
             {formatCurrency(ledger.pendingSharedTotal || ledger.commissionPendingTotal)}
           </p>
         </GlassCard>
@@ -183,7 +183,7 @@ export function PartnerCommissionLedgerPanel({
                           ? "text-[#22C55E]"
                           : entry.type === "received"
                             ? "text-[#22C55E]"
-                            : "text-[#E8952E]"
+                            : "text-[#0B8FD8]"
                       }
                     >
                       {formatCurrency(entry.amount)}

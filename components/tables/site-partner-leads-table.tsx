@@ -283,7 +283,7 @@ export function SitePartnerLeadsTable({
               data.map((lead) => (
                 <TableRow
                   key={lead._id}
-                  className={highlightedRowId === lead._id ? "bg-[#E8952E]/10" : undefined}
+                  className={highlightedRowId === lead._id ? "bg-[#0B8FD8]/10" : undefined}
                 >
                   {canWrite ? (
                     <TableCell>
@@ -326,7 +326,7 @@ export function SitePartnerLeadsTable({
                             size="sm"
                             onClick={() => openPromote(lead)}
                           >
-                            <ArrowUpRight className="h-4 w-4 text-[#E8952E]" />
+                            <ArrowUpRight className="h-4 w-4 text-[#0B8FD8]" />
                           </Button>
                           <Button
                             type="button"

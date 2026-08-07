@@ -17,8 +17,8 @@ interface FollowUpItem {
 
 const PRIORITY_STYLES = {
   high: "from-[#EF4444] to-[#EC4899]",
-  medium: "from-[#F59E0B] to-[#EF4444]",
-  low: "from-[#E8952E] to-[#F59E0B]",
+  medium: "from-[#0369A1] to-[#EF4444]",
+  low: "from-[#0B8FD8] to-[#0369A1]",
 };
 
 interface FollowUpCardsProps {
@@ -38,7 +38,7 @@ export function FollowUpCards({ followups }: FollowUpCardsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06 }}
             whileHover={{ y: -2 }}
-            className="group flex flex-col gap-3 rounded-2xl border border-[#E8952E]/10 bg-white/50 p-4 backdrop-blur-sm transition-all hover:border-[#E8952E]/20 hover:shadow-lg hover:shadow-[#E8952E]/10 sm:flex-row sm:items-center dark:bg-white/5"
+            className="group flex flex-col gap-3 rounded-2xl border border-[#0B8FD8]/10 bg-white/50 p-4 backdrop-blur-sm transition-all hover:border-[#0B8FD8]/20 hover:shadow-lg hover:shadow-[#0B8FD8]/10 sm:flex-row sm:items-center dark:bg-white/5"
           >
             <div
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${PRIORITY_STYLES[priority]} shadow-md`}
@@ -50,7 +50,7 @@ export function FollowUpCards({ followups }: FollowUpCardsProps) {
                 {f.firstName} {f.lastName}
               </p>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">{f.note}</p>
-              <p className="mt-1 text-xs font-medium text-[#E8952E]">{formatDate(f.dueDate)}</p>
+              <p className="mt-1 text-xs font-medium text-[#0B8FD8]">{formatDate(f.dueDate)}</p>
             </div>
             <Link href={`/dashboard/students/${f.id}`}>
               <Button

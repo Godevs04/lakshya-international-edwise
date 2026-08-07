@@ -32,9 +32,12 @@ export function RegisterForm() {
   }
 
   return (
-    <GlassCard className="p-8 shadow-2xl shadow-[#E8952E]/10">
+    <GlassCard className="border-primary/10 p-8 shadow-2xl shadow-primary/15 ring-1 ring-primary/10">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold tracking-tight">Request access</h2>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+          Join the team
+        </p>
+        <h2 className="text-2xl font-bold tracking-tight text-secondary">Request access</h2>
         <p className="mt-1.5 text-sm text-muted-foreground">
           Register to join the approval queue. An admin will onboard you after verification.
         </p>

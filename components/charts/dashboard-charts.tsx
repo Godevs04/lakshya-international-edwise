@@ -124,8 +124,8 @@ export function MonthlyStudentsAreaChart({ data }: { data: ChartDataPoint[] }) {
         <AreaChart data={data}>
           <defs>
             <linearGradient id="studentGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8952E" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#E8952E" stopOpacity={0} />
+              <stop offset="0%" stopColor="#0B8FD8" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#0B8FD8" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
@@ -140,7 +140,7 @@ export function MonthlyStudentsAreaChart({ data }: { data: ChartDataPoint[] }) {
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#E8952E"
+            stroke="#0B8FD8"
             fill="url(#studentGradient)"
             strokeWidth={2.5}
           />
@@ -157,8 +157,8 @@ export function LoanAmountBarChart({ data }: { data: ChartDataPoint[] }) {
         <BarChart data={data}>
           <defs>
             <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F59E0B" />
-              <stop offset="100%" stopColor="#E8952E" />
+              <stop offset="0%" stopColor="#0369A1" />
+              <stop offset="100%" stopColor="#0B8FD8" />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
@@ -256,8 +256,8 @@ export function TrendLineChart({
         <AreaChart data={data}>
           <defs>
             <linearGradient id="trendStudents" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8952E" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#E8952E" stopOpacity={0} />
+              <stop offset="0%" stopColor="#0B8FD8" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#0B8FD8" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="trendLoans" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#22C55E" stopOpacity={0.3} />
@@ -277,7 +277,7 @@ export function TrendLineChart({
           <Area
             type="monotone"
             dataKey="students"
-            stroke="#E8952E"
+            stroke="#0B8FD8"
             fill="url(#trendStudents)"
             strokeWidth={2}
           />
@@ -419,7 +419,7 @@ export function HeatMapGrid({
                   <div
                     key={`${month}-${day}`}
                     className="h-7 w-7 rounded-lg transition-transform hover:scale-110"
-                    style={{ backgroundColor: `rgba(232, 149, 46, ${Math.max(opacity, 0.06)})` }}
+                    style={{ backgroundColor: `rgba(11, 143, 216, ${Math.max(opacity, 0.06)})` }}
                     title={`${value} activities`}
                   />
                 );

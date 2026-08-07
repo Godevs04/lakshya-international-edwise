@@ -53,9 +53,9 @@ function VerifyOtpForm() {
   }
 
   return (
-    <GlassCard className="p-8 shadow-2xl shadow-[#E8952E]/10">
+    <GlassCard className="border-primary/10 p-8 shadow-2xl shadow-primary/15 ring-1 ring-primary/10">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#E8952E] to-[#F59E0B]">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0B8FD8] to-[#0369A1]">
           <ShieldCheck className="h-7 w-7 text-white" />
         </div>
         <h2 className="text-2xl font-bold tracking-tight">Verify your email</h2>
@@ -97,7 +97,7 @@ function VerifyOtpForm() {
           type="button"
           onClick={handleResend}
           disabled={resending}
-          className="text-[#E8952E] hover:underline disabled:opacity-50"
+          className="text-[#0B8FD8] hover:underline disabled:opacity-50"
         >
           {resending ? "Sending..." : "Resend OTP"}
         </button>

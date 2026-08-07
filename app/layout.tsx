@@ -4,7 +4,7 @@ import { PwaRegister } from "@/components/pwa/pwa-register";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
 import { getSiteUrl } from "@/lib/config/marketing";
-import { fontMono, fontSans } from "@/lib/fonts";
+import { fontMarketing, fontMono, fontSans } from "@/lib/fonts";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#E8952E",
+  themeColor: "#0B8FD8",
   width: "device-width",
   initialScale: 1,
 };
@@ -44,7 +44,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`light ${fontSans.variable} ${fontMono.variable} ${fontSans.className} h-full antialiased`}
+      className={`light ${fontMarketing.variable} ${fontSans.variable} ${fontMono.variable} ${fontMarketing.className} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

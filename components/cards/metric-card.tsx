@@ -103,14 +103,14 @@ export function MetricCard({
   const formatted = typeof value === "number" ? value.toLocaleString("en-IN") : String(value);
   const sparkColor =
     palette?.spark ??
-    (gradient.includes("#E8952E")
-      ? "#E8952E"
+    (gradient.includes("#0B8FD8")
+      ? "#0B8FD8"
       : gradient.includes("#3B82F6")
         ? "#3B82F6"
         : gradient.includes("#22C55E")
           ? "#22C55E"
-          : gradient.includes("#F59E0B")
-            ? "#F59E0B"
+          : gradient.includes("#0369A1")
+            ? "#0369A1"
             : gradient.includes("#EC4899")
               ? "#EC4899"
               : "#06B6D4");
@@ -158,7 +158,7 @@ export function MetricCard({
     return (
       <Link
         href={href}
-        className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8952E]"
+        className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B8FD8]"
       >
         {card}
       </Link>

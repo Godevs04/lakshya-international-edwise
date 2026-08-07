@@ -55,16 +55,16 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       <PageHeader title="Profile" description="Manage your account settings" badge="Account" />
       <GlassCard className="p-8">
         <div className="mb-8 flex items-center gap-5">
-          <Avatar className="h-20 w-20 ring-4 ring-[#E8952E]/20">
+          <Avatar className="h-20 w-20 ring-4 ring-[#0B8FD8]/20">
             <AvatarImage src={profile.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-[#E8952E] to-[#F59E0B] text-xl font-bold text-white">
+            <AvatarFallback className="bg-gradient-to-br from-[#0B8FD8] to-[#0369A1] text-xl font-bold text-white">
               {getInitials(name)}
             </AvatarFallback>
           </Avatar>
           <div>
             <h2 className="text-xl font-bold">{name}</h2>
             <p className="text-sm text-muted-foreground">{email}</p>
-            <span className="mt-1 inline-flex rounded-full bg-[#E8952E]/10 px-3 py-0.5 text-xs font-semibold text-[#E8952E]">
+            <span className="mt-1 inline-flex rounded-full bg-[#0B8FD8]/10 px-3 py-0.5 text-xs font-semibold text-[#0B8FD8]">
               {ROLE_LABELS[profile.role]}
             </span>
           </div>

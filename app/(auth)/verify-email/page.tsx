@@ -12,7 +12,7 @@ export default async function VerifyEmailPage({
 
   if (!token) {
     return (
-      <GlassCard className="p-8 text-center">
+      <GlassCard className="border-primary/10 p-8 text-center shadow-2xl shadow-primary/15 ring-1 ring-primary/10">
         <p className="text-muted-foreground">Invalid verification link.</p>
         <Link href="/verify-otp" className="mt-4 inline-block">
           <Button variant="outline">Verify with OTP instead</Button>
@@ -24,7 +24,7 @@ export default async function VerifyEmailPage({
   const result = await verifyEmailAction(token);
 
   return (
-    <GlassCard className="p-8 text-center">
+    <GlassCard className="border-primary/10 p-8 text-center shadow-2xl shadow-primary/15 ring-1 ring-primary/10">
       {result.success ? (
         <>
           <h2 className="text-xl font-semibold text-emerald-600">Email Verified!</h2>

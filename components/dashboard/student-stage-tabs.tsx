@@ -33,8 +33,8 @@ export function StudentStageTabs({
             className={cn(
               "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
               isActive
-                ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
-                : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
+                ? "border-[#0B8FD8] bg-[#0B8FD8] text-white shadow-sm"
+                : "border-[#0B8FD8]/15 bg-white/60 text-muted-foreground hover:border-[#0B8FD8]/30 hover:bg-[#0B8FD8]/8 hover:text-foreground dark:bg-white/5"
             )}
           >
             {workflow.label}

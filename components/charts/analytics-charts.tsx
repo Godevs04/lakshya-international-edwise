@@ -206,7 +206,7 @@ export function AnalyticsKpiCards({
             transition={{ duration: 0.45, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
           >
             <Link href={card.href} className="group block">
-              <GlassCard className="p-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:shadow-lg group-hover:shadow-[#E8952E]/10">
+              <GlassCard className="p-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:shadow-lg group-hover:shadow-[#0B8FD8]/10">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{card.title}</p>
@@ -257,13 +257,13 @@ export function VisualFunnelChart({
   );
 
   const funnelColors = [
-    "#E8952E",
-    "#F59E0B",
+    "#0B8FD8",
+    "#0369A1",
     "#3B82F6",
     "#06B6D4",
     "#22C55E",
     "#10B981",
-    "#F59E0B",
+    "#0369A1",
     "#EF4444",
   ];
   const isClickable = Boolean(linkMode);
@@ -431,8 +431,8 @@ export function AnalyticsTrendChart({
         <AreaChart data={data}>
           <defs>
             <linearGradient id="trendStudents" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8952E" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#E8952E" stopOpacity={0} />
+              <stop offset="0%" stopColor="#0B8FD8" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#0B8FD8" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="trendLoans" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#22C55E" stopOpacity={0.3} />
@@ -485,7 +485,7 @@ export function AnalyticsTrendChart({
             type="monotone"
             dataKey="students"
             name="Students"
-            stroke="#E8952E"
+            stroke="#0B8FD8"
             fill="url(#trendStudents)"
             strokeWidth={2.5}
             {...CHART_ANIMATION}
@@ -630,7 +630,7 @@ export function CourseBarChart({
         <BarChart data={enriched} layout="vertical" margin={{ left: 8 }}>
           <defs>
             <linearGradient id="courseGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#F59E0B" />
+              <stop offset="0%" stopColor="#0369A1" />
               <stop offset="100%" stopColor="#EC4899" />
             </linearGradient>
           </defs>
@@ -683,7 +683,7 @@ export function LenderBarChart({ data, delay = 0 }: { data: ChartDataPoint[]; de
           <defs>
             <linearGradient id="lenderGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#E8952E" />
+              <stop offset="100%" stopColor="#0B8FD8" />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
@@ -738,8 +738,8 @@ export function LoanRangeChart({ data, delay = 0 }: { data: ChartDataPoint[]; de
         <BarChart data={enriched} margin={{ bottom: 8 }}>
           <defs>
             <linearGradient id="loanRangeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F59E0B" />
-              <stop offset="100%" stopColor="#E8952E" />
+              <stop offset="0%" stopColor="#0369A1" />
+              <stop offset="100%" stopColor="#0B8FD8" />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(109,94,247,0.08)" vertical={false} />
@@ -840,8 +840,8 @@ export function AnalyticsHeatMap({
                     style={{
                       backgroundColor:
                         value > 0
-                          ? `rgba(232, 149, 46, ${Math.max(0.2, intensity)})`
-                          : "rgba(232, 149, 46, 0.06)",
+                          ? `rgba(11, 143, 216, ${Math.max(0.2, intensity)})`
+                          : "rgba(11, 143, 216, 0.06)",
                     }}
                     title={`${month} ${day}: ${value} student${value === 1 ? "" : "s"}`}
                   >
@@ -864,7 +864,7 @@ export function AnalyticsHeatMap({
             <div
               key={opacity}
               className="h-3 w-3 rounded"
-              style={{ backgroundColor: `rgba(232, 149, 46, ${opacity})` }}
+              style={{ backgroundColor: `rgba(11, 143, 216, ${opacity})` }}
             />
           ))}
         </div>

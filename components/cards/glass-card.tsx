@@ -27,8 +27,7 @@ export function GlassCard({
       className={cn(
         "glass-card relative overflow-hidden rounded-2xl",
         animate && "animate-fade-in-up",
-        hover &&
-          "cursor-pointer transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10",
+        hover && "crm-card-lift cursor-pointer hover:shadow-xl hover:shadow-primary/10",
         glow && "ring-1 ring-primary/20",
         padding && "p-6",
         className

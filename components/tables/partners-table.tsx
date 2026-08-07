@@ -54,8 +54,8 @@ export function PartnersTable({ data, total, page, totalPages, actionStatus }: P
             className={cn(
               "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
               currentActionStatus === "all"
-                ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
-                : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
+                ? "border-[#0B8FD8] bg-[#0B8FD8] text-white shadow-sm"
+                : "border-[#0B8FD8]/15 bg-white/60 text-muted-foreground hover:border-[#0B8FD8]/30 hover:bg-[#0B8FD8]/8 hover:text-foreground dark:bg-white/5"
             )}
           >
             All
@@ -70,8 +70,8 @@ export function PartnersTable({ data, total, page, totalPages, actionStatus }: P
                 className={cn(
                   "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-[#E8952E] bg-[#E8952E] text-white shadow-sm"
-                    : "border-[#E8952E]/15 bg-white/60 text-muted-foreground hover:border-[#E8952E]/30 hover:bg-[#E8952E]/8 hover:text-foreground dark:bg-white/5"
+                    ? "border-[#0B8FD8] bg-[#0B8FD8] text-white shadow-sm"
+                    : "border-[#0B8FD8]/15 bg-white/60 text-muted-foreground hover:border-[#0B8FD8]/30 hover:bg-[#0B8FD8]/8 hover:text-foreground dark:bg-white/5"
                 )}
               >
                 {PARTNER_ACTION_STATUS_LABELS[status]}
@@ -102,7 +102,7 @@ export function PartnersTable({ data, total, page, totalPages, actionStatus }: P
                   <TableCell>
                     <Link
                       href={`/dashboard/partners/${p._id}`}
-                      className="font-semibold text-[#E8952E] hover:underline"
+                      className="font-semibold text-[#0B8FD8] hover:underline"
                     >
                       {p.companyName}
                     </Link>

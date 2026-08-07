@@ -1,43 +1,46 @@
-/** Premium CRM design tokens — Design 08 warm amber / gold */
+/** Shared CRM design tokens — aligned with marketing sky-blue brand */
 
 export const BRAND = {
-  primary: "#E8952E",
-  secondary: "#F59E0B",
-  accent: "#FBBF24",
-  success: "#22C55E",
+  primary: "#0B8FD8",
+  secondary: "#0369A1",
+  accent: "#4FC3F7",
+  success: "#10B981",
   warning: "#F59E0B",
   danger: "#EF4444",
-  pink: "#FB923C",
-  background: "#FFFBF5",
-  sidebarFrom: "#9A3412",
-  sidebarTo: "#EA580C",
+  pink: "#38BDF8",
+  background: "#F8FBFF",
+  sidebarFrom: "#0B1E48",
+  sidebarTo: "#0B8FD8",
+  navy: "#0B1E48",
+  soft: "#E6F7FF",
 } as const;
 
 export const KPI_GRADIENTS = [
-  "from-[#E8952E] to-[#F59E0B]",
-  "from-[#F97316] to-[#FB923C]",
-  "from-[#22C55E] to-[#10B981]",
-  "from-[#3B82F6] to-[#60A5FA]",
-  "from-[#FBBF24] to-[#FCD34D]",
-  "from-[#D97706] to-[#EA580C]",
-  "from-[#14B8A6] to-[#22C55E]",
+  "from-[#0B8FD8] to-[#0369A1]",
+  "from-[#0369A1] to-[#0B1E48]",
+  "from-[#10B981] to-[#059669]",
+  "from-[#38BDF8] to-[#0EA5E9]",
+  "from-[#4FC3F7] to-[#0B8FD8]",
+  "from-[#0284C7] to-[#0369A1]",
+  "from-[#14B8A6] to-[#0B8FD8]",
   "from-[#EF4444] to-[#F87171]",
-  "from-[#EAB308] to-[#FACC15]",
+  "from-[#0EA5E9] to-[#38BDF8]",
 ] as const;
 
 export const CHART_COLORS = [
-  "#E8952E",
-  "#F59E0B",
-  "#FBBF24",
-  "#22C55E",
-  "#3B82F6",
-  "#F97316",
-  "#FB923C",
+  "#0B8FD8",
+  "#0369A1",
+  "#4FC3F7",
+  "#10B981",
+  "#0EA5E9",
+  "#38BDF8",
+  "#0B1E48",
   "#EF4444",
 ] as const;
 
-export const HERO_GRADIENT = "linear-gradient(90deg, #E8952E, #F59E0B, #FBBF24)";
+export const HERO_GRADIENT = "linear-gradient(90deg, #0B8FD8, #0EA5E9, #4FC3F7)";
 
-export const CARD_GRADIENT = "linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,251,245,.9))";
+export const CARD_GRADIENT =
+  "linear-gradient(180deg, rgba(255,255,255,.97), rgba(248,251,255,.92))";
 
-export const SIDEBAR_GRADIENT = "linear-gradient(180deg, #FFFBF5 0%, #FFF7ED 45%, #FFEDD5 100%)";
+export const SIDEBAR_GRADIENT = "linear-gradient(180deg, #F8FBFF 0%, #F0F9FF 45%, #E0F2FE 100%)";

@@ -72,7 +72,7 @@ function LenderCard({
             accent={lender.accent}
             size="sm"
           />
-          <div className="flex items-center gap-1.5 rounded-full bg-[#E8952E]/10 px-3 py-1 text-xs font-semibold text-[#E8952E]">
+          <div className="flex items-center gap-1.5 rounded-full bg-[#0B8FD8]/10 px-3 py-1 text-xs font-semibold text-[#0B8FD8]">
             <Users className="h-3.5 w-3.5" />
             {lender.applicationCount}
           </div>
@@ -111,7 +111,7 @@ function LenderCard({
       ) : (
         <Link
           href={`/dashboard/students?lenderId=${encodeURIComponent(lender.slug)}`}
-          className="mt-4 flex items-center justify-end gap-1 text-xs font-medium text-[#E8952E] hover:underline"
+          className="mt-4 flex items-center justify-end gap-1 text-xs font-medium text-[#0B8FD8] hover:underline"
         >
           View students
           <ChevronRight className="h-3.5 w-3.5" />

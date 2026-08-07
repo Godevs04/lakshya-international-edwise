@@ -6,20 +6,20 @@ import type { CompanySettings } from "@/types";
 
 /** Design 06 palette — deep indigo, violet accent, clean neutrals */
 const BRAND = {
-  primary: "#2D1B69",
-  primaryMid: "#E8952E",
-  accent: "#F59E0B",
-  accentLight: "#FDE68A",
-  text: "#1E293B",
+  primary: "#0B1E48",
+  primaryMid: "#0B8FD8",
+  accent: "#0369A1",
+  accentLight: "#7DD3FC",
+  text: "#0F172A",
   muted: "#64748B",
-  border: "#E5E7EB",
-  surface: "#F8F7FC",
-  otpCell: "#EDEAFD",
+  border: "#E2E8F0",
+  surface: "#F8FBFF",
+  otpCell: "#E6F7FF",
   white: "#FFFFFF",
-  link: "#E8952E",
+  link: "#0B8FD8",
   success: "#166534",
   successBg: "#F0FDF4",
-  footerBg: "#9A3412",
+  footerBg: "#0B1E48",
 };
 
 const FONT = "'SN Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -90,7 +90,7 @@ function emailHeader(company: CompanySettings): string {
   const logoWidth = 88;
   const logoHeight = Math.round(logoWidth / APP_LOGO_ASPECT_RATIO);
 
-  const logoBlock = `<img src="${escapeHtml(logo)}" alt="${name}" width="${logoWidth}" height="${logoHeight}" style="display: block; border: 0; border-radius: 12px; object-fit: contain; background-color: ${BRAND.white}; box-shadow: 0 4px 14px rgba(232, 149, 46, 0.18);" />`;
+  const logoBlock = `<img src="${escapeHtml(logo)}" alt="${name}" width="${logoWidth}" height="${logoHeight}" style="display: block; border: 0; border-radius: 12px; object-fit: contain; background-color: ${BRAND.white}; box-shadow: 0 4px 14px rgba(11, 143, 216, 0.18);" />`;
 
   return `
     <tr>

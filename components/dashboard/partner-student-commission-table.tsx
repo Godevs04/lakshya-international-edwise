@@ -161,7 +161,7 @@ export function PartnerStudentCommissionTable({
         <span>
           {label}
           {field === "partner" && student.partnerSharePercentOverride != null && (
-            <span className="ml-1 text-[10px] text-[#E8952E]">custom</span>
+            <span className="ml-1 text-[10px] text-[#0B8FD8]">custom</span>
           )}
         </span>
         {canWrite && (
@@ -257,7 +257,7 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(row.disbursed)}</TableCell>
                   <TableCell>{formatCurrency(row.commissionExpected)}</TableCell>
                   <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
-                  <TableCell className="text-[#E8952E]">
+                  <TableCell className="text-[#0B8FD8]">
                     {formatCurrency(row.projectedNetEarned)}
                   </TableCell>
                   <TableCell className="text-[#22C55E]">
@@ -266,10 +266,10 @@ export function PartnerStudentCommissionTable({
                   <TableCell className="text-[#22C55E]">
                     {formatCurrency(row.commissionShared)}
                   </TableCell>
-                  <TableCell className="text-[#F59E0B]">
+                  <TableCell className="text-[#0369A1]">
                     {formatCurrency(row.pendingReceived)}
                   </TableCell>
-                  <TableCell className="text-[#F59E0B]">
+                  <TableCell className="text-[#0369A1]">
                     {formatCurrency(row.pendingShared)}
                   </TableCell>
                   <TableCell className="font-medium">
@@ -355,8 +355,8 @@ export function PartnerStudentCommissionTable({
 
 function GlassHelp() {
   return (
-    <div className="rounded-xl border border-[#E8952E]/15 bg-[#E8952E]/5 p-4 text-sm">
-      <p className="font-medium text-[#E8952E]">Where to mark received & paid</p>
+    <div className="rounded-xl border border-[#0B8FD8]/15 bg-[#0B8FD8]/5 p-4 text-sm">
+      <p className="font-medium text-[#0B8FD8]">Where to mark received & paid</p>
       <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
         <li>
           <strong>Received</strong> — money from lender/bank (use Actions → Received; full or

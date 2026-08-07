@@ -15,7 +15,7 @@ const quickActions = [
     href: "/dashboard/students/new",
     label: "Add Student",
     icon: UserPlus,
-    gradient: "from-[#E8952E] to-[#F59E0B]",
+    gradient: "from-[#0B8FD8] to-[#0369A1]",
   },
   {
     href: "/dashboard/partners/new",
@@ -27,7 +27,7 @@ const quickActions = [
     href: "/dashboard/applications",
     label: "Applications",
     icon: FileText,
-    gradient: "from-[#F97316] to-[#FB923C]",
+    gradient: "from-[#38BDF8] to-[#7DD3FC]",
   },
   {
     href: "/dashboard/reports",
@@ -90,7 +90,7 @@ export function DashboardHero({ userName }: DashboardHeroProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.05 }}
-                className="flex w-full items-center gap-2.5 rounded-2xl border border-[#FEF3C7]/80 bg-white/90 px-3 py-2.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur-[2px] transition-all hover:border-primary/18 hover:bg-white hover:shadow-md hover:shadow-primary/8 dark:border-white/10 dark:bg-slate-950/42 dark:text-slate-100 dark:shadow-black/20 dark:hover:border-[#FBBF24]/28 dark:hover:bg-slate-950/56 dark:hover:shadow-[#FBBF24]/10 sm:w-auto sm:px-4 sm:py-3 sm:text-sm"
+                className="flex w-full items-center gap-2.5 rounded-2xl border border-[#E0F2FE]/80 bg-white/90 px-3 py-2.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur-[2px] transition-all hover:border-primary/18 hover:bg-white hover:shadow-md hover:shadow-primary/8 dark:border-white/10 dark:bg-slate-950/42 dark:text-slate-100 dark:shadow-black/20 dark:hover:border-[#4FC3F7]/28 dark:hover:bg-slate-950/56 dark:hover:shadow-[#4FC3F7]/10 sm:w-auto sm:px-4 sm:py-3 sm:text-sm"
               >
                 <div
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient} shadow-md sm:h-9 sm:w-9`}

@@ -89,17 +89,17 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                     <TableCell className="text-[#22C55E]">
                       {formatCurrency(row.commissionReceived)}
                     </TableCell>
-                    <TableCell className="text-[#F59E0B]">
+                    <TableCell className="text-[#0369A1]">
                       {formatCurrency(row.pendingReceived)}
                     </TableCell>
                     <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
                     <TableCell className="text-[#22C55E]">
                       {formatCurrency(row.commissionShared)}
                     </TableCell>
-                    <TableCell className="text-[#F59E0B]">
+                    <TableCell className="text-[#0369A1]">
                       {formatCurrency(row.pendingShared)}
                     </TableCell>
-                    <TableCell className="font-medium text-[#E8952E]">
+                    <TableCell className="font-medium text-[#0B8FD8]">
                       {formatCurrency(row.commissionEarned)}
                     </TableCell>
                     <TableCell className="text-right">

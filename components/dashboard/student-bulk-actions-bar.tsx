@@ -204,7 +204,7 @@ export function StudentBulkActionsBar({
       exit="exit"
       variants={BAR_VARIANTS}
       className={cn(
-        "overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-[#E8952E]/8 via-white/95 to-white/90 p-4 shadow-[0_12px_40px_rgba(232,149,46,0.12)] backdrop-blur-xl dark:from-[#E8952E]/12 dark:via-white/5 dark:to-white/5",
+        "overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-[#0B8FD8]/8 via-white/95 to-white/90 p-4 shadow-[0_12px_40px_rgba(11,143,216,0.12)] backdrop-blur-xl dark:from-[#0B8FD8]/12 dark:via-white/5 dark:to-white/5",
         className
       )}
       role="region"

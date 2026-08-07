@@ -18,7 +18,7 @@ function resolveLenderVisuals(lender: {
   const seed = LENDER_SEEDS.find((entry) => entry.slug === lender.slug);
   return {
     logo: lender.logoUrl ?? seed?.logo,
-    accent: lender.accentColor ?? seed?.accent ?? "#E8952E",
+    accent: lender.accentColor ?? seed?.accent ?? "#0B8FD8",
   };
 }
 

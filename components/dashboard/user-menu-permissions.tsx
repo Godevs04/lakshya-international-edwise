@@ -40,14 +40,14 @@ const MODULE_ICONS: Record<MenuPermissionKey, LucideIcon> = {
 };
 
 const MODULE_ACCENTS: Record<MenuPermissionKey, string> = {
-  students: "from-[#E8952E] to-[#F59E0B]",
-  admissions: "from-[#D97706] to-[#FBBF24]",
+  students: "from-[#0B8FD8] to-[#0369A1]",
+  admissions: "from-[#0284C7] to-[#4FC3F7]",
   partners: "from-[#8B5CF6] to-[#A78BFA]",
   applications: "from-[#3B82F6] to-[#60A5FA]",
   reports: "from-[#10B981] to-[#34D399]",
   analytics: "from-[#06B6D4] to-[#22D3EE]",
   audit: "from-[#64748B] to-[#94A3B8]",
-  settings: "from-[#F97316] to-[#FB923C]",
+  settings: "from-[#38BDF8] to-[#7DD3FC]",
   users: "from-[#EC4899] to-[#F472B6]",
 };
 

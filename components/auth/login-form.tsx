@@ -67,10 +67,15 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
   }
 
   return (
-    <GlassCard className="p-8 shadow-2xl shadow-[#E8952E]/10">
+    <GlassCard className="border-primary/10 p-8 shadow-2xl shadow-primary/15 ring-1 ring-primary/10">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to your enterprise dashboard</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+          Staff portal
+        </p>
+        <h2 className="text-2xl font-bold tracking-tight text-secondary">Welcome back</h2>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Sign in to continue to your education loan workspace
+        </p>
         <p className="mt-1 text-xs text-muted-foreground/80">{APP_TAGLINE}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
