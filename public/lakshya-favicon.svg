@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!--
+    Google/GitHub favicon pattern:
+    - Transparent background
+    - One bold mark, centered, fills most of the tile
+    - Single high-contrast brand color (reads on light + dark tabs)
+  -->
+  <!-- Cap -->
+  <path fill="#0B8FD8" d="M6 8.2 L16 2.8 L26 8.2 L16 13.6 Z"/>
+  <rect x="14.2" y="12.4" width="3.6" height="3" rx="0.4" fill="#0B8FD8"/>
+  <circle cx="20.2" cy="14.8" r="1.4" fill="#0B8FD8"/>
+
+  <!-- L -->
+  <path fill="#0B8FD8" d="M7.5 14.2h5.8v11.2H21v4.2H6c-1.4 0-2.5-1.1-2.5-2.5V16.7c0-1.4 1.1-2.5 2.5-2.5z"/>
+
+  <!-- A -->
+  <path fill="#0B8FD8" fill-rule="evenodd" d="
+    M20 14.5 L28.5 29.5 H23.6 L22 25.2 H16.6 L15 29.5 H10.2 L18.4 14.5 H20 Z
+    M19 19.4 L20.6 23.6 H17.4 Z
+  "/>
+</svg>

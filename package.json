@@ -26,7 +26,7 @@
     "seed": "tsx scripts/seed.ts",
     "sync:branding": "tsx scripts/seed.ts",
     "backup:mongodb": "bash scripts/backup-mongodb.sh",
-    "prepare": "husky",
+    "prepare": "husky && node scripts/patch-next-themes.mjs",
     "lint:staged": "lint-staged"
   },
   "lint-staged": {
