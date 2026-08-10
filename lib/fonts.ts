@@ -1,9 +1,8 @@
 import localFont from "next/font/local";
-import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
 /**
  * SN Pro — https://fonts.google.com/specimen/SN+Pro
- * Self-hosted variable font (Google Fonts) for consistent rendering across browsers.
+ * Self-hosted variable font for consistent rendering across browsers.
  */
 export const fontSans = localFont({
   src: "../app/fonts/SNPro-Variable.woff2",
@@ -22,23 +21,40 @@ export const fontSans = localFont({
   ],
 });
 
-export const fontMono = JetBrains_Mono({
+/**
+ * JetBrains Mono — self-hosted (avoids next/font/google fetch failures on Vercel Turbopack).
+ */
+export const fontMono = localFont({
+  src: [
+    {
+      path: "../app/fonts/JetBrainsMono-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/JetBrainsMono-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
   variable: "--font-mono",
-  subsets: ["latin"],
   display: "swap",
   preload: true,
-  adjustFontFallback: true,
-  weight: ["400", "500"],
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
 });
 
 /**
- * Plus Jakarta Sans — clean, premium sans used across the finance marketing site.
+ * Plus Jakarta Sans — self-hosted variable font for the marketing site.
+ * Avoids Google Fonts CDN fetches during `next build` (Turbopack 404s on stale gstatic URLs).
  */
-export const fontMarketing = Plus_Jakarta_Sans({
+export const fontMarketing = localFont({
+  src: "../app/fonts/PlusJakartaSans-Variable.woff2",
   variable: "--font-marketing",
-  subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: "200 800",
+  preload: true,
+  adjustFontFallback: "Arial",
   fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
 });
 
