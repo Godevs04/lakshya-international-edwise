@@ -17,6 +17,16 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: `${config.company.name} — ${APP_TAGLINE}`,
     applicationName: config.company.name,
+    icons: {
+      icon: [
+        { url: "/favicon-32.png?v=8", sizes: "32x32", type: "image/png" },
+        { url: "/favicon-48.png?v=8", sizes: "48x48", type: "image/png" },
+        { url: "/favicon.ico?v=8", sizes: "any" },
+        { url: "/icon-192.png?v=8", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png?v=8", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png?v=8", sizes: "180x180", type: "image/png" }],
+    },
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
