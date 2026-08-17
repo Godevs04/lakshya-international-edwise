@@ -52,6 +52,8 @@ export async function getReportData(
           commissionReceived: summary?.commissionReceived ?? 0,
           pendingReceived: summary?.pendingReceived ?? 0,
           partnerShareExpected: summary?.partnerShareExpected ?? 0,
+          tdsAmount: summary?.tdsAmount ?? 0,
+          netPayableToPartner: summary?.netPayableToPartner ?? 0,
           commissionShared: summary?.commissionShared ?? 0,
           commissionEarned: summary?.commissionEarned ?? 0,
         };

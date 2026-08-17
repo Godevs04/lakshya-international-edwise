@@ -1,5 +1,8 @@
 import { roundMoney } from "@/lib/utils/format";
 
+/** Section 194H-style TDS withheld from partner share payouts. */
+export const PARTNER_TDS_PERCENT = 2;
+
 export function resolvePartnerSharePercent(
   partnerPercent: number,
   studentOverride?: number | null
@@ -47,4 +50,21 @@ export function calculateProjectedNetEarned(
   partnerShareExpected: number
 ): number {
   return calculateNetEarned(expectedCommission, partnerShareExpected);
+}
+
+export function calculateTdsAmount(
+  grossAmount: number,
+  tdsPercent: number = PARTNER_TDS_PERCENT
+): number {
+  if (grossAmount <= 0 || tdsPercent <= 0) {
+    return 0;
+  }
+  return roundMoney((grossAmount * tdsPercent) / 100);
+}
+
+export function calculateNetAfterTds(
+  grossAmount: number,
+  tdsPercent: number = PARTNER_TDS_PERCENT
+): number {
+  return roundMoney(Math.max(0, grossAmount) - calculateTdsAmount(grossAmount, tdsPercent));
 }

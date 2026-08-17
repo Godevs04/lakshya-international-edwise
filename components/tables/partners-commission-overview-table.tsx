@@ -26,6 +26,8 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
       commissionReceived: acc.commissionReceived + row.commissionReceived,
       pendingReceived: acc.pendingReceived + row.pendingReceived,
       partnerShareExpected: acc.partnerShareExpected + row.partnerShareExpected,
+      tdsAmount: acc.tdsAmount + row.tdsAmount,
+      netPayableToPartner: acc.netPayableToPartner + row.netPayableToPartner,
       commissionShared: acc.commissionShared + row.commissionShared,
       pendingShared: acc.pendingShared + row.pendingShared,
       commissionEarned: acc.commissionEarned + row.commissionEarned,
@@ -36,6 +38,8 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
       commissionReceived: 0,
       pendingReceived: 0,
       partnerShareExpected: 0,
+      tdsAmount: 0,
+      netPayableToPartner: 0,
       commissionShared: 0,
       pendingShared: 0,
       commissionEarned: 0,
@@ -56,6 +60,8 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
               <TableHead>Received</TableHead>
               <TableHead>Pend. Rcvd</TableHead>
               <TableHead>Share Exp.</TableHead>
+              <TableHead>TDS 2%</TableHead>
+              <TableHead>Net Payable</TableHead>
               <TableHead>Shared</TableHead>
               <TableHead>Pend. Sh.</TableHead>
               <TableHead>Net</TableHead>
@@ -93,6 +99,10 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                       {formatCurrency(row.pendingReceived)}
                     </TableCell>
                     <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
+                    <TableCell>{formatCurrency(row.tdsAmount)}</TableCell>
+                    <TableCell className="font-medium">
+                      {formatCurrency(row.netPayableToPartner)}
+                    </TableCell>
                     <TableCell className="text-[#22C55E]">
                       {formatCurrency(row.commissionShared)}
                     </TableCell>
@@ -118,6 +128,8 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                   <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.pendingReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.partnerShareExpected)}</TableCell>
+                  <TableCell>{formatCurrency(totals.tdsAmount)}</TableCell>
+                  <TableCell>{formatCurrency(totals.netPayableToPartner)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionShared)}</TableCell>
                   <TableCell>{formatCurrency(totals.pendingShared)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionEarned)}</TableCell>
@@ -126,7 +138,7 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
               </>
             ) : (
               <TableRow>
-                <TableCell colSpan={12} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={14} className="h-24 text-center text-muted-foreground">
                   No partner commission data for this filter.
                 </TableCell>
               </TableRow>

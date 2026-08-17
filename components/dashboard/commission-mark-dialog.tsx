@@ -17,6 +17,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/utils/format";
 import {
+  calculateNetAfterTds,
+  calculateTdsAmount,
+  PARTNER_TDS_PERCENT,
+} from "@/lib/utils/commission-calculations";
+import {
   recordStudentCommissionReceivedAction,
   recordStudentCommissionSettlementAction,
 } from "@/lib/actions/partner.actions";
@@ -59,11 +64,13 @@ function CommissionMarkForm({
   const title = isReceived ? "Mark commission received" : "Mark paid to partner";
   const description = isReceived
     ? "Record amount received from the lender/bank for this student."
-    : "Record amount paid to the partner for this student.";
+    : "Record gross partner share. 2% TDS is withheld automatically; transfer the net amount.";
+  const parsedAmount = Number(amount);
+  const tdsAmount = !isReceived && parsedAmount > 0 ? calculateTdsAmount(parsedAmount) : 0;
+  const netPayable = !isReceived && parsedAmount > 0 ? calculateNetAfterTds(parsedAmount) : 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const parsedAmount = Number(amount);
     if (!parsedAmount || parsedAmount <= 0) {
       notify.error("Enter a valid amount");
       return;
@@ -86,7 +93,7 @@ function CommissionMarkForm({
       notify.success(
         isReceived
           ? `Recorded ${formatCurrency(parsedAmount)} received for ${studentName}`
-          : `Recorded ${formatCurrency(parsedAmount)} paid for ${studentName}`
+          : `Recorded ${formatCurrency(parsedAmount)} paid for ${studentName} (TDS ${formatCurrency(calculateTdsAmount(parsedAmount))}, net ${formatCurrency(calculateNetAfterTds(parsedAmount))})`
       );
       onClose();
       router.refresh();
@@ -109,6 +116,18 @@ function CommissionMarkForm({
             Pending:{" "}
             <span className="font-semibold text-foreground">{formatCurrency(pendingAmount)}</span>
           </p>
+          {!isReceived && pendingAmount > 0 ? (
+            <p className="mt-1 text-muted-foreground">
+              Net to transfer if full pending:{" "}
+              <span className="font-semibold text-foreground">
+                {formatCurrency(calculateNetAfterTds(pendingAmount))}
+              </span>
+              <span className="ml-1">
+                after {PARTNER_TDS_PERCENT}% TDS (
+                {formatCurrency(calculateTdsAmount(pendingAmount))})
+              </span>
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="commissionMarkAmount">Amount (INR)</Label>
@@ -123,8 +142,22 @@ function CommissionMarkForm({
             required
           />
           <p className="text-xs text-muted-foreground">
-            Enter full pending for complete payment, or a lower amount for partial.
+            {isReceived
+              ? "Enter full pending for complete payment, or a lower amount for partial."
+              : "Enter the gross partner share. 2% TDS is calculated automatically."}
           </p>
+          {!isReceived && parsedAmount > 0 ? (
+            <div className="rounded-lg border border-[#0B8FD8]/20 bg-[#0B8FD8]/5 p-3 text-xs">
+              <p>
+                TDS {PARTNER_TDS_PERCENT}%:{" "}
+                <span className="font-semibold text-foreground">{formatCurrency(tdsAmount)}</span>
+              </p>
+              <p className="mt-1">
+                Net payable to partner:{" "}
+                <span className="font-semibold text-foreground">{formatCurrency(netPayable)}</span>
+              </p>
+            </div>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button

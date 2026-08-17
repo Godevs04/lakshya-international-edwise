@@ -15,6 +15,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatCurrency, formatPercent } from "@/lib/utils/format";
 import { updateStudentCommissionRateAction } from "@/lib/actions/partner.actions";
 import type { StudentCommissionRow } from "@/lib/services/partner-commission.service";
@@ -26,7 +27,7 @@ import {
   type CommissionMarkType,
 } from "@/components/dashboard/commission-mark-dialog";
 import { CommissionStatusFilter as CommissionStatusFilterControl } from "@/components/dashboard/commission-status-filter";
-import { CheckCircle2, Pencil, Wallet } from "lucide-react";
+import { CheckCircle2, Pencil, Search, Wallet } from "lucide-react";
 
 export type PartnerStudentCommissionRow = StudentCommissionRow;
 
@@ -61,11 +62,18 @@ export function PartnerStudentCommissionTable({
     type: CommissionMarkType;
     student: PartnerStudentCommissionRow;
   } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredRows = useMemo(
-    () => filterCommissionRows(rows, statusFilter),
-    [rows, statusFilter]
-  );
+  const filteredRows = useMemo(() => {
+    const statusFiltered = filterCommissionRows(rows, statusFilter);
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return statusFiltered;
+
+    return statusFiltered.filter((row) => {
+      const haystack = `${row.studentName} ${row.studentId}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [rows, statusFilter, searchQuery]);
 
   const totals = filteredRows.reduce(
     (acc, row) => ({
@@ -74,6 +82,8 @@ export function PartnerStudentCommissionTable({
       commissionReceived: acc.commissionReceived + row.commissionReceived,
       pendingReceived: acc.pendingReceived + row.pendingReceived,
       partnerShareExpected: acc.partnerShareExpected + row.partnerShareExpected,
+      tdsAmount: acc.tdsAmount + row.tdsAmount,
+      netPayableToPartner: acc.netPayableToPartner + row.netPayableToPartner,
       commissionShared: acc.commissionShared + row.commissionShared,
       pendingShared: acc.pendingShared + row.pendingShared,
       projectedNetEarned: acc.projectedNetEarned + row.projectedNetEarned,
@@ -85,6 +95,8 @@ export function PartnerStudentCommissionTable({
       commissionReceived: 0,
       pendingReceived: 0,
       partnerShareExpected: 0,
+      tdsAmount: 0,
+      netPayableToPartner: 0,
       commissionShared: 0,
       pendingShared: 0,
       projectedNetEarned: 0,
@@ -197,17 +209,33 @@ export function PartnerStudentCommissionTable({
     <div className="space-y-4 overflow-x-auto">
       <GlassHelp />
 
-      {showStatusFilter ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium">Filter students</p>
-            <p className="text-xs text-muted-foreground">
-              Pending, partial, and complete received/paid states
-            </p>
-          </div>
-          <CommissionStatusFilterControl />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-sm font-medium">Filter students</p>
+          <p className="text-xs text-muted-foreground">
+            Search by name or ID
+            {showStatusFilter ? ", then narrow by received/paid status" : ""}
+          </p>
         </div>
-      ) : null}
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-end lg:w-auto">
+          <div className="w-full space-y-2 sm:max-w-xs">
+            <Label htmlFor="student-commission-search">Search</Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="student-commission-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search by name or ID..."
+                className="pl-9"
+                autoComplete="off"
+              />
+            </div>
+          </div>
+          {showStatusFilter ? <CommissionStatusFilterControl /> : null}
+        </div>
+      </div>
 
       <Table>
         <TableHeader>
@@ -219,6 +247,8 @@ export function PartnerStudentCommissionTable({
             <TableHead>Disbursed</TableHead>
             <TableHead>Expected</TableHead>
             <TableHead>Share Exp.</TableHead>
+            <TableHead>TDS 2%</TableHead>
+            <TableHead>Net Payable</TableHead>
             <TableHead>Proj. Net</TableHead>
             <TableHead>Received</TableHead>
             <TableHead>Paid</TableHead>
@@ -257,6 +287,10 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(row.disbursed)}</TableCell>
                   <TableCell>{formatCurrency(row.commissionExpected)}</TableCell>
                   <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
+                  <TableCell>{formatCurrency(row.tdsAmount)}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatCurrency(row.netPayableToPartner)}
+                  </TableCell>
                   <TableCell className="text-[#0B8FD8]">
                     {formatCurrency(row.projectedNetEarned)}
                   </TableCell>
@@ -309,6 +343,8 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(totals.disbursed)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionExpected)}</TableCell>
                   <TableCell>{formatCurrency(totals.partnerShareExpected)}</TableCell>
+                  <TableCell>{formatCurrency(totals.tdsAmount)}</TableCell>
+                  <TableCell>{formatCurrency(totals.netPayableToPartner)}</TableCell>
                   <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionShared)}</TableCell>
@@ -322,11 +358,13 @@ export function PartnerStudentCommissionTable({
           ) : (
             <TableRow>
               <TableCell
-                colSpan={canWrite ? 14 : 13}
+                colSpan={canWrite ? 16 : 15}
                 className="h-24 text-center text-muted-foreground"
               >
                 {rows.length
-                  ? "No students match this filter."
+                  ? searchQuery.trim()
+                    ? "No students match this search."
+                    : "No students match this filter."
                   : "No linked students for commission breakdown."}
               </TableCell>
             </TableRow>
@@ -368,6 +406,10 @@ function GlassHelp() {
         <li>
           Click the pencil on <strong>Our %</strong> or <strong>Partner %</strong> to update rates
           per student
+        </li>
+        <li>
+          <strong>2% TDS</strong> is deducted automatically from partner share. Transfer the{" "}
+          <strong>Net Payable</strong> amount; withhold TDS for deposit
         </li>
         <li>Expected, share, and pending columns update automatically from disbursement + rates</li>
         <li>
