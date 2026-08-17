@@ -87,6 +87,8 @@ describe("report-format", () => {
     expect(partners[0]?.Students).toBe(12);
     expect(partners[0]?.["Net Earned"]).toContain("79,600");
     expect(partners[0]?.["Partner Share %"]).toBe("0.8%");
+    expect(partners[0]?.["TDS 2%"]).toContain("16");
+    expect(partners[0]?.["Net Payable"]).toContain("784");
 
     const loans = formatLoanReportRows([
       {

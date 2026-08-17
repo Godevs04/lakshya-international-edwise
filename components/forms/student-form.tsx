@@ -25,8 +25,10 @@ import { createStudentAction, updateStudentAction } from "@/lib/actions/student.
 import { StudentPhoneField } from "@/components/forms/student-phone-field";
 import {
   calculateExpectedCommission,
+  calculateNetAfterTds,
   calculateNetEarned,
   calculatePartnerShareExpected,
+  calculateTdsAmount,
   resolvePartnerSharePercent,
 } from "@/lib/utils/commission-calculations";
 import { formatCurrency, formatPercent } from "@/lib/utils/format";
@@ -122,8 +124,10 @@ export function StudentForm({
     );
     const expected = calculateExpectedCommission(disbursed, ourRate);
     const partnerShare = calculatePartnerShareExpected(disbursed, partnerRate);
+    const tds = calculateTdsAmount(partnerShare);
+    const netPayable = calculateNetAfterTds(partnerShare);
     const net = calculateNetEarned(expected, partnerShare);
-    return { expected, partnerShare, net, partnerRate };
+    return { expected, partnerShare, tds, netPayable, net, partnerRate };
   }, [
     loanDisbursed,
     ourCommissionPercent,
@@ -590,7 +594,9 @@ export function StudentForm({
                 <p className="font-medium text-[#0B8FD8]">Commission preview</p>
                 <p className="mt-1 text-muted-foreground">
                   Auto-calculated: Expected {formatCurrency(commissionPreview.expected)} · Partner
-                  share {formatCurrency(commissionPreview.partnerShare)} · Projected net{" "}
+                  share {formatCurrency(commissionPreview.partnerShare)} · TDS 2%{" "}
+                  {formatCurrency(commissionPreview.tds)} · Net payable{" "}
+                  {formatCurrency(commissionPreview.netPayable)} · Projected net{" "}
                   {formatCurrency(commissionPreview.net)}. Mark received/paid only when money moves.
                 </p>
               </div>

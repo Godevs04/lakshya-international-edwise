@@ -20,6 +20,11 @@ import {
   getPartnersCommissionOverview,
 } from "@/lib/services/partner-commission.service";
 import {
+  calculateNetAfterTds,
+  calculateTdsAmount,
+  PARTNER_TDS_PERCENT,
+} from "@/lib/utils/commission-calculations";
+import {
   partnerSchema,
   commissionSettlementSchema,
   studentCommissionSettlementSchema,
@@ -567,11 +572,16 @@ export async function recordStudentCommissionSettlementAction(
       };
     }
 
+    const tdsAmount = calculateTdsAmount(parsed.data.amount);
+    const netPayable = calculateNetAfterTds(parsed.data.amount);
+    const tdsNote = `${PARTNER_TDS_PERCENT}% TDS ${tdsAmount.toLocaleString("en-IN")}; net to partner ${netPayable.toLocaleString("en-IN")}`;
+    const note = parsed.data.note?.trim() ? `${parsed.data.note.trim()} (${tdsNote})` : tdsNote;
+
     student.commissionSettled = (student.commissionSettled ?? 0) + parsed.data.amount;
     student.commissionSettlements ??= [];
     student.commissionSettlements.push({
       amount: parsed.data.amount,
-      note: parsed.data.note?.trim() || undefined,
+      note,
       settledAt: new Date(),
       settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
       settledByName: user?.name,
@@ -584,7 +594,7 @@ export async function recordStudentCommissionSettlementAction(
     partner.commissionSettlements ??= [];
     partner.commissionSettlements.push({
       amount: parsed.data.amount,
-      note: parsed.data.note?.trim() || `Settlement for ${student.studentId}`,
+      note: parsed.data.note?.trim() || `Settlement for ${student.studentId} (${tdsNote})`,
       settledAt: new Date(),
       settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
       settledByName: user?.name,
@@ -603,13 +613,16 @@ export async function recordStudentCommissionSettlementAction(
 
     await logActivity({
       action: "partner.student_commission_settled",
-      description: `Recorded INR ${parsed.data.amount.toLocaleString("en-IN")} commission settlement for ${student.studentId} (${partner.companyName})`,
+      description: `Recorded INR ${parsed.data.amount.toLocaleString("en-IN")} commission settlement for ${student.studentId} (${partner.companyName}); ${tdsNote}`,
       resourceType: "partner",
       resourceId: partnerId,
       userId: user?.id,
       userName: user?.name,
       metadata: {
         amount: parsed.data.amount,
+        tdsPercent: PARTNER_TDS_PERCENT,
+        tdsAmount,
+        netPayable,
         studentId: student.studentId,
         studentDbId: studentId,
         note: parsed.data.note?.trim() || undefined,

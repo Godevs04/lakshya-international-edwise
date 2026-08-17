@@ -1,4 +1,5 @@
 import { formatCurrency, formatDate, formatPercent } from "@/lib/utils/format";
+import { calculateNetAfterTds, calculateTdsAmount } from "@/lib/utils/commission-calculations";
 import { getDisbursementTypeLabel } from "@/lib/constants/disbursement";
 import { maskAadhaar, maskPan } from "@/lib/utils/pii";
 
@@ -105,6 +106,15 @@ export function formatPartnerReportRows(
     Received: formatCurrency(Number(partner.commissionReceived ?? 0)),
     "Pending Received": formatCurrency(Number(partner.pendingReceived ?? 0)),
     "Share Expected": formatCurrency(Number(partner.partnerShareExpected ?? 0)),
+    "TDS 2%": formatCurrency(
+      Number(partner.tdsAmount ?? calculateTdsAmount(Number(partner.partnerShareExpected ?? 0)))
+    ),
+    "Net Payable": formatCurrency(
+      Number(
+        partner.netPayableToPartner ??
+          calculateNetAfterTds(Number(partner.partnerShareExpected ?? 0))
+      )
+    ),
     Shared: formatCurrency(Number(partner.commissionShared ?? partner.commissionSettled ?? 0)),
     "Pending Shared": formatCurrency(
       Math.max(

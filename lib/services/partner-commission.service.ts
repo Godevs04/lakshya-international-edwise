@@ -16,6 +16,8 @@ import {
   calculatePendingShared,
   calculateNetEarned,
   calculateProjectedNetEarned,
+  calculateTdsAmount,
+  calculateNetAfterTds,
 } from "@/lib/utils/commission-calculations";
 
 export {
@@ -26,6 +28,8 @@ export {
   calculatePendingShared,
   calculateNetEarned,
   calculateProjectedNetEarned,
+  calculateTdsAmount,
+  calculateNetAfterTds,
 };
 
 /** @deprecated use resolvePartnerSharePercent */
@@ -55,6 +59,8 @@ export interface PartnerCommissionSummary {
   commissionReceived: number;
   pendingReceived: number;
   partnerShareExpected: number;
+  tdsAmount: number;
+  netPayableToPartner: number;
   commissionShared: number;
   pendingShared: number;
   projectedNetEarned: number;
@@ -81,6 +87,8 @@ export interface StudentCommissionRow {
   commissionReceived: number;
   pendingReceived: number;
   partnerShareExpected: number;
+  tdsAmount: number;
+  netPayableToPartner: number;
   commissionShared: number;
   pendingShared: number;
   projectedNetEarned: number;
@@ -109,6 +117,8 @@ export interface PartnerCommissionOverviewRow {
   commissionReceived: number;
   pendingReceived: number;
   partnerShareExpected: number;
+  tdsAmount: number;
+  netPayableToPartner: number;
   commissionShared: number;
   pendingShared: number;
   projectedNetEarned: number;
@@ -274,6 +284,8 @@ function applyStudentSettlements(
       row.partnerShareExpected
     );
     const commissionEarned = calculateNetEarned(row.commissionReceived, commissionShared);
+    const tdsAmount = calculateTdsAmount(row.partnerShareExpected);
+    const netPayableToPartner = calculateNetAfterTds(row.partnerShareExpected);
 
     return {
       studentDbId: row.studentDbId,
@@ -289,6 +301,8 @@ function applyStudentSettlements(
       commissionReceived: row.commissionReceived,
       pendingReceived: row.pendingReceived,
       partnerShareExpected: row.partnerShareExpected,
+      tdsAmount,
+      netPayableToPartner,
       commissionShared,
       pendingShared,
       projectedNetEarned,
@@ -312,6 +326,8 @@ function summarizeRows(
   const commissionReceived = rows.reduce((sum, row) => sum + row.commissionReceived, 0);
   const pendingReceived = rows.reduce((sum, row) => sum + row.pendingReceived, 0);
   const partnerShareExpected = rows.reduce((sum, row) => sum + row.partnerShareExpected, 0);
+  const tdsAmount = rows.reduce((sum, row) => sum + row.tdsAmount, 0);
+  const netPayableToPartner = rows.reduce((sum, row) => sum + row.netPayableToPartner, 0);
   const commissionShared = rows.reduce((sum, row) => sum + row.commissionShared, 0);
   const pendingShared = rows.reduce((sum, row) => sum + row.pendingShared, 0);
   const projectedNetEarned = rows.reduce((sum, row) => sum + row.projectedNetEarned, 0);
@@ -325,6 +341,8 @@ function summarizeRows(
     commissionReceived,
     pendingReceived,
     partnerShareExpected,
+    tdsAmount,
+    netPayableToPartner,
     commissionShared,
     pendingShared,
     projectedNetEarned,
@@ -421,6 +439,8 @@ export async function getPartnersCommissionOverview(
         commissionReceived: summary.commissionReceived,
         pendingReceived: summary.pendingReceived,
         partnerShareExpected: summary.partnerShareExpected,
+        tdsAmount: summary.tdsAmount,
+        netPayableToPartner: summary.netPayableToPartner,
         commissionShared: summary.commissionShared,
         pendingShared: summary.pendingShared,
         projectedNetEarned: summary.projectedNetEarned,
@@ -459,6 +479,8 @@ export async function getGlobalCommissionTotals(): Promise<PartnerCommissionSumm
     commissionReceived: overview.reduce((sum, row) => sum + row.commissionReceived, 0),
     pendingReceived: overview.reduce((sum, row) => sum + row.pendingReceived, 0),
     partnerShareExpected: overview.reduce((sum, row) => sum + row.partnerShareExpected, 0),
+    tdsAmount: overview.reduce((sum, row) => sum + row.tdsAmount, 0),
+    netPayableToPartner: overview.reduce((sum, row) => sum + row.netPayableToPartner, 0),
     commissionShared: overview.reduce((sum, row) => sum + row.commissionShared, 0),
     pendingShared: overview.reduce((sum, row) => sum + row.pendingShared, 0),
     projectedNetEarned: overview.reduce((sum, row) => sum + row.projectedNetEarned, 0),
@@ -633,6 +655,8 @@ export function buildCommissionStatementRows(
     "Pending Received": row.pendingReceived,
     "Partner Share %": row.partnerSharePercentOverride ?? partnerSharePercent,
     "Share Expected": row.partnerShareExpected,
+    "TDS 2%": row.tdsAmount,
+    "Net Payable": row.netPayableToPartner,
     Shared: row.commissionShared,
     "Pending Shared": row.pendingShared,
     "Net Earned": row.commissionEarned,
@@ -653,6 +677,8 @@ export function buildCommissionStatementRows(
         "Pending Received": ledger.pendingReceivedTotal,
         "Partner Share %": 0,
         "Share Expected": ledger.partnerShareExpectedTotal,
+        "TDS 2%": calculateTdsAmount(ledger.partnerShareExpectedTotal),
+        "Net Payable": calculateNetAfterTds(ledger.partnerShareExpectedTotal),
         Shared: ledger.commissionSharedTotal,
         "Pending Shared": ledger.pendingSharedTotal,
         "Net Earned": ledger.commissionEarnedTotal,
@@ -670,6 +696,8 @@ export function buildCommissionStatementRows(
         "Pending Received": 0,
         "Partner Share %": 0,
         "Share Expected": 0,
+        "TDS 2%": 0,
+        "Net Payable": 0,
         Shared: 0,
         "Pending Shared": 0,
         "Net Earned": 0,
@@ -687,6 +715,8 @@ export function buildCommissionStatementRows(
         "Pending Received": 0,
         "Partner Share %": 0,
         "Share Expected": 0,
+        "TDS 2%": 0,
+        "Net Payable": 0,
         Shared: ledger.sharedInMonth,
         "Pending Shared": 0,
         "Net Earned": 0,

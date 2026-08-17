@@ -27,6 +27,11 @@ import {
 } from "@/components/dashboard/partner-commission-ledger-panel";
 import { formatCurrency, formatDateTime, formatPercent } from "@/lib/utils/format";
 import {
+  calculateNetAfterTds,
+  calculateTdsAmount,
+  PARTNER_TDS_PERCENT,
+} from "@/lib/utils/commission-calculations";
+import {
   exportPartnerCommissionAction,
   recordPartnerCommissionSettlementAction,
 } from "@/lib/actions/partner.actions";
@@ -98,6 +103,8 @@ export function PartnerCommissionSection({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const tdsAmount = calculateTdsAmount(partnerShareExpected);
+  const netPayableToPartner = calculateNetAfterTds(partnerShareExpected);
   const tab = resolveCommissionTab(searchParams.get("tab") ?? initialTab);
 
   function handleTabChange(value: string | null) {
@@ -182,6 +189,18 @@ export function PartnerCommissionSection({
             <p className="text-2xl font-semibold">{formatCurrency(partnerShareExpected)}</p>
           </GlassCard>
           <GlassCard className="p-4">
+            <p className="text-xs text-muted-foreground">TDS {PARTNER_TDS_PERCENT}% (auto)</p>
+            <p className="text-2xl font-semibold">{formatCurrency(tdsAmount)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Withheld from partner share</p>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <p className="text-xs text-muted-foreground">Net Payable to Partner</p>
+            <p className="text-2xl font-semibold text-[#0B8FD8]">
+              {formatCurrency(netPayableToPartner)}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Share minus TDS</p>
+          </GlassCard>
+          <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Commission Shared</p>
             <p className="text-2xl font-semibold text-[#22C55E]">
               {formatCurrency(commissionShared || commissionSettled)}
@@ -219,8 +238,9 @@ export function PartnerCommissionSection({
             <h3 className="mb-1 text-sm font-semibold">Record Bulk Partner Share</h3>
             <p className="mb-4 text-xs text-muted-foreground">
               Amounts are calculated automatically. Use per-student <strong>Received</strong> and{" "}
-              <strong>Paid</strong> buttons in the Student-wise tab. Bulk entry below is only for
-              legacy lump-sum partner payments.
+              <strong>Paid</strong> buttons in the Student-wise tab. When paying a partner, transfer
+              the net amount after 2% TDS. Bulk entry below is only for legacy lump-sum partner
+              payments.
             </p>
             <form onSubmit={handleSettlementSubmit} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

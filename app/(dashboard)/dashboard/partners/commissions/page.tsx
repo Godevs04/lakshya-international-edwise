@@ -10,6 +10,7 @@ import { requireModuleEnabled } from "@/lib/auth/module-guard";
 import { requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { formatCurrency } from "@/lib/utils/format";
+import { PARTNER_TDS_PERCENT } from "@/lib/utils/commission-calculations";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -30,9 +31,20 @@ export default async function PartnerCommissionsPage({
       pendingReceived: acc.pendingReceived + row.pendingReceived,
       shared: acc.shared + row.commissionShared,
       pendingShared: acc.pendingShared + row.pendingShared,
+      tds: acc.tds + row.tdsAmount,
+      netPayable: acc.netPayable + row.netPayableToPartner,
       earned: acc.earned + row.commissionEarned,
     }),
-    { expected: 0, received: 0, pendingReceived: 0, shared: 0, pendingShared: 0, earned: 0 }
+    {
+      expected: 0,
+      received: 0,
+      pendingReceived: 0,
+      shared: 0,
+      pendingShared: 0,
+      tds: 0,
+      netPayable: 0,
+      earned: 0,
+    }
   );
 
   return (
@@ -86,6 +98,16 @@ export default async function PartnerCommissionsPage({
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">Commission Shared</p>
           <p className="text-2xl font-semibold text-[#22C55E]">{formatCurrency(totals.shared)}</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-xs text-muted-foreground">TDS {PARTNER_TDS_PERCENT}% (auto)</p>
+          <p className="text-2xl font-semibold">{formatCurrency(totals.tds)}</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-xs text-muted-foreground">Net Payable to Partners</p>
+          <p className="text-2xl font-semibold text-[#0B8FD8]">
+            {formatCurrency(totals.netPayable)}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-xs text-muted-foreground">Pending Shared</p>

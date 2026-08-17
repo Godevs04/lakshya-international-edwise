@@ -12,6 +12,8 @@ import {
   calculateCommissionPayout,
   calculatePendingCommission,
   resolveCommissionPercent,
+  calculateTdsAmount,
+  calculateNetAfterTds,
 } from "@/lib/services/partner-commission.service";
 
 describe("two-tier commission formulas", () => {
@@ -34,6 +36,13 @@ describe("two-tier commission formulas", () => {
     expect(calculateNetEarned(1_600, 800)).toBe(800);
   });
 
+  it("withholds 2% TDS from partner share automatically", () => {
+    expect(calculateTdsAmount(24_000)).toBe(480);
+    expect(calculateNetAfterTds(24_000)).toBe(23_520);
+    expect(calculateTdsAmount(0)).toBe(0);
+    expect(calculateNetAfterTds(0)).toBe(0);
+  });
+
   it("matches the user example end-to-end", () => {
     const disbursed = 4_000_000;
     const ourRate = 1.2;
@@ -42,6 +51,8 @@ describe("two-tier commission formulas", () => {
     const share = calculatePartnerShareExpected(disbursed, partnerRate);
     expect(expected).toBe(48_000);
     expect(share).toBe(24_000);
+    expect(calculateTdsAmount(share)).toBe(480);
+    expect(calculateNetAfterTds(share)).toBe(23_520);
     expect(calculateNetEarned(expected, share)).toBe(24_000);
   });
 });
