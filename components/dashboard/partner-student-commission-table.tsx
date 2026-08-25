@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -311,28 +312,59 @@ export function PartnerStudentCommissionTable({
                   </TableCell>
                   {canWrite && (
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={
-                            row.pendingReceived <= 0 || pendingStudentId === row.studentDbId
-                          }
-                          onClick={() => openMarkDialog("received", row)}
-                        >
-                          <Wallet className="mr-1 h-3.5 w-3.5" />
-                          Received
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={row.pendingShared <= 0 || pendingStudentId === row.studentDbId}
-                          onClick={() => openMarkDialog("paid", row)}
-                        >
-                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-                          Paid
-                        </Button>
-                      </div>
+                      {row.commissionExpected > 0 &&
+                      row.pendingReceived <= 0 &&
+                      row.pendingShared <= 0 ? (
+                        <Badge className="border-transparent bg-[#22C55E]/15 text-[#22C55E]">
+                          <CheckCircle2 data-icon="inline-start" />
+                          Completed
+                        </Badge>
+                      ) : (
+                        <div className="flex justify-end gap-1">
+                          {row.pendingReceived <= 0 && row.commissionReceived > 0 ? (
+                            <Badge
+                              variant="outline"
+                              className="h-8 border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E]"
+                            >
+                              <CheckCircle2 data-icon="inline-start" />
+                              Received
+                            </Badge>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={
+                                row.pendingReceived <= 0 || pendingStudentId === row.studentDbId
+                              }
+                              onClick={() => openMarkDialog("received", row)}
+                            >
+                              <Wallet className="mr-1 h-3.5 w-3.5" />
+                              Received
+                            </Button>
+                          )}
+                          {row.pendingShared <= 0 && row.commissionShared > 0 ? (
+                            <Badge
+                              variant="outline"
+                              className="h-8 border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E]"
+                            >
+                              <CheckCircle2 data-icon="inline-start" />
+                              Paid
+                            </Badge>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={
+                                row.pendingShared <= 0 || pendingStudentId === row.studentDbId
+                              }
+                              onClick={() => openMarkDialog("paid", row)}
+                            >
+                              <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                              Paid
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>
@@ -402,6 +434,9 @@ function GlassHelp() {
         </li>
         <li>
           <strong>Paid</strong> — money paid to partner (use Actions → Paid; full or partial amount)
+        </li>
+        <li>
+          When both are done, Actions shows a green <strong>Completed</strong> badge
         </li>
         <li>
           Click the pencil on <strong>Our %</strong> or <strong>Partner %</strong> to update rates
