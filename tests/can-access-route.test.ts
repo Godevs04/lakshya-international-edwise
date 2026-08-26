@@ -46,7 +46,21 @@ describe("canAccessRoute", () => {
     expect(canAccessRoute(user, "/dashboard/site-leads")).toBe(true);
   });
 
-  it("blocks unauthenticated access", () => {
-    expect(canAccessRoute(null, "/dashboard/students")).toBe(false);
+  it("guards overview, lenders, and tasks with dedicated permissions", () => {
+    const banker = mockUser("staff", ["students:read", "students:write"]);
+    expect(canAccessRoute(banker, "/dashboard/overview")).toBe(false);
+    expect(canAccessRoute(banker, "/dashboard/lenders")).toBe(false);
+    expect(canAccessRoute(banker, "/dashboard/tasks")).toBe(false);
+    expect(canAccessRoute(banker, "/dashboard/students")).toBe(true);
+
+    const withExtras = mockUser("staff", [
+      "overview:read",
+      "students:read",
+      "lenders:read",
+      "tasks:read",
+    ]);
+    expect(canAccessRoute(withExtras, "/dashboard/overview")).toBe(true);
+    expect(canAccessRoute(withExtras, "/dashboard/lenders")).toBe(true);
+    expect(canAccessRoute(withExtras, "/dashboard/tasks")).toBe(true);
   });
 });

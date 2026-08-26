@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   const user = session?.user;
 
   if (!hasPermission(user, PERMISSIONS.SETTINGS_READ)) {
-    redirect("/dashboard/overview");
+    redirect("/dashboard");
   }
 
   const canManageUsers = hasPermission(user, PERMISSIONS.USERS_READ);

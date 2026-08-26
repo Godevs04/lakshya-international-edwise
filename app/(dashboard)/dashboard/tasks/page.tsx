@@ -5,7 +5,7 @@ import { TasksTable } from "@/components/tables/tasks-table";
 import { getTasks, getTaskSummary } from "@/lib/actions/task.actions";
 import { getAssignableUsers } from "@/lib/actions/student.actions";
 import { requireModuleEnabled } from "@/lib/auth/module-guard";
-import { getStudentPageAccess, requirePagePermission } from "@/lib/auth/page-access";
+import { getTasksPageAccess, requirePagePermission } from "@/lib/auth/page-access";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { auth } from "@/lib/auth/auth";
 
@@ -21,11 +21,11 @@ export default async function TasksPage({
   }>;
 }) {
   await requireModuleEnabled("tasks");
-  await requirePagePermission(PERMISSIONS.STUDENTS_READ);
+  await requirePagePermission(PERMISSIONS.TASKS_READ);
 
   const params = await searchParams;
   const session = await auth();
-  const access = await getStudentPageAccess();
+  const access = await getTasksPageAccess();
 
   const isMine = params.mine === "1";
   const isOverdue = params.overdue === "1";

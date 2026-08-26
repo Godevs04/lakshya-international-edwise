@@ -12,21 +12,21 @@ export function canViewAdmissionRevenue(role?: UserRole): boolean {
 export async function requirePagePermission(permission: Permission): Promise<void> {
   const session = await auth();
   if (!hasPermission(session?.user, permission)) {
-    redirect("/dashboard/overview");
+    redirect("/dashboard");
   }
 }
 
 export async function requireAnyPagePermission(permissions: Permission[]): Promise<void> {
   const session = await auth();
   if (!hasAnyPermission(session?.user, permissions)) {
-    redirect("/dashboard/overview");
+    redirect("/dashboard");
   }
 }
 
 export async function requireRouteAccess(route: string): Promise<void> {
   const session = await auth();
   if (!canAccessRoute(session?.user, route)) {
-    redirect("/dashboard/overview");
+    redirect("/dashboard");
   }
 }
 
@@ -38,6 +38,24 @@ export async function getStudentPageAccess() {
     canWrite: hasPermission(user, PERMISSIONS.STUDENTS_WRITE),
     canDelete: hasPermission(user, PERMISSIONS.STUDENTS_DELETE),
     canExport: hasPermission(user, PERMISSIONS.STUDENTS_EXPORT),
+  };
+}
+
+export async function getLendersPageAccess() {
+  const session = await auth();
+  const user = session?.user;
+
+  return {
+    canWrite: hasPermission(user, PERMISSIONS.LENDERS_WRITE),
+  };
+}
+
+export async function getTasksPageAccess() {
+  const session = await auth();
+  const user = session?.user;
+
+  return {
+    canWrite: hasPermission(user, PERMISSIONS.TASKS_WRITE),
   };
 }
 

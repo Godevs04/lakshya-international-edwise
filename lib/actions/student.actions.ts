@@ -9,7 +9,7 @@ import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
 import { User } from "@/models/User";
 import { getSessionUser } from "@/lib/auth/auth";
-import { requirePermission } from "@/lib/auth/permissions";
+import { requirePermission, requireAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import {
   excludeAdmissionLeadsFilter,
@@ -186,7 +186,11 @@ export async function getAssignableUsers() {
     "getAssignableUsers",
     async () => {
       const user = await getSessionUser();
-      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      requireAnyPermission(user, [
+        PERMISSIONS.STUDENTS_READ,
+        PERMISSIONS.ADMISSIONS_READ,
+        PERMISSIONS.TASKS_READ,
+      ]);
 
       await connectDB();
       const users = await User.find({ status: "active" })

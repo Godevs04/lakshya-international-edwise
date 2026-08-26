@@ -20,7 +20,6 @@ import {
 import { updateUserMenuPermissionsAction } from "@/lib/actions/settings.actions";
 import {
   deriveMenuAccessFromRole,
-  applyLegacyMenuAccessFallback,
   permissionsToMenuAccess,
 } from "@/lib/constants/menu-permissions";
 import { ROLE_LABELS } from "@/lib/constants/permissions";
@@ -46,7 +45,7 @@ function buildPermissionsValue(user: PermissionUser): UserMenuPermissionsValue {
   return {
     useCustomPermissions: Boolean(user.useCustomPermissions),
     menuAccess: user.useCustomPermissions
-      ? applyLegacyMenuAccessFallback(permissionsToMenuAccess(user.customPermissions ?? []))
+      ? permissionsToMenuAccess(user.customPermissions ?? [])
       : deriveMenuAccessFromRole(user.role),
   };
 }
@@ -116,7 +115,7 @@ export function UserPermissionsSheet({ user, open, onOpenChange }: UserPermissio
           </SheetTitle>
           <SheetDescription className="text-left text-sm leading-relaxed">
             {user
-              ? `Choose read or write access for each menu. Changes apply after ${user.name} signs in again.`
+              ? `Choose None / Read / Write for each controllable menu. Saved access applies on ${user.name}'s next page load (or after they refresh).`
               : "Configure menu-level read and write access."}
           </SheetDescription>
         </SheetHeader>

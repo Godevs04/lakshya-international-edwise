@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/lib/auth/auth";
-import { requirePermission } from "@/lib/auth/permissions";
+import { requirePermission, requireAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import {
   createLender,
@@ -36,7 +36,7 @@ export async function getLendersAction(): Promise<LenderListItem[]> {
     "getLendersAction",
     async () => {
       const user = await getSessionUser();
-      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      requirePermission(user, PERMISSIONS.LENDERS_READ);
       return getLendersWithCounts();
     },
     []
@@ -48,7 +48,12 @@ export async function getLenderOptionsAction(): Promise<LenderOption[]> {
     "getLenderOptionsAction",
     async () => {
       const user = await getSessionUser();
-      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      // Student/admission forms still need the lender dropdown without Lenders menu access.
+      requireAnyPermission(user, [
+        PERMISSIONS.LENDERS_READ,
+        PERMISSIONS.STUDENTS_READ,
+        PERMISSIONS.ADMISSIONS_READ,
+      ]);
       return getLenderOptions();
     },
     []
@@ -60,7 +65,7 @@ export async function createLenderAction(
 ): Promise<ActionResult<{ id: string; slug: string }>> {
   return runLoggedMutation("createLenderAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.LENDERS_WRITE);
 
     const parsed = createLenderSchema.safeParse(parseLenderFormData(formData));
 
@@ -107,7 +112,7 @@ export async function updateLenderAction(
 ): Promise<ActionResult<{ id: string; slug: string }>> {
   return runLoggedMutation("updateLenderAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.LENDERS_WRITE);
 
     const parsed = updateLenderSchema.safeParse(parseLenderFormData(formData));
 
@@ -150,7 +155,7 @@ export async function updateLenderAction(
 export async function deleteLenderAction(id: string): Promise<ActionResult> {
   return runLoggedMutation("deleteLenderAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.LENDERS_WRITE);
 
     try {
       const lender = await deleteLender(id);

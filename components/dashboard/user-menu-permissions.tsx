@@ -2,10 +2,14 @@
 
 import {
   BarChart3,
+  Building2,
   FileText,
   GraduationCap,
   Handshake,
+  LayoutDashboard,
   LineChart,
+  ListTodo,
+  MessageCircle,
   RotateCcw,
   Settings,
   Shield,
@@ -17,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   MENU_PERMISSION_MODULES,
+  PORTAL_MENU_CATALOG,
   countMenuAccessLevels,
   deriveMenuAccessFromRole,
   isMenuAccessEqual,
@@ -28,10 +33,14 @@ import { ROLE_LABELS } from "@/lib/constants/permissions";
 import type { UserRole } from "@/types";
 
 const MODULE_ICONS: Record<MenuPermissionKey, LucideIcon> = {
+  overview: LayoutDashboard,
+  support: MessageCircle,
   students: Users,
   admissions: GraduationCap,
   partners: Handshake,
   applications: FileText,
+  lenders: Building2,
+  tasks: ListTodo,
   reports: BarChart3,
   analytics: LineChart,
   audit: Shield,
@@ -40,10 +49,14 @@ const MODULE_ICONS: Record<MenuPermissionKey, LucideIcon> = {
 };
 
 const MODULE_ACCENTS: Record<MenuPermissionKey, string> = {
+  overview: "from-[#0369A1] to-[#0B8FD8]",
+  support: "from-[#0EA5E9] to-[#38BDF8]",
   students: "from-[#0B8FD8] to-[#0369A1]",
   admissions: "from-[#0284C7] to-[#4FC3F7]",
   partners: "from-[#8B5CF6] to-[#A78BFA]",
   applications: "from-[#3B82F6] to-[#60A5FA]",
+  lenders: "from-[#F59E0B] to-[#FBBF24]",
+  tasks: "from-[#EF4444] to-[#F87171]",
   reports: "from-[#10B981] to-[#34D399]",
   analytics: "from-[#06B6D4] to-[#22D3EE]",
   audit: "from-[#64748B] to-[#94A3B8]",
@@ -188,6 +201,23 @@ export function UserMenuPermissions({
         <SummaryPill label="Write" value={summary.write} tone="write" />
         <SummaryPill label="Read" value={summary.read} tone="read" />
         <SummaryPill label="Hidden" value={summary.none} tone="none" />
+      </div>
+
+      <div className="rounded-2xl border border-border bg-muted/40 p-4 text-xs text-muted-foreground">
+        <p className="font-semibold text-foreground">Portal menus</p>
+        <ul className="mt-2 space-y-1.5">
+          {PORTAL_MENU_CATALOG.map((item) => (
+            <li key={item.label} className="flex gap-2">
+              <span className="min-w-[8.5rem] font-medium text-foreground">{item.label}</span>
+              <span>{"note" in item ? item.note : "Configurable below"}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 flex items-start gap-2 rounded-xl bg-card/80 px-3 py-2 text-[11px] leading-relaxed ring-1 ring-border">
+          <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+          Overview, Lenders, and Tasks are separate from Students. Leave them on None for
+          banker-style access.
+        </p>
       </div>
 
       <div className={cn("grid gap-3", compact ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>

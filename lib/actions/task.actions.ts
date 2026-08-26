@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Task } from "@/models/Task";
 import { Student } from "@/models/Student";
 import { getSessionUser } from "@/lib/auth/auth";
-import { requirePermission } from "@/lib/auth/permissions";
+import { hasPermission, requirePermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { taskSchema, updateTaskSchema } from "@/lib/validations/schemas";
 import { logActivity } from "@/lib/services/activity.service";
@@ -95,7 +95,10 @@ export async function getTaskSummary(): Promise<{
     "getTaskSummary",
     async () => {
       const user = await getSessionUser();
-      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      // Layout badge call — return zeros when Tasks menu is hidden.
+      if (!hasPermission(user, PERMISSIONS.TASKS_READ)) {
+        return { myOpen: 0, overdue: 0, dueToday: 0 };
+      }
 
       await connectDB();
       const now = new Date();
@@ -143,7 +146,7 @@ export async function getTasks(params: {
     "getTasks",
     async () => {
       const user = await getSessionUser();
-      requirePermission(user, PERMISSIONS.STUDENTS_READ);
+      requirePermission(user, PERMISSIONS.TASKS_READ);
 
       await connectDB();
       const page = params.page ?? 1;
@@ -228,7 +231,7 @@ export async function getTasks(params: {
 export async function createTaskAction(formData: FormData): Promise<ActionResult<{ id: string }>> {
   return runLoggedMutation("createTaskAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.TASKS_WRITE);
 
     const raw = Object.fromEntries(formData.entries());
     const parsed = taskSchema.safeParse(raw);
@@ -295,7 +298,7 @@ export async function updateTaskStatusAction(
 ): Promise<ActionResult> {
   return runLoggedMutation("updateTaskStatusAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.TASKS_WRITE);
 
     await connectDB();
     const task = await Task.findByIdAndUpdate(id, { status }, { new: true });
@@ -319,7 +322,7 @@ export async function updateTaskStatusAction(
 export async function updateTaskAction(formData: FormData): Promise<ActionResult> {
   return runLoggedMutation("updateTaskAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.TASKS_WRITE);
 
     const raw = Object.fromEntries(formData.entries());
     const parsed = updateTaskSchema.safeParse(raw);
@@ -397,7 +400,7 @@ export async function updateTaskAction(formData: FormData): Promise<ActionResult
 export async function assignTaskToMeAction(taskId: string): Promise<ActionResult> {
   return runLoggedMutation("assignTaskToMeAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.TASKS_WRITE);
     if (!user?.id || !isObjectId(user.id)) {
       return { success: false, error: "Invalid session" };
     }
@@ -442,7 +445,7 @@ export async function assignTaskToMeAction(taskId: string): Promise<ActionResult
 export async function deleteTaskAction(id: string): Promise<ActionResult> {
   return runLoggedMutation("deleteTaskAction", async () => {
     const user = await getSessionUser();
-    requirePermission(user, PERMISSIONS.STUDENTS_WRITE);
+    requirePermission(user, PERMISSIONS.TASKS_WRITE);
 
     await connectDB();
     const task = await Task.findByIdAndDelete(id);

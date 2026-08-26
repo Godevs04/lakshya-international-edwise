@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,6 +14,7 @@ import { GlassCard } from "@/components/cards/glass-card";
 import { PasswordInput } from "@/components/auth/password-input";
 import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getLoginFailureReasonAction } from "@/lib/actions/auth.actions";
+import { getDefaultDashboardHref } from "@/lib/constants/menu-permissions";
 
 interface LoginFormProps {
   allowRegistration?: boolean;
@@ -59,7 +60,8 @@ export function LoginForm({ allowRegistration = false }: LoginFormProps) {
       notify.success("Welcome back", {
         description: "Signed in to your workspace.",
       });
-      router.push("/dashboard/overview");
+      const session = await getSession();
+      router.push(getDefaultDashboardHref(session?.user?.permissions ?? []));
       router.refresh();
     } finally {
       setLoading(false);

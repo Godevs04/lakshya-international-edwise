@@ -20,13 +20,7 @@ import { getSiteLeadCounts } from "@/lib/actions/site-lead.actions";
 import { CACHE_TAGS } from "@/lib/cache/revalidate";
 import { runLogged } from "@/lib/action-utils";
 
-const OVERVIEW_PERMISSIONS = [
-  PERMISSIONS.STUDENTS_READ,
-  PERMISSIONS.PARTNERS_READ,
-  PERMISSIONS.APPLICATIONS_READ,
-  PERMISSIONS.ANALYTICS_READ,
-  PERMISSIONS.REPORTS_READ,
-];
+const OVERVIEW_PERMISSIONS = [PERMISSIONS.OVERVIEW_READ];
 
 const CACHE_SECONDS = 60;
 

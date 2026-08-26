@@ -31,7 +31,7 @@ export const navItems: NavItem[] = [
     label: "Overview",
     icon: LayoutDashboard,
     module: null,
-    permission: null,
+    permission: "overview:read",
   },
   {
     href: "/dashboard/site-leads",
@@ -81,14 +81,14 @@ export const navItems: NavItem[] = [
     label: "Lenders",
     icon: Building2,
     module: "lenders",
-    permission: "students:read",
+    permission: "lenders:read",
   },
   {
     href: "/dashboard/tasks",
     label: "Tasks",
     icon: ListTodo,
     module: "tasks",
-    permission: "students:read",
+    permission: "tasks:read",
   },
   {
     href: "/dashboard/reports",

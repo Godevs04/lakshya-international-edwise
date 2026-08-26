@@ -7,10 +7,10 @@ import { SitePartnerLeadsTable } from "@/components/tables/site-partner-leads-ta
 import {
   getSiteLeadAssignableUsers,
   getSiteLeadCounts,
+  getSiteLeadPartnerOptions,
   getSitePartnerLeads,
   getSiteStudentLeads,
 } from "@/lib/actions/site-lead.actions";
-import { getPartnersList } from "@/lib/actions/partner.actions";
 import { getSiteLeadsPageAccess } from "@/lib/auth/page-access";
 import { auth } from "@/lib/auth/auth";
 import { hasPermission } from "@/lib/auth/permissions";
@@ -40,7 +40,7 @@ export default async function SiteLeadsPage({
   const canViewPartners = hasPermission(user, PERMISSIONS.PARTNERS_READ);
 
   if (!canViewStudents && !canViewPartners) {
-    redirect("/dashboard/overview");
+    redirect("/dashboard");
   }
 
   const params = await searchParams;
@@ -59,7 +59,7 @@ export default async function SiteLeadsPage({
     access.canWriteStudents || access.canWritePartners
       ? getSiteLeadAssignableUsers()
       : Promise.resolve([]),
-    canViewStudents && access.canWriteStudents ? getPartnersList() : Promise.resolve([]),
+    access.canWriteStudents ? getSiteLeadPartnerOptions() : Promise.resolve([]),
   ]);
 
   return (

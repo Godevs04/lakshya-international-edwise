@@ -3,11 +3,20 @@ import type { UserRole } from "@/types";
 
 export type MenuAccessLevel = "none" | "read" | "write";
 
+/**
+ * Controllable menu keys in Create User / Edit Access.
+ * Aligned with sidebar items in `components/dashboard/nav-config.ts`
+ * (From Site is derived from admissions|partners).
+ */
 export type MenuPermissionKey =
+  | "overview"
+  | "support"
   | "students"
   | "admissions"
   | "partners"
   | "applications"
+  | "lenders"
+  | "tasks"
   | "reports"
   | "analytics"
   | "audit"
@@ -22,25 +31,126 @@ export interface MenuPermissionModule {
   writePermissions: Permission[];
 }
 
+/** Full portal menu catalog for admins (sidebar + access matrix). */
+export const PORTAL_MENU_CATALOG = [
+  {
+    label: "Overview",
+    controllable: true as const,
+    menuKey: "overview" as const,
+    note: "Independent — set None or Read below.",
+  },
+  {
+    label: "From Site",
+    controllable: false as const,
+    note: "Shows when Admission Details or Partners has Read/Write.",
+  },
+  {
+    label: "Support",
+    controllable: true as const,
+    menuKey: "support" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Students",
+    controllable: true as const,
+    menuKey: "students" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Admission Details",
+    controllable: true as const,
+    menuKey: "admissions" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Partners",
+    controllable: true as const,
+    menuKey: "partners" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Applications",
+    controllable: true as const,
+    menuKey: "applications" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Lenders",
+    controllable: true as const,
+    menuKey: "lenders" as const,
+    note: "Independent of Students — set below.",
+  },
+  {
+    label: "Tasks",
+    controllable: true as const,
+    menuKey: "tasks" as const,
+    note: "Independent of Students — set below.",
+  },
+  {
+    label: "Reports",
+    controllable: true as const,
+    menuKey: "reports" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Analytics",
+    controllable: true as const,
+    menuKey: "analytics" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Audit Log",
+    controllable: true as const,
+    menuKey: "audit" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "Settings",
+    controllable: true as const,
+    menuKey: "settings" as const,
+    note: "Configurable below",
+  },
+  {
+    label: "User Management",
+    controllable: true as const,
+    menuKey: "users" as const,
+    note: "Controlled inside Settings → Users.",
+  },
+] as const;
+
 export const MENU_PERMISSION_MODULES: MenuPermissionModule[] = [
+  {
+    key: "overview",
+    label: "Overview",
+    description: "Main dashboard home and summary cards",
+    readPermissions: [PERMISSIONS.OVERVIEW_READ],
+    writePermissions: [],
+  },
+  {
+    key: "support",
+    label: "Support",
+    description: "Inbox, conversations, and customer replies",
+    readPermissions: [PERMISSIONS.SUPPORT_READ],
+    writePermissions: [PERMISSIONS.SUPPORT_WRITE],
+  },
   {
     key: "students",
     label: "Students",
-    description: "CRM records, lenders & tasks",
+    description: "CRM student records",
     readPermissions: [PERMISSIONS.STUDENTS_READ],
     writePermissions: [PERMISSIONS.STUDENTS_WRITE, PERMISSIONS.STUDENTS_EXPORT],
   },
   {
     key: "admissions",
     label: "Admission Details",
-    description: "Admission pipeline and revenue tracking",
+    description: "Admission pipeline (also enables From Site with Partners)",
     readPermissions: [PERMISSIONS.ADMISSIONS_READ],
     writePermissions: [PERMISSIONS.ADMISSIONS_WRITE],
   },
   {
     key: "partners",
     label: "Partners",
-    description: "Consultancies and commission tracking",
+    description: "Consultancies & commissions (also enables From Site)",
     readPermissions: [PERMISSIONS.PARTNERS_READ],
     writePermissions: [PERMISSIONS.PARTNERS_WRITE],
   },
@@ -50,6 +160,20 @@ export const MENU_PERMISSION_MODULES: MenuPermissionModule[] = [
     description: "Loan application pipeline",
     readPermissions: [PERMISSIONS.APPLICATIONS_READ],
     writePermissions: [PERMISSIONS.APPLICATIONS_WRITE],
+  },
+  {
+    key: "lenders",
+    label: "Lenders",
+    description: "Bank / lender directory and logos",
+    readPermissions: [PERMISSIONS.LENDERS_READ],
+    writePermissions: [PERMISSIONS.LENDERS_WRITE],
+  },
+  {
+    key: "tasks",
+    label: "Tasks",
+    description: "Follow-ups and assigned work items",
+    readPermissions: [PERMISSIONS.TASKS_READ],
+    writePermissions: [PERMISSIONS.TASKS_WRITE],
   },
   {
     key: "reports",
@@ -82,7 +206,7 @@ export const MENU_PERMISSION_MODULES: MenuPermissionModule[] = [
   {
     key: "users",
     label: "User Management",
-    description: "Team members, roles and access",
+    description: "Team members, roles and menu access",
     readPermissions: [PERMISSIONS.USERS_READ],
     writePermissions: [PERMISSIONS.USERS_WRITE, PERMISSIONS.USERS_DELETE],
   },
@@ -138,7 +262,9 @@ export function permissionsToMenuAccess(permissions: string[]): MenuAccessMap {
   return access;
 }
 
-/** Show admissions access in the UI when older custom grants only included students. */
+/**
+ * @deprecated Legacy UI helper — do not use for new saves.
+ */
 export function applyLegacyMenuAccessFallback(access: MenuAccessMap): MenuAccessMap {
   if ((access.admissions ?? "none") === "none" && (access.students ?? "none") !== "none") {
     return { ...access, admissions: access.students };
@@ -146,24 +272,11 @@ export function applyLegacyMenuAccessFallback(access: MenuAccessMap): MenuAccess
   return access;
 }
 
-/** Grant admissions permissions at runtime for custom grants saved before admissions split. */
+/**
+ * @deprecated Custom menu access must match exactly what was saved.
+ */
 export function inheritLegacyAdmissionsPermissions(permissions: string[]): string[] {
-  if (permissions.includes("*")) return permissions;
-
-  const hasAdmissionsRead =
-    permissions.includes(PERMISSIONS.ADMISSIONS_READ) || permissions.includes("admissions:*");
-  if (hasAdmissionsRead) return permissions;
-
-  const hasStudentsRead =
-    permissions.includes(PERMISSIONS.STUDENTS_READ) || permissions.includes("students:*");
-  if (!hasStudentsRead) return permissions;
-
-  const inherited = [...permissions, PERMISSIONS.ADMISSIONS_READ];
-  const hasStudentsWrite = permissions.includes(PERMISSIONS.STUDENTS_WRITE);
-  if (hasStudentsWrite) {
-    inherited.push(PERMISSIONS.ADMISSIONS_WRITE);
-  }
-  return inherited;
+  return permissions;
 }
 
 export function menuAccessToPermissions(access: MenuAccessMap): string[] {
@@ -228,10 +341,10 @@ export function buildUserPermissionFields(
   menuAccess: MenuAccessMap
 ): {
   useCustomPermissions: boolean;
-  customPermissions?: string[];
+  customPermissions: string[];
 } {
   if (!useCustomPermissions) {
-    return { useCustomPermissions: false, customPermissions: undefined };
+    return { useCustomPermissions: false, customPermissions: [] };
   }
 
   return {
@@ -247,4 +360,35 @@ export function parseMenuAccessJson(raw: FormDataEntryValue | null): MenuAccessM
   } catch {
     return {};
   }
+}
+
+/** First dashboard path a user can open after login. */
+export function getDefaultDashboardHref(permissions: string[]): string {
+  if (permissions.includes("*") || permissions.includes(PERMISSIONS.OVERVIEW_READ)) {
+    return "/dashboard/overview";
+  }
+
+  const candidates: Array<{ permission: string; href: string }> = [
+    { permission: PERMISSIONS.STUDENTS_READ, href: "/dashboard/students" },
+    { permission: PERMISSIONS.ADMISSIONS_READ, href: "/dashboard/admissions" },
+    { permission: PERMISSIONS.PARTNERS_READ, href: "/dashboard/partners" },
+    { permission: PERMISSIONS.APPLICATIONS_READ, href: "/dashboard/applications" },
+    { permission: PERMISSIONS.LENDERS_READ, href: "/dashboard/lenders" },
+    { permission: PERMISSIONS.TASKS_READ, href: "/dashboard/tasks" },
+    { permission: PERMISSIONS.SUPPORT_READ, href: "/dashboard/support" },
+    { permission: PERMISSIONS.REPORTS_READ, href: "/dashboard/reports" },
+    { permission: PERMISSIONS.ANALYTICS_READ, href: "/dashboard/analytics" },
+    { permission: PERMISSIONS.SETTINGS_READ, href: "/dashboard/settings" },
+  ];
+
+  for (const candidate of candidates) {
+    if (
+      permissions.includes(candidate.permission) ||
+      permissions.includes(`${candidate.permission.split(":")[0]}:*`)
+    ) {
+      return candidate.href;
+    }
+  }
+
+  return "/dashboard/profile";
 }
