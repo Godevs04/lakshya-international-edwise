@@ -71,7 +71,7 @@ async function notifyPermissionRefresh(targetUserId: string, title: string, body
     userId: targetUserId,
     type: "system",
     title,
-    body: `${body} Sign in again for permissions to take full effect.`,
+    body: `${body}`,
     link: "/dashboard/profile",
   });
 }
@@ -468,12 +468,13 @@ export async function updateUserMenuPermissionsAction(
     const permissionFields = buildUserPermissionFields(useCustomPermissions, menuAccess);
     targetUser.useCustomPermissions = permissionFields.useCustomPermissions;
     targetUser.customPermissions = permissionFields.customPermissions;
+    targetUser.markModified("customPermissions");
     await targetUser.save();
 
     await notifyPermissionRefresh(
       targetUser._id.toString(),
       "Menu access updated",
-      "Your dashboard menu permissions were updated."
+      "Your dashboard menu permissions were updated. Refresh any open dashboard tabs."
     );
 
     await logUserActivity(

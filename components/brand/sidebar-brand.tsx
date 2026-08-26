@@ -75,7 +75,7 @@ export function SidebarBrand({
   if (linkToOverview) {
     return (
       <Link
-        href="/dashboard/overview"
+        href="/dashboard"
         className="block rounded-2xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/25"
       >
         {content}

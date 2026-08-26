@@ -1,6 +1,5 @@
 import type { SessionUser, UserRole } from "@/types";
 import { ROLE_PERMISSIONS, PERMISSIONS } from "@/lib/constants/permissions";
-import { inheritLegacyAdmissionsPermissions } from "@/lib/constants/menu-permissions";
 
 export function getPermissionsForRole(role: UserRole): string[] {
   const perms = ROLE_PERMISSIONS[role];
@@ -14,8 +13,9 @@ export function resolveUserPermissions(
   customPermissions?: string[]
 ): string[] {
   if (role === "super_admin") return ["*"];
-  if (useCustomPermissions && customPermissions?.length) {
-    return inheritLegacyAdmissionsPermissions([...customPermissions]);
+  // Custom mode must honor the saved list exactly (including empty = no menus).
+  if (useCustomPermissions) {
+    return [...(customPermissions ?? [])];
   }
   return getPermissionsForRole(role);
 }
@@ -36,12 +36,13 @@ export function hasAnyPermission(
 }
 
 const ROUTE_PERMISSIONS: { prefix: string; permission: string }[] = [
+  { prefix: "/dashboard/overview", permission: "overview:read" },
   { prefix: "/dashboard/students", permission: "students:read" },
   { prefix: "/dashboard/admissions", permission: "admissions:read" },
   { prefix: "/dashboard/partners", permission: "partners:read" },
   { prefix: "/dashboard/applications", permission: "applications:read" },
-  { prefix: "/dashboard/lenders", permission: "students:read" },
-  { prefix: "/dashboard/tasks", permission: "students:read" },
+  { prefix: "/dashboard/lenders", permission: "lenders:read" },
+  { prefix: "/dashboard/tasks", permission: "tasks:read" },
   { prefix: "/dashboard/reports", permission: "reports:read" },
   { prefix: "/dashboard/analytics", permission: "analytics:read" },
   { prefix: "/dashboard/settings", permission: "settings:read" },

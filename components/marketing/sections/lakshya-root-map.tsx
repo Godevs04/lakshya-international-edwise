@@ -195,7 +195,7 @@ export function LakshyaRootMap() {
       variant="muted"
       background="grid"
       eyebrow="Why Lakshya"
-      title="One Partner, Three Promises"
+      title="One partner, three promises"
       description="From eligibility to disbursement, here is what sets Lakshya apart."
       align="center"
       className="why-lakshya-section-premium"

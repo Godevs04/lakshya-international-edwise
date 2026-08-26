@@ -147,7 +147,7 @@ export const authConfig = {
 
       if (isAuthPage) {
         if (session) {
-          return Response.redirect(new URL("/dashboard/overview", request.nextUrl));
+          return Response.redirect(new URL("/dashboard", request.nextUrl));
         }
         return true;
       }

@@ -7,7 +7,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Partner } from "@/models/Partner";
 import { Student } from "@/models/Student";
 import { getSessionUser } from "@/lib/auth/auth";
-import { requirePermission } from "@/lib/auth/permissions";
+import { requirePermission, requireAnyPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { buildStudentVisibilityFilter } from "@/lib/services/student-visibility.service";
 import { mergeMongoFilter } from "@/lib/utils/mongo-filter";
@@ -202,7 +202,12 @@ export async function getPartnersList() {
     "getPartnersList",
     async () => {
       const user = await getSessionUser();
-      requirePermission(user, PERMISSIONS.PARTNERS_READ);
+      // Student/admission forms need partner dropdowns without Partners menu access.
+      requireAnyPermission(user, [
+        PERMISSIONS.PARTNERS_READ,
+        PERMISSIONS.STUDENTS_READ,
+        PERMISSIONS.ADMISSIONS_READ,
+      ]);
 
       await connectDB();
       return Partner.find({ status: "active" })

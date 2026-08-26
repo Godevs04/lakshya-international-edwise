@@ -8,7 +8,7 @@ export const UPLOAD_FOLDER_PERMISSIONS: Record<UploadFolder, Permission> = {
   students: PERMISSIONS.STUDENTS_WRITE,
   partners: PERMISSIONS.PARTNERS_WRITE,
   settings: PERMISSIONS.SETTINGS_WRITE,
-  lenders: PERMISSIONS.STUDENTS_WRITE,
+  lenders: PERMISSIONS.LENDERS_WRITE,
 };
 
 export function isUploadFolder(value: string): value is UploadFolder {

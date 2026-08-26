@@ -8,7 +8,7 @@ import { Partner } from "@/models/Partner";
 import { Application } from "@/models/Application";
 import { User } from "@/models/User";
 import { getSessionUser } from "@/lib/auth/auth";
-import { requirePermission, hasPermission } from "@/lib/auth/permissions";
+import { requirePermission, requireAnyPermission, hasPermission } from "@/lib/auth/permissions";
 import { PERMISSIONS } from "@/lib/constants/permissions";
 import { STUDENT_RECORD_TYPE } from "@/lib/constants/student-record-type";
 import {
@@ -126,6 +126,24 @@ export async function getSiteLeadAssignableUsers() {
         email: entry.email,
         role: entry.role,
       }));
+    },
+    []
+  );
+}
+
+/** Active partners for student-lead promote/assign (admissions write does not need partners:read). */
+export async function getSiteLeadPartnerOptions() {
+  return runLoggedQuery(
+    "getSiteLeadPartnerOptions",
+    async () => {
+      const user = await getSessionUser();
+      requireAnyPermission(user, [PERMISSIONS.ADMISSIONS_WRITE, PERMISSIONS.PARTNERS_READ]);
+
+      await connectDB();
+      return Partner.find({ status: "active" })
+        .select("companyName")
+        .sort({ companyName: 1 })
+        .lean();
     },
     []
   );

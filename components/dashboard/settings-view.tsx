@@ -50,7 +50,6 @@ import {
 import {
   countMenuAccessLevels,
   deriveMenuAccessFromRole,
-  applyLegacyMenuAccessFallback,
   permissionsToMenuAccess,
 } from "@/lib/constants/menu-permissions";
 import { Clock, KeyRound, UserCheck, UserX } from "lucide-react";
@@ -99,10 +98,10 @@ function getCreatableRoles(currentUserRole?: UserRole): UserRole[] {
 function getAccessSummary(user: SettingsViewProps["users"][number]): string {
   if (user.role === "super_admin") return "Full access";
   const access = user.useCustomPermissions
-    ? applyLegacyMenuAccessFallback(permissionsToMenuAccess(user.customPermissions ?? []))
+    ? permissionsToMenuAccess(user.customPermissions ?? [])
     : deriveMenuAccessFromRole(user.role);
   const summary = countMenuAccessLevels(access);
-  const label = `${summary.write} write · ${summary.read} read`;
+  const label = `Write: ${summary.write} · Read: ${summary.read} · Hidden: ${summary.none}`;
   return user.useCustomPermissions ? label : `${label} via role`;
 }
 
