@@ -27,8 +27,8 @@ describe("marketing site configuration", () => {
   });
 
   it("formats Indian phone numbers for display", () => {
-    expect(formatMarketingPhoneDisplay("919502180806")).toBe("+91 95021 80806");
-    expect(formatMarketingPhoneDisplay("9502180806")).toBe("+91 95021 80806");
+    expect(formatMarketingPhoneDisplay("919491989746")).toBe("+91 94919 89746");
+    expect(formatMarketingPhoneDisplay("9491989746")).toBe("+91 94919 89746");
   });
 });
 
