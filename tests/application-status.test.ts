@@ -34,6 +34,16 @@ describe("application status", () => {
     });
   });
 
+  it("maps completed to completed lifecycle status", () => {
+    expect(applyApplicationStatus("completed")).toEqual({
+      applicationStatus: "completed",
+      status: "completed",
+      loggedIn: true,
+      pfPaid: true,
+    });
+    expect(deriveApplicationStatus({ status: "completed" })).toBe("completed");
+  });
+
   it("maps need callback to contacted", () => {
     expect(applyApplicationStatus("need_callback")).toEqual({
       applicationStatus: "need_callback",
@@ -61,6 +71,9 @@ describe("buildWorkflowMongoFilter", () => {
     });
     expect(buildWorkflowMongoFilter("rejected")).toEqual({
       $or: [{ applicationStatus: "rejected" }, { status: "rejected" }],
+    });
+    expect(buildWorkflowMongoFilter("completed")).toEqual({
+      $or: [{ applicationStatus: "completed" }, { status: "completed" }],
     });
   });
 });

@@ -314,6 +314,7 @@ const StudentSchema = new Schema<IStudent>(
         "approved",
         "sanctioned",
         "disbursed",
+        "completed",
         "rejected",
         "closed",
       ],

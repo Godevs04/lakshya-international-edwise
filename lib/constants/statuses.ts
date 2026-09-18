@@ -7,6 +7,7 @@ export const STUDENT_STATUSES = [
   "approved",
   "sanctioned",
   "disbursed",
+  "completed",
   "rejected",
   "closed",
 ] as const;
@@ -25,6 +26,7 @@ export const APPLICATION_STATUSES = [
   "approved",
   "sanctioned",
   "disbursed",
+  "completed",
   "rejected",
   "closed",
 ] as const;
@@ -80,6 +82,12 @@ export const STUDENT_STATUS_CONFIG: Record<StudentStatus, StatusConfig> = {
     label: "Disbursed",
     color: "bg-[#06B6D4]/12 text-[#06B6D4] border-[#06B6D4]/25",
     dotColor: "bg-[#06B6D4]",
+  },
+  completed: {
+    label: "Completed",
+    color:
+      "bg-[#0D9488]/15 text-[#0F766E] border-[#0D9488]/35 dark:text-[#5EEAD4] shadow-[0_0_0_1px_rgba(13,148,136,0.08)]",
+    dotColor: "bg-[#0D9488]",
   },
   rejected: {
     label: "Rejected",

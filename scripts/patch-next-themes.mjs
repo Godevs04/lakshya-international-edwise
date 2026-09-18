@@ -1,7 +1,7 @@
 /**
  * Patch next-themes so ThemeScript never renders a <script> inside a Client Component.
  * React 19 / Next 16 warn: "Encountered a script tag while rendering React component".
- * FOUC prevention is handled by useServerInsertedHTML in components/theme-provider.tsx.
+ * FOUC prevention is handled by an inline <script> in app/layout.tsx (Server Component).
  * @see https://github.com/pacocoursey/next-themes/issues/385
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";

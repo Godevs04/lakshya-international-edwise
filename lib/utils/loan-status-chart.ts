@@ -13,6 +13,9 @@ export function loanStatusChartHref(chartName: string): string {
   if (status === "disbursed") {
     return "/dashboard/students?workflow=disbursed";
   }
+  if (status === "completed") {
+    return "/dashboard/students?workflow=completed";
+  }
   if (status === "rejected") {
     return "/dashboard/students?status=rejected";
   }
