@@ -93,7 +93,9 @@ const LEGACY_STATUS_TO_APPLICATION: Partial<Record<StudentStatus, ApplicationSta
   submitted: "loggedin",
   sanctioned: "sanctioned",
   disbursed: "disbursed",
+  completed: "completed",
   rejected: "rejected",
+  closed: "not_interested",
 };
 
 function normalizeHeader(header: string): string {
@@ -120,6 +122,9 @@ function normalizeApplicationStatus(value?: string): ApplicationStatusId | undef
   if (trimmed === "pf_pending") return "pf_pending";
   if (trimmed === "need_call_back" || trimmed === "need_callback") return "need_callback";
   if (trimmed === "future_intake") return "future_intake";
+  if (trimmed === "complete" || trimmed === "completed" || trimmed === "file_completed") {
+    return "completed";
+  }
   return undefined;
 }
 

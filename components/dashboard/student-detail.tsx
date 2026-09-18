@@ -6,7 +6,6 @@ import { notify } from "@/lib/toast";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GlassCard } from "@/components/cards/glass-card";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Timeline } from "@/components/ui/timeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +30,15 @@ import {
   getStudentProfileCompleteness,
   isStudentProfileVerified,
 } from "@/lib/utils/student-profile";
-import type { StudentStatus } from "@/lib/constants/statuses";
+import { StudentLifecycleBadge } from "@/components/dashboard/student-lifecycle-badge";
+import { CompletedProfileMark } from "@/components/dashboard/completed-profile-mark";
+import {
+  closedStudentProfileCardClass,
+  getClosedStudentProfileTone,
+} from "@/lib/utils/closed-student-profile";
+import { cn } from "@/lib/utils";
 import { ExternalLink, Pencil, Trash2, UserRound } from "lucide-react";
+import type { StudentStatus } from "@/lib/constants/statuses";
 import {
   getStudentEditHref,
   type StudentEditSectionKey,
@@ -216,6 +222,9 @@ export function StudentDetailView({
 
   const latestRemark = latestNote?.content ?? student.remarks;
   const lenderName = student.loan?.lenderId?.name ?? student.loan?.bankName;
+  const closedTone = getClosedStudentProfileTone(student.status);
+  const isCompletedProfile =
+    student.applicationStatus === "completed" || student.status === "completed";
   const banksSummary = useMemo(() => {
     if (loanApplications.length > 0) {
       return loanApplications
@@ -260,9 +269,14 @@ export function StudentDetailView({
   return (
     <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-        <GlassCard className="p-5">
+        <GlassCard className={cn("p-5", closedStudentProfileCardClass(closedTone))}>
           <div className="flex flex-col items-center text-center">
-            <Avatar className="h-20 w-20">
+            <Avatar
+              className={cn(
+                "h-20 w-20",
+                isCompletedProfile && "ring-2 ring-[#22C55E]/40 ring-offset-2 ring-offset-card"
+              )}
+            >
               <AvatarImage src={student.photo} />
               <AvatarFallback>
                 {getInitials(`${student.firstName} ${student.lastName}`)}
@@ -275,11 +289,17 @@ export function StudentDetailView({
               <ProfileCompleteBadge verified={profileVerified} />
             </h2>
             <p className="text-sm text-muted-foreground">{student.studentId}</p>
+            {isCompletedProfile ? (
+              <CompletedProfileMark />
+            ) : (
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <StudentLifecycleBadge status={student.status as StudentStatus} />
+                <Badge variant="outline" className="text-xs">
+                  {getApplicationStatusLabel(student.applicationStatus)}
+                </Badge>
+              </div>
+            )}
             <div className="mt-3 flex flex-col items-center gap-2">
-              <StatusBadge status={student.status as StudentStatus} />
-              <Badge variant="outline" className="text-xs">
-                {getApplicationStatusLabel(student.applicationStatus)}
-              </Badge>
               {bankSent ? (
                 <Badge className="bg-[#22C55E]/15 text-[#22C55E] hover:bg-[#22C55E]/15">
                   {sentBanks.length > 1 ? `Sent to ${sentBanks.length} banks` : "Sent to bank"}

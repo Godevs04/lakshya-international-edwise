@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StudentLifecycleBadge } from "@/components/dashboard/student-lifecycle-badge";
 import { getInitials } from "@/lib/utils/format";
 import type { StudentStatus } from "@/lib/constants/statuses";
+import {
+  closedStudentProfileCardClass,
+  getClosedStudentProfileTone,
+} from "@/lib/utils/closed-student-profile";
+import { cn } from "@/lib/utils";
 
 interface StudentListItem {
   id: string;
@@ -42,7 +47,10 @@ export function StudentListCard({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
             whileHover={{ x: 4, scale: 1.01 }}
-            className="group flex items-center gap-3 rounded-2xl border border-transparent bg-[#0B8FD8]/4 p-3 transition-all hover:border-[#0B8FD8]/15 hover:bg-[#0B8FD8]/8 hover:shadow-md hover:shadow-[#0B8FD8]/10"
+            className={cn(
+              "group flex items-center gap-3 rounded-2xl border border-transparent bg-[#0B8FD8]/4 p-3 transition-all hover:border-[#0B8FD8]/15 hover:bg-[#0B8FD8]/8 hover:shadow-md hover:shadow-[#0B8FD8]/10",
+              closedStudentProfileCardClass(getClosedStudentProfileTone(s.status))
+            )}
           >
             <Avatar className="h-10 w-10 ring-2 ring-[#0B8FD8]/15 transition-all group-hover:ring-[#0B8FD8]/30">
               <AvatarFallback className="bg-gradient-to-br from-[#0B8FD8] to-[#0369A1] text-xs font-bold text-white">
@@ -61,7 +69,7 @@ export function StudentListCard({
                 <p className="mt-0.5 text-xs font-medium text-[#0B8FD8]">{s.loanAmount}</p>
               )}
             </div>
-            <StatusBadge status={s.status} />
+            <StudentLifecycleBadge status={s.status} />
           </motion.div>
         </Link>
       ))}

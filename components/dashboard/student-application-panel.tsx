@@ -35,7 +35,7 @@ import {
   type LoanApplicationItem,
 } from "@/lib/constants/loan-application";
 import { LenderLogo } from "@/components/lenders/lender-logo";
-import { LockKeyhole, Pencil, Plus, Send, XCircle } from "lucide-react";
+import { CheckCircle2, LockKeyhole, Pencil, Plus, Send, XCircle } from "lucide-react";
 
 interface StudentApplicationPanelProps {
   studentId: string;
@@ -178,6 +178,12 @@ function BankApplicationCard({
               {application.applicationStatus === "rejected" ? (
                 <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/15">
                   Rejected
+                </Badge>
+              ) : null}
+              {application.applicationStatus === "completed" ? (
+                <Badge className="gap-1 border border-[#0D9488]/30 bg-[#0D9488]/15 text-[#0F766E] hover:bg-[#0D9488]/15 dark:text-[#5EEAD4]">
+                  <CheckCircle2 className="h-3 w-3" aria-hidden />
+                  Completed
                 </Badge>
               ) : null}
               {isWinner ? (

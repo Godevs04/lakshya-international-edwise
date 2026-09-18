@@ -165,6 +165,7 @@ export const studentSchema = z
         "approved",
         "sanctioned",
         "disbursed",
+        "completed",
         "rejected",
         "closed",
       ])

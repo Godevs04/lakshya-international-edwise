@@ -13,6 +13,7 @@ export const STUDENT_WORKFLOW_FILTERS: StudentWorkflowFilter[] = [
   { id: "pf_paid", label: "PF Paid" },
   { id: "pf_pending", label: "PF Pending" },
   { id: "disbursed", label: "Disbursed" },
+  { id: "completed", label: "Completed" },
   { id: "not_interested", label: "Not Interested" },
   { id: "rejected", label: "Rejected" },
 ];
@@ -25,6 +26,12 @@ export function buildWorkflowMongoFilter(workflow?: string): Record<string, unkn
   if (workflow === "rejected") {
     return {
       $or: [{ applicationStatus: "rejected" }, { status: "rejected" }],
+    };
+  }
+
+  if (workflow === "completed") {
+    return {
+      $or: [{ applicationStatus: "completed" }, { status: "completed" }],
     };
   }
 

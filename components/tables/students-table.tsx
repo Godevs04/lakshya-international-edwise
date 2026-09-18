@@ -23,10 +23,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StudentLifecycleBadge } from "@/components/dashboard/student-lifecycle-badge";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import type { StudentListItem } from "@/types";
 import type { StudentStatus } from "@/lib/constants/statuses";
+import {
+  closedStudentProfileCardClass,
+  closedStudentProfileRowClass,
+  getClosedStudentProfileTone,
+} from "@/lib/utils/closed-student-profile";
+import { cn } from "@/lib/utils";
 import { StudentContactActions } from "@/components/dashboard/student-contact-actions";
 import { StudentImportDialog } from "@/components/dashboard/student-import-dialog";
 import { StudentStageTabs } from "@/components/dashboard/student-stage-tabs";
@@ -174,7 +180,7 @@ export function StudentsTable({
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => <StatusBadge status={row.original.status as StudentStatus} />,
+      cell: ({ row }) => <StudentLifecycleBadge status={row.original.status as StudentStatus} />,
     },
     {
       accessorKey: "createdAt",
@@ -363,8 +369,12 @@ export function StudentsTable({
         {data.length ? (
           data.map((student) => {
             const isSelected = selected.includes(student._id);
+            const closedTone = getClosedStudentProfileTone(student.status);
             return (
-              <GlassCard key={student._id} className="p-4">
+              <GlassCard
+                key={student._id}
+                className={cn("p-4", closedStudentProfileCardClass(closedTone))}
+              >
                 <div className="flex items-start gap-3">
                   {canSelect && (
                     <input
@@ -397,7 +407,7 @@ export function StudentsTable({
                         </p>
                         <p className="text-xs text-muted-foreground">{student.studentId}</p>
                       </div>
-                      <StatusBadge status={student.status as StudentStatus} />
+                      <StudentLifecycleBadge status={student.status as StudentStatus} />
                     </div>
                   </div>
                 </div>
@@ -460,15 +470,18 @@ export function StudentsTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const closedTone = getClosedStudentProfileTone(row.original.status);
+                return (
+                  <TableRow key={row.id} className={cn(closedStudentProfileRowClass(closedTone))}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

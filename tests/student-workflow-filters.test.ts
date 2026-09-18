@@ -22,6 +22,7 @@ describe("loanStatusChartHref", () => {
     );
     expect(loanStatusChartHref("sanctioned")).toBe("/dashboard/students?workflow=sanctioned");
     expect(loanStatusChartHref("disbursed")).toBe("/dashboard/students?workflow=disbursed");
+    expect(loanStatusChartHref("completed")).toBe("/dashboard/students?workflow=completed");
     expect(loanStatusChartHref("rejected")).toBe("/dashboard/students?status=rejected");
     expect(loanStatusChartHref("new")).toBe("/dashboard/students?status=new");
   });
