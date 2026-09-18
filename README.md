@@ -1,5 +1,5 @@
 # Lakshya International Edwise CRM
- 
+
 Production-grade, white-label-ready education/loan consultancy CRM built with Next.js, MongoDB, and Auth.js.
 
 ## Tech Stack
