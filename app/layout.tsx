@@ -5,6 +5,7 @@ import { APP_TAGLINE } from "@/lib/brand/app-logo";
 import { getAppConfig } from "@/lib/config/app-config";
 import { getSiteUrl } from "@/lib/config/marketing";
 import { fontMarketing, fontMono, fontSans } from "@/lib/fonts";
+import { THEME_INIT_SCRIPT } from "@/lib/theme-init-script";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -56,7 +57,8 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`light ${fontMarketing.variable} ${fontSans.variable} ${fontMono.variable} ${fontMarketing.className} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <script id="lakshya-theme-init" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <Providers>{children}</Providers>
         <PwaRegister />
       </body>
