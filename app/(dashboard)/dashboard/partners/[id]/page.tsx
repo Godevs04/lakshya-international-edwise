@@ -109,6 +109,8 @@ export default async function PartnerDetailPage({
           commissionReceived={analytics?.commissionReceived ?? 0}
           pendingReceived={analytics?.pendingReceived ?? 0}
           partnerShareExpected={analytics?.partnerShareExpected ?? 0}
+          netPayableToPartner={analytics?.netPayableToPartner ?? 0}
+          retainedAmount={analytics?.retainedAmount ?? 0}
           commissionShared={analytics?.commissionShared ?? 0}
           pendingShared={analytics?.pendingShared ?? 0}
           projectedNetEarned={analytics?.projectedNetEarned ?? 0}
