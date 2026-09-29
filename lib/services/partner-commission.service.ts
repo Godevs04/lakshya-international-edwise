@@ -18,6 +18,10 @@ import {
   calculateProjectedNetEarned,
   calculateTdsAmount,
   calculateNetAfterTds,
+  resolveAgreedNetPayable,
+  calculateRetainedFromNet,
+  settlementObligationGross,
+  grossSettlementForAgreedNet,
 } from "@/lib/utils/commission-calculations";
 
 export {
@@ -30,6 +34,10 @@ export {
   calculateProjectedNetEarned,
   calculateTdsAmount,
   calculateNetAfterTds,
+  resolveAgreedNetPayable,
+  calculateRetainedFromNet,
+  settlementObligationGross,
+  grossSettlementForAgreedNet,
 };
 
 /** @deprecated use resolvePartnerSharePercent */
@@ -61,6 +69,8 @@ export interface PartnerCommissionSummary {
   partnerShareExpected: number;
   tdsAmount: number;
   netPayableToPartner: number;
+  calculatedNetPayable: number;
+  retainedAmount: number;
   commissionShared: number;
   pendingShared: number;
   projectedNetEarned: number;
@@ -89,6 +99,10 @@ export interface StudentCommissionRow {
   partnerShareExpected: number;
   tdsAmount: number;
   netPayableToPartner: number;
+  calculatedNetPayable: number;
+  retainedAmount: number;
+  netPayableOverride?: number | null;
+  agreedNetPayableNote?: string | null;
   commissionShared: number;
   pendingShared: number;
   projectedNetEarned: number;
@@ -119,6 +133,8 @@ export interface PartnerCommissionOverviewRow {
   partnerShareExpected: number;
   tdsAmount: number;
   netPayableToPartner: number;
+  calculatedNetPayable: number;
+  retainedAmount: number;
   commissionShared: number;
   pendingShared: number;
   projectedNetEarned: number;
@@ -222,6 +238,8 @@ function buildStudentCommissionBaseRows(
     loan?: { disbursed?: number; disbursedAt?: Date };
     ourCommissionPercent?: number;
     commissionPercentOverride?: number;
+    agreedNetPayable?: number | null;
+    agreedNetPayableNote?: string | null;
     commissionReceived?: number;
     commissionSettled?: number;
   }>,
@@ -248,6 +266,8 @@ function buildStudentCommissionBaseRows(
       ourCommissionPercent,
       partnerSharePercent: effectivePartnerShare,
       partnerSharePercentOverride: student.commissionPercentOverride ?? null,
+      netPayableOverride: student.agreedNetPayable ?? null,
+      agreedNetPayableNote: student.agreedNetPayableNote ?? null,
       commissionExpected,
       commissionReceived,
       pendingReceived: calculatePendingReceived(commissionExpected, commissionReceived),
@@ -278,14 +298,23 @@ function applyStudentSettlements(
     const commissionShared = useLegacyAllocation
       ? (legacyAllocation?.get(row.studentDbId)?.settled ?? 0)
       : row.commissionSharedStored;
-    const pendingShared = calculatePendingShared(row.partnerShareExpected, commissionShared);
-    const projectedNetEarned = calculateProjectedNetEarned(
-      row.commissionExpected,
-      row.partnerShareExpected
+    const tdsAmount = calculateTdsAmount(row.partnerShareExpected);
+    const calculatedNetPayable = calculateNetAfterTds(row.partnerShareExpected);
+    const netPayableToPartner = resolveAgreedNetPayable(
+      calculatedNetPayable,
+      row.netPayableOverride
+    );
+    const retainedAmount = calculateRetainedFromNet(calculatedNetPayable, netPayableToPartner);
+    const settlementObligation = settlementObligationGross(
+      row.partnerShareExpected,
+      calculatedNetPayable,
+      netPayableToPartner
+    );
+    const pendingShared = calculatePendingShared(settlementObligation, commissionShared);
+    const projectedNetEarned = roundMoney(
+      calculateProjectedNetEarned(row.commissionExpected, row.partnerShareExpected) + retainedAmount
     );
     const commissionEarned = calculateNetEarned(row.commissionReceived, commissionShared);
-    const tdsAmount = calculateTdsAmount(row.partnerShareExpected);
-    const netPayableToPartner = calculateNetAfterTds(row.partnerShareExpected);
 
     return {
       studentDbId: row.studentDbId,
@@ -303,6 +332,10 @@ function applyStudentSettlements(
       partnerShareExpected: row.partnerShareExpected,
       tdsAmount,
       netPayableToPartner,
+      calculatedNetPayable,
+      retainedAmount,
+      netPayableOverride: row.netPayableOverride,
+      agreedNetPayableNote: row.agreedNetPayableNote,
       commissionShared,
       pendingShared,
       projectedNetEarned,
@@ -328,6 +361,8 @@ function summarizeRows(
   const partnerShareExpected = rows.reduce((sum, row) => sum + row.partnerShareExpected, 0);
   const tdsAmount = rows.reduce((sum, row) => sum + row.tdsAmount, 0);
   const netPayableToPartner = rows.reduce((sum, row) => sum + row.netPayableToPartner, 0);
+  const calculatedNetPayable = rows.reduce((sum, row) => sum + row.calculatedNetPayable, 0);
+  const retainedAmount = rows.reduce((sum, row) => sum + row.retainedAmount, 0);
   const commissionShared = rows.reduce((sum, row) => sum + row.commissionShared, 0);
   const pendingShared = rows.reduce((sum, row) => sum + row.pendingShared, 0);
   const projectedNetEarned = rows.reduce((sum, row) => sum + row.projectedNetEarned, 0);
@@ -343,6 +378,8 @@ function summarizeRows(
     partnerShareExpected,
     tdsAmount,
     netPayableToPartner,
+    calculatedNetPayable,
+    retainedAmount,
     commissionShared,
     pendingShared,
     projectedNetEarned,
@@ -373,7 +410,7 @@ export async function getPartnerStudentCommissions(
 
   const students = await Student.find({ partnerId: new Types.ObjectId(partnerId) })
     .select(
-      "studentId firstName lastName status loan.disbursed loan.disbursedAt ourCommissionPercent commissionPercentOverride commissionReceived commissionSettled"
+      "studentId firstName lastName status loan.disbursed loan.disbursedAt ourCommissionPercent commissionPercentOverride agreedNetPayable agreedNetPayableNote commissionReceived commissionSettled"
     )
     .sort({ "loan.disbursed": -1, createdAt: -1 })
     .lean();
@@ -441,6 +478,8 @@ export async function getPartnersCommissionOverview(
         partnerShareExpected: summary.partnerShareExpected,
         tdsAmount: summary.tdsAmount,
         netPayableToPartner: summary.netPayableToPartner,
+        calculatedNetPayable: summary.calculatedNetPayable,
+        retainedAmount: summary.retainedAmount,
         commissionShared: summary.commissionShared,
         pendingShared: summary.pendingShared,
         projectedNetEarned: summary.projectedNetEarned,
@@ -481,6 +520,8 @@ export async function getGlobalCommissionTotals(): Promise<PartnerCommissionSumm
     partnerShareExpected: overview.reduce((sum, row) => sum + row.partnerShareExpected, 0),
     tdsAmount: overview.reduce((sum, row) => sum + row.tdsAmount, 0),
     netPayableToPartner: overview.reduce((sum, row) => sum + row.netPayableToPartner, 0),
+    calculatedNetPayable: overview.reduce((sum, row) => sum + row.calculatedNetPayable, 0),
+    retainedAmount: overview.reduce((sum, row) => sum + row.retainedAmount, 0),
     commissionShared: overview.reduce((sum, row) => sum + row.commissionShared, 0),
     pendingShared: overview.reduce((sum, row) => sum + row.pendingShared, 0),
     projectedNetEarned: overview.reduce((sum, row) => sum + row.projectedNetEarned, 0),
@@ -656,7 +697,9 @@ export function buildCommissionStatementRows(
     "Partner Share %": row.partnerSharePercentOverride ?? partnerSharePercent,
     "Share Expected": row.partnerShareExpected,
     "TDS 2%": row.tdsAmount,
+    "Calculated Net": row.calculatedNetPayable,
     "Net Payable": row.netPayableToPartner,
+    Retained: row.retainedAmount,
     Shared: row.commissionShared,
     "Pending Shared": row.pendingShared,
     "Net Earned": row.commissionEarned,
@@ -678,7 +721,9 @@ export function buildCommissionStatementRows(
         "Partner Share %": 0,
         "Share Expected": ledger.partnerShareExpectedTotal,
         "TDS 2%": calculateTdsAmount(ledger.partnerShareExpectedTotal),
-        "Net Payable": calculateNetAfterTds(ledger.partnerShareExpectedTotal),
+        "Calculated Net": rows.reduce((sum, row) => sum + row.calculatedNetPayable, 0),
+        "Net Payable": rows.reduce((sum, row) => sum + row.netPayableToPartner, 0),
+        Retained: rows.reduce((sum, row) => sum + row.retainedAmount, 0),
         Shared: ledger.commissionSharedTotal,
         "Pending Shared": ledger.pendingSharedTotal,
         "Net Earned": ledger.commissionEarnedTotal,
@@ -697,7 +742,9 @@ export function buildCommissionStatementRows(
         "Partner Share %": 0,
         "Share Expected": 0,
         "TDS 2%": 0,
+        "Calculated Net": 0,
         "Net Payable": 0,
+        Retained: 0,
         Shared: 0,
         "Pending Shared": 0,
         "Net Earned": 0,
@@ -716,7 +763,9 @@ export function buildCommissionStatementRows(
         "Partner Share %": 0,
         "Share Expected": 0,
         "TDS 2%": 0,
+        "Calculated Net": 0,
         "Net Payable": 0,
+        Retained: 0,
         Shared: ledger.sharedInMonth,
         "Pending Shared": 0,
         "Net Earned": 0,

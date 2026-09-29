@@ -68,3 +68,46 @@ export function calculateNetAfterTds(
 ): number {
   return roundMoney(Math.max(0, grossAmount) - calculateTdsAmount(grossAmount, tdsPercent));
 }
+
+/** Agreed cash to the partner. Blank override keeps the calculated net. Never above calculated. */
+export function resolveAgreedNetPayable(calculatedNet: number, override?: number | null): number {
+  const calculated = roundMoney(Math.max(0, calculatedNet));
+  if (override == null || Number.isNaN(Number(override))) return calculated;
+  return roundMoney(Math.min(calculated, Math.max(0, override)));
+}
+
+export function calculateRetainedFromNet(calculatedNet: number, agreedNet: number): number {
+  return roundMoney(Math.max(0, calculatedNet - agreedNet));
+}
+
+/**
+ * Gross settlement that transfers exactly `agreedNet` after TDS.
+ * Used only when the agreed net is below the calculated net.
+ */
+export function grossSettlementForAgreedNet(
+  agreedNet: number,
+  tdsPercent: number = PARTNER_TDS_PERCENT
+): number {
+  const target = roundMoney(Math.max(0, agreedNet));
+  if (target <= 0 || tdsPercent >= 100) return 0;
+
+  const ratio = 1 - tdsPercent / 100;
+  let gross = roundMoney(target / ratio);
+  for (let step = 0; step < 4; step += 1) {
+    const net = calculateNetAfterTds(gross, tdsPercent);
+    if (net === target) return gross;
+    gross = roundMoney(gross + (target - net) / ratio);
+  }
+  return gross;
+}
+
+/** Gross still owed to clear the partner. Unchanged when there is no agreed-net override. */
+export function settlementObligationGross(
+  partnerShareExpected: number,
+  calculatedNet: number,
+  agreedNet: number
+): number {
+  const share = roundMoney(Math.max(0, partnerShareExpected));
+  if (agreedNet >= calculatedNet) return share;
+  return grossSettlementForAgreedNet(agreedNet);
+}

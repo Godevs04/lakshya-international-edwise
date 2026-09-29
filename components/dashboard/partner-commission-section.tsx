@@ -56,6 +56,8 @@ interface PartnerCommissionSectionProps {
   commissionReceived?: number;
   pendingReceived?: number;
   partnerShareExpected?: number;
+  netPayableToPartner?: number;
+  retainedAmount?: number;
   commissionShared?: number;
   pendingShared?: number;
   projectedNetEarned?: number;
@@ -87,6 +89,8 @@ export function PartnerCommissionSection({
   commissionReceived = 0,
   pendingReceived = 0,
   partnerShareExpected = 0,
+  netPayableToPartner: netPayableFromSummary,
+  retainedAmount = 0,
   commissionShared = 0,
   pendingShared = 0,
   projectedNetEarned = 0,
@@ -104,7 +108,7 @@ export function PartnerCommissionSection({
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const tdsAmount = calculateTdsAmount(partnerShareExpected);
-  const netPayableToPartner = calculateNetAfterTds(partnerShareExpected);
+  const netPayableToPartner = netPayableFromSummary ?? calculateNetAfterTds(partnerShareExpected);
   const tab = resolveCommissionTab(searchParams.get("tab") ?? initialTab);
 
   function handleTabChange(value: string | null) {
@@ -198,7 +202,11 @@ export function PartnerCommissionSection({
             <p className="text-2xl font-semibold text-[#0B8FD8]">
               {formatCurrency(netPayableToPartner)}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Share minus TDS</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {retainedAmount > 0
+                ? `Agreed cash · kept ${formatCurrency(retainedAmount)}`
+                : "Share minus TDS"}
+            </p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Commission Shared</p>

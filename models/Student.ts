@@ -153,6 +153,9 @@ export interface IStudent extends Document {
   }>;
   commissionPercentOverride?: number;
   ourCommissionPercent?: number;
+  /** Cash agreed with the partner when it is below calculated net payable. */
+  agreedNetPayable?: number;
+  agreedNetPayableNote?: string;
   commissionReceived: number;
   commissionReceipts: Array<{
     _id?: Types.ObjectId;
@@ -283,6 +286,8 @@ const StudentSchema = new Schema<IStudent>(
     loanApplications: [LoanApplicationSchema],
     commissionPercentOverride: { type: Number, min: 0, max: 100 },
     ourCommissionPercent: { type: Number, min: 0, max: 100 },
+    agreedNetPayable: { type: Number, min: 0 },
+    agreedNetPayableNote: { type: String, trim: true, maxlength: 500 },
     commissionReceived: { type: Number, default: 0, min: 0 },
     commissionReceipts: [
       {

@@ -328,6 +328,16 @@ export const commissionReceiptSchema = z.object({
   note: z.string().max(500).optional(),
 });
 
+export const studentAgreedNetPayableSchema = z.object({
+  agreedNetPayable: z.coerce
+    .number()
+    .min(0, "Agreed payable cannot be negative")
+    .transform(roundMoney)
+    .optional()
+    .or(z.literal("")),
+  note: z.string().max(500).optional().or(z.literal("")),
+});
+
 export const studentCommissionRateSchema = z.object({
   commissionPercentOverride: z.coerce
     .number()

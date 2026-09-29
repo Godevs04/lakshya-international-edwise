@@ -29,6 +29,7 @@ import {
   commissionSettlementSchema,
   studentCommissionSettlementSchema,
   studentCommissionRateSchema,
+  studentAgreedNetPayableSchema,
   commissionLedgerFilterSchema,
   commissionReceiptSchema,
   commissionStatusFilterSchema,
@@ -417,6 +418,8 @@ export async function getPartnerAnalytics(partnerId: string) {
         partnerShareExpected: commission.partnerShareExpected,
         commissionShared: commission.commissionShared,
         pendingShared: commission.pendingShared,
+        netPayableToPartner: commission.netPayableToPartner,
+        retainedAmount: commission.retainedAmount,
         projectedNetEarned: commission.projectedNetEarned,
         commissionEarned: commission.commissionEarned,
         commissionPercent: commission.commissionPercent,
@@ -848,6 +851,85 @@ export async function updateStudentCommissionRateAction(
             $set.commissionPercentOverride ??
             ($unset.commissionPercentOverride ? null : before.commissionPercentOverride),
         },
+      },
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath(`/dashboard/students/${studentId}`);
+    revalidateInsightCaches();
+    return { success: true };
+  });
+}
+
+export async function updateStudentAgreedNetPayableAction(
+  partnerId: string,
+  studentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("updateStudentAgreedNetPayableAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const parsed = studentAgreedNetPayableSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const student = await Student.findOne({ _id: studentId, partnerId });
+    if (!student) return { success: false, error: "Student not found for this partner" };
+
+    const rows = await getPartnerStudentCommissions(partnerId);
+    const row = rows.find((item) => item.studentDbId === studentId);
+    if (!row) return { success: false, error: "Student commission row not found" };
+
+    const rawAgreed = formData.get("agreedNetPayable");
+    const clearing = rawAgreed === "" || parsed.data.agreedNetPayable === "";
+    const agreed = clearing ? row.calculatedNetPayable : Number(parsed.data.agreedNetPayable);
+    const note = typeof parsed.data.note === "string" ? parsed.data.note.trim() : "";
+    const cashAlreadyPaid = calculateNetAfterTds(row.commissionShared);
+
+    if (!clearing && agreed < cashAlreadyPaid) {
+      return {
+        success: false,
+        error: `Agreed payable cannot be below the net already paid (${cashAlreadyPaid.toLocaleString("en-IN")})`,
+      };
+    }
+
+    if (agreed > row.calculatedNetPayable) {
+      return {
+        success: false,
+        error: `Agreed payable cannot exceed calculated net (${row.calculatedNetPayable.toLocaleString("en-IN")})`,
+      };
+    }
+
+    const isCustom = !clearing && agreed < row.calculatedNetPayable;
+    if (isCustom && !note) {
+      return { success: false, error: "Add a note explaining why the payable was reduced" };
+    }
+
+    await Student.updateOne(
+      { _id: studentId, partnerId },
+      isCustom
+        ? { $set: { agreedNetPayable: agreed, agreedNetPayableNote: note } }
+        : { $unset: { agreedNetPayable: 1, agreedNetPayableNote: 1 } }
+    );
+
+    await logActivity({
+      action: "partner.student_agreed_net_payable_updated",
+      description: isCustom
+        ? `Set agreed net payable to INR ${agreed.toLocaleString("en-IN")} for ${student.studentId} (calculated ${row.calculatedNetPayable.toLocaleString("en-IN")})`
+        : `Reset agreed net payable to calculated amount for ${student.studentId}`,
+      resourceType: "student",
+      resourceId: studentId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: {
+        partnerId,
+        calculatedNetPayable: row.calculatedNetPayable,
+        agreedNetPayable: isCustom ? agreed : null,
+        retainedAmount: isCustom ? row.calculatedNetPayable - agreed : 0,
+        note: note || undefined,
       },
     });
 

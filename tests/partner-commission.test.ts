@@ -14,6 +14,10 @@ import {
   resolveCommissionPercent,
   calculateTdsAmount,
   calculateNetAfterTds,
+  resolveAgreedNetPayable,
+  calculateRetainedFromNet,
+  grossSettlementForAgreedNet,
+  settlementObligationGross,
 } from "@/lib/services/partner-commission.service";
 
 describe("two-tier commission formulas", () => {
@@ -41,6 +45,23 @@ describe("two-tier commission formulas", () => {
     expect(calculateNetAfterTds(24_000)).toBe(23_520);
     expect(calculateTdsAmount(0)).toBe(0);
     expect(calculateNetAfterTds(0)).toBe(0);
+  });
+
+  it("keeps an agreed net below calculated and tallies the retained gap", () => {
+    const calculatedNet = 42_000;
+    const agreedNet = resolveAgreedNetPayable(calculatedNet, 40_000);
+    expect(agreedNet).toBe(40_000);
+    expect(calculateRetainedFromNet(calculatedNet, agreedNet)).toBe(2_000);
+    expect(resolveAgreedNetPayable(calculatedNet, null)).toBe(42_000);
+    expect(resolveAgreedNetPayable(calculatedNet, 50_000)).toBe(42_000);
+
+    const share = 42_857.14;
+    expect(calculateNetAfterTds(share)).toBe(42_000);
+    const obligation = settlementObligationGross(share, calculatedNet, agreedNet);
+    expect(calculateNetAfterTds(obligation)).toBe(40_000);
+    expect(grossSettlementForAgreedNet(40_000)).toBe(obligation);
+    expect(calculatePendingShared(obligation, obligation)).toBe(0);
+    expect(settlementObligationGross(share, calculatedNet, calculatedNet)).toBe(share);
   });
 
   it("matches the user example end-to-end", () => {

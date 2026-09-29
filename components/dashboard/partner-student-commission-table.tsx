@@ -28,6 +28,7 @@ import {
   type CommissionMarkType,
 } from "@/components/dashboard/commission-mark-dialog";
 import { CommissionStatusFilter as CommissionStatusFilterControl } from "@/components/dashboard/commission-status-filter";
+import { AgreedNetPayableDialog } from "@/components/dashboard/agreed-net-payable-dialog";
 import { CheckCircle2, Pencil, Search, Wallet } from "lucide-react";
 
 export type PartnerStudentCommissionRow = StudentCommissionRow;
@@ -64,6 +65,7 @@ export function PartnerStudentCommissionTable({
     student: PartnerStudentCommissionRow;
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [payableStudent, setPayableStudent] = useState<PartnerStudentCommissionRow | null>(null);
 
   const filteredRows = useMemo(() => {
     const statusFiltered = filterCommissionRows(rows, statusFilter);
@@ -85,6 +87,7 @@ export function PartnerStudentCommissionTable({
       partnerShareExpected: acc.partnerShareExpected + row.partnerShareExpected,
       tdsAmount: acc.tdsAmount + row.tdsAmount,
       netPayableToPartner: acc.netPayableToPartner + row.netPayableToPartner,
+      retainedAmount: acc.retainedAmount + row.retainedAmount,
       commissionShared: acc.commissionShared + row.commissionShared,
       pendingShared: acc.pendingShared + row.pendingShared,
       projectedNetEarned: acc.projectedNetEarned + row.projectedNetEarned,
@@ -98,6 +101,7 @@ export function PartnerStudentCommissionTable({
       partnerShareExpected: 0,
       tdsAmount: 0,
       netPayableToPartner: 0,
+      retainedAmount: 0,
       commissionShared: 0,
       pendingShared: 0,
       projectedNetEarned: 0,
@@ -290,7 +294,26 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
                   <TableCell>{formatCurrency(row.tdsAmount)}</TableCell>
                   <TableCell className="font-medium">
-                    {formatCurrency(row.netPayableToPartner)}
+                    <div className="flex items-start gap-2">
+                      <div>
+                        <p>{formatCurrency(row.netPayableToPartner)}</p>
+                        {row.retainedAmount > 0 ? (
+                          <p className="text-[10px] text-[#0D9488]">
+                            custom · kept {formatCurrency(row.retainedAmount)}
+                          </p>
+                        ) : null}
+                      </div>
+                      {canWrite ? (
+                        <button
+                          type="button"
+                          className="mt-0.5 text-muted-foreground hover:text-foreground"
+                          aria-label={`Edit agreed net payable for ${row.studentName}`}
+                          onClick={() => setPayableStudent(row)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell className="text-[#0B8FD8]">
                     {formatCurrency(row.projectedNetEarned)}
@@ -376,7 +399,14 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(totals.commissionExpected)}</TableCell>
                   <TableCell>{formatCurrency(totals.partnerShareExpected)}</TableCell>
                   <TableCell>{formatCurrency(totals.tdsAmount)}</TableCell>
-                  <TableCell>{formatCurrency(totals.netPayableToPartner)}</TableCell>
+                  <TableCell>
+                    {formatCurrency(totals.netPayableToPartner)}
+                    {totals.retainedAmount > 0 ? (
+                      <p className="text-[10px] font-medium text-[#0D9488]">
+                        kept {formatCurrency(totals.retainedAmount)}
+                      </p>
+                    ) : null}
+                  </TableCell>
                   <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionShared)}</TableCell>
@@ -403,6 +433,21 @@ export function PartnerStudentCommissionTable({
           )}
         </TableBody>
       </Table>
+
+      {payableStudent ? (
+        <AgreedNetPayableDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setPayableStudent(null);
+          }}
+          partnerId={partnerId}
+          studentDbId={payableStudent.studentDbId}
+          studentName={payableStudent.studentName}
+          calculatedNet={payableStudent.calculatedNetPayable}
+          agreedNet={payableStudent.netPayableToPartner}
+          existingNote={payableStudent.agreedNetPayableNote}
+        />
+      ) : null}
 
       {markDialog ? (
         <CommissionMarkDialog
@@ -445,6 +490,10 @@ function GlassHelp() {
         <li>
           <strong>2% TDS</strong> is deducted automatically from partner share. Transfer the{" "}
           <strong>Net Payable</strong> amount; withhold TDS for deposit
+        </li>
+        <li>
+          Pencil on <strong>Net Payable</strong> sets a lower agreed amount. The difference is
+          retained by you and drops out of pending
         </li>
         <li>Expected, share, and pending columns update automatically from disbursement + rates</li>
         <li>
