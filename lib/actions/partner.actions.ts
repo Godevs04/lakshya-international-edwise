@@ -22,6 +22,7 @@ import {
 import {
   calculateNetAfterTds,
   calculateTdsAmount,
+  grossForSyncedPaidCash,
   PARTNER_TDS_PERCENT,
 } from "@/lib/utils/commission-calculations";
 import {
@@ -30,6 +31,7 @@ import {
   studentCommissionSettlementSchema,
   studentCommissionRateSchema,
   studentAgreedNetPayableSchema,
+  studentPaidFinalNetSchema,
   commissionLedgerFilterSchema,
   commissionReceiptSchema,
   commissionStatusFilterSchema,
@@ -935,6 +937,163 @@ export async function updateStudentAgreedNetPayableAction(
 
     revalidatePath(`/dashboard/partners/${partnerId}`);
     revalidatePath(`/dashboard/students/${studentId}`);
+    revalidateInsightCaches();
+    return { success: true };
+  });
+}
+
+export async function syncStudentPaidAndFinalNetAction(
+  partnerId: string,
+  studentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  return runLoggedMutation("syncStudentPaidAndFinalNetAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    const parsed = studentPaidFinalNetSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
+    }
+
+    await connectDB();
+    const [partner, student] = await Promise.all([
+      Partner.findById(partnerId),
+      Student.findOne({ _id: studentId, partnerId }),
+    ]);
+    if (!partner) return { success: false, error: "Partner not found" };
+    if (!student) return { success: false, error: "Student not found for this partner" };
+
+    const rows = await getPartnerStudentCommissions(partnerId);
+    const row = rows.find((item) => item.studentDbId === studentId);
+    if (!row) return { success: false, error: "Student commission row not found" };
+
+    const cash = parsed.data.amount;
+    if (cash > row.calculatedNetPayable) {
+      return {
+        success: false,
+        error: `Amount cannot exceed net payable (${row.calculatedNetPayable.toLocaleString("en-IN")})`,
+      };
+    }
+
+    const note = typeof parsed.data.note === "string" ? parsed.data.note.trim() : "";
+    const isFull = cash >= row.calculatedNetPayable;
+    const gross = grossForSyncedPaidCash(row.partnerShareExpected, row.calculatedNetPayable, cash);
+    const previousGross = student.commissionSettled ?? 0;
+    const delta = Math.round((gross - previousGross) * 100) / 100;
+    const syncNote = note || `Final net synced to paid cash ${cash.toLocaleString("en-IN")}`;
+
+    const $set: Record<string, unknown> = { commissionSettled: gross };
+    const update: Record<string, unknown> = { $set };
+    if (isFull) {
+      update.$unset = { agreedNetPayable: 1, agreedNetPayableNote: 1 };
+    } else {
+      $set.agreedNetPayable = cash;
+      $set.agreedNetPayableNote = syncNote;
+    }
+    if (delta > 0) {
+      update.$push = {
+        commissionSettlements: {
+          amount: delta,
+          note: syncNote,
+          settledAt: new Date(),
+          settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+          settledByName: user?.name,
+        },
+      };
+    }
+
+    await Student.updateOne({ _id: studentId, partnerId }, update);
+
+    const updatedRows = await getPartnerStudentCommissions(partnerId);
+    const totalSettled = updatedRows.reduce((sum, item) => sum + item.commissionShared, 0);
+    partner.performance ??= {
+      monthlyLeads: 0,
+      sanctionRate: 0,
+      disbursementTotal: 0,
+      commissionEarned: 0,
+      commissionSettled: 0,
+    };
+    partner.performance.commissionSettled = totalSettled;
+    if (delta > 0) {
+      partner.commissionSettlements ??= [];
+      partner.commissionSettlements.push({
+        amount: Math.abs(delta),
+        note: syncNote,
+        settledAt: new Date(),
+        settledBy: user?.id ? new Types.ObjectId(user.id) : undefined,
+        settledByName: user?.name,
+        studentId: student._id,
+        studentName: `${student.firstName} ${student.lastName}`.trim(),
+      });
+    }
+    await partner.save();
+
+    await logActivity({
+      action: "partner.student_paid_final_net_synced",
+      description: `Set paid and final net to INR ${cash.toLocaleString("en-IN")} for ${student.studentId} (calculated ${row.calculatedNetPayable.toLocaleString("en-IN")})`,
+      resourceType: "partner",
+      resourceId: partnerId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: {
+        partnerId,
+        studentId,
+        paidCash: cash,
+        finalNet: isFull ? row.calculatedNetPayable : cash,
+        calculatedNetPayable: row.calculatedNetPayable,
+        retainedAmount: isFull ? 0 : row.calculatedNetPayable - cash,
+        previousGross,
+        gross,
+      },
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath(`/dashboard/students/${studentId}`);
+    revalidatePath("/dashboard/partners");
+    revalidateInsightCaches();
+    return { success: true };
+  });
+}
+
+export async function reopenStudentPayoutAction(
+  partnerId: string,
+  studentId: string
+): Promise<ActionResult> {
+  return runLoggedMutation("reopenStudentPayoutAction", async () => {
+    const user = await getSessionUser();
+    requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
+
+    await connectDB();
+    const student = await Student.findOne({ _id: studentId, partnerId });
+    if (!student) return { success: false, error: "Student not found for this partner" };
+
+    if (student.agreedNetPayable == null) {
+      return {
+        success: false,
+        error:
+          "This payout already matches the full net payable. Enter a lower paid amount if part of it should stay with you.",
+      };
+    }
+
+    await Student.updateOne(
+      { _id: studentId, partnerId },
+      { $unset: { agreedNetPayable: 1, agreedNetPayableNote: 1 } }
+    );
+
+    await logActivity({
+      action: "partner.student_payout_reopened",
+      description: `Marked payout pending again for ${student.studentId}`,
+      resourceType: "partner",
+      resourceId: partnerId,
+      userId: user?.id,
+      userName: user?.name,
+      metadata: { partnerId, studentId },
+    });
+
+    revalidatePath(`/dashboard/partners/${partnerId}`);
+    revalidatePath(`/dashboard/students/${studentId}`);
+    revalidatePath("/dashboard/partners");
     revalidateInsightCaches();
     return { success: true };
   });

@@ -101,6 +101,32 @@ export function grossSettlementForAgreedNet(
   return gross;
 }
 
+/**
+ * Gross to store when the cash paid and the final net are the same figure.
+ * Full calculated net keeps the original partner share. A lower cash figure
+ * uses the gross that transfers exactly that cash after TDS.
+ */
+export function grossForSyncedPaidCash(
+  partnerShareExpected: number,
+  calculatedNet: number,
+  paidCash: number
+): number {
+  const share = roundMoney(Math.max(0, partnerShareExpected));
+  const calculated = roundMoney(Math.max(0, calculatedNet));
+  const cash = roundMoney(Math.max(0, paidCash));
+  if (cash >= calculated) return share;
+  return grossSettlementForAgreedNet(cash);
+}
+
+/** Row is closed once the cash paid covers the final net and nothing is still pending. */
+export function isStudentPayoutComplete(
+  partnerShareExpected: number,
+  pendingShared: number,
+  paidCash: number
+): boolean {
+  return partnerShareExpected > 0 && pendingShared <= 0 && paidCash > 0;
+}
+
 /** Gross still owed to clear the partner. Unchanged when there is no agreed-net override. */
 export function settlementObligationGross(
   partnerShareExpected: number,
