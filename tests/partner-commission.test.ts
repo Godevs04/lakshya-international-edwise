@@ -87,6 +87,9 @@ describe("two-tier commission formulas", () => {
     expect(isStudentPayoutComplete(share, calculatePendingShared(gross, gross), paidCash)).toBe(
       true
     );
+    expect(gross).toBe(21_000);
+    expect(calculateNetEarned(52_676.19, paidCash)).toBe(32_096.19);
+    expect(calculateNetEarned(52_676.19, gross)).toBe(31_676.19);
   });
 
   it("matches the user example end-to-end", () => {
