@@ -317,10 +317,12 @@ function applyStudentSettlements(
       netPayableToPartner
     );
     const pendingShared = calculatePendingShared(settlementObligation, commissionShared);
-    const projectedNetEarned = roundMoney(
-      calculateProjectedNetEarned(row.commissionExpected, row.partnerShareExpected) + retainedAmount
-    );
-    const commissionEarned = calculateNetEarned(row.commissionReceived, commissionShared);
+    const paidCash = calculateNetAfterTds(commissionShared);
+    const projectedNetEarned =
+      retainedAmount > 0
+        ? calculateNetEarned(row.commissionExpected, netPayableToPartner)
+        : calculateProjectedNetEarned(row.commissionExpected, row.partnerShareExpected);
+    const commissionEarned = calculateNetEarned(row.commissionReceived, paidCash);
 
     return {
       studentDbId: row.studentDbId,
@@ -343,7 +345,7 @@ function applyStudentSettlements(
       netPayableOverride: row.netPayableOverride,
       agreedNetPayableNote: row.agreedNetPayableNote,
       commissionShared,
-      paidCash: calculateNetAfterTds(commissionShared),
+      paidCash,
       pendingShared,
       projectedNetEarned,
       commissionEarned,
