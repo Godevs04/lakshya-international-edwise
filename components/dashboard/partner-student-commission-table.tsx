@@ -23,13 +23,10 @@ import type { StudentCommissionRow } from "@/lib/services/partner-commission.ser
 import type { StudentStatus } from "@/lib/constants/statuses";
 import type { CommissionStatusFilter } from "@/lib/constants/commission-status";
 import { filterCommissionRows } from "@/lib/utils/commission-status-filter";
-import {
-  CommissionMarkDialog,
-  type CommissionMarkType,
-} from "@/components/dashboard/commission-mark-dialog";
 import { CommissionStatusFilter as CommissionStatusFilterControl } from "@/components/dashboard/commission-status-filter";
 import { AgreedNetPayableDialog } from "@/components/dashboard/agreed-net-payable-dialog";
-import { CheckCircle2, Pencil, Search, Wallet } from "lucide-react";
+import { isStudentPayoutComplete } from "@/lib/utils/commission-calculations";
+import { CheckCircle2, Pencil, Search } from "lucide-react";
 
 export type PartnerStudentCommissionRow = StudentCommissionRow;
 
@@ -59,11 +56,6 @@ export function PartnerStudentCommissionTable({
     field: "our" | "partner";
   } | null>(null);
   const [rateDraft, setRateDraft] = useState("");
-  const [markDialog, setMarkDialog] = useState<{
-    open: boolean;
-    type: CommissionMarkType;
-    student: PartnerStudentCommissionRow;
-  } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [payableStudent, setPayableStudent] = useState<PartnerStudentCommissionRow | null>(null);
 
@@ -87,8 +79,10 @@ export function PartnerStudentCommissionTable({
       partnerShareExpected: acc.partnerShareExpected + row.partnerShareExpected,
       tdsAmount: acc.tdsAmount + row.tdsAmount,
       netPayableToPartner: acc.netPayableToPartner + row.netPayableToPartner,
+      calculatedNetPayable: acc.calculatedNetPayable + row.calculatedNetPayable,
       retainedAmount: acc.retainedAmount + row.retainedAmount,
       commissionShared: acc.commissionShared + row.commissionShared,
+      paidCash: acc.paidCash + row.paidCash,
       pendingShared: acc.pendingShared + row.pendingShared,
       projectedNetEarned: acc.projectedNetEarned + row.projectedNetEarned,
       commissionEarned: acc.commissionEarned + row.commissionEarned,
@@ -101,17 +95,15 @@ export function PartnerStudentCommissionTable({
       partnerShareExpected: 0,
       tdsAmount: 0,
       netPayableToPartner: 0,
+      calculatedNetPayable: 0,
       retainedAmount: 0,
       commissionShared: 0,
+      paidCash: 0,
       pendingShared: 0,
       projectedNetEarned: 0,
       commissionEarned: 0,
     }
   );
-
-  function openMarkDialog(type: CommissionMarkType, student: PartnerStudentCommissionRow) {
-    setMarkDialog({ open: true, type, student });
-  }
 
   async function handleSaveRate(student: PartnerStudentCommissionRow, field: "our" | "partner") {
     setPendingStudentId(student.studentDbId);
@@ -219,7 +211,7 @@ export function PartnerStudentCommissionTable({
           <p className="text-sm font-medium">Filter students</p>
           <p className="text-xs text-muted-foreground">
             Search by name or ID
-            {showStatusFilter ? ", then narrow by received/paid status" : ""}
+            {showStatusFilter ? ", then narrow by payout status" : ""}
           </p>
         </div>
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-end lg:w-auto">
@@ -257,6 +249,7 @@ export function PartnerStudentCommissionTable({
             <TableHead>Proj. Net</TableHead>
             <TableHead>Received</TableHead>
             <TableHead>Paid</TableHead>
+            <TableHead>Final Net</TableHead>
             <TableHead>Pend. Rcvd</TableHead>
             <TableHead>Pend. Paid</TableHead>
             <TableHead>Net</TableHead>
@@ -294,26 +287,7 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
                   <TableCell>{formatCurrency(row.tdsAmount)}</TableCell>
                   <TableCell className="font-medium">
-                    <div className="flex items-start gap-2">
-                      <div>
-                        <p>{formatCurrency(row.netPayableToPartner)}</p>
-                        {row.retainedAmount > 0 ? (
-                          <p className="text-[10px] text-[#0D9488]">
-                            custom · kept {formatCurrency(row.retainedAmount)}
-                          </p>
-                        ) : null}
-                      </div>
-                      {canWrite ? (
-                        <button
-                          type="button"
-                          className="mt-0.5 text-muted-foreground hover:text-foreground"
-                          aria-label={`Edit agreed net payable for ${row.studentName}`}
-                          onClick={() => setPayableStudent(row)}
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                      ) : null}
-                    </div>
+                    {formatCurrency(row.calculatedNetPayable)}
                   </TableCell>
                   <TableCell className="text-[#0B8FD8]">
                     {formatCurrency(row.projectedNetEarned)}
@@ -322,7 +296,41 @@ export function PartnerStudentCommissionTable({
                     {formatCurrency(row.commissionReceived)}
                   </TableCell>
                   <TableCell className="text-[#22C55E]">
-                    {formatCurrency(row.commissionShared)}
+                    <div className="flex items-start gap-2">
+                      <span>{formatCurrency(row.paidCash)}</span>
+                      {canWrite ? (
+                        <button
+                          type="button"
+                          className="mt-0.5 text-muted-foreground hover:text-foreground"
+                          aria-label={`Edit paid amount for ${row.studentName}`}
+                          onClick={() => setPayableStudent(row)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-start gap-2">
+                      <div>
+                        <p>{formatCurrency(row.netPayableToPartner)}</p>
+                        {row.retainedAmount > 0 ? (
+                          <p className="text-[10px] text-[#0D9488]">
+                            kept {formatCurrency(row.retainedAmount)}
+                          </p>
+                        ) : null}
+                      </div>
+                      {canWrite ? (
+                        <button
+                          type="button"
+                          className="mt-0.5 text-muted-foreground hover:text-foreground"
+                          aria-label={`Edit final net for ${row.studentName}`}
+                          onClick={() => setPayableStudent(row)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell className="text-[#0369A1]">
                     {formatCurrency(row.pendingReceived)}
@@ -335,57 +343,31 @@ export function PartnerStudentCommissionTable({
                   </TableCell>
                   {canWrite && (
                     <TableCell className="text-right">
-                      {row.commissionExpected > 0 &&
-                      row.pendingReceived <= 0 &&
-                      row.pendingShared <= 0 ? (
+                      {isStudentPayoutComplete(
+                        row.partnerShareExpected,
+                        row.pendingShared,
+                        row.paidCash
+                      ) ? (
                         <Badge className="border-transparent bg-[#22C55E]/15 text-[#22C55E]">
                           <CheckCircle2 data-icon="inline-start" />
                           Completed
                         </Badge>
                       ) : (
-                        <div className="flex justify-end gap-1">
-                          {row.pendingReceived <= 0 && row.commissionReceived > 0 ? (
-                            <Badge
-                              variant="outline"
-                              className="h-8 border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E]"
-                            >
-                              <CheckCircle2 data-icon="inline-start" />
-                              Received
-                            </Badge>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={
-                                row.pendingReceived <= 0 || pendingStudentId === row.studentDbId
-                              }
-                              onClick={() => openMarkDialog("received", row)}
-                            >
-                              <Wallet className="mr-1 h-3.5 w-3.5" />
-                              Received
-                            </Button>
-                          )}
-                          {row.pendingShared <= 0 && row.commissionShared > 0 ? (
-                            <Badge
-                              variant="outline"
-                              className="h-8 border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E]"
-                            >
-                              <CheckCircle2 data-icon="inline-start" />
-                              Paid
-                            </Badge>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={
-                                row.pendingShared <= 0 || pendingStudentId === row.studentDbId
-                              }
-                              onClick={() => openMarkDialog("paid", row)}
-                            >
-                              <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-                              Paid
-                            </Button>
-                          )}
+                        <div className="flex items-center justify-end gap-2">
+                          <Badge variant="outline" className="text-muted-foreground">
+                            Pending
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              row.calculatedNetPayable <= 0 || pendingStudentId === row.studentDbId
+                            }
+                            onClick={() => setPayableStudent(row)}
+                          >
+                            <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                            Complete
+                          </Button>
                         </div>
                       )}
                     </TableCell>
@@ -399,6 +381,10 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(totals.commissionExpected)}</TableCell>
                   <TableCell>{formatCurrency(totals.partnerShareExpected)}</TableCell>
                   <TableCell>{formatCurrency(totals.tdsAmount)}</TableCell>
+                  <TableCell>{formatCurrency(totals.calculatedNetPayable)}</TableCell>
+                  <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
+                  <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
+                  <TableCell>{formatCurrency(totals.paidCash)}</TableCell>
                   <TableCell>
                     {formatCurrency(totals.netPayableToPartner)}
                     {totals.retainedAmount > 0 ? (
@@ -407,9 +393,6 @@ export function PartnerStudentCommissionTable({
                       </p>
                     ) : null}
                   </TableCell>
-                  <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
-                  <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
-                  <TableCell>{formatCurrency(totals.commissionShared)}</TableCell>
                   <TableCell>{formatCurrency(totals.pendingReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.pendingShared)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionEarned)}</TableCell>
@@ -420,7 +403,7 @@ export function PartnerStudentCommissionTable({
           ) : (
             <TableRow>
               <TableCell
-                colSpan={canWrite ? 16 : 15}
+                colSpan={canWrite ? 17 : 16}
                 className="h-24 text-center text-muted-foreground"
               >
                 {rows.length
@@ -444,24 +427,8 @@ export function PartnerStudentCommissionTable({
           studentDbId={payableStudent.studentDbId}
           studentName={payableStudent.studentName}
           calculatedNet={payableStudent.calculatedNetPayable}
-          agreedNet={payableStudent.netPayableToPartner}
+          paidCash={payableStudent.paidCash}
           existingNote={payableStudent.agreedNetPayableNote}
-        />
-      ) : null}
-
-      {markDialog ? (
-        <CommissionMarkDialog
-          open={markDialog.open}
-          onOpenChange={(open) => setMarkDialog(open ? markDialog : null)}
-          partnerId={partnerId}
-          studentDbId={markDialog.student.studentDbId}
-          studentName={markDialog.student.studentName}
-          type={markDialog.type}
-          pendingAmount={
-            markDialog.type === "received"
-              ? markDialog.student.pendingReceived
-              : markDialog.student.pendingShared
-          }
         />
       ) : null}
     </div>
@@ -471,31 +438,24 @@ export function PartnerStudentCommissionTable({
 function GlassHelp() {
   return (
     <div className="rounded-xl border border-[#0B8FD8]/15 bg-[#0B8FD8]/5 p-4 text-sm">
-      <p className="font-medium text-[#0B8FD8]">Where to mark received & paid</p>
+      <p className="font-medium text-[#0B8FD8]">How to close a partner payout</p>
       <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
         <li>
-          <strong>Received</strong> — money from lender/bank (use Actions → Received; full or
-          partial amount)
+          <strong>Expected</strong>, <strong>Share Exp.</strong>, <strong>TDS 2%</strong>,{" "}
+          <strong>Net Payable</strong>, and <strong>Proj. Net</strong> stay calculated
         </li>
         <li>
-          <strong>Paid</strong> — money paid to partner (use Actions → Paid; full or partial amount)
+          Pencil on <strong>Paid</strong> or <strong>Final net</strong>, or use{" "}
+          <strong>Complete</strong>. The amount you enter is saved in both places
         </li>
         <li>
-          When both are done, Actions shows a green <strong>Completed</strong> badge
+          That amount can be higher than the old pending figure. The difference from Net Payable
+          stays with you and is no longer pending
         </li>
         <li>
-          Click the pencil on <strong>Our %</strong> or <strong>Partner %</strong> to update rates
-          per student
+          Actions show <strong>Pending</strong> until you complete the row, then{" "}
+          <strong>Completed</strong>
         </li>
-        <li>
-          <strong>2% TDS</strong> is deducted automatically from partner share. Transfer the{" "}
-          <strong>Net Payable</strong> amount; withhold TDS for deposit
-        </li>
-        <li>
-          Pencil on <strong>Net Payable</strong> sets a lower agreed amount. The difference is
-          retained by you and drops out of pending
-        </li>
-        <li>Expected, share, and pending columns update automatically from disbursement + rates</li>
         <li>
           All-partner filter:{" "}
           <Link href="/dashboard/partners/commissions" className="text-primary underline">

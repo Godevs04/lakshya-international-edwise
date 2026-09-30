@@ -22,6 +22,8 @@ import {
   calculateRetainedFromNet,
   settlementObligationGross,
   grossSettlementForAgreedNet,
+  grossForSyncedPaidCash,
+  isStudentPayoutComplete,
 } from "@/lib/utils/commission-calculations";
 
 export {
@@ -38,6 +40,8 @@ export {
   calculateRetainedFromNet,
   settlementObligationGross,
   grossSettlementForAgreedNet,
+  grossForSyncedPaidCash,
+  isStudentPayoutComplete,
 };
 
 /** @deprecated use resolvePartnerSharePercent */
@@ -104,6 +108,8 @@ export interface StudentCommissionRow {
   netPayableOverride?: number | null;
   agreedNetPayableNote?: string | null;
   commissionShared: number;
+  /** Cash already transferred. Matches Final net after a payout is saved. */
+  paidCash: number;
   pendingShared: number;
   projectedNetEarned: number;
   commissionEarned: number;
@@ -337,6 +343,7 @@ function applyStudentSettlements(
       netPayableOverride: row.netPayableOverride,
       agreedNetPayableNote: row.agreedNetPayableNote,
       commissionShared,
+      paidCash: calculateNetAfterTds(commissionShared),
       pendingShared,
       projectedNetEarned,
       commissionEarned,

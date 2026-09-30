@@ -245,10 +245,10 @@ export function PartnerCommissionSection({
           <GlassCard className="p-5">
             <h3 className="mb-1 text-sm font-semibold">Record Bulk Partner Share</h3>
             <p className="mb-4 text-xs text-muted-foreground">
-              Amounts are calculated automatically. Use per-student <strong>Received</strong> and{" "}
-              <strong>Paid</strong> buttons in the Student-wise tab. When paying a partner, transfer
-              the net amount after 2% TDS. Bulk entry below is only for legacy lump-sum partner
-              payments.
+              Amounts are calculated automatically. On the Student-wise tab, use{" "}
+              <strong>Complete</strong> and enter the cash you paid. That same amount becomes Paid
+              and Final net, even when it is higher than the old pending figure. Bulk entry below is
+              only for legacy lump-sum partner payments.
             </p>
             <form onSubmit={handleSettlementSubmit} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

@@ -18,6 +18,8 @@ import {
   calculateRetainedFromNet,
   grossSettlementForAgreedNet,
   settlementObligationGross,
+  grossForSyncedPaidCash,
+  isStudentPayoutComplete,
 } from "@/lib/services/partner-commission.service";
 
 describe("two-tier commission formulas", () => {
@@ -62,6 +64,29 @@ describe("two-tier commission formulas", () => {
     expect(grossSettlementForAgreedNet(40_000)).toBe(obligation);
     expect(calculatePendingShared(obligation, obligation)).toBe(0);
     expect(settlementObligationGross(share, calculatedNet, calculatedNet)).toBe(share);
+  });
+
+  it("syncs a paid cash above the old pending remainder to the same final net", () => {
+    const share = 23_045.83;
+    const calculatedNet = calculateNetAfterTds(share);
+    const alreadyPaidGross = 20_580;
+    const pendingRemainder = calculatePendingShared(share, alreadyPaidGross);
+    const paidCash = 20_580;
+
+    expect(calculatedNet).toBe(22_584.91);
+    expect(pendingRemainder).toBe(2_465.83);
+    expect(paidCash).toBeGreaterThan(pendingRemainder);
+    expect(paidCash).toBeLessThan(calculatedNet);
+
+    const finalNet = resolveAgreedNetPayable(calculatedNet, paidCash);
+    const gross = grossForSyncedPaidCash(share, calculatedNet, paidCash);
+    expect(finalNet).toBe(paidCash);
+    expect(calculateNetAfterTds(gross)).toBe(paidCash);
+    expect(calculatePendingShared(gross, gross)).toBe(0);
+    expect(calculateRetainedFromNet(calculatedNet, finalNet)).toBe(2_004.91);
+    expect(isStudentPayoutComplete(share, calculatePendingShared(gross, gross), paidCash)).toBe(
+      true
+    );
   });
 
   it("matches the user example end-to-end", () => {

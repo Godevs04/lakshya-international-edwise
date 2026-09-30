@@ -71,7 +71,7 @@ export default async function PartnerDetailPage({
           <div className="flex flex-wrap gap-2">
             <Link href={`/dashboard/partners/${id}?tab=students`}>
               <Button variant="default" size="sm">
-                <IndianRupee className="mr-1 h-4 w-4" /> Mark Received / Paid
+                <IndianRupee className="mr-1 h-4 w-4" /> Student payouts
               </Button>
             </Link>
             {access.canWrite ? (
@@ -147,8 +147,8 @@ export default async function PartnerDetailPage({
         <div className="flex flex-wrap items-center gap-4">
           <StatusBadge status={partner.status as PartnerStatus} type="partner" />
           <span className="text-sm text-muted-foreground">
-            Commission is calculated from disbursed loan amounts. Use the Student-wise tab for
-            per-student payout view.
+            Commission is calculated from disbursed loan amounts. Use Complete on the Student-wise
+            tab to set the cash paid and the final net together.
           </span>
         </div>
 
