@@ -127,6 +127,19 @@ export function isStudentPayoutComplete(
   return partnerShareExpected > 0 && pendingShared <= 0 && paidCash > 0;
 }
 
+/**
+ * Full payout: Final net is the share before 2% TDS.
+ * A reduced payout shows the agreed cash instead.
+ */
+export function resolveDisplayedFinalNet(
+  partnerShareExpected: number,
+  agreedNet: number,
+  retainedAmount: number
+): number {
+  if (retainedAmount > 0) return roundMoney(Math.max(0, agreedNet));
+  return roundMoney(Math.max(0, partnerShareExpected));
+}
+
 /** Gross still owed to clear the partner. Unchanged when there is no agreed-net override. */
 export function settlementObligationGross(
   partnerShareExpected: number,

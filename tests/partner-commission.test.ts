@@ -20,6 +20,7 @@ import {
   settlementObligationGross,
   grossForSyncedPaidCash,
   isStudentPayoutComplete,
+  resolveDisplayedFinalNet,
 } from "@/lib/services/partner-commission.service";
 
 describe("two-tier commission formulas", () => {
@@ -90,6 +91,14 @@ describe("two-tier commission formulas", () => {
     expect(gross).toBe(21_000);
     expect(calculateNetEarned(52_676.19, paidCash)).toBe(32_096.19);
     expect(calculateNetEarned(52_676.19, gross)).toBe(31_676.19);
+  });
+
+  it("shows the share as final net on a full payout and the cash after 2% as paid", () => {
+    const share = 18_000;
+    const paidAfterTds = calculateNetAfterTds(share);
+    expect(paidAfterTds).toBe(17_640);
+    expect(resolveDisplayedFinalNet(share, paidAfterTds, 0)).toBe(18_000);
+    expect(resolveDisplayedFinalNet(23_045.83, 20_580, 2_004.91)).toBe(20_580);
   });
 
   it("matches the user example end-to-end", () => {

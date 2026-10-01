@@ -25,7 +25,10 @@ import type { CommissionStatusFilter } from "@/lib/constants/commission-status";
 import { filterCommissionRows } from "@/lib/utils/commission-status-filter";
 import { CommissionStatusFilter as CommissionStatusFilterControl } from "@/components/dashboard/commission-status-filter";
 import { AgreedNetPayableDialog } from "@/components/dashboard/agreed-net-payable-dialog";
-import { isStudentPayoutComplete } from "@/lib/utils/commission-calculations";
+import {
+  isStudentPayoutComplete,
+  resolveDisplayedFinalNet,
+} from "@/lib/utils/commission-calculations";
 import { CheckCircle2, Pencil, Search } from "lucide-react";
 
 export type PartnerStudentCommissionRow = StudentCommissionRow;
@@ -83,6 +86,13 @@ export function PartnerStudentCommissionTable({
       retainedAmount: acc.retainedAmount + row.retainedAmount,
       commissionShared: acc.commissionShared + row.commissionShared,
       paidCash: acc.paidCash + row.paidCash,
+      finalNet:
+        acc.finalNet +
+        resolveDisplayedFinalNet(
+          row.partnerShareExpected,
+          row.netPayableToPartner,
+          row.retainedAmount
+        ),
       pendingShared: acc.pendingShared + row.pendingShared,
       projectedNetEarned: acc.projectedNetEarned + row.projectedNetEarned,
       commissionEarned: acc.commissionEarned + row.commissionEarned,
@@ -99,6 +109,7 @@ export function PartnerStudentCommissionTable({
       retainedAmount: 0,
       commissionShared: 0,
       paidCash: 0,
+      finalNet: 0,
       pendingShared: 0,
       projectedNetEarned: 0,
       commissionEarned: 0,
@@ -250,9 +261,6 @@ export function PartnerStudentCommissionTable({
             <TableHead>Received</TableHead>
             <TableHead>Paid</TableHead>
             <TableHead>Final Net</TableHead>
-            <TableHead>Pend. Rcvd</TableHead>
-            <TableHead>Pend. Paid</TableHead>
-            <TableHead>Net</TableHead>
             {canWrite && <TableHead className="text-right">Actions</TableHead>}
           </TableRow>
         </TableHeader>
@@ -313,7 +321,15 @@ export function PartnerStudentCommissionTable({
                   <TableCell className="font-medium">
                     <div className="flex items-start gap-2">
                       <div>
-                        <p>{formatCurrency(row.netPayableToPartner)}</p>
+                        <p>
+                          {formatCurrency(
+                            resolveDisplayedFinalNet(
+                              row.partnerShareExpected,
+                              row.netPayableToPartner,
+                              row.retainedAmount
+                            )
+                          )}
+                        </p>
                         {row.retainedAmount > 0 ? (
                           <p className="text-[10px] text-[#0D9488]">
                             kept {formatCurrency(row.retainedAmount)}
@@ -331,15 +347,6 @@ export function PartnerStudentCommissionTable({
                         </button>
                       ) : null}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-[#0369A1]">
-                    {formatCurrency(row.pendingReceived)}
-                  </TableCell>
-                  <TableCell className="text-[#0369A1]">
-                    {formatCurrency(row.pendingShared)}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {formatCurrency(row.commissionEarned)}
                   </TableCell>
                   {canWrite && (
                     <TableCell className="text-right">
@@ -386,16 +393,13 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.paidCash)}</TableCell>
                   <TableCell>
-                    {formatCurrency(totals.netPayableToPartner)}
+                    {formatCurrency(totals.finalNet)}
                     {totals.retainedAmount > 0 ? (
                       <p className="text-[10px] font-medium text-[#0D9488]">
                         kept {formatCurrency(totals.retainedAmount)}
                       </p>
                     ) : null}
                   </TableCell>
-                  <TableCell>{formatCurrency(totals.pendingReceived)}</TableCell>
-                  <TableCell>{formatCurrency(totals.pendingShared)}</TableCell>
-                  <TableCell>{formatCurrency(totals.commissionEarned)}</TableCell>
                   {canWrite && <TableCell />}
                 </TableRow>
               )}
@@ -403,7 +407,7 @@ export function PartnerStudentCommissionTable({
           ) : (
             <TableRow>
               <TableCell
-                colSpan={canWrite ? 17 : 16}
+                colSpan={canWrite ? 14 : 13}
                 className="h-24 text-center text-muted-foreground"
               >
                 {rows.length
@@ -445,12 +449,12 @@ function GlassHelp() {
           <strong>Net Payable</strong>, and <strong>Proj. Net</strong> stay calculated
         </li>
         <li>
-          Pencil on <strong>Paid</strong> or <strong>Final net</strong>, or use{" "}
-          <strong>Complete</strong>. The amount you enter is saved in both places
+          A full payout keeps <strong>Final net</strong> as the share before 2% TDS.{" "}
+          <strong>Paid</strong> is that share after the 2% deduction
         </li>
         <li>
-          That amount can be higher than the old pending figure. The difference from Net Payable
-          stays with you and is no longer pending
+          Enter a lower cash on <strong>Paid</strong> or <strong>Final net</strong> only when you
+          are keeping part of the net payable. That lower cash is saved in both places
         </li>
         <li>
           Actions show <strong>Pending</strong> until you complete the row, then{" "}

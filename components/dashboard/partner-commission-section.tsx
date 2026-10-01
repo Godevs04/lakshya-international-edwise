@@ -246,9 +246,10 @@ export function PartnerCommissionSection({
             <h3 className="mb-1 text-sm font-semibold">Record Bulk Partner Share</h3>
             <p className="mb-4 text-xs text-muted-foreground">
               Amounts are calculated automatically. On the Student-wise tab, use{" "}
-              <strong>Complete</strong> and enter the cash you paid. That same amount becomes Paid
-              and Final net, even when it is higher than the old pending figure. Bulk entry below is
-              only for legacy lump-sum partner payments.
+              <strong>Complete</strong>. A full payout shows Final net as the share before 2% TDS
+              and Paid as the cash after that deduction. Enter a lower cash only when you are
+              keeping part of the net payable. Bulk entry below is only for legacy lump-sum partner
+              payments.
             </p>
             <form onSubmit={handleSettlementSubmit} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
