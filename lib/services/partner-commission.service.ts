@@ -24,6 +24,7 @@ import {
   grossSettlementForAgreedNet,
   grossForSyncedPaidCash,
   isStudentPayoutComplete,
+  resolveDisplayedFinalNet,
 } from "@/lib/utils/commission-calculations";
 
 export {
@@ -42,6 +43,7 @@ export {
   grossSettlementForAgreedNet,
   grossForSyncedPaidCash,
   isStudentPayoutComplete,
+  resolveDisplayedFinalNet,
 };
 
 /** @deprecated use resolvePartnerSharePercent */

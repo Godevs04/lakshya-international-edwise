@@ -132,7 +132,9 @@ function PaidFinalNetForm({
       <DialogHeader>
         <DialogTitle>Paid and final net</DialogTitle>
         <DialogDescription>
-          Enter the cash paid to {studentName}. The same amount is saved as Paid and Final net.
+          For {studentName}, a full payout keeps Final net as the share before 2% TDS and Paid as
+          the cash after that deduction. Enter a lower amount only when you are keeping part of the
+          net payable.
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-4 py-4">
@@ -142,8 +144,8 @@ function PaidFinalNetForm({
             <span className="font-semibold text-foreground">{formatCurrency(calculatedNet)}</span>
           </p>
           <p className="mt-1 text-muted-foreground">
-            This can be higher than the old pending amount. Both Paid and Final net become this
-            figure, and the row is completed.
+            Paying the full net payable records Paid after 2% TDS. Final net stays the share before
+            that deduction. A lower amount is kept by you and becomes both Paid and Final net.
           </p>
         </div>
         <div className="space-y-2">
