@@ -52,6 +52,27 @@ export function calculateProjectedNetEarned(
   return calculateNetEarned(expectedCommission, partnerShareExpected);
 }
 
+/**
+ * Once cash is paid, company projection is expected commission minus that cash.
+ * Before any payment, a reduced agreement uses the agreed cash; otherwise the
+ * projection stays expected minus the gross partner share.
+ */
+export function calculateDisplayedProjectedNet(input: {
+  expectedCommission: number;
+  partnerShareExpected: number;
+  paidCash: number;
+  agreedNet: number;
+  retainedAmount: number;
+}): number {
+  if (input.paidCash > 0) {
+    return calculateNetEarned(input.expectedCommission, input.paidCash);
+  }
+  if (input.retainedAmount > 0) {
+    return calculateNetEarned(input.expectedCommission, input.agreedNet);
+  }
+  return calculateProjectedNetEarned(input.expectedCommission, input.partnerShareExpected);
+}
+
 export function calculateTdsAmount(
   grossAmount: number,
   tdsPercent: number = PARTNER_TDS_PERCENT

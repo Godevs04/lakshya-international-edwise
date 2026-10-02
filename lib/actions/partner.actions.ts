@@ -421,6 +421,7 @@ export async function getPartnerAnalytics(partnerId: string) {
         commissionShared: commission.commissionShared,
         pendingShared: commission.pendingShared,
         netPayableToPartner: commission.netPayableToPartner,
+        calculatedNetPayable: commission.calculatedNetPayable,
         retainedAmount: commission.retainedAmount,
         projectedNetEarned: commission.projectedNetEarned,
         commissionEarned: commission.commissionEarned,

@@ -27,10 +27,10 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
       pendingReceived: acc.pendingReceived + row.pendingReceived,
       partnerShareExpected: acc.partnerShareExpected + row.partnerShareExpected,
       tdsAmount: acc.tdsAmount + row.tdsAmount,
-      netPayableToPartner: acc.netPayableToPartner + row.netPayableToPartner,
+      netPayableToPartner: acc.netPayableToPartner + row.calculatedNetPayable,
       commissionShared: acc.commissionShared + row.commissionShared,
       pendingShared: acc.pendingShared + row.pendingShared,
-      commissionEarned: acc.commissionEarned + row.commissionEarned,
+      projectedNetEarned: acc.projectedNetEarned + row.projectedNetEarned,
     }),
     {
       totalDisbursed: 0,
@@ -42,7 +42,7 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
       netPayableToPartner: 0,
       commissionShared: 0,
       pendingShared: 0,
-      commissionEarned: 0,
+      projectedNetEarned: 0,
     }
   );
 
@@ -64,7 +64,7 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
               <TableHead>Net Payable</TableHead>
               <TableHead>Shared</TableHead>
               <TableHead>Pend. Sh.</TableHead>
-              <TableHead>Net</TableHead>
+              <TableHead>Proj. Net</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -101,7 +101,7 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                     <TableCell>{formatCurrency(row.partnerShareExpected)}</TableCell>
                     <TableCell>{formatCurrency(row.tdsAmount)}</TableCell>
                     <TableCell className="font-medium">
-                      {formatCurrency(row.netPayableToPartner)}
+                      {formatCurrency(row.calculatedNetPayable)}
                     </TableCell>
                     <TableCell className="text-[#22C55E]">
                       {formatCurrency(row.commissionShared)}
@@ -110,7 +110,7 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                       {formatCurrency(row.pendingShared)}
                     </TableCell>
                     <TableCell className="font-medium text-[#0B8FD8]">
-                      {formatCurrency(row.commissionEarned)}
+                      {formatCurrency(row.projectedNetEarned)}
                     </TableCell>
                     <TableCell className="text-right">
                       <Link href={`/dashboard/partners/${row.partnerId}?tab=students`}>
@@ -132,7 +132,7 @@ export function PartnersCommissionOverviewTable({ rows }: PartnersCommissionOver
                   <TableCell>{formatCurrency(totals.netPayableToPartner)}</TableCell>
                   <TableCell>{formatCurrency(totals.commissionShared)}</TableCell>
                   <TableCell>{formatCurrency(totals.pendingShared)}</TableCell>
-                  <TableCell>{formatCurrency(totals.commissionEarned)}</TableCell>
+                  <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
                   <TableCell />
                 </TableRow>
               </>

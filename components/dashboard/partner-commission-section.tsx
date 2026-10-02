@@ -57,6 +57,7 @@ interface PartnerCommissionSectionProps {
   pendingReceived?: number;
   partnerShareExpected?: number;
   netPayableToPartner?: number;
+  calculatedNetPayable?: number;
   retainedAmount?: number;
   commissionShared?: number;
   pendingShared?: number;
@@ -89,12 +90,10 @@ export function PartnerCommissionSection({
   commissionReceived = 0,
   pendingReceived = 0,
   partnerShareExpected = 0,
-  netPayableToPartner: netPayableFromSummary,
-  retainedAmount = 0,
+  calculatedNetPayable = 0,
   commissionShared = 0,
   pendingShared = 0,
   projectedNetEarned = 0,
-  commissionEarned,
   commissionSettled,
   commissionPending,
   settlements,
@@ -108,7 +107,8 @@ export function PartnerCommissionSection({
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const tdsAmount = calculateTdsAmount(partnerShareExpected);
-  const netPayableToPartner = netPayableFromSummary ?? calculateNetAfterTds(partnerShareExpected);
+  const netPayableToPartner =
+    calculatedNetPayable > 0 ? calculatedNetPayable : calculateNetAfterTds(partnerShareExpected);
   const tab = resolveCommissionTab(searchParams.get("tab") ?? initialTab);
 
   function handleTabChange(value: string | null) {
@@ -202,11 +202,7 @@ export function PartnerCommissionSection({
             <p className="text-2xl font-semibold text-[#0B8FD8]">
               {formatCurrency(netPayableToPartner)}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {retainedAmount > 0
-                ? `Agreed cash · kept ${formatCurrency(retainedAmount)}`
-                : "Share minus TDS"}
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Share minus TDS</p>
           </GlassCard>
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground">Commission Shared</p>
@@ -221,14 +217,10 @@ export function PartnerCommissionSection({
             </p>
           </GlassCard>
           <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Projected Net (auto)</p>
+            <p className="text-xs text-muted-foreground">Proj. Net</p>
             <p className="text-2xl font-semibold text-[#0B8FD8]">
               {formatCurrency(projectedNetEarned)}
             </p>
-          </GlassCard>
-          <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground">Net Earned (after marks)</p>
-            <p className="text-2xl font-semibold">{formatCurrency(commissionEarned)}</p>
           </GlassCard>
         </div>
 
@@ -246,10 +238,8 @@ export function PartnerCommissionSection({
             <h3 className="mb-1 text-sm font-semibold">Record Bulk Partner Share</h3>
             <p className="mb-4 text-xs text-muted-foreground">
               Amounts are calculated automatically. On the Student-wise tab, use{" "}
-              <strong>Complete</strong>. A full payout shows Final net as the share before 2% TDS
-              and Paid as the cash after that deduction. Enter a lower cash only when you are
-              keeping part of the net payable. Bulk entry below is only for legacy lump-sum partner
-              payments.
+              <strong>Complete</strong> and enter the cash paid. Proj. Net on this page is the
+              company figure. Bulk entry below is only for legacy lump-sum partner payments.
             </p>
             <form onSubmit={handleSettlementSubmit} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -318,7 +308,7 @@ export function PartnerCommissionSection({
           <div className="mb-4">
             <h3 className="text-sm font-semibold">Student-wise Commission & Payout</h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              Mark commission received from lender and partner share paid per student.
+              Record the cash paid to the partner for each student.
             </p>
           </div>
           <PartnerStudentCommissionTable

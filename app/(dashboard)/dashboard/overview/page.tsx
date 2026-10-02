@@ -163,8 +163,8 @@ export default async function OverviewPage() {
       "/dashboard/partners/commissions"
     ),
     withTrend(
-      "Net Commission Earned",
-      formatCurrency(commissionTotals.commissionEarned),
+      "Proj. Net",
+      formatCurrency(commissionTotals.projectedNetEarned),
       "indian-rupee",
       { trend: "", trendUp: true },
       "purple",

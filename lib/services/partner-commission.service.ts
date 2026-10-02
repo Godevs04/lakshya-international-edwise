@@ -16,6 +16,7 @@ import {
   calculatePendingShared,
   calculateNetEarned,
   calculateProjectedNetEarned,
+  calculateDisplayedProjectedNet,
   calculateTdsAmount,
   calculateNetAfterTds,
   resolveAgreedNetPayable,
@@ -35,6 +36,7 @@ export {
   calculatePendingShared,
   calculateNetEarned,
   calculateProjectedNetEarned,
+  calculateDisplayedProjectedNet,
   calculateTdsAmount,
   calculateNetAfterTds,
   resolveAgreedNetPayable,
@@ -320,10 +322,13 @@ function applyStudentSettlements(
     );
     const pendingShared = calculatePendingShared(settlementObligation, commissionShared);
     const paidCash = calculateNetAfterTds(commissionShared);
-    const projectedNetEarned =
-      retainedAmount > 0
-        ? calculateNetEarned(row.commissionExpected, netPayableToPartner)
-        : calculateProjectedNetEarned(row.commissionExpected, row.partnerShareExpected);
+    const projectedNetEarned = calculateDisplayedProjectedNet({
+      expectedCommission: row.commissionExpected,
+      partnerShareExpected: row.partnerShareExpected,
+      paidCash,
+      agreedNet: netPayableToPartner,
+      retainedAmount,
+    });
     const commissionEarned = calculateNetEarned(row.commissionReceived, paidCash);
 
     return {

@@ -100,7 +100,7 @@ function PaidFinalNetForm({
     setLoading(false);
 
     if (result.success) {
-      notify.success(`Paid and final net set to ${formatCurrency(parsed)}`);
+      notify.success(`Paid amount set to ${formatCurrency(parsed)}`);
       onClose();
       router.refresh();
       return;
@@ -130,11 +130,11 @@ function PaidFinalNetForm({
       }}
     >
       <DialogHeader>
-        <DialogTitle>Paid and final net</DialogTitle>
+        <DialogTitle>Amount paid</DialogTitle>
         <DialogDescription>
-          For {studentName}, a full payout keeps Final net as the share before 2% TDS and Paid as
-          the cash after that deduction. Enter a lower amount only when you are keeping part of the
-          net payable.
+          For {studentName}, enter the cash paid. A full payout records Paid after 2% TDS. Proj. Net
+          is the company figure on the dashboard. Enter a lower amount only when you are keeping
+          part of the net payable.
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-4 py-4">
@@ -144,8 +144,8 @@ function PaidFinalNetForm({
             <span className="font-semibold text-foreground">{formatCurrency(calculatedNet)}</span>
           </p>
           <p className="mt-1 text-muted-foreground">
-            Paying the full net payable records Paid after 2% TDS. Final net stays the share before
-            that deduction. A lower amount is kept by you and becomes both Paid and Final net.
+            Paying the full net payable records Paid after 2% TDS. A lower amount is kept by you and
+            Proj. Net updates from it.
           </p>
         </div>
         <div className="space-y-2">
@@ -167,7 +167,7 @@ function PaidFinalNetForm({
             <span className="font-semibold text-foreground">{formatCurrency(retained)}</span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Net payable {formatCurrency(calculatedNet)} = final net {formatCurrency(capped)} + kept{" "}
+            Net payable {formatCurrency(calculatedNet)} = paid {formatCurrency(capped)} + kept{" "}
             {formatCurrency(retained)}
           </p>
         </div>
