@@ -25,10 +25,7 @@ import type { CommissionStatusFilter } from "@/lib/constants/commission-status";
 import { filterCommissionRows } from "@/lib/utils/commission-status-filter";
 import { CommissionStatusFilter as CommissionStatusFilterControl } from "@/components/dashboard/commission-status-filter";
 import { AgreedNetPayableDialog } from "@/components/dashboard/agreed-net-payable-dialog";
-import {
-  isStudentPayoutComplete,
-  resolveDisplayedFinalNet,
-} from "@/lib/utils/commission-calculations";
+import { isStudentPayoutComplete } from "@/lib/utils/commission-calculations";
 import { CheckCircle2, Pencil, Search } from "lucide-react";
 
 export type PartnerStudentCommissionRow = StudentCommissionRow;
@@ -86,13 +83,6 @@ export function PartnerStudentCommissionTable({
       retainedAmount: acc.retainedAmount + row.retainedAmount,
       commissionShared: acc.commissionShared + row.commissionShared,
       paidCash: acc.paidCash + row.paidCash,
-      finalNet:
-        acc.finalNet +
-        resolveDisplayedFinalNet(
-          row.partnerShareExpected,
-          row.netPayableToPartner,
-          row.retainedAmount
-        ),
       pendingShared: acc.pendingShared + row.pendingShared,
       projectedNetEarned: acc.projectedNetEarned + row.projectedNetEarned,
       commissionEarned: acc.commissionEarned + row.commissionEarned,
@@ -109,7 +99,6 @@ export function PartnerStudentCommissionTable({
       retainedAmount: 0,
       commissionShared: 0,
       paidCash: 0,
-      finalNet: 0,
       pendingShared: 0,
       projectedNetEarned: 0,
       commissionEarned: 0,
@@ -257,10 +246,8 @@ export function PartnerStudentCommissionTable({
             <TableHead>Share Exp.</TableHead>
             <TableHead>TDS 2%</TableHead>
             <TableHead>Net Payable</TableHead>
-            <TableHead>Proj. Net</TableHead>
-            <TableHead>Received</TableHead>
             <TableHead>Paid</TableHead>
-            <TableHead>Final Net</TableHead>
+            <TableHead>Proj. Net</TableHead>
             {canWrite && <TableHead className="text-right">Actions</TableHead>}
           </TableRow>
         </TableHeader>
@@ -297,12 +284,6 @@ export function PartnerStudentCommissionTable({
                   <TableCell className="font-medium">
                     {formatCurrency(row.calculatedNetPayable)}
                   </TableCell>
-                  <TableCell className="text-[#0B8FD8]">
-                    {formatCurrency(row.projectedNetEarned)}
-                  </TableCell>
-                  <TableCell className="text-[#22C55E]">
-                    {formatCurrency(row.commissionReceived)}
-                  </TableCell>
                   <TableCell className="text-[#22C55E]">
                     <div className="flex items-start gap-2">
                       <span>{formatCurrency(row.paidCash)}</span>
@@ -318,35 +299,8 @@ export function PartnerStudentCommissionTable({
                       ) : null}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex items-start gap-2">
-                      <div>
-                        <p>
-                          {formatCurrency(
-                            resolveDisplayedFinalNet(
-                              row.partnerShareExpected,
-                              row.netPayableToPartner,
-                              row.retainedAmount
-                            )
-                          )}
-                        </p>
-                        {row.retainedAmount > 0 ? (
-                          <p className="text-[10px] text-[#0D9488]">
-                            kept {formatCurrency(row.retainedAmount)}
-                          </p>
-                        ) : null}
-                      </div>
-                      {canWrite ? (
-                        <button
-                          type="button"
-                          className="mt-0.5 text-muted-foreground hover:text-foreground"
-                          aria-label={`Edit final net for ${row.studentName}`}
-                          onClick={() => setPayableStudent(row)}
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                      ) : null}
-                    </div>
+                  <TableCell className="text-[#0B8FD8] font-medium">
+                    {formatCurrency(row.projectedNetEarned)}
                   </TableCell>
                   {canWrite && (
                     <TableCell className="text-right">
@@ -389,17 +343,8 @@ export function PartnerStudentCommissionTable({
                   <TableCell>{formatCurrency(totals.partnerShareExpected)}</TableCell>
                   <TableCell>{formatCurrency(totals.tdsAmount)}</TableCell>
                   <TableCell>{formatCurrency(totals.calculatedNetPayable)}</TableCell>
-                  <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
-                  <TableCell>{formatCurrency(totals.commissionReceived)}</TableCell>
                   <TableCell>{formatCurrency(totals.paidCash)}</TableCell>
-                  <TableCell>
-                    {formatCurrency(totals.finalNet)}
-                    {totals.retainedAmount > 0 ? (
-                      <p className="text-[10px] font-medium text-[#0D9488]">
-                        kept {formatCurrency(totals.retainedAmount)}
-                      </p>
-                    ) : null}
-                  </TableCell>
+                  <TableCell>{formatCurrency(totals.projectedNetEarned)}</TableCell>
                   {canWrite && <TableCell />}
                 </TableRow>
               )}
@@ -407,7 +352,7 @@ export function PartnerStudentCommissionTable({
           ) : (
             <TableRow>
               <TableCell
-                colSpan={canWrite ? 14 : 13}
+                colSpan={canWrite ? 12 : 11}
                 className="h-24 text-center text-muted-foreground"
               >
                 {rows.length
@@ -446,15 +391,16 @@ function GlassHelp() {
       <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
         <li>
           <strong>Expected</strong>, <strong>Share Exp.</strong>, <strong>TDS 2%</strong>,{" "}
-          <strong>Net Payable</strong>, and <strong>Proj. Net</strong> stay calculated
+          <strong>Net Payable</strong>, and <strong>Proj. Net</strong> stay calculated. Proj. Net is
+          the company figure used on the dashboard
         </li>
         <li>
-          A full payout keeps <strong>Final net</strong> as the share before 2% TDS.{" "}
-          <strong>Paid</strong> is that share after the 2% deduction
+          Pencil on <strong>Paid</strong>, or use <strong>Complete</strong>, to record the cash
+          sent. A full payout records Paid after 2% TDS
         </li>
         <li>
-          Enter a lower cash on <strong>Paid</strong> or <strong>Final net</strong> only when you
-          are keeping part of the net payable. That lower cash is saved in both places
+          Enter a lower cash only when you are keeping part of the net payable. Proj. Net updates
+          from that amount
         </li>
         <li>
           Actions show <strong>Pending</strong> until you complete the row, then{" "}

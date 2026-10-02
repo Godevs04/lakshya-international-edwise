@@ -18,6 +18,7 @@ import {
   calculateRetainedFromNet,
   grossSettlementForAgreedNet,
   settlementObligationGross,
+  calculateDisplayedProjectedNet,
   grossForSyncedPaidCash,
   isStudentPayoutComplete,
   resolveDisplayedFinalNet,
@@ -99,6 +100,43 @@ describe("two-tier commission formulas", () => {
     expect(paidAfterTds).toBe(17_640);
     expect(resolveDisplayedFinalNet(share, paidAfterTds, 0)).toBe(18_000);
     expect(resolveDisplayedFinalNet(23_045.83, 20_580, 2_004.91)).toBe(20_580);
+  });
+
+  it("keeps proj net as expected minus paid cash when paid equals net payable", () => {
+    const expected = 64_000;
+    const share = 40_000;
+    const netPayable = calculateNetAfterTds(share);
+    expect(netPayable).toBe(39_200);
+
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: expected,
+        partnerShareExpected: share,
+        paidCash: 39_200,
+        agreedNet: netPayable,
+        retainedAmount: 0,
+      })
+    ).toBe(24_800);
+
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: expected,
+        partnerShareExpected: share,
+        paidCash: 39_199,
+        agreedNet: 39_199,
+        retainedAmount: 1,
+      })
+    ).toBe(24_801);
+
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: expected,
+        partnerShareExpected: share,
+        paidCash: 0,
+        agreedNet: netPayable,
+        retainedAmount: 0,
+      })
+    ).toBe(24_000);
   });
 
   it("matches the user example end-to-end", () => {

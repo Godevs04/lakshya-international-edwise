@@ -32,8 +32,8 @@ export default async function PartnerCommissionsPage({
       shared: acc.shared + row.commissionShared,
       pendingShared: acc.pendingShared + row.pendingShared,
       tds: acc.tds + row.tdsAmount,
-      netPayable: acc.netPayable + row.netPayableToPartner,
-      earned: acc.earned + row.commissionEarned,
+      netPayable: acc.netPayable + row.calculatedNetPayable,
+      earned: acc.earned + row.projectedNetEarned,
     }),
     {
       expected: 0,
@@ -68,7 +68,7 @@ export default async function PartnerCommissionsPage({
         <div>
           <p className="text-sm font-medium">Filter by commission status</p>
           <p className="text-xs text-muted-foreground">
-            All partners — pending, partial, and complete received/paid
+            All partners — pending, partial, and complete payouts
           </p>
         </div>
         <Suspense fallback={null}>
@@ -116,7 +116,7 @@ export default async function PartnerCommissionsPage({
           </p>
         </GlassCard>
         <GlassCard className="p-4 sm:col-span-2 xl:col-span-1">
-          <p className="text-xs text-muted-foreground">Net Commission Earned</p>
+          <p className="text-xs text-muted-foreground">Proj. Net</p>
           <p className="text-2xl font-semibold text-[#0B8FD8]">{formatCurrency(totals.earned)}</p>
         </GlassCard>
       </div>

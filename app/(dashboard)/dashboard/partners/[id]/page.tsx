@@ -110,6 +110,7 @@ export default async function PartnerDetailPage({
           pendingReceived={analytics?.pendingReceived ?? 0}
           partnerShareExpected={analytics?.partnerShareExpected ?? 0}
           netPayableToPartner={analytics?.netPayableToPartner ?? 0}
+          calculatedNetPayable={analytics?.calculatedNetPayable ?? 0}
           retainedAmount={analytics?.retainedAmount ?? 0}
           commissionShared={analytics?.commissionShared ?? 0}
           pendingShared={analytics?.pendingShared ?? 0}
@@ -147,8 +148,8 @@ export default async function PartnerDetailPage({
         <div className="flex flex-wrap items-center gap-4">
           <StatusBadge status={partner.status as PartnerStatus} type="partner" />
           <span className="text-sm text-muted-foreground">
-            Commission is calculated from disbursed loan amounts. Use Complete on the Student-wise
-            tab to set the cash paid and the final net together.
+            Commission is calculated from disbursed loan amounts. Proj. Net on the Student-wise tab
+            is the company figure shown on the dashboard.
           </span>
         </div>
 
