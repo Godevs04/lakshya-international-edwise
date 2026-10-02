@@ -136,7 +136,35 @@ describe("two-tier commission formulas", () => {
         agreedNet: netPayable,
         retainedAmount: 0,
       })
-    ).toBe(24_000);
+    ).toBe(24_800);
+  });
+
+  it("includes TDS in proj net before any paid amount is entered", () => {
+    const expected = 64_000;
+    const share = 32_000;
+    const netPayable = calculateNetAfterTds(share);
+    expect(calculateTdsAmount(share)).toBe(640);
+    expect(netPayable).toBe(31_360);
+
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: expected,
+        partnerShareExpected: share,
+        paidCash: 0,
+        agreedNet: netPayable,
+        retainedAmount: 0,
+      })
+    ).toBe(32_640);
+
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: expected,
+        partnerShareExpected: share,
+        paidCash: 31_360,
+        agreedNet: netPayable,
+        retainedAmount: 0,
+      })
+    ).toBe(32_640);
   });
 
   it("matches the user example end-to-end", () => {
