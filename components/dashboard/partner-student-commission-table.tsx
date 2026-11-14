@@ -304,11 +304,13 @@ export function PartnerStudentCommissionTable({
                   </TableCell>
                   {canWrite && (
                     <TableCell className="text-right">
-                      {isStudentPayoutComplete(
-                        row.partnerShareExpected,
-                        row.pendingShared,
-                        row.paidCash
-                      ) ? (
+                      {isStudentPayoutComplete({
+                        commissionExpected: row.commissionExpected,
+                        partnerShareExpected: row.partnerShareExpected,
+                        pendingShared: row.pendingShared,
+                        paidCash: row.paidCash,
+                        retainedAmount: row.retainedAmount,
+                      }) ? (
                         <Badge className="border-transparent bg-[#22C55E]/15 text-[#22C55E]">
                           <CheckCircle2 data-icon="inline-start" />
                           Completed

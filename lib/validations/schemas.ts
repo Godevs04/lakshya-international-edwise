@@ -329,7 +329,7 @@ export const commissionReceiptSchema = z.object({
 });
 
 export const studentPaidFinalNetSchema = z.object({
-  amount: z.coerce.number().positive("Enter the amount paid").transform(roundMoney),
+  amount: z.coerce.number().min(0, "Amount paid cannot be negative").transform(roundMoney),
   note: z.string().max(500).optional().or(z.literal("")),
 });
 
