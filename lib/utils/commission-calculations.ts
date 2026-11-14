@@ -134,13 +134,20 @@ export function grossForSyncedPaidCash(
   return grossSettlementForAgreedNet(cash);
 }
 
-/** Row is closed once the cash paid covers the final net and nothing is still pending. */
-export function isStudentPayoutComplete(
-  partnerShareExpected: number,
-  pendingShared: number,
-  paidCash: number
-): boolean {
-  return partnerShareExpected > 0 && pendingShared <= 0 && paidCash > 0;
+/**
+ * Row is closed once nothing is pending and the payout was settled: cash was paid,
+ * or the company chose to keep part or all of the net payable (including paying 0).
+ * A 0% partner share has nothing to pay, so it is closed as soon as commission is expected.
+ */
+export function isStudentPayoutComplete(input: {
+  commissionExpected: number;
+  partnerShareExpected: number;
+  pendingShared: number;
+  paidCash: number;
+  retainedAmount: number;
+}): boolean {
+  if (input.partnerShareExpected <= 0) return input.commissionExpected > 0;
+  return input.pendingShared <= 0 && (input.paidCash > 0 || input.retainedAmount > 0);
 }
 
 /**

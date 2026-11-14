@@ -952,6 +952,10 @@ export async function syncStudentPaidAndFinalNetAction(
     const user = await getSessionUser();
     requirePermission(user, PERMISSIONS.PARTNERS_WRITE);
 
+    const rawAmount = formData.get("amount");
+    if (typeof rawAmount !== "string" || rawAmount.trim() === "") {
+      return { success: false, error: "Enter the amount paid" };
+    }
     const parsed = studentPaidFinalNetSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -982,7 +986,11 @@ export async function syncStudentPaidAndFinalNetAction(
     const gross = grossForSyncedPaidCash(row.partnerShareExpected, row.calculatedNetPayable, cash);
     const previousGross = student.commissionSettled ?? 0;
     const delta = Math.round((gross - previousGross) * 100) / 100;
-    const syncNote = note || `Final net synced to paid cash ${cash.toLocaleString("en-IN")}`;
+    const syncNote =
+      note ||
+      (cash === 0
+        ? "Not shared with partner; full net payable kept"
+        : `Final net synced to paid cash ${cash.toLocaleString("en-IN")}`);
 
     const $set: Record<string, unknown> = { commissionSettled: gross };
     const update: Record<string, unknown> = { $set };

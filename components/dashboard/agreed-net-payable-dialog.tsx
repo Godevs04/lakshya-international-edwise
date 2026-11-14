@@ -82,8 +82,8 @@ function PaidFinalNetForm({
     Number.isFinite(parsed) && parsed >= 0 ? calculateRetainedFromNet(calculatedNet, capped) : 0;
 
   async function save() {
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      notify.error("Enter the amount paid");
+    if (amount.trim() === "" || !Number.isFinite(parsed) || parsed < 0) {
+      notify.error("Enter the amount paid (0 if you keep the full amount)");
       return;
     }
     if (parsed > calculatedNet) {
@@ -100,7 +100,11 @@ function PaidFinalNetForm({
     setLoading(false);
 
     if (result.success) {
-      notify.success(`Paid amount set to ${formatCurrency(parsed)}`);
+      notify.success(
+        parsed === 0
+          ? "Marked complete. Full net payable kept by you"
+          : `Paid amount set to ${formatCurrency(parsed)}`
+      );
       onClose();
       router.refresh();
       return;
@@ -133,8 +137,8 @@ function PaidFinalNetForm({
         <DialogTitle>Amount paid</DialogTitle>
         <DialogDescription>
           For {studentName}, enter the cash paid. A full payout records Paid after 2% TDS. Proj. Net
-          is the company figure on the dashboard. Enter a lower amount only when you are keeping
-          part of the net payable.
+          is the company figure on the dashboard. Enter a lower amount when you are keeping part of
+          the net payable, or 0 when you are not sharing anything.
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-4 py-4">
@@ -154,7 +158,7 @@ function PaidFinalNetForm({
             id="paidFinalNetAmount"
             type="number"
             step="0.01"
-            min={0.01}
+            min={0}
             max={calculatedNet}
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
@@ -179,6 +183,9 @@ function PaidFinalNetForm({
             onClick={() => setAmount(String(calculatedNet))}
           >
             Use full net payable ({formatCurrency(calculatedNet)})
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setAmount("0")}>
+            Not sharing (pay 0)
           </Button>
         </div>
         <div className="space-y-2">

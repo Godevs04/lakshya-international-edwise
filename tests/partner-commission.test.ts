@@ -86,12 +86,83 @@ describe("two-tier commission formulas", () => {
     expect(calculateNetAfterTds(gross)).toBe(paidCash);
     expect(calculatePendingShared(gross, gross)).toBe(0);
     expect(calculateRetainedFromNet(calculatedNet, finalNet)).toBe(2_004.91);
-    expect(isStudentPayoutComplete(share, calculatePendingShared(gross, gross), paidCash)).toBe(
-      true
-    );
+    expect(
+      isStudentPayoutComplete({
+        commissionExpected: 52_676.19,
+        partnerShareExpected: share,
+        pendingShared: calculatePendingShared(gross, gross),
+        paidCash,
+        retainedAmount: 2_004.91,
+      })
+    ).toBe(true);
     expect(gross).toBe(21_000);
     expect(calculateNetEarned(52_676.19, paidCash)).toBe(32_096.19);
     expect(calculateNetEarned(52_676.19, gross)).toBe(31_676.19);
+  });
+
+  it("closes a 0% partner share row without any payment", () => {
+    expect(
+      isStudentPayoutComplete({
+        commissionExpected: 37_800,
+        partnerShareExpected: 0,
+        pendingShared: 0,
+        paidCash: 0,
+        retainedAmount: 0,
+      })
+    ).toBe(true);
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: 37_800,
+        partnerShareExpected: 0,
+        paidCash: 0,
+        agreedNet: 0,
+        retainedAmount: 0,
+      })
+    ).toBe(37_800);
+  });
+
+  it("closes a row when the company keeps the full net payable (paid 0)", () => {
+    const share = 32_000;
+    const calculatedNet = calculateNetAfterTds(share);
+    const agreed = resolveAgreedNetPayable(calculatedNet, 0);
+    const gross = grossForSyncedPaidCash(share, calculatedNet, 0);
+    const pending = calculatePendingShared(
+      settlementObligationGross(share, calculatedNet, agreed),
+      gross
+    );
+    const retained = calculateRetainedFromNet(calculatedNet, agreed);
+
+    expect(agreed).toBe(0);
+    expect(gross).toBe(0);
+    expect(pending).toBe(0);
+    expect(retained).toBe(31_360);
+    expect(
+      isStudentPayoutComplete({
+        commissionExpected: 64_000,
+        partnerShareExpected: share,
+        pendingShared: pending,
+        paidCash: 0,
+        retainedAmount: retained,
+      })
+    ).toBe(true);
+    expect(
+      isStudentPayoutComplete({
+        commissionExpected: 64_000,
+        partnerShareExpected: share,
+        pendingShared: share,
+        paidCash: 0,
+        retainedAmount: 0,
+      })
+    ).toBe(false);
+    expect(
+      calculateDisplayedProjectedNet({
+        expectedCommission: 64_000,
+        partnerShareExpected: share,
+        paidCash: 0,
+        agreedNet: agreed,
+        retainedAmount: retained,
+      })
+    ).toBe(64_000);
   });
 
   it("shows the share as final net on a full payout and the cash after 2% as paid", () => {
